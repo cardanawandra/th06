@@ -1059,7 +1059,7 @@ ZunBool MainMenu::WeirdSecondInputCheck()
         return true;
     }
 
-    if (!WAS_PRESSED_WEIRD(TH_BUTTON_SELECTMENU | TH_BUTTON_BOMB | TH_BUTTON_MENU | TH_BUTTON_Q | TH_BUTTON_S))
+    if (!WAS_PRESSED_WEIRD(TH_BUTTON_SELECTMENU | TH_BUTTON_BOMB | TH_BUTTON_MENU))
     {
         return true;
     }
@@ -1238,7 +1238,7 @@ ZunResult MainMenu::DrawStartMenu(void)
                 break;
             }
         }
-        if (WAS_PRESSED(TH_BUTTON_Q))
+        if (WAS_PRESSED(TH_BUTTON_BOMB2))
         {
             this->gameState = STATE_QUIT;
             this->stateTimer = 0;

@@ -22,6 +22,7 @@
 
 namespace th06
 {
+DIFFABLE_STATIC(Player, g_Player2);
 DIFFABLE_STATIC(Player, g_Player);
 
 DIFFABLE_STATIC_ARRAY_ASSIGN(CharacterData, 4, g_CharData) = {
@@ -37,25 +38,48 @@ Player::Player()
 
 ZunResult Player::RegisterChain(u8 unk)
 {
-    Player *p = &g_Player;
-    memset(p, 0, sizeof(Player));
-
-    p->invulnerabilityTimer.InitializeForPopup();
-    p->unk_9e1 = unk;
-    p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate);
-    p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player::OnDrawHighPrio);
-    p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player::OnDrawLowPrio);
-    p->chainCalc->arg = p;
-    p->chainDraw1->arg = p;
-    p->chainDraw2->arg = p;
-    p->chainCalc->addedCallback = (ChainAddedCallback)Player::AddedCallback;
-    p->chainCalc->deletedCallback = (ChainDeletedCallback)Player::DeletedCallback;
-    if (g_Chain.AddToCalcChain(p->chainCalc, TH_CHAIN_PRIO_CALC_PLAYER))
     {
-        return ZUN_ERROR;
+        Player *p = &g_Player;
+        memset(p, 0, sizeof(Player));
+
+        p->invulnerabilityTimer.InitializeForPopup();
+        p->unk_9e1 = unk;
+        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate1);
+        p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player::OnDrawHighPrio);
+        p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player::OnDrawLowPrio);
+        p->chainCalc->arg = p;
+        p->chainDraw1->arg = p;
+        p->chainDraw2->arg = p;
+        p->chainCalc->addedCallback = (ChainAddedCallback)Player::AddedCallback;
+        p->chainCalc->deletedCallback = (ChainDeletedCallback)Player::DeletedCallback;
+        if (g_Chain.AddToCalcChain(p->chainCalc, TH_CHAIN_PRIO_CALC_PLAYER))
+        {
+            return ZUN_ERROR;
+        }
+        g_Chain.AddToDrawChain(p->chainDraw1, TH_CHAIN_PRIO_DRAW_LOW_PRIO_PLAYER);
+        g_Chain.AddToDrawChain(p->chainDraw2, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_PLAYER);
     }
-    g_Chain.AddToDrawChain(p->chainDraw1, TH_CHAIN_PRIO_DRAW_LOW_PRIO_PLAYER);
-    g_Chain.AddToDrawChain(p->chainDraw2, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_PLAYER);
+    {
+        Player *p = &g_Player2;
+        memset(p, 0, sizeof(Player));
+
+        p->invulnerabilityTimer.InitializeForPopup();
+        p->unk_9e1 = unk;
+        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate2);
+        p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player::OnDrawHighPrio);
+        p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player::OnDrawLowPrio);
+        p->chainCalc->arg = p;
+        p->chainDraw1->arg = p;
+        p->chainDraw2->arg = p;
+        p->chainCalc->addedCallback = (ChainAddedCallback)Player::AddedCallback;
+        p->chainCalc->deletedCallback = (ChainDeletedCallback)Player::DeletedCallback;
+        if (g_Chain.AddToCalcChain(p->chainCalc, TH_CHAIN_PRIO_CALC_PLAYER))
+        {
+            return ZUN_ERROR;
+        }
+        g_Chain.AddToDrawChain(p->chainDraw1, TH_CHAIN_PRIO_DRAW_LOW_PRIO_PLAYER);
+        g_Chain.AddToDrawChain(p->chainDraw2, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_PLAYER);
+    }
     return ZUN_SUCCESS;
 }
 
@@ -67,6 +91,13 @@ void Player::CutChain()
     g_Player.chainDraw1 = NULL;
     g_Chain.Cut(g_Player.chainDraw2);
     g_Player.chainDraw2 = NULL;
+
+    g_Chain.Cut(g_Player2.chainCalc);
+    g_Player2.chainCalc = NULL;
+    g_Chain.Cut(g_Player2.chainDraw1);
+    g_Player2.chainDraw1 = NULL;
+    g_Chain.Cut(g_Player2.chainDraw2);
+    g_Player2.chainDraw2 = NULL;
     return;
 }
 
@@ -149,7 +180,17 @@ ZunResult Player::DeletedCallback(Player *p)
 }
 
 #pragma var_order(idx, scaleFactor1, scaleFactor2, lastEnemyHit)
-ChainCallbackResult Player::OnUpdate(Player *p)
+ChainCallbackResult Player::OnUpdate1(Player *p)
+{
+    return Player::OnUpdate(p,1);
+}
+
+ChainCallbackResult Player::OnUpdate2(Player *p)
+{
+    return Player::OnUpdate(p,2);
+}
+
+ChainCallbackResult Player::OnUpdate(Player *p,int playerType)
 {
     f32 scaleFactor1, scaleFactor2;
     i32 idx;
@@ -172,7 +213,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
         p->bombInfo.calc(p);
     }
     else if (!g_Gui.HasCurrentMsgIdx() && p->respawnTimer != 0 && 0 < g_GameManager.bombsRemaining &&
-             WAS_PRESSED(TH_BUTTON_BOMB) && p->bombInfo.calc != NULL)
+             ((playerType==1&&WAS_PRESSED(TH_BUTTON_BOMB)) || (playerType==1&&WAS_PRESSED(TH_BUTTON_BOMB2))) && p->bombInfo.calc != NULL)
     {
         g_GameManager.bombsUsed++;
         g_GameManager.bombsRemaining--;
@@ -322,7 +363,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
     }
     if (p->playerState != PLAYER_STATE_DEAD && p->playerState != PLAYER_STATE_SPAWNING)
     {
-        p->HandlePlayerInputs();
+        p->HandlePlayerInputs(playerType);
     }
     g_AnmManager->ExecuteScript(&p->playerSprite);
     Player::UpdatePlayerBullets(p);
@@ -627,7 +668,7 @@ ChainCallbackResult Player::OnDrawLowPrio(Player *p)
 
 #pragma var_order(playerDirection, verticalSpeed, horizontalSpeed, verticalOrbOffset, horizontalOrbOffset,             \
                   intermediateFloat)
-ZunResult Player::HandlePlayerInputs()
+ZunResult Player::HandlePlayerInputs(int playerType)
 {
     float intermediateFloat;
 
@@ -639,57 +680,106 @@ ZunResult Player::HandlePlayerInputs()
     PlayerDirection playerDirection = this->playerDirection;
 
     this->playerDirection = MOVEMENT_NONE;
-    if (IS_PRESSED(TH_BUTTON_UP))
-    {
-        this->playerDirection = MOVEMENT_UP;
-        if (IS_PRESSED(TH_BUTTON_LEFT))
+    if(playerType==1){
+        if (IS_PRESSED(TH_BUTTON_UP))
         {
-            this->playerDirection = MOVEMENT_UP_LEFT;
-        }
-        if (IS_PRESSED(TH_BUTTON_RIGHT))
-        {
-            this->playerDirection = MOVEMENT_UP_RIGHT;
-        }
-    }
-    else
-    {
-        if (IS_PRESSED(TH_BUTTON_DOWN))
-        {
-            this->playerDirection = MOVEMENT_DOWN;
+            this->playerDirection = MOVEMENT_UP;
             if (IS_PRESSED(TH_BUTTON_LEFT))
             {
-                this->playerDirection = MOVEMENT_DOWN_LEFT;
+                this->playerDirection = MOVEMENT_UP_LEFT;
             }
             if (IS_PRESSED(TH_BUTTON_RIGHT))
             {
-                this->playerDirection = MOVEMENT_DOWN_RIGHT;
+                this->playerDirection = MOVEMENT_UP_RIGHT;
             }
         }
         else
         {
-            if (IS_PRESSED(TH_BUTTON_LEFT))
+            if (IS_PRESSED(TH_BUTTON_DOWN))
             {
-                this->playerDirection = MOVEMENT_LEFT;
+                this->playerDirection = MOVEMENT_DOWN;
+                if (IS_PRESSED(TH_BUTTON_LEFT))
+                {
+                    this->playerDirection = MOVEMENT_DOWN_LEFT;
+                }
+                if (IS_PRESSED(TH_BUTTON_RIGHT))
+                {
+                    this->playerDirection = MOVEMENT_DOWN_RIGHT;
+                }
             }
-            if (IS_PRESSED(TH_BUTTON_RIGHT))
+            else
             {
-                this->playerDirection = MOVEMENT_RIGHT;
+                if (IS_PRESSED(TH_BUTTON_LEFT))
+                {
+                    this->playerDirection = MOVEMENT_LEFT;
+                }
+                if (IS_PRESSED(TH_BUTTON_RIGHT))
+                {
+                    this->playerDirection = MOVEMENT_RIGHT;
+                }
             }
         }
-    }
-    if (IS_PRESSED(TH_BUTTON_FOCUS))
-    {
-        this->isFocus = true;
-    }
-    else
-    {
-        this->isFocus = false;
+        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        {
+            this->isFocus = true;
+        }
+        else
+        {
+            this->isFocus = false;
+        }
+    }else{
+        if (IS_PRESSED(TH_BUTTON_UP2))
+        {
+            this->playerDirection = MOVEMENT_UP;
+            if (IS_PRESSED(TH_BUTTON_LEFT2))
+            {
+                this->playerDirection = MOVEMENT_UP_LEFT;
+            }
+            if (IS_PRESSED(TH_BUTTON_RIGHT2))
+            {
+                this->playerDirection = MOVEMENT_UP_RIGHT;
+            }
+        }
+        else
+        {
+            if (IS_PRESSED(TH_BUTTON_DOWN2))
+            {
+                this->playerDirection = MOVEMENT_DOWN;
+                if (IS_PRESSED(TH_BUTTON_LEFT2))
+                {
+                    this->playerDirection = MOVEMENT_DOWN_LEFT;
+                }
+                if (IS_PRESSED(TH_BUTTON_RIGHT2))
+                {
+                    this->playerDirection = MOVEMENT_DOWN_RIGHT;
+                }
+            }
+            else
+            {
+                if (IS_PRESSED(TH_BUTTON_LEFT2))
+                {
+                    this->playerDirection = MOVEMENT_LEFT;
+                }
+                if (IS_PRESSED(TH_BUTTON_RIGHT2))
+                {
+                    this->playerDirection = MOVEMENT_RIGHT;
+                }
+            }
+        }
+        if (IS_PRESSED(TH_BUTTON_FOCUS2))
+        {
+            this->isFocus = true;
+        }
+        else
+        {
+            this->isFocus = false;
+        }
     }
 
     switch (this->playerDirection)
     {
     case MOVEMENT_RIGHT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = this->characterData.orthogonalMovementSpeedFocus;
         }
@@ -699,7 +789,7 @@ ZunResult Player::HandlePlayerInputs()
         }
         break;
     case MOVEMENT_LEFT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = -this->characterData.orthogonalMovementSpeedFocus;
         }
@@ -709,7 +799,7 @@ ZunResult Player::HandlePlayerInputs()
         }
         break;
     case MOVEMENT_UP:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             verticalSpeed = -this->characterData.orthogonalMovementSpeedFocus;
         }
@@ -719,7 +809,7 @@ ZunResult Player::HandlePlayerInputs()
         }
         break;
     case MOVEMENT_DOWN:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             verticalSpeed = this->characterData.orthogonalMovementSpeedFocus;
         }
@@ -729,7 +819,7 @@ ZunResult Player::HandlePlayerInputs()
         }
         break;
     case MOVEMENT_UP_LEFT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = -this->characterData.diagonalMovementSpeedFocus;
         }
@@ -740,7 +830,7 @@ ZunResult Player::HandlePlayerInputs()
         verticalSpeed = horizontalSpeed;
         break;
     case MOVEMENT_DOWN_LEFT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = -this->characterData.diagonalMovementSpeedFocus;
         }
@@ -751,7 +841,7 @@ ZunResult Player::HandlePlayerInputs()
         verticalSpeed = -horizontalSpeed;
         break;
     case MOVEMENT_UP_RIGHT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = this->characterData.diagonalMovementSpeedFocus;
         }
@@ -762,7 +852,7 @@ ZunResult Player::HandlePlayerInputs()
         verticalSpeed = -horizontalSpeed;
         break;
     case MOVEMENT_DOWN_RIGHT:
-        if (IS_PRESSED(TH_BUTTON_FOCUS))
+        if (this->isFocus)
         {
             horizontalSpeed = this->characterData.diagonalMovementSpeedFocus;
         }
@@ -925,9 +1015,16 @@ ZunResult Player::HandlePlayerInputs()
     this->orbsPosition[1].x += horizontalOrbOffset;
     this->orbsPosition[0].y += verticalOrbOffset;
     this->orbsPosition[1].y += verticalOrbOffset;
-    if (IS_PRESSED(TH_BUTTON_SHOOT) && !g_Gui.HasCurrentMsgIdx())
-    {
-        this->StartFireBulletTimer(this);
+    if(playerType==1){
+        if (IS_PRESSED(TH_BUTTON_SHOOT) && !g_Gui.HasCurrentMsgIdx())
+        {
+            this->StartFireBulletTimer(this);
+        }
+    }else{
+        if (IS_PRESSED(TH_BUTTON_SHOOT2) && !g_Gui.HasCurrentMsgIdx())
+        {
+            this->StartFireBulletTimer(this);
+        }
     }
     this->previousFrameInput = g_CurFrameInput;
     return ZUN_SUCCESS;
@@ -984,6 +1081,7 @@ void Player::StartFireBulletTimer(Player *p)
     }
 }
 
+// TODO
 ZunResult Player::UpdateFireBulletsTimer(Player *p)
 {
     if (p->fireBulletTimer.AsFrames() < 0)

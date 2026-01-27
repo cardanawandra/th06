@@ -171,7 +171,9 @@ struct Player
 
     static ZunResult RegisterChain(u8 unk);
     static void CutChain();
-    static ChainCallbackResult OnUpdate(Player *p);
+    static ChainCallbackResult OnUpdate(Player *p,int playerType);
+    static ChainCallbackResult OnUpdate1(Player *p);
+    static ChainCallbackResult OnUpdate2(Player *p);
     static ChainCallbackResult OnDrawHighPrio(Player *p);
     static ChainCallbackResult OnDrawLowPrio(Player *p);
     static ZunResult AddedCallback(Player *p);
@@ -186,7 +188,7 @@ struct Player
     static FireBulletResult FireBulletMarisaB(Player *, PlayerBullet *, u32, u32);
 
     static void StartFireBulletTimer(Player *);
-    ZunResult HandlePlayerInputs();
+    ZunResult HandlePlayerInputs(int playerTipe);
     static void UpdatePlayerBullets(Player *);
     static ZunResult UpdateFireBulletsTimer(Player *);
 
