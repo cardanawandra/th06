@@ -171,9 +171,7 @@ struct Player
 
     static ZunResult RegisterChain(u8 unk);
     static void CutChain();
-    static ChainCallbackResult OnUpdate(Player *p,int playerType);
-    static ChainCallbackResult OnUpdate1(Player *p);
-    static ChainCallbackResult OnUpdate2(Player *p);
+    static ChainCallbackResult OnUpdate(Player *p);
     static ChainCallbackResult OnDrawHighPrio(Player *p);
     static ChainCallbackResult OnDrawLowPrio(Player *p);
     static ZunResult AddedCallback(Player *p);
@@ -188,7 +186,7 @@ struct Player
     static FireBulletResult FireBulletMarisaB(Player *, PlayerBullet *, u32, u32);
 
     static void StartFireBulletTimer(Player *);
-    ZunResult HandlePlayerInputs(int playerTipe);
+    ZunResult HandlePlayerInputs();
     static void UpdatePlayerBullets(Player *);
     static ZunResult UpdateFireBulletsTimer(Player *);
 
@@ -229,6 +227,7 @@ struct Player
     i32 respawnTimer;
     i32 bulletGracePeriod;
     i8 playerState;
+    i8 playerType;
     u8 unk_9e1;
     i8 orbState;
     i8 isFocus;
@@ -260,4 +259,5 @@ struct Player
 ZUN_ASSERT_SIZE(Player, 0x98f0);
 
 DIFFABLE_EXTERN(Player, g_Player);
+DIFFABLE_EXTERN(Player, g_Player2);
 }; // namespace th06

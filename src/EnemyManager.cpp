@@ -591,10 +591,16 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
                 {
                     curEnemy->life -= 10;
                 }
+                if (g_Player2.CalcKillBoxCollision(&curEnemy->position, &enemyHitbox) == 1 && curEnemy->flags.unk6 &&
+                    !curEnemy->flags.isBoss)
+                {
+                    curEnemy->life -= 10;
+                }
             }
             if (curEnemy->flags.unk6 != 0)
             {
                 damage = g_Player.CalcDamageToEnemy(&curEnemy->position, &curEnemy->hitboxDimensions, &local_8);
+                damage += g_Player2.CalcDamageToEnemy(&curEnemy->position, &curEnemy->hitboxDimensions, &local_8);
                 if (70 <= damage)
                 {
                     damage = 70;
@@ -636,6 +642,10 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
                 if (g_Player.positionOfLastEnemyHit.y < curEnemy->position.y)
                 {
                     g_Player.positionOfLastEnemyHit = curEnemy->position;
+                }
+                if (g_Player2.positionOfLastEnemyHit.y < curEnemy->position.y)
+                {
+                    g_Player2.positionOfLastEnemyHit = curEnemy->position;
                 }
             }
             if (0 >= curEnemy->life && curEnemy->flags.unk6 != 0)

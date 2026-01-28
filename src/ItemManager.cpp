@@ -127,6 +127,11 @@ void ItemManager::OnUpdate()
                 playerAngle = g_Player.AngleToPlayer(&curItem->currentPosition);
                 sincosmul(&curItem->startPosition, playerAngle, 8.0f);
                 curItem->state = 1;
+            }else if (curItem->state == 1 || (128 <= g_GameManager.currentPower && g_Player2.positionCenter.y < 128.0f))
+            {
+                playerAngle = g_Player2.AngleToPlayer(&curItem->currentPosition);
+                sincosmul(&curItem->startPosition, playerAngle, 8.0f);
+                curItem->state = 1;
             }
             else
             {
@@ -154,7 +159,10 @@ void ItemManager::OnUpdate()
             curItem->startPosition.y = 3.0f;
         }
     yolo:
-        if (g_Player.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize))
+        if (
+            g_Player.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize)
+            ||g_Player2.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize)
+        )
         {
             switch (curItem->itemType)
             {

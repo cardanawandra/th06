@@ -42,9 +42,10 @@ ZunResult Player::RegisterChain(u8 unk)
         Player *p = &g_Player;
         memset(p, 0, sizeof(Player));
 
+        p->playerType=1;
         p->invulnerabilityTimer.InitializeForPopup();
         p->unk_9e1 = unk;
-        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate1);
+        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate);
         p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player::OnDrawHighPrio);
         p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player::OnDrawLowPrio);
         p->chainCalc->arg = p;
@@ -63,9 +64,10 @@ ZunResult Player::RegisterChain(u8 unk)
         Player *p = &g_Player2;
         memset(p, 0, sizeof(Player));
 
+        p->playerType=2;
         p->invulnerabilityTimer.InitializeForPopup();
         p->unk_9e1 = unk;
-        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate2);
+        p->chainCalc = g_Chain.CreateElem((ChainCallback)Player::OnUpdate);
         p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player::OnDrawHighPrio);
         p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player::OnDrawLowPrio);
         p->chainCalc->arg = p;
@@ -106,25 +108,48 @@ ZunResult Player::AddedCallback(Player *p)
     PlayerBullet *curBullet;
     i32 idx;
 
-    switch (g_GameManager.character)
-    {
-    case CHARA_REIMU:
-        // This is likely an inline function from g_Supervisor returning an i32.
-        if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
-            g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player00.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
+    if(p->playerType==1){
+        switch (g_GameManager.character)
         {
-            return ZUN_ERROR;
+        case CHARA_REIMU:
+            // This is likely an inline function from g_Supervisor returning an i32.
+            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player00.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
+            {
+                return ZUN_ERROR;
+            }
+            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
+            break;
+        case CHARA_MARISA:
+            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player01.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
+            {
+                return ZUN_ERROR;
+            }
+            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
+            break;
         }
-        g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
-        break;
-    case CHARA_MARISA:
-        if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
-            g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player01.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
+    }else{
+        switch (g_GameManager.character2)
         {
-            return ZUN_ERROR;
+        case CHARA_REIMU:
+            // This is likely an inline function from g_Supervisor returning an i32.
+            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player00.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+            {
+                return ZUN_ERROR;
+            }
+            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+            break;
+        case CHARA_MARISA:
+            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player01.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+            {
+                return ZUN_ERROR;
+            }
+            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+            break;
         }
-        g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
-        break;
     }
     p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
@@ -142,7 +167,11 @@ ZunResult Player::AddedCallback(Player *p)
     p->grabItemSize.y = 12.0;
     p->grabItemSize.z = 5.0;
     p->playerDirection = MOVEMENT_NONE;
-    memcpy(&p->characterData, &g_CharData[g_GameManager.CharacterShotType()], sizeof(CharacterData));
+    if(p->playerType==1){
+        memcpy(&p->characterData, &g_CharData[g_GameManager.CharacterShotType()], sizeof(CharacterData));
+    }else{
+        memcpy(&p->characterData, &g_CharData[g_GameManager.CharacterShotType2()], sizeof(CharacterData));
+    }
     p->characterData.diagonalMovementSpeed = p->characterData.orthogonalMovementSpeed / sqrtf(2.0);
     p->characterData.diagonalMovementSpeedFocus = p->characterData.orthogonalMovementSpeedFocus / sqrtf(2.0);
     p->fireBulletCallback = p->characterData.fireBulletCallback;
@@ -150,15 +179,25 @@ ZunResult Player::AddedCallback(Player *p)
     p->playerState = PLAYER_STATE_SPAWNING;
     p->invulnerabilityTimer.SetCurrent(120);
     p->orbState = ORB_HIDDEN;
-    g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[0], ANM_SCRIPT_PLAYER_ORB_LEFT);
-    g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[1], ANM_SCRIPT_PLAYER_ORB_RIGHT);
+    if(p->playerType==1){
+        g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[0], ANM_SCRIPT_PLAYER_ORB_LEFT);
+        g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[1], ANM_SCRIPT_PLAYER_ORB_RIGHT);
+    }else{
+        g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[0], ANM_SCRIPT_PLAYER_ORB_LEFT2);
+        g_AnmManager->SetAndExecuteScriptIdx(&p->orbsSprite[1], ANM_SCRIPT_PLAYER_ORB_RIGHT2);
+    }
     for (curBullet = &p->bullets[0], idx = 0; idx < ARRAY_SIZE_SIGNED(p->bullets); idx++, curBullet++)
     {
         curBullet->bulletState = 0;
     }
     p->fireBulletTimer.SetCurrent(-1);
-    p->bombInfo.calc = g_BombData[g_GameManager.CharacterShotType()].calc;
-    p->bombInfo.draw = g_BombData[g_GameManager.CharacterShotType()].draw;
+    if(p->playerType==1){
+        p->bombInfo.calc = g_BombData[g_GameManager.CharacterShotType()].calc;
+        p->bombInfo.draw = g_BombData[g_GameManager.CharacterShotType()].draw;
+    }else{
+        p->bombInfo.calc = g_BombData[g_GameManager.CharacterShotType2()].calc;
+        p->bombInfo.draw = g_BombData[g_GameManager.CharacterShotType2()].draw;
+    }
     p->bombInfo.isInUse = 0;
     for (idx = 0; idx < ARRAY_SIZE_SIGNED(p->laserTimer); idx++)
     {
@@ -174,23 +213,17 @@ ZunResult Player::DeletedCallback(Player *p)
 {
     if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT))
     {
-        g_AnmManager->ReleaseAnm(ANM_FILE_PLAYER);
+        if(p->playerType==1){
+            g_AnmManager->ReleaseAnm(ANM_FILE_PLAYER);
+        }else{
+            g_AnmManager->ReleaseAnm(ANM_FILE_PLAYER2);
+        }
     }
     return ZUN_SUCCESS;
 }
 
 #pragma var_order(idx, scaleFactor1, scaleFactor2, lastEnemyHit)
-ChainCallbackResult Player::OnUpdate1(Player *p)
-{
-    return Player::OnUpdate(p,1);
-}
-
-ChainCallbackResult Player::OnUpdate2(Player *p)
-{
-    return Player::OnUpdate(p,2);
-}
-
-ChainCallbackResult Player::OnUpdate(Player *p,int playerType)
+ChainCallbackResult Player::OnUpdate(Player *p)
 {
     f32 scaleFactor1, scaleFactor2;
     i32 idx;
@@ -213,7 +246,7 @@ ChainCallbackResult Player::OnUpdate(Player *p,int playerType)
         p->bombInfo.calc(p);
     }
     else if (!g_Gui.HasCurrentMsgIdx() && p->respawnTimer != 0 && 0 < g_GameManager.bombsRemaining &&
-             ((playerType==1&&WAS_PRESSED(TH_BUTTON_BOMB)) || (playerType==1&&WAS_PRESSED(TH_BUTTON_BOMB2))) && p->bombInfo.calc != NULL)
+             ((p->playerType==1&&WAS_PRESSED(TH_BUTTON_BOMB)) || (p->playerType==2&&WAS_PRESSED(TH_BUTTON_BOMB2))) && p->bombInfo.calc != NULL)
     {
         g_GameManager.bombsUsed++;
         g_GameManager.bombsRemaining--;
@@ -285,7 +318,11 @@ ChainCallbackResult Player::OnUpdate(Player *p,int playerType)
                 p->invulnerabilityTimer.SetCurrent(0);
                 p->playerSprite.scaleX = 3.0;
                 p->playerSprite.scaleY = 3.0;
-                g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
+                if(p->playerType==1){
+                    g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
+                }else{
+                    g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+                }
                 if (g_GameManager.livesRemaining <= 0)
                 {
                     g_GameManager.isInRetryMenu = 1;
@@ -363,7 +400,7 @@ ChainCallbackResult Player::OnUpdate(Player *p,int playerType)
     }
     if (p->playerState != PLAYER_STATE_DEAD && p->playerState != PLAYER_STATE_SPAWNING)
     {
-        p->HandlePlayerInputs(playerType);
+        p->HandlePlayerInputs();
     }
     g_AnmManager->ExecuteScript(&p->playerSprite);
     Player::UpdatePlayerBullets(p);
@@ -447,6 +484,23 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
                 bullet->size.y = 48.0f;
                 break;
             case ANM_SCRIPT_PLAYER_MARISA_A_ORB_BULLET_4:
+                bullet->size.x = 48.0f;
+                bullet->size.y = 48.0f;
+
+            //player 2
+            case ANM_SCRIPT_PLAYER_MARISA_A_ORB_BULLET_12:
+                bullet->size.x = 32.0f;
+                bullet->size.y = 32.0f;
+                break;
+            case ANM_SCRIPT_PLAYER_MARISA_A_ORB_BULLET_22:
+                bullet->size.x = 42.0f;
+                bullet->size.y = 42.0f;
+                break;
+            case ANM_SCRIPT_PLAYER_MARISA_A_ORB_BULLET_32:
+                bullet->size.x = 48.0f;
+                bullet->size.y = 48.0f;
+                break;
+            case ANM_SCRIPT_PLAYER_MARISA_A_ORB_BULLET_42:
                 bullet->size.x = 48.0f;
                 bullet->size.y = 48.0f;
             }
@@ -668,7 +722,7 @@ ChainCallbackResult Player::OnDrawLowPrio(Player *p)
 
 #pragma var_order(playerDirection, verticalSpeed, horizontalSpeed, verticalOrbOffset, horizontalOrbOffset,             \
                   intermediateFloat)
-ZunResult Player::HandlePlayerInputs(int playerType)
+ZunResult Player::HandlePlayerInputs()
 {
     float intermediateFloat;
 
@@ -680,7 +734,7 @@ ZunResult Player::HandlePlayerInputs(int playerType)
     PlayerDirection playerDirection = this->playerDirection;
 
     this->playerDirection = MOVEMENT_NONE;
-    if(playerType==1){
+    if(this->playerType==1){
         if (IS_PRESSED(TH_BUTTON_UP))
         {
             this->playerDirection = MOVEMENT_UP;
@@ -865,20 +919,36 @@ ZunResult Player::HandlePlayerInputs(int playerType)
 
     if (horizontalSpeed < 0.0f && this->previousHorizontalSpeed >= 0.0f)
     {
-        g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT);
+        if(this->playerType==1){
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT);
+        }else{
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_LEFT2);
+        }
     }
     else if (!horizontalSpeed && this->previousHorizontalSpeed < 0.0f)
     {
-        g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_LEFT);
+        if(this->playerType==1){
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_LEFT);
+        }else{
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_LEFT2);
+        }
     }
 
     if (horizontalSpeed > 0.0f && this->previousHorizontalSpeed <= 0.0f)
     {
-        g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_RIGHT);
+        if(this->playerType==1){
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_RIGHT);
+        }else{
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_MOVING_RIGHT2);
+        }
     }
     else if (!horizontalSpeed && this->previousHorizontalSpeed > 0.0f)
     {
-        g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_RIGHT);
+        if(this->playerType==1){
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_RIGHT);
+        }else{
+            g_AnmManager->SetAndExecuteScriptIdx(&this->playerSprite, ANM_SCRIPT_PLAYER_STOPPING_RIGHT2);
+        }
     }
 
     this->previousHorizontalSpeed = horizontalSpeed;
@@ -1015,7 +1085,7 @@ ZunResult Player::HandlePlayerInputs(int playerType)
     this->orbsPosition[1].x += horizontalOrbOffset;
     this->orbsPosition[0].y += verticalOrbOffset;
     this->orbsPosition[1].y += verticalOrbOffset;
-    if(playerType==1){
+    if(this->playerType==1){
         if (IS_PRESSED(TH_BUTTON_SHOOT) && !g_Gui.HasCurrentMsgIdx())
         {
             this->StartFireBulletTimer(this);
@@ -1089,10 +1159,18 @@ ZunResult Player::UpdateFireBulletsTimer(Player *p)
         return ZUN_SUCCESS;
     }
 
-    if (p->fireBulletTimer.HasTicked() && (!g_Player.bombInfo.isInUse || g_GameManager.character != CHARA_MARISA ||
-                                           g_GameManager.shotType != SHOT_TYPE_B))
-    {
-        p->SpawnBullets(p, p->fireBulletTimer.AsFrames());
+    if(p->playerType==1){
+        if (p->fireBulletTimer.HasTicked() && (!g_Player.bombInfo.isInUse || g_GameManager.character != CHARA_MARISA ||
+                                            g_GameManager.shotType != SHOT_TYPE_B))
+        {
+            p->SpawnBullets(p, p->fireBulletTimer.AsFrames());
+        }
+    }else{
+        if (p->fireBulletTimer.HasTicked() && (!g_Player.bombInfo.isInUse || g_GameManager.character2 != CHARA_MARISA ||
+                                            g_GameManager.shotType2 != SHOT_TYPE_B))
+        {
+            p->SpawnBullets(p, p->fireBulletTimer.AsFrames());
+        }
     }
 
     p->fireBulletTimer.Tick();
@@ -1221,7 +1299,11 @@ FireBulletResult Player::FireSingleBullet(Player *player, PlayerBullet *bullet, 
     {
     SHOOT_BULLET:
 
-        g_AnmManager->SetAndExecuteScriptIdx(&bullet->sprite, bulletData->anmFileIdx);
+        if(player->playerType==1){
+            g_AnmManager->SetAndExecuteScriptIdx(&bullet->sprite, bulletData->anmFileIdx);
+        }else{
+            g_AnmManager->SetAndExecuteScriptIdx(&bullet->sprite, ANM_OFFSET_PLAYER_DIFFERENCE+bulletData->anmFileIdx);
+        }
         if (!bulletData->spawnPositionIdx)
         {
             bullet->position = player->positionCenter;
