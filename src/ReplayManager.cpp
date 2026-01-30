@@ -237,6 +237,7 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *mgr)
         mgr->replayData = new ReplayData();
         memcpy(&mgr->replayData->magic[0], "T6RP", 4);
         mgr->replayData->shottypeChara = g_GameManager.character * 2 + g_GameManager.shotType;
+        mgr->replayData->shottypeChara2 = g_GameManager.character2 * 2 + g_GameManager.shotType2;
         mgr->replayData->version = 0x102;
         mgr->replayData->difficulty = g_GameManager.difficulty;
         memcpy(&mgr->replayData->name, "NO NAME", 4);
@@ -303,6 +304,8 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *mgr)
     replayData = mgr->replayData->stageReplayData[g_GameManager.currentStage - 1];
     g_GameManager.character = mgr->replayData->shottypeChara / 2;
     g_GameManager.shotType = mgr->replayData->shottypeChara % 2;
+    g_GameManager.character2 = mgr->replayData->shottypeChara2 / 2;
+    g_GameManager.shotType2 = mgr->replayData->shottypeChara2 % 2;
     g_GameManager.difficulty = (Difficulty)mgr->replayData->difficulty;
     g_GameManager.pointItemsCollected = replayData->pointItemsCollected;
     g_Rng.Initialize(replayData->randomSeed);

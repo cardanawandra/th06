@@ -173,6 +173,7 @@ u32 BulletManager::SpawnSingleBullet(EnemyBulletShooter *bulletProps, i32 bullet
     bullet->speed = bulletSpeed;
     bullet->angle = utils::AddNormalizeAngle(bulletAngle, 0.0f);
     bullet->pos = bulletProps->position;
+    bullet->provokedPlayer = bulletProps->provokedPlayer;
     bullet->pos.z = 0.1f;
     sincosmul(&bullet->velocity, bullet->angle, bulletSpeed);
     bullet->exFlags = bulletProps->flags;
@@ -531,12 +532,20 @@ i32 BulletManager::DespawnBullets(i32 maxBonusScore, ZunBool awardPoints)
     return totalBonusScore;
 }
 
+f32 BulletManager::AngleProvokedPlayer(D3DXVECTOR3 *pos, u8 playerType)
+{
+    if(playerType==2){
+        return g_Player2.AngleToPlayer(pos);
+    }
+    return g_Player.AngleToPlayer(pos);
+}
+
 ZunResult BulletManager::SpawnBulletPattern(EnemyBulletShooter *bulletProps)
 {
     i32 idx1, idx2;
     f32 angle;
 
-    angle = g_Player.AngleToPlayer(&bulletProps->position);
+    angle = this->AngleProvokedPlayer(&bulletProps->position,bulletProps->provokedPlayer);
     for (idx1 = 0; idx1 < bulletProps->count2; idx1++)
     {
         for (idx2 = 0; idx2 < bulletProps->count1; idx2++)
@@ -578,13 +587,14 @@ Laser *BulletManager::SpawnLaserPattern(EnemyLaserShooter *bulletProps)
 
         laser->vm1.flags.blendMode = AnmVmBlendMode_One;
         laser->pos = bulletProps->position;
+        laser->provokedPlayer = bulletProps->provokedPlayer;
         laser->color = bulletProps->spriteOffset;
         laser->inUse = true;
         laser->angle = bulletProps->angle;
 
         if (bulletProps->type == 0)
         {
-            laser->angle += g_Player.AngleToPlayer(&bulletProps->position);
+            laser->angle += this->AngleProvokedPlayer(&bulletProps->position,bulletProps->provokedPlayer);
         }
 
         laser->flags = bulletProps->flags;
@@ -813,8 +823,12 @@ ChainCallbackResult BulletManager::OnUpdate(BulletManager *mgr)
                         {
                             curBullet->exFlags &= ~0x80;
                         }
+                        if(curBullet->provokedPlayer==2){
+                            curBullet->angle = g_Player2.AngleToPlayer(&curBullet->pos);
+                        }else{
+                            curBullet->angle = g_Player.AngleToPlayer(&curBullet->pos);
+                        }
 
-                        curBullet->angle = g_Player.AngleToPlayer(&curBullet->pos) + curBullet->dirChangeRotation;
                         curBullet->speed = curBullet->dirChangeSpeed;
                         bulletSpeed = curBullet->speed;
                     }

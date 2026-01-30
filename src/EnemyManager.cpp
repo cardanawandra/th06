@@ -107,6 +107,13 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i16 life, i16 it
             newEnemy->life = life;
 
         newEnemy->position = *pos;
+
+        if(g_Player.RangeToPlayer(pos) > g_Player2.RangeToPlayer(pos)){
+            newEnemy->provokedPlayer=2;
+        }
+        newEnemy->provokedPlayer=1;
+
+
         g_EclManager.CallEclSub(&newEnemy->currentContext, eclSubId);
         g_EclManager.RunEcl(newEnemy);
         newEnemy->color = newEnemy->primaryVm.color;
@@ -526,6 +533,7 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
     D3DXVECTOR3 enemyHitbox;
     i32 enemyIdx;
     i32 damage;
+    i32 damage2;
     i32 local_8;
 
     local_8 = 0;
@@ -600,7 +608,15 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
             if (curEnemy->flags.unk6 != 0)
             {
                 damage = g_Player.CalcDamageToEnemy(&curEnemy->position, &curEnemy->hitboxDimensions, &local_8);
-                damage += g_Player2.CalcDamageToEnemy(&curEnemy->position, &curEnemy->hitboxDimensions, &local_8);
+                if(damage>0){
+                    curEnemy->provokedPlayer=1;
+                }
+                damage2 = g_Player2.CalcDamageToEnemy(&curEnemy->position, &curEnemy->hitboxDimensions, &local_8);
+                if(damage2>0){
+                    curEnemy->provokedPlayer=2;
+                }
+
+                damage+=damage2;
                 if (70 <= damage)
                 {
                     damage = 70;
@@ -637,6 +653,9 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
                 }
                 if (curEnemy->flags.unk10 != 0)
                 {
+                    if(curEnemy->flags.isBoss){
+                        damage *= 0.75;
+                    }
                     curEnemy->life -= damage;
                 }
                 if (g_Player.positionOfLastEnemyHit.y < curEnemy->position.y)

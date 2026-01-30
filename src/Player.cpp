@@ -1215,6 +1215,10 @@ f32 Player::AngleToPlayer(D3DXVECTOR3 *pos)
     return atan2f(relY, relX);
 }
 
+f32 Player::RangeToPlayer(D3DXVECTOR3 *pos){
+    return sqrt(pow(pos->x - this->positionCenter.x, 2) + pow(pos->y - this->positionCenter.y, 2));
+}
+
 #pragma var_order(idx, curBulletIdx, curBullet, bulletResult)
 void Player::SpawnBullets(Player *p, u32 timer)
 {
