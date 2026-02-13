@@ -14,13 +14,13 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 
 ## Targets
 
--2 player controls (done)
--different character (done)
--replay (done)
--provoke enemy by player (done)
--player 2 custom shot type (todo)
--netplay (todo)
--new demo gameplay (todo)
+-2 player controls (done)<br>
+-different character (done)<br>
+-replay (done)<br>
+-provoke enemy by player (done)<br>
+-player 2 custom shot type (todo)<br>
+-netplay (todo)<br>
+-new demo gameplay (todo)<br>
 
 ## Installation
 
