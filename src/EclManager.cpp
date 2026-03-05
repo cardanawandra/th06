@@ -130,7 +130,9 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 if (g_Player.RangeToPlayer(&enemy->position) > g_Player2.RangeToPlayer(&enemy->position))
                 {
                     enemy->provokedPlayer = 2;
-                }else{
+                }
+                else
+                {
                     enemy->provokedPlayer = 1;
                 }
             }
