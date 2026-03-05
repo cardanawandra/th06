@@ -1256,9 +1256,11 @@ f32 Player::AngleToPlayer(D3DXVECTOR3 *pos)
     return atan2f(relY, relX);
 }
 
-f32 Player::RangeToPlayer(D3DXVECTOR3 *pos)
-{
-    return sqrt(pow(pos->x - this->positionCenter.x, 2) + pow(pos->y - this->positionCenter.y, 2));
+f32 Player::RangeToPlayer(D3DXVECTOR3 *pos){
+    D3DXVECTOR3 vecToPlayer(pos->x - this->positionCenter.x,
+                            pos->y - this->positionCenter.y,
+                            0.0f);
+    return D3DXVec3LengthSq(&vecToPlayer);
 }
 
 #pragma var_order(idx, curBulletIdx, curBullet, bulletResult)
