@@ -14,7 +14,8 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 
 ## Targets 2
 -netplay (done?) <br>
-
+-player 2 custom shot type (done?)<br>
+-new demo gameplay (demo play is banned currently...)<br>
 
 ## NetPlay
 # Multiplayer Guide
@@ -82,8 +83,6 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 -different character (done)<br>
 -replay (done)<br>
 -provoke enemy by player (done)<br>
--player 2 custom shot type (todo)<br>
--new demo gameplay (todo)<br>
 
 ## Installation
 
