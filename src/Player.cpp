@@ -133,26 +133,52 @@ ZunResult Player::AddedCallback(Player *p)
     }
     else
     {
-        switch (g_GameManager.character2)
+        
+        if(g_GameManager.character==g_GameManager.character2)
         {
-        case CHARA_REIMU:
-            // This is likely an inline function from g_Supervisor returning an i32.
-            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
-                g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player00.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+            switch (g_GameManager.character2)
             {
-                return ZUN_ERROR;
+            case CHARA_REIMU:
+                // This is likely an inline function from g_Supervisor returning an i32.
+                if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                    g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player00b.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+                {
+                    return ZUN_ERROR;
+                }
+                g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+                break;
+            case CHARA_MARISA:
+                if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                    g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player01b.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+                {
+                    return ZUN_ERROR;
+                }
+                g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+                break;
             }
-            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
-            break;
-        case CHARA_MARISA:
-            if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
-                g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player01.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+        }else{
+            switch (g_GameManager.character2)
             {
-                return ZUN_ERROR;
+            case CHARA_REIMU:
+                // This is likely an inline function from g_Supervisor returning an i32.
+                if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                    g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player00.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+                {
+                    return ZUN_ERROR;
+                }
+                g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+                break;
+            case CHARA_MARISA:
+                if ((i32)(g_Supervisor.curState != SUPERVISOR_STATE_GAMEMANAGER_REINIT) &&
+                    g_AnmManager->LoadAnm(ANM_FILE_PLAYER2, "data/player01.anm", ANM_OFFSET_PLAYER2) != ZUN_SUCCESS)
+                {
+                    return ZUN_ERROR;
+                }
+                g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
+                break;
             }
-            g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
-            break;
         }
+        
     }
     p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;

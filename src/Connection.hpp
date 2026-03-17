@@ -1,5 +1,5 @@
 #pragma once
-#define MULTI_NET_VER 3520
+#define MULTI_NET_VER 3600
 
 #include <winsock2.h>
 #include <Ws2tcpip.h>

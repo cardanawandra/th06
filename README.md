@@ -28,7 +28,6 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 * Click **as guest**.
 * Wait for the connection to be established.
 
----
 
 ### Network and Port Settings
 * **Standard Scenario:** If you are not using network tunneling/penetration, you usually don't need to change the **host port**. If you must change it, ensure the guest's **host port** matches the host's **listen port**.
@@ -39,21 +38,28 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
     * **Recommendation:** When using tunneling, it is recommended to set **target delay >= 2**, otherwise the game will be very laggy.
     * Press M or N in-game to increase/decrease the target delay.
 
----
 
 ### After Connection
 * The host can choose whether to be **1P** and set the **target delay**.
 * **Note:** A higher target delay can better tolerate network latency, but the input lag for controls will also increase.
 * Click **start game** to begin.
 
----
 
 ### Troubleshooting and Additional Notes
 * **Reconnection:** If the connection drops in-game, there is a 5-second timeout. If it doesn't reconnect within this time, you can try returning to the main menu (at the Reimu head screen) to reconnect (though this may not always work).
 * **Background Music:** The game does not include WAV format BGM. Please add it yourself if needed.
 * **Plugins and Testing:** `d3d8.dll` is a d3d8-to-9 conversion plugin. If you wish to use dgVoodoo (dgv), please add it yourself. It is recommended to select **Start Game (local)** to test performance before attempting multiplayer.
 
----
+
+### P2 Color Swapping
+* After version 0.36, you can freely choose P1/P2 characters. If you want to change colors at this point, you need to unpack `TOLOL_CM.DAT`, then replace the following files: `player00b.png/player01b.png/player00b_a.png/player01b_a.png`.
+* The description files for these are stored in `player00b.anm` and `player01b.anm` respectively.
+
+
+### 0.36 Updates
+
+- Added P1/P2 character selection and color swapping.
+
 
 ### 0.35 Updates
 
