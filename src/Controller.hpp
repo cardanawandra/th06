@@ -61,5 +61,6 @@ void ResetKeyboard(void);
 bool RcvPacks();
 void SendKeys(int frame);
 u16 GetInput_Net(int frame,bool is_in_UI,int& cur_ctrl);
+u16 GetInput_Single(int& cur_ctrl);
 }; // namespace Controller
 }; // namespace th06

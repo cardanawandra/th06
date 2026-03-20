@@ -41,12 +41,29 @@ extern int g_delay;
 extern bool g_is_host;
 extern bool g_is_single_mode;
 extern bool g_restart_flag;
+extern bool g_is_in_insane_mode = false;
 
 bool g_resync_trigger = false;
 int g_resync_stage_frame = 0;
 
 
-int g_change_delay_cd = 40;
+struct DifficultyInfo
+{
+    u32 rank;
+    u32 minRank;
+    u32 maxRank;
+};
+ZUN_ASSERT_SIZE(DifficultyInfo, 0xc);
+static DIFFABLE_STATIC_ARRAY_ASSIGN(DifficultyInfo, 5, g_DifficultyInfo) = {
+    // rank, minRank, maxRank
+    /* EASY    */ {16, 12, 20},
+    /* NORMAL  */ {16, 10, 32},
+    /* HARD    */ {16, 10, 32},
+    /* LUNATIC */ {16, 10, 32},
+    /* EXTRA   */ {16, 14, 18},
+};
+
+int g_change_option_hotkey_cd = 40;
 
 namespace th06
 {
@@ -60,6 +77,8 @@ DIFFABLE_STATIC(u16, g_NumOfFramesInputsWereHeld);
 
 ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
 {
+    
+    D3DXVECTOR3 pos;
     static last_frame_a = 0;
     bool is_in_UI = (s->curState != SUPERVISOR_STATE_GAMEMANAGER) || (s->curState == SUPERVISOR_STATE_GAMEMANAGER && g_GameManager.isInGameMenu);
     int frame_a = s->calcCount;
@@ -80,6 +99,11 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
     //     QueryPerformanceCounter(&q);
     //     g_Rng.seed = q.QuadPart%65535;
     // }
+    // if(GetAsyncKeyState('W'))
+    // {
+    //     g_GameManager.livesRemaining = 0;
+    //     g_GameManager.livesRemaining2 = 0;
+    // }
 
     g_cur_ctrl = IGC_NONE;
     if (g_SoundPlayer.backgroundMusic != NULL)
@@ -90,7 +114,12 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
 
     if(g_is_single_mode)
     {
-        g_CurFrameInput = Controller::GetInput();
+        int cur_ctrl_i;
+        g_CurFrameInput = Controller::GetInput_Single(cur_ctrl_i);
+        g_cur_ctrl = (InGameCtrlType)cur_ctrl_i;
+        g_change_option_hotkey_cd--;
+        if(g_change_option_hotkey_cd<0)
+            g_change_option_hotkey_cd=0;
     }else{
         if(g_is_connected && !g_is_sync)
         {
@@ -142,38 +171,15 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
             g_CurFrameInput = Controller::GetInput_Net(frame_a, is_in_UI,cur_ctrl_i);
         }
         g_cur_ctrl = (InGameCtrlType)cur_ctrl_i;
-        g_change_delay_cd--;
-        if(g_change_delay_cd<0)
-            g_change_delay_cd=0;
-        switch(g_cur_ctrl)
-        {
-            default:
-            break;
-            case Add_Delay:
-                if(g_change_delay_cd==0)
-                {
-                    g_change_delay_cd = 40;
-                    g_delay++;
-                    if(g_delay>=10)
-                        g_delay=10;
-                    break;
-                }
-            case Dec_Delay:
-                if(g_change_delay_cd==0)
-                {
-                    g_change_delay_cd = 40;
-                    g_delay--;
-                    if(g_delay<0)
-                        g_delay=0;    
-                    break;
-                }
-        }
+        g_change_option_hotkey_cd--;
+        if(g_change_option_hotkey_cd<0)
+            g_change_option_hotkey_cd=0;
+       
         
-        D3DXVECTOR3 pos;
         pos.x=0;
         pos.y=0;
         pos.z=0;
-        if(g_istry_to_reconnect)  {
+        if(g_istry_to_reconnect || ((GetAsyncKeyState(VK_F8) & 0x8000) == 0x8000))  {
             g_CurFrameInput = 0;
             g_AsciiManager.AddFormatText(&pos, "try to reconnect...(%s)",g_is_sync?"sync":"desynced");
             Controller::SendKeys(frame_a);
@@ -185,6 +191,7 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
                 g_ctrl_bits_rcved.clear();
                 g_ctrl_rng_rcved.clear();
                 g_ctrl_rcved.clear();
+                s->calcCount = 0;
                 g_cur_ctrl = IGC_NONE;
             }
         }else{
@@ -196,10 +203,59 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
                 g_GameManager.gameFrames,g_resync_stage_frame,g_resync_trigger?1:0
             );
         }
-        pos.x=500;
-        pos.y=440;
-        pos.z=0;
-        g_AsciiManager.AddFormatText(&pos, "delay: %d",g_delay);
+    }
+
+    switch(g_cur_ctrl)
+    {
+        default:
+        break;
+        case Add_Delay:
+            if(g_change_option_hotkey_cd==0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_delay++;
+                if(g_delay>=10)
+                    g_delay=10;
+                break;
+            }
+        case Dec_Delay:
+            if(g_change_option_hotkey_cd==0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_delay--;
+                if(g_delay<0)
+                    g_delay=0;    
+                break;
+            }
+        case Insane_Mode:
+            if(g_change_option_hotkey_cd==0)
+            {
+                g_change_option_hotkey_cd = 40;
+                g_is_in_insane_mode = !g_is_in_insane_mode;
+                break;
+            }
+            break;
+    }
+    
+    pos.x=500;
+    pos.y=440;
+    pos.z=0;
+    g_AsciiManager.AddFormatText(&pos, "delay: %d",g_delay);
+    pos.x=480;
+    pos.y=440-24.0f;
+    pos.z=0;
+    g_AsciiManager.AddFormatText(&pos, "insane: %s",g_is_in_insane_mode?"On":"Off");
+    
+    if(g_is_in_insane_mode)
+    {
+        g_GameManager.minRank = 63;
+        g_GameManager.maxRank = 64;
+        g_GameManager.rank = 64;
+    }else
+    {
+        g_GameManager.rank = g_DifficultyInfo[g_GameManager.difficulty].rank;
+        g_GameManager.minRank = g_DifficultyInfo[g_GameManager.difficulty].minRank;
+        g_GameManager.maxRank = g_DifficultyInfo[g_GameManager.difficulty].maxRank;
     }
 
     g_IsEigthFrameOfHeldInput = 0;

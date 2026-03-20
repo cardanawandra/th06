@@ -143,7 +143,7 @@ bool ConnectionUI::CreateMainWindow(HINSTANCE hInst)
 
     RegisterClassA(&wc);
     char title[100];
-    sprintf(title,"Game Launcher [ver=%s]",MULTI_NET_VER_S);
+    sprintf(title,"Launcher [ver=%s]",MULTI_NET_VER_S);
 
     m_hWnd = CreateWindowA(
         "ConnectionUIClass",

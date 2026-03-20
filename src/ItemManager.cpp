@@ -153,6 +153,11 @@ void ItemManager::OnUpdate()
 
                 float dis2 = hypotsqf(curItem->currentPosition.x-g_Player2.positionCenter.x,
                     curItem->currentPosition.y-g_Player2.positionCenter.y);
+                if(g_Player.playerState == PLAYER_STATE_SPIRIT)
+                    dis1 = 1e6;
+                if(g_Player2.playerState == PLAYER_STATE_SPIRIT)
+                    dis2 = 1e6;
+                // spirit mode do not eat items
                 if(dis1<dis2)
                 {
                     playerAngle = g_Player.AngleToPlayer(&curItem->currentPosition);
@@ -202,6 +207,10 @@ void ItemManager::OnUpdate()
     yolo:
         bool hit_player1 = g_Player.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize);
         bool hit_player2 = g_Player2.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize);
+        if(g_Player.playerState == PLAYER_STATE_SPIRIT)
+            hit_player1 = 0;
+        if(g_Player2.playerState == PLAYER_STATE_SPIRIT)
+            hit_player2 = 0;
         if(curItem->timer.current<20 && (curItem->state==3 || curItem->state==4))
         {
             hit_player1=hit_player2=false;

@@ -1,6 +1,6 @@
 #pragma once
-#define MULTI_NET_VER 3800
-#define MULTI_NET_VER_S "3.8.0"
+#define MULTI_NET_VER 3900
+#define MULTI_NET_VER_S "3.9.0"
 
 #include <winsock2.h>
 #include <Ws2tcpip.h>
@@ -99,7 +99,7 @@ enum Control
 
 enum InGameCtrlType
 {
-    Quick_Quit,Quick_Restart,Inf_Life,Inf_Bomb,Inf_Power,Add_Delay,Dec_Delay,IGC_NONE
+    Quick_Quit,Quick_Restart,Inf_Life,Inf_Bomb,Inf_Power,Add_Delay,Dec_Delay,Insane_Mode,IGC_NONE
 };
 
 #define KeyPackFrameNum 15

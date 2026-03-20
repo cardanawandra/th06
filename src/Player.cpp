@@ -371,7 +371,9 @@ ChainCallbackResult Player::OnUpdate(Player *p)
             if (p->respawnTimer == 0)
             {
                 g_GameManager.powerItemCountForScore = 0;
-                if (g_GameManager.livesRemaining > 0 && g_GameManager.livesRemaining2 > 0)
+                if (!((g_GameManager.livesRemaining <= 0 && p->playerType==1 && g_Player2.playerState == PLAYER_STATE_SPIRIT)// P1 in sprit mode and P2 died
+                || (g_GameManager.livesRemaining2 <= 0 && p->playerType!=1 && g_Player.playerState == PLAYER_STATE_SPIRIT)))// P2 in sprit mode and P1 died
+                // all died
                 {
                     g_ItemManager.SpawnItem(&p->positionCenter, ITEM_POWER_BIG, 2);
                     g_ItemManager.SpawnItem(&p->positionCenter, ITEM_POWER_SMALL, 2);
@@ -425,18 +427,6 @@ ChainCallbackResult Player::OnUpdate(Player *p)
             if (p->invulnerabilityTimer.AsFrames() >= 30)
             {
                 p->playerState = PLAYER_STATE_SPAWNING;
-                if(p->playerType==1)
-                {
-                    p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f - 32.0f;
-                }else
-                {
-                    p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f + 32.0f;
-                }
-                p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-                p->positionCenter.z = 0.2;
-                p->invulnerabilityTimer.SetCurrent(0);
-                p->playerSprite.scaleX = 3.0;
-                p->playerSprite.scaleY = 3.0;
                 if (p->playerType == 1)
                 {
                     g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
@@ -445,12 +435,54 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 {
                     g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE2);
                 }
-                if ((g_GameManager.livesRemaining <= 0 && p->playerType==1) || (g_GameManager.livesRemaining2 <= 0 && p->playerType!=1))
+                if ((g_GameManager.livesRemaining <= 0 && p->playerType==1 && g_Player2.playerState == PLAYER_STATE_SPIRIT)// P1 in sprit mode and P2 died
+                || (g_GameManager.livesRemaining2 <= 0 && p->playerType!=1 && g_Player.playerState == PLAYER_STATE_SPIRIT))// P2 in sprit mode and P1 died
+                // all died
                 {
                     g_GameManager.isInRetryMenu = 1;
+                }else if (g_GameManager.livesRemaining <= 0 && p->playerType==1)
+                // P1 died but no P2
+                {
+                    g_Gui.flags.flag0 = 2;
+                    g_Gui.flags.flag1 = 2;
+                    g_GameManager.bombsRemaining = 3;
+                    p->playerState = PLAYER_STATE_SPIRIT;
+                    float angle = (g_Rng.GetRandomU16() % 4)*(3.1415926f/2)+3.1415926f/4;
+                    p->spiritModeSpeed.x = cos(angle)*0.8;
+                    p->spiritModeSpeed.y = sin(angle)*0.8;
+                    g_ItemManager.SpawnItem(&p->positionCenter,ITEM_LIFE,3);
+                    p->isFocus = false;
+                    p->bulletGracePeriod = 10;
+                    goto spirit;
+                }else if(g_GameManager.livesRemaining2 <= 0 && p->playerType!=1)
+                // P2 died but no P1
+                {
+                    g_Gui.flags.flag0 = 2;
+                    g_Gui.flags.flag1 = 2;
+                    g_GameManager.bombsRemaining2 = 3;
+                    p->playerState = PLAYER_STATE_SPIRIT;
+                    float angle = (g_Rng.GetRandomU16() % 4)*(3.1415926f/2)+3.1415926f/4;
+                    p->spiritModeSpeed.x = cos(angle)*0.8;
+                    p->spiritModeSpeed.y = sin(angle)*0.8;
+                    g_ItemManager.SpawnItem(&p->positionCenter,ITEM_LIFE,4);
+                    p->isFocus = false;
+                    p->bulletGracePeriod = 10;
+                    goto spirit;
                 }
                 else
                 {
+                    if(p->playerType==1)
+                    {
+                        p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f - 32.0f;
+                    }else
+                    {
+                        p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f + 32.0f;
+                    }
+                    p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
+                    p->positionCenter.z = 0.2;
+                    p->invulnerabilityTimer.SetCurrent(0);
+                    p->playerSprite.scaleX = 3.0;
+                    p->playerSprite.scaleY = 3.0;
                     if(p->playerType==1)
                         g_GameManager.livesRemaining--;
                     else
@@ -499,6 +531,27 @@ ChainCallbackResult Player::OnUpdate(Player *p)
             p->invulnerabilityTimer.SetCurrent(240);
             p->respawnTimer = 6;
         }
+    }else if(p->playerState == PLAYER_STATE_SPIRIT)
+    {
+    spirit:
+        p->playerSprite.color = COLOR_SET_ALPHA(COLOR_WHITE, 80);
+        p->positionCenter.x += p->spiritModeSpeed.x;
+        p->positionCenter.y += p->spiritModeSpeed.y;
+        if (p->positionCenter.x < g_GameManager.playerMovementAreaTopLeftPos.x)
+            p->spiritModeSpeed.x *= -1.0f;
+        else if (g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x < p->positionCenter.x)
+            p->spiritModeSpeed.x *= -1.0f;
+
+        if (p->positionCenter.y < g_GameManager.playerMovementAreaTopLeftPos.y + 300.0f)
+        {
+            if (p->spiritModeSpeed.y < 0.0f)
+                p->spiritModeSpeed.y *= -1.0f;
+        }
+        else if (g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y - 32.0f < p->positionCenter.y)
+        {
+            if (p->spiritModeSpeed.y > 0.0f)
+                p->spiritModeSpeed.y *= -1.0f;
+        }
     }
     if (p->bulletGracePeriod != 0)
     {
@@ -530,7 +583,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
     {
         p->invulnerabilityTimer.Tick();
     }
-    if (p->playerState != PLAYER_STATE_DEAD && p->playerState != PLAYER_STATE_SPAWNING)
+    if (p->playerState != PLAYER_STATE_DEAD && p->playerState != PLAYER_STATE_SPAWNING && p->playerState != PLAYER_STATE_SPIRIT)
     {
         p->HandlePlayerInputs();
     }
@@ -567,17 +620,28 @@ ChainCallbackResult Player::OnUpdate(Player *p)
             g_Gui.flags.flag0 = 2;
             g_GameManager.livesRemaining--;
             D3DXVECTOR3 p1 = p->positionCenter;
-            g_ItemManager.SpawnItem(&p1, ITEM_LIFE, 3);
+            if(g_Player2.playerState == PLAYER_STATE_SPIRIT){
+                g_Player2.playerState = PLAYER_STATE_ALIVE;
+                g_SoundPlayer.PlaySoundByIdx(SOUND_1UP, 0);
+                g_Player2.playerSprite.color = COLOR_SET_ALPHA(COLOR_WHITE, 255);
+            }else{
+                g_ItemManager.SpawnItem(&p1, ITEM_LIFE, 3);
+            }
             //g_GameManager.livesRemaining2++;
             //g_SoundPlayer.PlaySoundByIdx(SOUND_F, 0);
-        }
-        else if(p->playerType!=1 && g_GameManager.livesRemaining2>=1 && g_GameManager.livesRemaining<8) {
+        } else if(p->playerType!=1 && g_GameManager.livesRemaining2>=1 && g_GameManager.livesRemaining<8) {
             g_Gui.flags.flag0 = 2;
             g_GameManager.livesRemaining2--;
             D3DXVECTOR3 p1 = p->positionCenter;
-            g_ItemManager.SpawnItem(&p1, ITEM_LIFE, 4);
             //g_GameManager.livesRemaining++;
             //g_SoundPlayer.PlaySoundByIdx(SOUND_F, 0);
+            if(g_Player.playerState == PLAYER_STATE_SPIRIT){
+                g_Player.playerState = PLAYER_STATE_ALIVE;
+                g_SoundPlayer.PlaySoundByIdx(SOUND_1UP, 0);
+                g_Player.playerSprite.color = COLOR_SET_ALPHA(COLOR_WHITE, 255);
+            }else{
+                g_ItemManager.SpawnItem(&p1, ITEM_LIFE, 4);
+            }
         }
     }
 
@@ -931,8 +995,7 @@ ChainCallbackResult Player::OnDrawHighPrio(Player *p)
                         int alpha = ((dist-50.0f)/50.0f)*220+35;
                         if(alpha>255) alpha=255;
                         if(alpha<0) alpha=0;
-                        if(alpha < p->hitboxSprite.color >> 24)
-                            p->playerSprite.color = COLOR_SET_ALPHA(p->hitboxSprite.color, alpha);
+                        p->hitboxSprite.color = COLOR_SET_ALPHA(p->hitboxSprite.color, alpha);
                     }
                 } 
             }
@@ -1449,7 +1512,7 @@ ZunResult Player::UpdateFireBulletsTimer(Player *p)
     p->fireBulletTimer.Tick();
 
     if (p->fireBulletTimer.AsFrames() >= 30 || p->playerState == PLAYER_STATE_DEAD ||
-        p->playerState == PLAYER_STATE_SPAWNING)
+        p->playerState == PLAYER_STATE_SPAWNING || p->playerState == PLAYER_STATE_SPIRIT)
     {
         p->fireBulletTimer.SetCurrent(-1);
     }
@@ -1695,7 +1758,7 @@ i32 Player::CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
         }
     }
 
-    if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING)
+    if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING || this->playerState == PLAYER_STATE_SPIRIT)
     {
         return 0;
     }
@@ -1715,6 +1778,9 @@ i32 Player::CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
                   bombProjectileRight)
 i32 Player::CalcKillBoxCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletSize)
 {
+    if(this->playerState == PLAYER_STATE_SPIRIT) {
+        return 0;
+    }
     PlayerRect *curBombProjectile;
     f32 bulletLeft, bulletTop, bulletRight, bulletBottom;
     f32 bombProjectileLeft, bombProjectileTop, bombProjectileRight, bombProjectileBottom;
@@ -1797,7 +1863,7 @@ i32 Player::CalcLaserHitbox(D3DXVECTOR3 *laserCenter, D3DXVECTOR3 *laserSize, D3
     {
         return 0;
     }
-    if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING)
+    if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING || this->playerState == PLAYER_STATE_SPIRIT)
     {
         return 0;
     }

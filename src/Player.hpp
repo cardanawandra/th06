@@ -55,6 +55,7 @@ enum PlayerState
     PLAYER_STATE_SPAWNING,
     PLAYER_STATE_DEAD,
     PLAYER_STATE_INVULNERABLE,
+    PLAYER_STATE_SPIRIT,
 };
 
 enum OrbState
@@ -254,7 +255,8 @@ struct Player
     AnmVm hitboxSprite;
     int hitboxTime;
     int lifegiveTime;
-
+    
+    D3DXVECTOR3 spiritModeSpeed;
 #pragma var_order(x, y)
     void inline SetToTopLeftPos(AnmVm *sprite)
     {

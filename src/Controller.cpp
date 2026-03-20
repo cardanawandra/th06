@@ -35,6 +35,8 @@ struct CurKeyStates
     bool K_R;
     bool K_Q;
 
+    bool K_F6; //insane mode
+
     bool K_N;//add delay
     bool K_M;//dec delay
 }g_cur_ctrl_key_state;
@@ -392,6 +394,7 @@ u16 Controller::GetInput(void)
         g_cur_ctrl_key_state.K_F2 = (keyboardState[VK_F2] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_F3 = (keyboardState[VK_F3] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_F4 = (keyboardState[VK_F4] & 0x80)?true:false;
+        g_cur_ctrl_key_state.K_F6 = (keyboardState[VK_F6] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_N = (keyboardState['N'] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_M = (keyboardState['M'] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_Q = (keyboardState['Q'] & 0x80)?true:false;
@@ -452,6 +455,7 @@ u16 Controller::GetInput(void)
         g_cur_ctrl_key_state.K_F2 = (keyboardState[DIK_F2] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_F3 = (keyboardState[DIK_F3] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_F4 = (keyboardState[DIK_F4] & 0x80)?true:false;
+        g_cur_ctrl_key_state.K_F6 = (keyboardState[DIK_F6] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_N = (keyboardState[DIK_N] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_M = (keyboardState[DIK_M] & 0x80)?true:false;
         g_cur_ctrl_key_state.K_Q = (keyboardState[DIK_Q] & 0x80)?true:false;
@@ -563,6 +567,8 @@ void HandleControlKeys(int frame)
         igctrl = Add_Delay;
     else if(g_cur_ctrl_key_state.K_N)
         igctrl = Dec_Delay;
+    else if(g_cur_ctrl_key_state.K_F6)
+        igctrl = Insane_Mode;
     g_ctrl_self[frame] = igctrl;
 }
 
@@ -678,10 +684,22 @@ u16 GetKeys(int frame,bool is_in_UI,int& out_ctrl)
     return finres;
 }
 
+
+u16 Controller::GetInput_Single(int& cur_ctrl)
+{
+    u16 input = GetInput();
+    HandleControlKeys(0);
+    cur_ctrl = g_ctrl_self[0];
+    return input;
+}
+
 u16 Controller::GetInput_Net(int frame,bool is_in_UI,int& cur_ctrl)
 {
     if(!g_is_connected){
-        return GetInput();
+        u16 input = GetInput();
+        HandleControlKeys(frame);
+        cur_ctrl = g_ctrl_self[frame];
+        return input;
     }
     u16 btn = GetInput();
     Bits<16> cur_btn_bits;

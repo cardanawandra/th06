@@ -57,7 +57,13 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 * The description files for these are stored in `player00b.anm` and `player01b.anm` respectively.
 * hitbox is added in 3.7.1, if want to change, unpack `TOTOL_CM.dat`，including `hitbox.png`,`hitbox_a.png`,`mod_anm.anm`'.
 
-## 3.8
+## 3.9 Updates
+- Changed the feature when one player has no life and died: The game will not end. The player dying will give an 1up item, and then enter spirit mode. If another player is focused without shooting on that spirit mode player for 1.5s, then that player can resurrection from spirit with 1 life cost. The game will end if both players is died and in spirit mode.
+- Add an insane mode, turn on by Press F6, which will make rank lock at 64.
+- Fix the hitbox alpha when players are too close.
+- Add re-connect hotkey: F8. Both host and guest need to press that key to try to reconnect. Notice that host/guest need to be in the same menu/UI.
+
+## 3.8 Updates
 - Adjusted score rewards (extend thresholds) to be more balanced (10, 20, 40, 60, 100, 150, 200, 250M).
 - When one is not shooting and overlaps with the other, holding the Focus button for 1.5s will transfer a life to the other player.
 - Disabled replay playback in multiplayer mode (replays can still be played in single-player). The connection will automatically disconnect upon entering the score screen and will only automatically reconnect once you return to the title screen (not the title menu).

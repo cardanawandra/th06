@@ -132,7 +132,6 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
         goto something;
     }
 
-
     switch (menu->gameState)
     {
     case STATE_STARTUP:
