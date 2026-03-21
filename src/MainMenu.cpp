@@ -68,6 +68,12 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
     D3DXVECTOR3 pos3;
     D3DXVECTOR3 pos4;
     D3DXVECTOR3 pos5;
+
+    D3DXVECTOR3 selectCharacterTextPos;
+    selectCharacterTextPos.x=10;
+    selectCharacterTextPos.y=150;
+    selectCharacterTextPos.z=0;
+
     AnmVm *vm;
     u32 hasLoadedSprite;
 
@@ -495,6 +501,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
     case STATE_CHARACTER_SELECT:
         if (menu->stateTimer < 30)
             break;
+        g_AsciiManager.AddFormatText(&selectCharacterTextPos, "Select Character 1","");
         if (WAS_PRESSED_WEIRD(TH_BUTTON_LEFT))
         {
             menu->cursor = menu->cursor + 1;
@@ -648,6 +655,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
         break;
     case STATE_SHOT_SELECT:
         MoveCursor(menu, 2);
+        g_AsciiManager.AddFormatText(&selectCharacterTextPos, "Character 1 Shot-Type","");
         if (g_GameManager.difficulty == EXTRA &&
             g_GameManager.HasReachedMaxClears(g_GameManager.character, menu->cursor) == 0)
         {
@@ -779,6 +787,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
     case STATE_CHARACTER_SELECT2:
         if (menu->stateTimer < 30)
             break;
+        g_AsciiManager.AddFormatText(&selectCharacterTextPos, "Select Character 2","");
         if (WAS_PRESSED_WEIRD(TH_BUTTON_LEFT))
         {
             menu->cursor = menu->cursor + 1;
@@ -933,6 +942,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
 
     case STATE_SHOT_SELECT2:
         MoveCursor(menu, 2);
+        g_AsciiManager.AddFormatText(&selectCharacterTextPos, "Character 2 Shot-Type","");
         if (g_GameManager.difficulty == EXTRA &&
             g_GameManager.HasReachedMaxClears(g_GameManager.character2, menu->cursor) == 0) {
             menu->cursor = 1 - menu->cursor;
