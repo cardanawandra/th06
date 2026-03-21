@@ -57,6 +57,11 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 * The description files for these are stored in `player00b.anm` and `player01b.anm` respectively.
 * hitbox is added in 3.7.1, if want to change, unpack `TOTOL_CM.dat`，including `hitbox.png`,`hitbox_a.png`,`mod_anm.anm`'.
 
+## 3.9.1 Updates
+- Spirit mode continue fixed.
+- Spirit mode item line fixed.
+- Spirit mode alpha fixed.
+
 ## 3.9 Updates
 - Changed the feature when one player has no life and died: The game will not end. The player dying will give an 1up item, and then enter spirit mode. If another player is focused without shooting on that spirit mode player for 1.5s, then that player can resurrection from spirit with 1 life cost. The game will end if both players is died and in spirit mode.
 - Add an insane mode, turn on by Press F6, which will make rank lock at 64.

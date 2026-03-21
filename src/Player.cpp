@@ -439,6 +439,8 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 || (g_GameManager.livesRemaining2 <= 0 && p->playerType!=1 && g_Player.playerState == PLAYER_STATE_SPIRIT))// P2 in sprit mode and P1 died
                 // all died
                 {
+                    g_Player2.playerState = PLAYER_STATE_SPAWNING;
+                    g_Player.playerState = PLAYER_STATE_SPAWNING;
                     g_GameManager.isInRetryMenu = 1;
                 }else if (g_GameManager.livesRemaining <= 0 && p->playerType==1)
                 // P1 died but no P2
@@ -648,15 +650,21 @@ ChainCallbackResult Player::OnUpdate(Player *p)
     if(!g_is_single_mode){
         if(p == another)
         {
-            if(dist < 50.0f)
-                dist = 50.0f;
-            if(dist<100.0f) {
-                int alpha = ((dist-50.0f)/50.0f)*200+55;
-                if(alpha>255) alpha=255;
-                if(alpha<0) alpha=0;
-                p->playerSprite.color = COLOR_SET_ALPHA(p->playerSprite.color, alpha);
-            }else{
-                p->playerSprite.color = COLOR_SET_ALPHA(p->playerSprite.color, 255);
+            if(p->playerState==PLAYER_STATE_SPIRIT)
+            {
+                 p->playerSprite.color = COLOR_SET_ALPHA(COLOR_WHITE, 80);
+            }else
+            {
+                if(dist < 50.0f)
+                    dist = 50.0f;
+                if(dist<100.0f) {
+                    int alpha = ((dist-50.0f)/50.0f)*200+55;
+                    if(alpha>255) alpha=255;
+                    if(alpha<0) alpha=0;
+                    p->playerSprite.color = COLOR_SET_ALPHA(p->playerSprite.color, alpha);
+                }else{
+                    p->playerSprite.color = COLOR_SET_ALPHA(p->playerSprite.color, 255);
+                }
             }
         } 
     }

@@ -166,13 +166,13 @@ void ItemManager::OnUpdate()
                 }
                 sincosmul(&curItem->startPosition, playerAngle, 8.0f);
             }else{
-                if ((0 <= g_GameManager.currentPower && g_Player.positionCenter.y < 128.0f))
+                if ((0 <= g_GameManager.currentPower && g_Player.positionCenter.y < 128.0f && g_Player.playerState!=PLAYER_STATE_SPIRIT))
                 {
                     playerAngle = g_Player.AngleToPlayer(&curItem->currentPosition);
                     sincosmul(&curItem->startPosition, playerAngle, 8.0f);
                     curItem->state = 1;
                 }
-                else if ((0 <= g_GameManager.currentPower2 && g_Player2.positionCenter.y < 128.0f))
+                else if ((0 <= g_GameManager.currentPower2 && g_Player2.positionCenter.y < 128.0f && g_Player2.playerState!=PLAYER_STATE_SPIRIT))
                 {
                     playerAngle = g_Player2.AngleToPlayer(&curItem->currentPosition);
                     sincosmul(&curItem->startPosition, playerAngle, 8.0f);
