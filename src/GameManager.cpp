@@ -1,3 +1,5 @@
+#include "Connection.hpp"
+
 #include "GameManager.hpp"
 #include "AsciiManager.hpp"
 #include "BulletManager.hpp"
@@ -15,14 +17,36 @@
 #include "Stage.hpp"
 #include "Supervisor.hpp"
 #include "utils.hpp"
+#include "ItemManager.hpp"
 
 #include <d3d8types.h>
 #include <d3dx8math.h>
 
+#include <map>
+extern InGameCtrlType g_cur_ctrl;
+extern std::map<int,Bits<16> > g_ctrl_bits_self;
+extern std::map<int,Bits<16> > g_ctrl_bits_rcved;
+extern std::map<int,int> g_ctrl_rng_rcved;
+extern std::map<int,int> g_ctrl_rng_self;
+extern std::map<int,InGameCtrlType> g_ctrl_rcved;
+extern std::map<int,InGameCtrlType> g_ctrl_self;
+extern InGameCtrlType g_cur_ctrl;
+
+bool g_restart_flag = false;
+
 namespace th06
 {
 
-DIFFABLE_STATIC_ARRAY_ASSIGN(u32, 5, g_ExtraLivesScores) = {10000000, 20000000, 40000000, 60000000, 1900000000};
+DIFFABLE_STATIC_ARRAY_ASSIGN(u32, 9, g_ExtraLivesScores) = {
+    10000000, 
+    20000000, 
+    40000000, 
+    60000000, 
+   100000000, 
+   150000000, 
+   200000000, 
+   250000000, 
+  1900000000};
 
 DIFFABLE_STATIC_ARRAY_ASSIGN(char *, 9, g_EclFiles) = {"dummy",
                                                        "data/ecldata1.ecl",
@@ -156,6 +180,46 @@ ChainCallbackResult GameManager::OnUpdate(GameManager *gameManager)
     }
 
     gameManager->isInMenu = isInMenu;
+    
+    if(gameManager->isInGameMenu)
+    {
+        switch(g_cur_ctrl)
+        {
+            default:
+            break;
+            case Quick_Quit:
+                g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
+                //g_Supervisor.wantedState = SUPERVISOR_STATE_GAMEMANAGER;
+                break;
+            case Quick_Restart:
+                g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;
+                //g_Supervisor.wantedState = SUPERVISOR_STATE_GAMEMANAGER;
+                g_restart_flag = true;
+                break;
+        }
+        g_cur_ctrl = IGC_NONE;
+    }else{
+        D3DXVECTOR3 p;
+        p.x=(g_Rng.GetRandomF32ZeroToOne()-0.5f)*2.0f*192.0f + 192.0f;
+        p.y=(g_Rng.GetRandomF32ZeroToOne()-0.5f)*2.0f*224.0f + 16.0f;
+        p.z=0.0f;
+        switch(g_cur_ctrl)
+        {
+            default:
+            break;
+            case Inf_Life:
+                g_ItemManager.SpawnItem(&p, ITEM_LIFE,0);
+                break;
+            case Inf_Bomb:
+                g_ItemManager.SpawnItem(&p, ITEM_BOMB,0);
+                break;
+            case Inf_Power:
+                g_ItemManager.SpawnItem(&p, ITEM_FULL_POWER,0);
+                break;
+        }
+        g_cur_ctrl = IGC_NONE;
+    }
+    
 
     g_Supervisor.viewport.X = gameManager->arcadeRegionTopLeftPos.x;
     g_Supervisor.viewport.Y = gameManager->arcadeRegionTopLeftPos.y;
@@ -214,11 +278,14 @@ ChainCallbackResult GameManager::OnUpdate(GameManager *gameManager)
         }
         if (gameManager->extraLives >= 0 && g_ExtraLivesScores[gameManager->extraLives] <= gameManager->guiScore)
         {
-            if (gameManager->livesRemaining < MAX_LIVES)
-            {
-                gameManager->livesRemaining++;
+            if (gameManager->livesRemaining < MAX_LIVES || gameManager->livesRemaining2 < MAX_LIVES) {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_1UP, 0);
             }
+            if (gameManager->livesRemaining < MAX_LIVES)
+                gameManager->livesRemaining++;
+            if (gameManager->livesRemaining2 < MAX_LIVES)
+                gameManager->livesRemaining2++;
+
             g_Gui.flags.flag0 = 2;
             gameManager->extraLives++;
             g_GameManager.IncreaseSubrank(200);
@@ -283,6 +350,7 @@ ZunResult GameManager::AddedCallback(GameManager *mgr)
     {
         g_Supervisor.defaultConfig.bombCount = g_GameManager.bombsRemaining;
         g_Supervisor.defaultConfig.lifeCount = g_GameManager.livesRemaining;
+        
         mgr->arcadeRegionTopLeftPos.x = 32.0;
         mgr->arcadeRegionTopLeftPos.y = 16.0;
         mgr->arcadeRegionSize.x = 384.0;
@@ -297,6 +365,7 @@ ZunResult GameManager::AddedCallback(GameManager *mgr)
         mgr->nextScoreIncrement = 0;
         mgr->highScore = 100000;
         mgr->currentPower = 0;
+        mgr->currentPower2 = 0;
         mgr->numRetries = 0;
         if (6 <= mgr->currentStage)
         {
@@ -359,6 +428,7 @@ ZunResult GameManager::AddedCallback(GameManager *mgr)
     mgr->grazeInStage = 0;
     mgr->isInGameMenu = 0;
     mgr->currentStage = mgr->currentStage + 1;
+
     if (g_GameManager.isInReplay == 0)
     {
         clrdIdx = g_GameManager.CharacterShotType();
@@ -380,9 +450,11 @@ ZunResult GameManager::AddedCallback(GameManager *mgr)
             break;
         case STAGE3:
             mgr->currentPower = 64;
+            mgr->currentPower2 = 64;
             break;
         default:
             mgr->currentPower = 128;
+            mgr->currentPower2 = 128;
         }
     }
     g_Supervisor.LoadPbg3(CM_PBG3_INDEX, TH_CM_DAT_FILE);
@@ -400,6 +472,17 @@ ZunResult GameManager::AddedCallback(GameManager *mgr)
         mgr->minRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].minRank;
         mgr->maxRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].maxRank;
     }
+    
+    {
+        //MessageBoxA(NULL,"","",MB_OK);
+        
+        g_Rng.seed = 0;
+        g_ctrl_bits_rcved.clear();
+        g_ctrl_rng_rcved.clear();
+        g_ctrl_rcved.clear();
+        g_cur_ctrl = IGC_NONE;
+    }
+
     g_Rng.generationCount = 0;
     mgr->randomSeed = g_Rng.seed;
     if (Stage::RegisterChain(mgr->currentStage) != ZUN_SUCCESS)

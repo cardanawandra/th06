@@ -166,6 +166,9 @@ void EnemyManager::RunEclTimeline()
         // number of lives lost?
         subrankIncreaseFrame = 10 * 4 * 60;
         subrankIncreaseFrame -= g_GameManager.livesRemaining * 4 * 60;
+        subrankIncreaseFrame -= g_GameManager.livesRemaining2 * 4 * 60;
+        if(subrankIncreaseFrame<=0)
+            subrankIncreaseFrame=1;
         if (this->timelineTime.HasTicked() && this->timelineTime.AsFrames() % subrankIncreaseFrame == 0)
         {
             g_GameManager.IncreaseSubrank(100);
@@ -314,6 +317,7 @@ void EnemyManager::RunEclTimeline()
                 break;
             case 0xb:
                 g_GameManager.currentPower = this->timelineInstr->arg0;
+                g_GameManager.currentPower2 = this->timelineInstr->arg0;
                 break;
             case 0xc:
                 if (this->bosses[this->timelineInstr->arg0] != NULL &&
@@ -613,10 +617,11 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
                 }
 
                 damage += damage2;
-                if (70 <= damage)
-                {
-                    damage = 70;
-                }
+                // disable damage cap
+                // if (70 <= damage)
+                // {
+                //     damage = 70;
+                // }
                 g_GameManager.score = (damage / 5) * 10 + g_GameManager.score;
                 if (mgr->spellcardInfo.isActive != 0)
                 {

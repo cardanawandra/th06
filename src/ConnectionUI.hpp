@@ -1,43 +1,41 @@
 #pragma once
 
-#include "connection.hpp"
+
 #include <string>
+#include "connection.hpp"
 #include <windows.h>
 
 class ConnectionUI
 {
-  public:
-    ConnectionUI(Host &h, Guest &g);
+public:
+    ConnectionUI(Host& h, Guest& g);
     ~ConnectionUI();
 
-  public:
+public:
     void Show();
     int GetDelay();
-    bool GetIsHostP1();
     void SetDelay(int delay);
-    void SetIsHostP1(bool is_host_p1);
 
     bool IsHost() const;
     bool IsGuest() const;
     bool IsConnected();
     bool IsGameStarted();
-
-  private:
+private:
     enum
     {
         PACK_HELLO = 1,
-        PACK_PING = 2,
-        PACK_PONG = 3
+        PACK_PING  = 2,
+        PACK_PONG  = 3
     };
 
-  private:
-    Host &m_host;
-    Guest &m_guest;
+private:
+
+    Host& m_host;
+    Guest& m_guest;
 
     bool m_isHost;
     bool m_isGuest;
     int m_delay;
-    bool m_is_host_p1;
 
     bool m_connected;
     bool m_startGame;
@@ -60,11 +58,11 @@ class ConnectionUI
 
     unsigned int m_seq;
 
-  private:
+private:
     static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     LRESULT HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-  private:
+private:
     bool CreateMainWindow(HINSTANCE hInst);
     void SaveControls();
     void CreateControls(HWND hWnd);
@@ -78,8 +76,8 @@ class ConnectionUI
     void ProcessGuestNetwork();
 
     void TryPeriodicPing();
-    void SendPingAsHost(CtrlPack ctrl);
-    void SendPingAsGuest(CtrlPack ctrl);
+    void SendPingAsHost(Control ctrl);
+    void SendPingAsGuest(Control ctrl);
 
     void EnterHostWaitingState();
     void EnterGuestWaitingState();
@@ -88,11 +86,12 @@ class ConnectionUI
 
     std::string GetEditText(HWND hEdit);
     int GetEditInt(HWND hEdit);
-    void SetText(HWND hWnd, const std::string &s);
-    void SetLatencyText(const std::string &s);
+    void SetText(HWND hWnd, const std::string& s);
+    void SetLatencyText(const std::string& s);
 
-    std::string BuildLatencyText(const std::string &ip, int port, ULONGLONG rtt);
+    std::string BuildLatencyText(const std::string& ip, int port, ULONGLONG rtt);
 
     bool TryStartHost(int listenPort);
-    bool TryStartGuest(const std::string &hostIp, int hostPort, int listenPort);
+    bool TryStartGuest(const std::string& hostIp, int hostPort, int listenPort);
+    
 };

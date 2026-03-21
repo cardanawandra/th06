@@ -14,35 +14,97 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 
 ## Targets 2
 -netplay (done?) <br>
-
+-player 2 custom shot type (done?)<br>
+-new demo gameplay (demo play is banned currently...)<br>
 
 ## NetPlay
+# Multiplayer Guide
 
 ### 1. Host Side
-* Click **"as host"** directly.
-* Wait for the guest's response.
+* Simply click **as host**.
+* Wait for the guest to respond.
 
 ### 2. Guest Side
-* Enter the Host's IP address.
-* Click **"as guest"**.
+* Enter the host's IP address.
+* Click **as guest**.
 * Wait for the connection to be established.
 
----
 
-### Network & Port Settings
-* **General:** If you are not using NAT traversal (tunneling), you generally don't need to change the host port. If you do, ensure the guest's **host port** matches the host's **listen port**.
-* **NAT Traversal (Tunneling):**
+### Network and Port Settings
+* **Standard Scenario:** If you are not using network tunneling/penetration, you usually don't need to change the **host port**. If you must change it, ensure the guest's **host port** matches the host's **listen port**.
+* **Network Tunneling (Intranet Penetration):** 
     * Select **UDP** as the tunnel type.
-    * **Host:** Set the mapping port in your tunneling software equal to the **listen port**.
-    * **Guest:** Set the **host port** to the external port provided by the tunneling service.
+    * **Host:** In your tunneling software, set the local port to the **listen port**.
+    * **Guest:** Set **host port** to the public port provided by the tunneling service.
     * **Recommendation:** When using tunneling, it is recommended to set **target delay >= 2**, otherwise the game will be very laggy.
+    * Press M or N in-game to increase/decrease the target delay.
 
----
 
 ### After Connection
-* The Host can choose whether to be **1P** and set the **target delay**.
-* **Note:** A higher target delay allows the game to handle network latency better, but the input lag will also increase.
-* Click **"start game"** to begin.
+* The host can choose whether to be **1P** and set the **target delay**.
+* **Note:** A higher target delay can better tolerate network latency, but the input lag for controls will also increase.
+* Click **start game** to begin.
+
+
+### Troubleshooting and Additional Notes
+* **Reconnection:** If the connection drops in-game, there is a 5-second timeout. If it doesn't reconnect within this time, you can try returning to the main menu (at the Reimu head screen) to reconnect (though this may not always work).
+* **Background Music:** The game does not include WAV format BGM. Please add it yourself if needed.
+* **Plugins and Testing:** `d3d8.dll` is a d3d8-to-9 conversion plugin. If you wish to use dgVoodoo (dgv), please add it yourself. It is recommended to select **Start Game (local)** to test performance before attempting multiplayer.
+
+
+### P2 Color Swapping
+* After version 3.6, you can freely choose P1/P2 characters. If you want to change colors at this point, you need to unpack `TOLOL_CM.DAT`, then replace the following files: `player00b.png/player01b.png/player00b_a.png/player01b_a.png`.
+* The description files for these are stored in `player00b.anm` and `player01b.anm` respectively.
+* hitbox is added in 3.7.1, if want to change, unpack `TOTOL_CM.dat`，including `hitbox.png`,`hitbox_a.png`,`mod_anm.anm`'.
+
+## 3.9.1 Updates
+- Spirit mode continue fixed.
+- Spirit mode item line fixed.
+- Spirit mode alpha fixed.
+
+## 3.9 Updates
+- Changed the feature when one player has no life and died: The game will not end. The player dying will give an 1up item, and then enter spirit mode. If another player is focused without shooting on that spirit mode player for 1.5s, then that player can resurrection from spirit with 1 life cost. The game will end if both players is died and in spirit mode.
+- Add an insane mode, turn on by Press F6, which will make rank lock at 64.
+- Fix the hitbox alpha when players are too close.
+- Add re-connect hotkey: F8. Both host and guest need to press that key to try to reconnect. Notice that host/guest need to be in the same menu/UI.
+
+## 3.8 Updates
+- Adjusted score rewards (extend thresholds) to be more balanced (10, 20, 40, 60, 100, 150, 200, 250M).
+- When one is not shooting and overlaps with the other, holding the Focus button for 1.5s will transfer a life to the other player.
+- Disabled replay playback in multiplayer mode (replays can still be played in single-player). The connection will automatically disconnect upon entering the score screen and will only automatically reconnect once you return to the title screen (not the title menu).
+- Fixed a bug where a Game Over would be triggered if either player missed while at 0 lives.
+- Fixed GUI issues when entering player signatures.
+
+### 3.7.1 Updates
+- hitbox when focusing
+- fix a 0.5px texture offset
+
+### 3.7 Updates
+- MarisaB is capable to shoot when another player is bombing
+- ESC+R added
+- initial resource is changed to 2-3
+- resources for P1/P2 is calculated separately
+- automatically hide another player if too close
+- add more score bonus life (10,20,30,40,50,60,80,100,125,150,200,250M)
+
+### 3.6.1 Updates
+- "P1 as host" is removed since P1/P2 character can be selected in game.
+- Code of timeout is changed to make it more stable.
+
+### 3.6 Updates
+
+- Added P1/P2 character selection and color swapping.
+
+
+### 3.5 Updates
+
+- Added Esc+Q shortcut.
+- Pressing F2, F3, or F4 will randomly drop Life/Bomb/Power items on the screen.
+- Cross-version multiplayer is no longer supported.
+- Modified item collection logic; items are now collected by the player closest to them.
+- Removed the frame damage cap and the Full Power item collection mechanism.
+- Config file = `th06e.cfg`.
+- Press M/N to increase/decrease delay.
 
 ---
 
@@ -55,8 +117,6 @@ This project aims to make multiplayer from reconstructed source code of [Touhou 
 -different character (done)<br>
 -replay (done)<br>
 -provoke enemy by player (done)<br>
--player 2 custom shot type (todo)<br>
--new demo gameplay (todo)<br>
 
 ## Installation
 

@@ -1,36 +1,41 @@
 #include "ConnectionUI.hpp"
-#include <cstdlib>
 #include <sstream>
+#include <cstdlib>
 
-#define IDC_EDIT_HOST_IP 1001
-#define IDC_EDIT_HOST_PORT 1002
-#define IDC_EDIT_LISTEN_PORT 1003
-#define IDC_BTN_START_HOST 1004
-#define IDC_BTN_START_GUEST 1005
-#define IDC_STATIC_LATENCY 1006
-#define IDC_EDIT_TARGET_LATENCY 1007
-#define IDC_BTN_START_GAME 1008
-#define IDC_CHECKBOX_IS_HOST_1P 1009
+#define IDC_EDIT_HOST_IP         1001
+#define IDC_EDIT_HOST_PORT       1002
+#define IDC_EDIT_LISTEN_PORT     1003
+#define IDC_BTN_START_HOST       1004
+#define IDC_BTN_START_GUEST      1005
+#define IDC_STATIC_LATENCY       1006
+#define IDC_EDIT_TARGET_LATENCY  1007
+#define IDC_BTN_START_GAME       1008
 #define IDC_BTN_START_GAME_LOCAL 1010
 
-#define TIMER_ID_POLL 1
-#define TIMER_INTERVAL_MS 50
+#define TIMER_ID_POLL            1
+#define TIMER_INTERVAL_MS        15
 
+#define max_delay 10
+#define max_delay_s "10"
+
+
+bool is_ver_matched = true;
 ULONGLONG MyGetTickCount()
 {
     LARGE_INTEGER l;
     static LARGE_INTEGER f;
     static bool is_inited = false;
-    if (!is_inited)
+    if(!is_inited)
     {
         is_inited = true;
         QueryPerformanceFrequency(&f);
     }
     QueryPerformanceCounter(&l);
-    return l.QuadPart * 1000 / f.QuadPart;
+    return l.QuadPart*1000/f.QuadPart;
 }
 
-ConnectionUI::ConnectionUI(Host &h, Guest &g) : m_host(h), m_guest(g)
+ConnectionUI::ConnectionUI(Host& h, Guest& g)
+    : m_host(h), m_guest(g)
 {
     m_isHost = false;
     m_isGuest = false;
@@ -61,31 +66,20 @@ int ConnectionUI::GetDelay()
     return m_delay;
 }
 
-bool ConnectionUI::GetIsHostP1()
-{
-    return m_is_host_p1;
-}
 void ConnectionUI::SetDelay(int delay)
 {
     m_delay = delay;
-    if (m_delay <= 0)
+    if(m_delay < 0)
     {
-        m_delay = 1;
+        m_delay = 0;
     }
-    if (m_delay > 60)
+    if(m_delay > max_delay)
     {
-        m_delay = 60;
+        m_delay = max_delay;
     }
     char chs[60];
-    sprintf(chs, "%d", m_delay);
-    SetWindowTextA(m_editTargetLatency, chs);
-    return;
-}
-
-void ConnectionUI::SetIsHostP1(bool is_host_p1)
-{
-    m_is_host_p1 = is_host_p1;
-    SendMessage(m_checkBoxIsHost1P, BM_SETCHECK, m_is_host_p1 ? BST_CHECKED : BST_UNCHECKED, 0);
+    sprintf(chs,"%d",m_delay);
+    SetWindowTextA(m_editTargetLatency,chs);
     return;
 }
 
@@ -101,39 +95,39 @@ bool ConnectionUI::IsGuest() const
 
 std::string ConnectionUI::GetEditText(HWND hEdit)
 {
-    char buf[256] = {0};
+    char buf[256] = { 0 };
     GetWindowTextA(hEdit, buf, sizeof(buf));
     return std::string(buf);
 }
 
 int ConnectionUI::GetEditInt(HWND hEdit)
 {
-    char buf[64] = {0};
+    char buf[64] = { 0 };
     GetWindowTextA(hEdit, buf, sizeof(buf));
-    int n = strlen(buf);
-    for (int i = 0; i < n; i++)
-        if (buf[i] > '9' || buf[i] < '0')
+    int n=strlen(buf);
+    for(int i=0;i<n;i++)
+        if(buf[i]>'9' || buf[i]<'0')
         {
-            MessageBoxA(NULL, "wrong number", "err", MB_OK);
+            MessageBoxA(NULL,"wrong number","err",MB_OK);
             return -1;
         }
     return atoi(buf);
 }
 
-void ConnectionUI::SetText(HWND hWnd, const std::string &s)
+void ConnectionUI::SetText(HWND hWnd, const std::string& s)
 {
     SetWindowTextA(hWnd, s.c_str());
 }
 
-void ConnectionUI::SetLatencyText(const std::string &s)
+void ConnectionUI::SetLatencyText(const std::string& s)
 {
     SetText(m_staticLatency, s);
 }
 
-std::string ConnectionUI::BuildLatencyText(const std::string &ip, int port, ULONGLONG rtt)
+std::string ConnectionUI::BuildLatencyText(const std::string& ip, int port, ULONGLONG rtt)
 {
     std::ostringstream oss;
-    oss << ip << ":" << port << "(" << (ULONGLONG)rtt / 2 << "ms)";
+    oss << ip << ":" << port << "(" << (ULONGLONG)rtt/2 << "ms)";
     return oss.str();
 }
 
@@ -148,15 +142,21 @@ bool ConnectionUI::CreateMainWindow(HINSTANCE hInst)
     wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 
     RegisterClassA(&wc);
+    char title[100];
+    sprintf(title,"Launcher [ver=%s]",MULTI_NET_VER_S);
 
-    m_hWnd =
-        CreateWindowA("ConnectionUIClass", "Game Launcher", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-                      CW_USEDEFAULT, CW_USEDEFAULT, 430, 480, NULL, NULL, hInst, this);
+    m_hWnd = CreateWindowA(
+        "ConnectionUIClass",
+        title,
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        430, 400,
+        NULL, NULL, hInst, this);
 
     return (m_hWnd != NULL);
 }
 
-const char *g_iniPath = ".\\connect_config.ini";
+const char* g_iniPath = ".\\connect_config.ini";
 
 void ConnectionUI::SaveControls()
 {
@@ -172,7 +172,6 @@ void ConnectionUI::SaveControls()
 
     GetWindowTextA(m_editTargetLatency, buf, 128);
     WritePrivateProfileStringA("Connection", "target_delay", buf, g_iniPath);
-    WritePrivateProfileStringA("Connection", "is_host_p1", GetIsHostP1() ? "1" : "0", g_iniPath);
 }
 
 void ConnectionUI::CreateControls(HWND hWnd)
@@ -181,73 +180,76 @@ void ConnectionUI::CreateControls(HWND hWnd)
     static char port_host[128];
     static char port_listen[128];
     static char target_delay[128];
-    static bool is_host_p1;
 
     GetPrivateProfileStringA("Connection", "ip", "::1", ip, sizeof(ip), g_iniPath);
     GetPrivateProfileStringA("Connection", "port_host", "3036", port_host, sizeof(port_host), g_iniPath);
     GetPrivateProfileStringA("Connection", "port_listen", "3036", port_listen, sizeof(port_listen), g_iniPath);
     GetPrivateProfileStringA("Connection", "target_delay", "2", target_delay, sizeof(target_delay), g_iniPath);
-    is_host_p1 = GetPrivateProfileIntA("Connection", "is_host_p1", 0, g_iniPath);
 
-    CreateWindowA("STATIC", "Host IP:", WS_CHILD | WS_VISIBLE, 20, 20, 80, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Host IP:", WS_CHILD | WS_VISIBLE,
+        20, 20, 80, 20, hWnd, NULL, NULL, NULL);
 
-    m_editHostIp = CreateWindowA("EDIT", ip, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, 110, 20, 270, 24, hWnd,
-                                 (HMENU)IDC_EDIT_HOST_IP, NULL, NULL);
+    m_editHostIp = CreateWindowA("EDIT", ip,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL,
+        110, 20, 270, 24, hWnd, (HMENU)IDC_EDIT_HOST_IP, NULL, NULL);
 
-    CreateWindowA("STATIC", "Host Port:", WS_CHILD | WS_VISIBLE, 20, 60, 80, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Host Port:", WS_CHILD | WS_VISIBLE,
+        20, 60, 80, 20, hWnd, NULL, NULL, NULL);
 
-    m_editHostPort = CreateWindowA("EDIT", port_host, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER,
-                                   110, 60, 100, 24, hWnd, (HMENU)IDC_EDIT_HOST_PORT, NULL, NULL);
+    m_editHostPort = CreateWindowA("EDIT", port_host,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER,
+        110, 60, 100, 24, hWnd, (HMENU)IDC_EDIT_HOST_PORT, NULL, NULL);
 
-    CreateWindowA("STATIC", "Listen Port:", WS_CHILD | WS_VISIBLE, 20, 100, 80, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Listen Port:", WS_CHILD | WS_VISIBLE,
+        20, 100, 80, 20, hWnd, NULL, NULL, NULL);
 
-    m_editListenPort =
-        CreateWindowA("EDIT", port_listen, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 110, 100,
-                      100, 24, hWnd, (HMENU)IDC_EDIT_LISTEN_PORT, NULL, NULL);
+        
+    m_editListenPort = CreateWindowA("EDIT", port_listen,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER,
+        110, 100, 100, 24, hWnd, (HMENU)IDC_EDIT_LISTEN_PORT, NULL, NULL);
 
-    m_btnHost = CreateWindowA("BUTTON", "as host", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 20, 150, 160, 32, hWnd,
-                              (HMENU)IDC_BTN_START_HOST, NULL, NULL);
+    m_btnHost = CreateWindowA("BUTTON", "as host",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        20, 150, 160, 32, hWnd, (HMENU)IDC_BTN_START_HOST, NULL, NULL);
 
-    m_btnGuest = CreateWindowA("BUTTON", "as guest", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 220, 150, 160, 32, hWnd,
-                               (HMENU)IDC_BTN_START_GUEST, NULL, NULL);
+    m_btnGuest = CreateWindowA("BUTTON", "as guest",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        220, 150, 160, 32, hWnd, (HMENU)IDC_BTN_START_GUEST, NULL, NULL);
 
-    CreateWindowA("STATIC", "cur state:", WS_CHILD | WS_VISIBLE, 20, 210, 80, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "cur state:", WS_CHILD | WS_VISIBLE,
+        20, 210, 80, 20, hWnd, NULL, NULL, NULL);
 
-    m_staticLatency = CreateWindowA("STATIC", "no connection", WS_CHILD | WS_VISIBLE | WS_BORDER, 110, 210, 270, 24,
-                                    hWnd, (HMENU)IDC_STATIC_LATENCY, NULL, NULL);
+    m_staticLatency = CreateWindowA("STATIC", "no connection",
+        WS_CHILD | WS_VISIBLE | WS_BORDER,
+        110, 210, 270, 24, hWnd, (HMENU)IDC_STATIC_LATENCY, NULL, NULL);
 
-    CreateWindowA("STATIC", "target delay:", WS_CHILD | WS_VISIBLE, 20, 250, 120, 20, hWnd, NULL, NULL, NULL);
+        
+    CreateWindowA("STATIC", "target delay:", WS_CHILD | WS_VISIBLE,
+        20, 250, 120, 20, hWnd, NULL, NULL, NULL);
 
-    m_editTargetLatency =
-        CreateWindowA("EDIT", target_delay, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 110, 250,
-                      100, 24, hWnd, (HMENU)IDC_EDIT_TARGET_LATENCY, NULL, NULL);
+    m_editTargetLatency = CreateWindowA("EDIT", target_delay,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER,
+        110, 250, 100, 24, hWnd, (HMENU)IDC_EDIT_TARGET_LATENCY, NULL, NULL);
 
-    m_checkBoxIsHost1P = CreateWindowA("BUTTON", "Host is 1P", WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 20, 310, 100,
-                                       24, hWnd, (HMENU)IDC_CHECKBOX_IS_HOST_1P, NULL, NULL);
+    m_btnStartGame = CreateWindowA("BUTTON", "Start Game",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+        20, 300, 160, 32, hWnd, (HMENU)IDC_BTN_START_GAME, NULL, NULL);
 
-    m_btnStartGame = CreateWindowA("BUTTON", "Start Game", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, 20, 340,
-                                   180, 36, hWnd, (HMENU)IDC_BTN_START_GAME, NULL, NULL);
-
-    m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Game(local)", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 220, 340,
-                                        180, 36, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
+    m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Game(local)",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+        220, 300, 160, 32, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
 
     m_delay = atoi(target_delay);
-    if (m_delay <= 0)
+    if(m_delay<0)
     {
-        m_delay = 1;
-        SetWindowTextA(m_editTargetLatency, "1");
+        m_delay=0;
+        SetWindowTextA(m_editTargetLatency,"0");
     }
-    if (m_delay > 60)
+    if(m_delay>max_delay)
     {
-        m_delay = 60;
-        SetWindowTextA(m_editTargetLatency, "60");
+        m_delay=max_delay;
+        SetWindowTextA(m_editTargetLatency,max_delay_s);
     };
-
-    m_is_host_p1 = is_host_p1;
-    if (is_host_p1)
-    {
-        SendMessage(m_checkBoxIsHost1P, BM_SETCHECK, is_host_p1 ? BST_CHECKED : BST_UNCHECKED, 0);
-    }
 }
 
 bool ConnectionUI::IsGameStarted()
@@ -264,7 +266,7 @@ bool ConnectionUI::TryStartHost(int listenPort)
     return m_host.Start("", listenPort, AF_INET6);
 }
 
-bool ConnectionUI::TryStartGuest(const std::string &hostIp, int hostPort, int listenPort)
+bool ConnectionUI::TryStartGuest(const std::string& hostIp, int hostPort, int listenPort)
 {
     int family = (hostIp.find(':') != std::string::npos) ? AF_INET6 : AF_INET;
     return m_guest.Start(hostIp, hostPort, listenPort, family);
@@ -321,10 +323,15 @@ void ConnectionUI::ResetGuestButtonAfterTimeout()
     m_connected = false;
 }
 
-void ConnectionUI::SendPingAsHost(CtrlPack pctrl)
+void ConnectionUI::SendPingAsHost(Control ctrl)
 {
+    CtrlPack cp;
+    cp.ctrl_type = ctrl;
+    cp.init_setting.delay = GetDelay();
+    cp.init_setting.ver = MULTI_NET_VER;
+
     Pack p;
-    p.ctrl = pctrl;
+    p.ctrl = cp;
     p.type = PACK_PING;
     p.seq = m_seq++;
     p.sendTick = MyGetTickCount();
@@ -333,15 +340,20 @@ void ConnectionUI::SendPingAsHost(CtrlPack pctrl)
     m_host.SendPack(p);
 }
 
-void ConnectionUI::SendPingAsGuest(CtrlPack pctrl)
+void ConnectionUI::SendPingAsGuest(Control ctrl)
 {
+    CtrlPack cp;
+    cp.ctrl_type = ctrl;
+    cp.init_setting.delay = GetDelay();
+    cp.init_setting.ver = MULTI_NET_VER;
+
     Pack p;
-    p.ctrl = pctrl;
+    p.ctrl = cp;
     p.type = PACK_PING;
     p.seq = m_seq++;
     p.sendTick = MyGetTickCount();
     p.echoTick = 0;
-
+    
     m_guest.SendPack(p);
 }
 
@@ -355,14 +367,12 @@ void ConnectionUI::TryPeriodicPing()
     {
         if (m_isHost)
         {
-            CtrlPack c;
-            c.ctrl_type = Ctrl_Set_InitSetting;
-            c.init_setting.delay = GetDelay();
-            c.init_setting.is_host_p1 = GetIsHostP1();
-            SendPingAsHost(c);
+            SendPingAsHost(Ctrl_Set_InitSetting);
         }
         else if (m_isGuest)
-            SendPingAsGuest(CtrlPack());
+        {
+            SendPingAsGuest(Ctrl_Set_InitSetting);
+        }
 
         m_lastPeriodicPingTick = now;
     }
@@ -370,8 +380,9 @@ void ConnectionUI::TryPeriodicPing()
 
 void ConnectionUI::OnClickHost()
 {
+    is_ver_matched = true;
     int listenPort = GetEditInt(m_editListenPort);
-    if (listenPort == -1)
+    if(listenPort==-1)
         return;
     if (!TryStartHost(listenPort))
     {
@@ -384,13 +395,13 @@ void ConnectionUI::OnClickHost()
 
 void ConnectionUI::OnClickGuest()
 {
+    is_ver_matched = true;
     std::string hostIp = GetEditText(m_editHostIp);
     int hostPort = GetEditInt(m_editHostPort);
     int listenPort = GetEditInt(m_editListenPort);
     EnableWindow(m_editTargetLatency, FALSE);
-    EnableWindow(m_checkBoxIsHost1P, FALSE);
 
-    if (listenPort == -1 || hostPort == -1)
+    if(listenPort==-1 || hostPort==-1)
         return;
 
     if (!TryStartGuest(hostIp, hostPort, listenPort))
@@ -402,7 +413,7 @@ void ConnectionUI::OnClickGuest()
     EnterGuestWaitingState();
 
     // ping
-    SendPingAsGuest(CtrlPack());
+    SendPingAsGuest(Ctrl_Set_InitSetting);
 }
 
 void ConnectionUI::OnClickStartGame()
@@ -410,21 +421,19 @@ void ConnectionUI::OnClickStartGame()
     if (!m_connected)
         return;
     m_startGame = true;
-    CtrlPack p;
-    p.ctrl_type = Ctrl_Start_Game;
-    p.init_setting.delay = GetDelay();
-    p.init_setting.is_host_p1 = GetIsHostP1();
-    if (this->IsHost())
-        SendPingAsHost(p);
+    if(this->IsHost())
+        SendPingAsHost(Ctrl_Start_Game);
     else
-        SendPingAsGuest(p);
+        SendPingAsGuest(Ctrl_Start_Game);
     return;
-
+    
     // DestroyWindow(m_hWnd);
 }
 
 void ConnectionUI::ProcessHostNetwork()
 {
+    if(!is_ver_matched)
+        return;
     while (true)
     {
         Pack p;
@@ -436,21 +445,24 @@ void ConnectionUI::ProcessHostNetwork()
         if (!hasData)
             break;
 
+        if(p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
+            is_ver_matched = false;
+
         // host pong
         if (p.type == PACK_PING)
         {
+            
             Pack reply;
             reply.type = PACK_PONG;
             reply.seq = p.seq;
-            reply.sendTick = p.sendTick; // cal RTT
+            reply.sendTick = p.sendTick;           // cal RTT
             reply.echoTick = MyGetTickCount();
             reply.ctrl = p.ctrl;
-
+            reply.ctrl.init_setting.ver = MULTI_NET_VER;
             m_host.SendPack(reply);
-
             if (!m_connected)
                 EnterConnectedState();
-            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
+            if(p.ctrl.ctrl_type==Ctrl_Start_Game)
             {
                 m_startGame = true;
                 DestroyWindow(m_hWnd);
@@ -465,10 +477,26 @@ void ConnectionUI::ProcessHostNetwork()
 
             if (!m_connected)
                 EnterConnectedState();
-            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
+            if(p.ctrl.ctrl_type==Ctrl_Start_Game)
             {
                 DestroyWindow(m_hWnd);
             }
+        }
+
+        if(!is_ver_matched)
+        {
+            MessageBoxA(NULL,"not matched guest/host version","warning",MB_OK | MB_ICONWARNING);
+            m_host.Reset();
+            m_isHost = false;
+            m_isGuest = false;
+            m_connected = false;
+            m_lastPeriodicPingTick = 0;
+
+            EnableWindow(m_btnGuest, TRUE);
+            SetText(m_btnHost, "as host");
+            SetLatencyText("no connection");
+            EnableWindow(m_btnStartGame, FALSE);
+            return;
         }
     }
 }
@@ -476,7 +504,8 @@ void ConnectionUI::ProcessHostNetwork()
 void ConnectionUI::ProcessGuestNetwork()
 {
     bool gotAnyData = false;
-
+    if(!is_ver_matched)
+        return;
     while (true)
     {
         Pack p;
@@ -489,6 +518,9 @@ void ConnectionUI::ProcessGuestNetwork()
             break;
 
         gotAnyData = true;
+        
+        if(p.ctrl.ctrl_type == Ctrl_Set_InitSetting && p.ctrl.init_setting.ver != MULTI_NET_VER)
+            is_ver_matched = false;
 
         // guest rcv ping
         if (p.type == PACK_PING)
@@ -499,22 +531,20 @@ void ConnectionUI::ProcessGuestNetwork()
             reply.sendTick = p.sendTick;
             reply.echoTick = MyGetTickCount();
             reply.ctrl = p.ctrl;
-
+            reply.ctrl.init_setting.ver = MULTI_NET_VER;
             m_guest.SendPack(reply);
 
             if (!m_connected)
                 EnterConnectedState();
 
-            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
+            if(p.ctrl.ctrl_type==Ctrl_Start_Game)
             {
                 m_startGame = true;
                 DestroyWindow(m_hWnd);
-            }
-            else if (p.ctrl.ctrl_type == Ctrl_Set_InitSetting)
-            {
+            }else if(p.ctrl.ctrl_type==Ctrl_Set_InitSetting){
                 SetDelay(p.ctrl.init_setting.delay);
-                SetIsHostP1(p.ctrl.init_setting.is_host_p1);
             }
+            
         }
         // guest rcv pong
         else if (p.type == PACK_PONG)
@@ -522,11 +552,11 @@ void ConnectionUI::ProcessGuestNetwork()
             ULONGLONG now = MyGetTickCount();
             ULONGLONG rtt = now - p.sendTick;
             SetLatencyText(BuildLatencyText(m_guest.GetHostIp(), m_guest.GetHostPort(), rtt));
-
+            
             if (!m_connected)
                 EnterConnectedState();
 
-            if (p.ctrl.ctrl_type == Ctrl_Start_Game)
+            if(p.ctrl.ctrl_type==Ctrl_Start_Game)
             {
                 DestroyWindow(m_hWnd);
             }
@@ -542,6 +572,21 @@ void ConnectionUI::ProcessGuestNetwork()
             ResetGuestButtonAfterTimeout();
             MessageBoxA(m_hWnd, "no connection", "warning", MB_OK | MB_ICONWARNING);
         }
+    }else if(!is_ver_matched)
+    {
+        MessageBoxA(NULL,"not matched guest/host version","warning",MB_OK | MB_ICONWARNING);
+        m_guest.Reset();
+        m_isHost = false;
+        m_isGuest = false;
+        m_connected = false;
+        m_lastPeriodicPingTick = 0;
+        m_guestWaitStartTick = 0;
+
+        EnableWindow(m_btnHost, TRUE);
+        SetText(m_btnGuest, "as guest");
+        SetLatencyText("no connection");
+        EnableWindow(m_btnStartGame, FALSE);
+        return;
     }
 }
 
@@ -561,18 +606,18 @@ void ConnectionUI::OnTimer()
 
 LRESULT CALLBACK ConnectionUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    ConnectionUI *pThis = NULL;
+    ConnectionUI* pThis = NULL;
 
     if (msg == WM_NCCREATE)
     {
-        CREATESTRUCTA *pcs = (CREATESTRUCTA *)lParam;
-        pThis = (ConnectionUI *)pcs->lpCreateParams;
+        CREATESTRUCTA* pcs = (CREATESTRUCTA*)lParam;
+        pThis = (ConnectionUI*)pcs->lpCreateParams;
         SetWindowLongPtrA(hWnd, GWLP_USERDATA, (LONG_PTR)pThis);
         pThis->m_hWnd = hWnd;
     }
     else
     {
-        pThis = (ConnectionUI *)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
+        pThis = (ConnectionUI*)GetWindowLongPtrA(hWnd, GWLP_USERDATA);
     }
 
     if (pThis)
@@ -590,7 +635,8 @@ LRESULT ConnectionUI::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         SetTimer(hWnd, TIMER_ID_POLL, TIMER_INTERVAL_MS, NULL);
         return 0;
 
-    case WM_COMMAND: {
+    case WM_COMMAND:
+    {
         int id = LOWORD(wParam);
 
         switch (id)
@@ -616,38 +662,25 @@ LRESULT ConnectionUI::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
         case IDC_EDIT_LISTEN_PORT:
             break;
         case IDC_EDIT_TARGET_LATENCY:
-            if (HIWORD(wParam) == EN_CHANGE)
-            {
-                char buf[32];
-                GetWindowTextA(m_editTargetLatency, buf, 16);
-                m_delay = atoi(buf);
-                if (m_delay <= 0)
-                {
-                    m_delay = 1;
-                    SetWindowTextA(m_editTargetLatency, "1");
+                if (HIWORD(wParam) == EN_CHANGE) {
+                    char buf[32];
+                    GetWindowTextA(m_editTargetLatency, buf, 16);
+                    m_delay = atoi(buf);
+                    if(m_delay<0)
+                    {
+                        m_delay=0;
+                        SetWindowTextA(m_editTargetLatency,"0");
+                    }
+                    if(m_delay>max_delay)
+                    {
+                        m_delay=max_delay;
+                        SetWindowTextA(m_editTargetLatency,max_delay_s);
+                        SendMessage((HWND)lParam, EM_SETSEL, 2, 2);
+                    }
+                    if(IsHost())
+                        TryPeriodicPing();
                 }
-                if (m_delay > 60)
-                {
-                    m_delay = 60;
-                    SetWindowTextA(m_editTargetLatency, "60");
-                    SendMessage((HWND)lParam, EM_SETSEL, 2, 2);
-                }
-                if (IsHost())
-                    TryPeriodicPing();
-            }
-
-            break;
-        case IDC_CHECKBOX_IS_HOST_1P: {
-            if (HIWORD(wParam) == BN_CLICKED)
-            {
-                LRESULT state = SendMessage((HWND)lParam, BM_GETCHECK, 0, 0);
-                m_is_host_p1 = (state == BST_CHECKED);
-                if (IsHost())
-                    TryPeriodicPing();
-            }
-
-            break;
-        }
+                break;
         }
         break;
     }
