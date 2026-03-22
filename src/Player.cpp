@@ -459,6 +459,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 else if (g_GameManager.livesRemaining <= 0 && p->playerType == 1)
                 // P1 died but no P2
                 {
+                    g_Gui.ShowPlayerDeath();
                     g_Gui.flags.flag0 = 2;
                     g_Gui.flags.flag1 = 2;
                     g_GameManager.bombsRemaining = 3;
@@ -474,6 +475,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 else if (g_GameManager.livesRemaining2 <= 0 && p->playerType != 1)
                 // P2 died but no P1
                 {
+                    g_Gui.ShowPlayerDeath();
                     g_Gui.flags.flag0 = 2;
                     g_Gui.flags.flag1 = 2;
                     g_GameManager.bombsRemaining2 = 3;

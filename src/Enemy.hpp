@@ -13,7 +13,7 @@
 #include <d3d8.h>
 #include <d3dx8math.h>
 #include <string.h>
-#include <windows.h>
+#include <Windows.h>
 
 namespace th06
 {

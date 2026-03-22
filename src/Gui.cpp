@@ -79,8 +79,18 @@ void Gui::ShowSpellcardBonus(u32 spellcardScore)
 
 void Gui::ShowCheatActivated()
 {
+    if(g_GameManager.numRetries==0){
+        g_GameManager.numRetries++;
+    }
     this->impl->cheatActivated.isShown = 1;
     this->impl->cheatActivated.timer.InitializeForPopup();
+    return;
+}
+
+void Gui::ShowPlayerDeath()
+{
+    this->impl->playerDeath.isShown = 1;
+    this->impl->playerDeath.timer.InitializeForPopup();
     return;
 }
 
@@ -246,6 +256,25 @@ ChainCallbackResult Gui::OnDraw(Gui *gui)
             ((f32)GAME_REGION_WIDTH - (f32)strlen("Cheat Activated!") * 16.0f) / 2.0f + (f32)GAME_REGION_LEFT;
         gui->impl->cheatActivated.pos.y = GAME_REGION_BOTTOM - 64.0f;
         g_AsciiManager.AddFormatText(&gui->impl->cheatActivated.pos, "Cheat Activated!");
+    }
+    if (gui->impl->playerDeath.isShown)
+    {
+        g_AsciiManager.color = COLOR_RED;
+
+        gui->impl->playerDeath.pos.x =
+            ((f32)GAME_REGION_WIDTH - (f32)strlen("Another Player Defeated!") * 16.0f) / 2.0f + (f32)GAME_REGION_LEFT;
+        gui->impl->playerDeath.pos.y = GAME_REGION_BOTTOM - 64.0f;
+        g_AsciiManager.AddFormatText(&gui->impl->playerDeath.pos, "Another Player Defeated!");
+
+        gui->impl->playerDeath.pos.y += 16.0f;
+        gui->impl->playerDeath.pos.x =
+            ((f32)GAME_REGION_WIDTH - (f32)strlen("hold focus near it to revive!") * 32.0f) / 2.0f + (f32)GAME_REGION_LEFT;
+        g_AsciiManager.color = COLOR_LIGHT_RED;
+        g_AsciiManager.AddString(&gui->impl->playerDeath.pos, "hold focus near it to revive!");
+
+        g_AsciiManager.scale.x = 1.0;
+        g_AsciiManager.scale.y = 1.0;
+        g_AsciiManager.color = COLOR_WHITE;
     }
 
     g_AsciiManager.isGui = 0;
@@ -521,6 +550,8 @@ ZunResult Gui::ActualAddedCallback()
     this->impl->fullPowerMode.isShown = 0;
     this->impl->fullPowerMode2.isShown = 0;
     this->impl->spellCardBonus.isShown = 0;
+    this->impl->cheatActivated.isShown = 0;
+    this->impl->playerDeath.isShown = 0;
     this->flags.flag0 = 2;
     this->flags.flag1 = 2;
     this->flags.flag3 = 2;
@@ -1033,6 +1064,14 @@ void Gui::UpdateStageElements()
             this->impl->cheatActivated.isShown = 0;
         }
         this->TickTimer(&this->impl->cheatActivated.timer);
+    }
+    if (this->impl->playerDeath.isShown)
+    {
+        if ((i32)(280 <= this->impl->playerDeath.timer.current))
+        {
+            this->impl->playerDeath.isShown = 0;
+        }
+        this->TickTimer(&this->impl->playerDeath.timer);
     }
     if (this->impl->finishedStage == 1)
     {

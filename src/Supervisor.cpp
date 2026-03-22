@@ -249,18 +249,18 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
     pos.y = 440;
     pos.z = 0;
     g_AsciiManager.AddFormatText(&pos, "delay: %d", g_delay);
-    pos.x = 480;
-    pos.y = 440 - 24.0f;
-    pos.z = 0;
-    g_AsciiManager.AddFormatText(&pos, "insane: %s", g_is_in_insane_mode ? "On" : "Off");
+    // pos.x = 480;
+    // pos.y = 440 - 24.0f;
+    // pos.z = 0;
+    // g_AsciiManager.AddFormatText(&pos, "insane: %s", g_is_in_insane_mode ? "On" : "Off");
 
-    if (g_is_in_insane_mode)
-    {
-        g_GameManager.minRank = 63;
-        g_GameManager.maxRank = 64;
-        g_GameManager.rank = 64;
-    }
-    else
+    // if (g_is_in_insane_mode)
+    // {
+    //     g_GameManager.minRank = 63;
+    //     g_GameManager.maxRank = 64;
+    //     g_GameManager.rank = 64;
+    // }
+    // else
     {
         g_GameManager.rank = g_DifficultyInfo[g_GameManager.difficulty].rank;
         g_GameManager.minRank = g_DifficultyInfo[g_GameManager.difficulty].minRank;

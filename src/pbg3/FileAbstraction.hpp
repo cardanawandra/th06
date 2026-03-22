@@ -2,7 +2,7 @@
 
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include <windows.h>
+#include <Windows.h>
 
 namespace th06
 {

@@ -14,7 +14,7 @@
 #include <dsound.h>
 #include <dxerr8.h>
 #include <mmsystem.h>
-#include <windows.h>
+#include <Windows.h>
 
 namespace th06
 {

@@ -2,7 +2,7 @@
 
 #include "connection.hpp"
 #include <string>
-#include <windows.h>
+#include <Windows.h>
 
 class ConnectionUI
 {

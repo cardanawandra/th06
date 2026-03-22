@@ -5,7 +5,7 @@
 #include "Enemy.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include <windows.h>
+#include <Windows.h>
 
 namespace th06
 {

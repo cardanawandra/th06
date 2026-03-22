@@ -2,7 +2,7 @@
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
 #include <d3dx8math.h>
-#include <windows.h>
+#include <Windows.h>
 
 struct ZunVec2
 {

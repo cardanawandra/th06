@@ -2,7 +2,7 @@
 
 #include <d3d8.h>
 #include <d3dx8math.h>
-#include <windows.h>
+#include <Windows.h>
 
 #include "Chain.hpp"
 #include "ResultScreen.hpp"

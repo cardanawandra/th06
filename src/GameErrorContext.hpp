@@ -1,6 +1,6 @@
 #pragma once
 
-#include <windows.h>
+#include <Windows.h>
 
 #include "diffbuild.hpp"
 #include "i18n.hpp"
