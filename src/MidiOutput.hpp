@@ -3,7 +3,7 @@
 #include "ZunBool.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include <Windows.h>
+#include <windows.h>
 
 namespace th06
 {

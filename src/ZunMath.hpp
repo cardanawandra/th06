@@ -1,7 +1,7 @@
 #pragma once
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include <Windows.h>
+#include <windows.h>
 #include <d3dx8math.h>
 
 struct ZunVec2

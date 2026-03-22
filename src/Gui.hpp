@@ -6,7 +6,7 @@
 #include "ZunTimer.hpp"
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include <Windows.h>
+#include <windows.h>
 
 namespace th06
 {
@@ -118,7 +118,8 @@ struct GuiImpl
     GuiFormattedText bonusScore;
     GuiFormattedText fullPowerMode;
     GuiFormattedText spellCardBonus;
-    
+    GuiFormattedText cheatActivated;
+
     GuiFormattedText fullPowerMode2;
 };
 ZUN_ASSERT_SIZE(GuiImpl, 0x2c44);
@@ -159,6 +160,7 @@ struct Gui
     void ShowSpellcardBonus(u32 spellcardScore);
     void ShowBombNamePortrait(u32 sprite, char *bombName);
     void ShowBonusScore(u32 bonusScore);
+    void ShowCheatActivated();
     void EndEnemySpellcard();
     void EndPlayerSpellcard();
     ZunBool IsDialogueSkippable();
