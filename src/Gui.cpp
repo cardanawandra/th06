@@ -79,7 +79,8 @@ void Gui::ShowSpellcardBonus(u32 spellcardScore)
 
 void Gui::ShowCheatActivated()
 {
-    if(g_GameManager.numRetries==0){
+    if (g_GameManager.numRetries == 0)
+    {
         g_GameManager.numRetries++;
     }
     this->impl->cheatActivated.isShown = 1;
@@ -268,7 +269,8 @@ ChainCallbackResult Gui::OnDraw(Gui *gui)
 
         gui->impl->playerDeath.pos.y += 16.0f;
         gui->impl->playerDeath.pos.x =
-            ((f32)GAME_REGION_WIDTH - (f32)strlen("hold focus near it to revive!") * 32.0f) / 2.0f + (f32)GAME_REGION_LEFT;
+            ((f32)GAME_REGION_WIDTH - (f32)strlen("hold focus near it to revive!") * 32.0f) / 2.0f +
+            (f32)GAME_REGION_LEFT;
         g_AsciiManager.color = COLOR_LIGHT_RED;
         g_AsciiManager.AddString(&gui->impl->playerDeath.pos, "hold focus near it to revive!");
 

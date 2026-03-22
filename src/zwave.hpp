@@ -9,10 +9,10 @@
 #define DSUTIL_H
 
 #include "inttypes.hpp"
+#include <Windows.h>
 #include <dsound.h>
 #include <mmreg.h>
 #include <mmsystem.h>
-#include <Windows.h>
 
 namespace th06
 {

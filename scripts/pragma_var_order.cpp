@@ -18,8 +18,8 @@
 // Original by Treeki: https://gist.github.com/Treeki/b4552be7537bdbc11706fefc3e5efd0b
 // Modified by EstexNT to work on MSVC7: https://gist.github.com/EstexNT/e98a1384b906a3eedaaa3eeb7e58cd9d
 
-#include <stdio.h>
 #include <Windows.h>
+#include <stdio.h>
 
 HMODULE originalDLL = NULL;
 

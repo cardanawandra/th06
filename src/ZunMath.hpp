@@ -1,8 +1,8 @@
 #pragma once
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include <d3dx8math.h>
 #include <Windows.h>
+#include <d3dx8math.h>
 
 struct ZunVec2
 {
