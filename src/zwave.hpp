@@ -8,8 +8,8 @@
 #ifndef DSUTIL_H
 #define DSUTIL_H
 
-#include "inttypes.hpp"
 #include "Windows.h"
+#include "inttypes.hpp"
 #include <dsound.h>
 #include <mmreg.h>
 #include <mmsystem.h>

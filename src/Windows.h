@@ -17,7 +17,6 @@ Abstract:
 #ifndef _WINDOWS_
 #define _WINDOWS_
 
-
 #ifndef WINVER
 #define WINVER 0x0501
 #else
@@ -29,7 +28,7 @@ Abstract:
 #ifndef _INC_WINDOWS
 #define _INC_WINDOWS
 
-#if defined (_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
 #endif
 
@@ -132,34 +131,34 @@ Abstract:
 #endif
 #endif
 
-#if defined (_MSC_VER)
-#if ( _MSC_VER >= 800 )
+#if defined(_MSC_VER)
+#if (_MSC_VER >= 800)
 #ifndef __cplusplus
-#pragma warning(disable:4116)       // TYPE_ALIGNMENT generates this - move it
-                                    // outside the warning push/pop scope.
+#pragma warning(disable : 4116) // TYPE_ALIGNMENT generates this - move it
+                                // outside the warning push/pop scope.
 #endif
 #endif
 #endif
 
 #ifndef RC_INVOKED
-#if     ( _MSC_VER >= 800 )
-#pragma warning(disable:4514)
+#if (_MSC_VER >= 800)
+#pragma warning(disable : 4514)
 #ifndef __WINDOWS_DONT_DISABLE_PRAGMA_PACK_WARNING__
-#pragma warning(disable:4103)
+#pragma warning(disable : 4103)
 #endif
 #if _MSC_VER >= 1200
 #pragma warning(push)
 #endif
-#pragma warning(disable:4001)
-#pragma warning(disable:4201)
-#pragma warning(disable:4214)
+#pragma warning(disable : 4001)
+#pragma warning(disable : 4201)
+#pragma warning(disable : 4214)
 #endif
 #include <excpt.h>
 #include <stdarg.h>
 #endif /* RC_INVOKED */
 
-#include <windef.h>
 #include <winbase.h>
+#include <windef.h>
 #include <wingdi.h>
 #include <winuser.h>
 #if !defined(_MAC) || defined(_WIN32NLS)
@@ -217,7 +216,6 @@ Abstract:
 #include <winwlm.h>
 #endif
 
-
 #ifdef INC_OLE2
 #include <ole2.h>
 #endif /* INC_OLE2 */
@@ -227,7 +225,7 @@ Abstract:
 #include <winsvc.h>
 #endif
 
-#if(WINVER >= 0x0400)
+#if (WINVER >= 0x0400)
 #ifndef NOMCX
 #include <mcx.h>
 #endif /* NOMCX */
@@ -239,13 +237,13 @@ Abstract:
 #endif
 
 #ifndef RC_INVOKED
-#if     ( _MSC_VER >= 800 )
+#if (_MSC_VER >= 800)
 #if _MSC_VER >= 1200
 #pragma warning(pop)
 #else
-#pragma warning(default:4001)
-#pragma warning(default:4201)
-#pragma warning(default:4214)
+#pragma warning(default : 4001)
+#pragma warning(default : 4201)
+#pragma warning(default : 4214)
 /* Leave 4514 disabled.  It's an unneeded warning anyway. */
 #endif
 #endif
@@ -255,4 +253,3 @@ Abstract:
 
 #endif /* _INC_WINDOWS */
 #endif /* _WINDOWS_ */
-

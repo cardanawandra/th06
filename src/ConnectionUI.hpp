@@ -1,7 +1,7 @@
 #pragma once
 
-#include "connection.hpp"
 #include "Windows.h"
+#include "connection.hpp"
 #include <string>
 
 class ConnectionUI

@@ -9,9 +9,9 @@
 //-----------------------------------------------------------------------------
 #define STRICT
 #include "zwave.hpp"
+#include "Windows.h"
 #include "dxutil.hpp"
 #include "utils.hpp"
-#include "Windows.h"
 #include <dsound.h>
 #include <dxerr8.h>
 #include <mmsystem.h>

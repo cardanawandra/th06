@@ -3,10 +3,10 @@
 #include "AnmVm.hpp"
 #include "Chain.hpp"
 #include "Enemy.hpp"
+#include "Windows.h"
 #include "ZunTimer.hpp"
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include "Windows.h"
 
 namespace th06
 {

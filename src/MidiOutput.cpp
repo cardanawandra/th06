@@ -1,5 +1,5 @@
-#include "inttypes.hpp"
 #include "Windows.h"
+#include "inttypes.hpp"
 #include <mmreg.h>
 #include <mmsystem.h>
 

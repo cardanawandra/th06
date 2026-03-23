@@ -3,9 +3,9 @@
 #include "Chain.hpp"
 #include "EclManager.hpp"
 #include "Enemy.hpp"
+#include "Windows.h"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include "Windows.h"
 
 namespace th06
 {

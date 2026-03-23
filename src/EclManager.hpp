@@ -2,13 +2,13 @@
 
 #include "ItemManager.hpp"
 #include "SoundPlayer.hpp"
+#include "Windows.h"
 #include "ZunBool.hpp"
 #include "ZunColor.hpp"
 #include "ZunMath.hpp"
 #include "ZunResult.hpp"
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include "Windows.h"
 #include <d3dx8math.h>
 
 namespace th06

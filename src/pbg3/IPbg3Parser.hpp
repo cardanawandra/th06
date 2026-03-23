@@ -1,7 +1,7 @@
 #pragma once
 
-#include "inttypes.hpp"
 #include "Windows.h"
+#include "inttypes.hpp"
 
 namespace th06
 {

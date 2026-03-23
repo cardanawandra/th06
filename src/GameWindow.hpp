@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Windows.h"
 #include "diffbuild.hpp"
 #include "inttypes.hpp"
-#include "Windows.h"
 
 #define GAME_WINDOW_WIDTH 640
 #define GAME_WINDOW_HEIGHT 480

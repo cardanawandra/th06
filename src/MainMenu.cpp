@@ -1,5 +1,5 @@
-#include <D3DX8.h>
 #include "Windows.h"
+#include <D3DX8.h>
 #include <cstdio>
 #include <direct.h>
 

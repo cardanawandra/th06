@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Supervisor.hpp"
-#include "inttypes.hpp"
 #include "Windows.h"
+#include "inttypes.hpp"
 
 namespace th06
 {
