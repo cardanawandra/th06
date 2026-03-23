@@ -630,7 +630,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
         ((p->playerType == 1 && (!IS_PRESSED(TH_BUTTON_SHOOT))) ||
          (p->playerType != 1 && (!IS_PRESSED(TH_BUTTON_SHOOT2)))))
     {
-        g_SoundPlayer.PlaySoundByIdx(SOUND_15,0);
+        g_SoundPlayer.PlaySoundByIdx(SOUND_15, 0);
         p->lifegiveTime++;
     }
     else

@@ -1,11 +1,11 @@
 #include "GameWindow.hpp"
 #include "AnmManager.hpp"
+#include "Connection.hpp"
 #include "GameErrorContext.hpp"
 #include "ScreenEffect.hpp"
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "Supervisor.hpp"
-#include "Connection.hpp"
 #include "diffbuild.hpp"
 #include "i18n.hpp"
 
@@ -250,7 +250,7 @@ void GameWindow::CreateGameWindow(HINSTANCE hInstance)
     base_class.lpszClassName = "BASE";
     RegisterClass(&base_class);
 
-    std::string myString = std::string(TH_WINDOW_TITLE)+std::string(" CO-OP ")+std::string(MULTI_NET_VER_S);
+    std::string myString = std::string(TH_WINDOW_TITLE) + std::string(" CO-OP ") + std::string(MULTI_NET_VER_S);
     LPCSTR windowTitle = myString.c_str();
     if (g_Supervisor.cfg.windowed == 0)
     {

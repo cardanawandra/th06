@@ -141,7 +141,7 @@ bool ConnectionUI::CreateMainWindow(HINSTANCE hInst)
 
     RegisterClassA(&wc);
     char title[100];
-    std::string myString = std::string("Launcher ")+std::string(MULTI_NET_VER_S);
+    std::string myString = std::string("Launcher ") + std::string(MULTI_NET_VER_S);
     LPCSTR windowTitle = myString.c_str();
 
     m_hWnd = CreateWindowA("ConnectionUIClass", windowTitle, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
@@ -213,16 +213,20 @@ void ConnectionUI::CreateControls(HWND hWnd)
         CreateWindowA("EDIT", target_delay, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_NUMBER, 130, 250,
                       100, 24, hWnd, (HMENU)IDC_EDIT_TARGET_LATENCY, NULL, NULL);
 
-    m_btnStartGame = CreateWindowA("BUTTON", "Start Online", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, 20, 300,
-                                   200, 32, hWnd, (HMENU)IDC_BTN_START_GAME, NULL, NULL);
+    m_btnStartGame = CreateWindowA("BUTTON", "Start Online", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, 20,
+                                   300, 200, 32, hWnd, (HMENU)IDC_BTN_START_GAME, NULL, NULL);
 
-    m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Offline", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 300,
-                                        200, 32, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
+    m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Offline", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 300, 200,
+                                        32, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
 
-    CreateWindowA("STATIC", "Credits: Team Sanghai Alice and Gensokyo Club", WS_CHILD | WS_VISIBLE, 20, 350, 300, 20, hWnd, NULL, NULL, NULL);
-    CreateWindowA("STATIC", "Modders: Rueee and Cardana Wandra", WS_CHILD | WS_VISIBLE, 20, 375, 300, 20, hWnd, NULL, NULL, NULL);
-    CreateWindowA("STATIC", "Cheats: F2 life, F3 bombs, F4 power", WS_CHILD | WS_VISIBLE, 20, 400, 300, 20, hWnd, NULL, NULL, NULL);
-    CreateWindowA("STATIC", "Offline P2 Controls: DFG IJKL", WS_CHILD | WS_VISIBLE, 20, 425, 300, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Credits: Team Sanghai Alice and Gensokyo Club", WS_CHILD | WS_VISIBLE, 20, 350, 300, 20,
+                  hWnd, NULL, NULL, NULL);
+    CreateWindowA("STATIC", "Modders: Rueee and Cardana Wandra", WS_CHILD | WS_VISIBLE, 20, 375, 300, 20, hWnd, NULL,
+                  NULL, NULL);
+    CreateWindowA("STATIC", "Cheats: F2 life, F3 bombs, F4 power", WS_CHILD | WS_VISIBLE, 20, 400, 300, 20, hWnd, NULL,
+                  NULL, NULL);
+    CreateWindowA("STATIC", "Offline P2 Controls: DFG IJKL", WS_CHILD | WS_VISIBLE, 20, 425, 300, 20, hWnd, NULL, NULL,
+                  NULL);
 
     m_delay = atoi(target_delay);
     if (m_delay < 0)
