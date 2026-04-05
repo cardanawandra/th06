@@ -11,8 +11,8 @@ Builds for OS X, the BSDs, and other Unices are also almost certainly possible, 
 
 ### Platform Requirements
 
-- SDL2.30.0, SDL2-image, and SDL2-mixer support
-- C++17 standard library support
+- SDL2.30.0, SDL2-image, and SDL2-mixer support<br>
+- C++17 standard library support<br>
 - OpenGL ES 1.1, OpenGL 1.3, or GL ES 2.0 / WebGL support
 
 ### Dependencies
@@ -26,18 +26,20 @@ EoSD-portable has the following dependencies:
 In addition, building uses CMAKE 3.18 and a compiler that supports C++17.
 
 #### Building Windows
-run "cmake -B build_sdl2 -A Win32 -DUSE_GLES=ON"
-if success then
-run "cmake --build build_sdl2 --config Release"
+run "cmake -B build_sdl2 -A Win32 -DUSE_GLES=ON"<br>
+if success then<br>
+run "cmake --build build_sdl2 --config Release"<br>
+<br>
 result will be on "build_sdl2\Release"
 
 #### Building Android
--download source SDL2.30.0 and place it in android/SDL2_SRC
--download source SDL2-mixer and place it in android/SDL2_MIXER_SRC
--download source SDL2-image and place it in android/SDL2_image_SRC
--set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")
--run "cd android"
--then "./gradlew clean assembleDebug" (for windows "gradlew.bat clean assembleDebug")
+-download source SDL2.30.0 and place it in android/SDL2_SRC<br>
+-download source SDL2-mixer and place it in android/SDL2_MIXER_SRC<br>
+-download source SDL2-image and place it in android/SDL2_image_SRC<br>
+-set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")<br>
+-run "cd android"<br>
+-then "./gradlew clean assembleDebug" (for windows "gradlew.bat clean assembleDebug")<br>
+<br>
 result will be on "android\app\build\outputs\apk\debug\app_debug.apk"
 
 ### Use
