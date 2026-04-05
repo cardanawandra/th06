@@ -1,8 +1,8 @@
 #include "Controller.hpp"
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_scancode.h>
+#include <SDL_events.h>
+#include <SDL_keyboard.h>
+#include <SDL_scancode.h>
 
 #include "GameErrorContext.hpp"
 #include "Supervisor.hpp"

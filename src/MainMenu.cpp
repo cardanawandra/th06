@@ -21,8 +21,8 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include <SDL2/SDL_gamecontroller.h>
-#include <SDL2/SDL_timer.h>
+#include <SDL_gamecontroller.h>
+#include <SDL_timer.h>
 #include <cstring>
 
 const char *g_ShortCharacterList[4] = {"ReimuA ", "ReimuB ", "MarisaA", "MarisaB"};

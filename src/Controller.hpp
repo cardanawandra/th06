@@ -2,7 +2,7 @@
 
 #include "inttypes.hpp"
 
-#include <SDL2/SDL_gamecontroller.h>
+#include <SDL_gamecontroller.h>
 
 enum TouhouButton
 {

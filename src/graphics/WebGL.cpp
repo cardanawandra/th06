@@ -1,7 +1,7 @@
 #include "WebGL.hpp"
 #include "Supervisor.hpp"
 #include "utils.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <new>
 #include <unordered_set>
 

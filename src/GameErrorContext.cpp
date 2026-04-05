@@ -1,6 +1,6 @@
 #include "GameErrorContext.hpp"
 #include "FileSystem.hpp"
-#include <SDL2/SDL_messagebox.h>
+#include <SDL_messagebox.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>

@@ -1,6 +1,6 @@
 #include "GLFunc.hpp"
 
-#include <SDL2/SDL_video.h>
+#include <SDL_video.h>
 
 GLFuncTable g_glFuncTable;
 

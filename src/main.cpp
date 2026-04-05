@@ -1,55 +1,65 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_mouse.h>
-#include <cstdio>
+#include "sdl2_compat.hpp"
+#include <SDL.h>
+#include <stdio.h>
 
 #include "AnmManager.hpp"
 #include "Chain.hpp"
+#include "Controller.hpp"
 #include "FileSystem.hpp"
 #include "GameErrorContext.hpp"
+#include "GamePaths.hpp"
 #include "GameWindow.hpp"
+#include "IRenderer.hpp"
+#include "MidiOutput.hpp"
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"
 #include "Supervisor.hpp"
+#include "TextHelper.hpp"
 #include "ZunResult.hpp"
 #include "i18n.hpp"
+// #include "thprac_gui_integration.h"
 #include "utils.hpp"
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
-
     i32 renderResult = 0;
-    //    MSG msg;
-    //    i32 waste1, waste2, waste3, waste4, waste5, waste6;
 
-    //    if (utils::CheckForRunningGameInstance())
-    //    {
-    //        g_GameErrorContext.Flush();
-    //
-    //        return 1;
-    //    }
+#ifdef __ANDROID__
+    // On Android, SDL must be initialized before GamePaths::Init()
+    // because SDL_AndroidGetInternalStoragePath() requires SDL_Init.
+    if (SDL_Init(0) < 0)
+    {
+        return 1;
+    }
+#endif
 
-    //    g_Supervisor.hInstance = hInstance;
+    GamePaths::Init();
+
+    // if (utils::CheckForRunningGameInstance())
+    // {
+    //     g_GameErrorContext.Flush();
+
+    //     return 1;
+    // }
 
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
+#ifdef __ANDROID__
+        // On Android, config file may not exist on first run.
+        // LoadConfig sets defaults and tries to write — if write fails,
+        // continue anyway with defaults.
+        SDL_Log("LoadConfig failed (first run?), continuing with defaults");
+#else
         g_GameErrorContext.Flush();
         return -1;
+#endif
     }
 
-    //    if (GameWindow::InitD3dInterface())
-    //    {
-    //        g_GameErrorContext.Flush();
-    //        return 1;
-    //    }
-
-    //    SystemParametersInfo(SPI_GETSCREENSAVEACTIVE, 0, &g_GameWindow.screenSaveActive, 0);
-    //    SystemParametersInfo(SPI_GETLOWPOWERACTIVE, 0, &g_GameWindow.lowPowerActive, 0);
-    //    SystemParametersInfo(SPI_GETPOWEROFFACTIVE, 0, &g_GameWindow.powerOffActive, 0);
-    //    SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, 0, NULL, SPIF_SENDCHANGE);
-    //    SystemParametersInfo(SPI_SETLOWPOWERACTIVE, 0, NULL, SPIF_SENDCHANGE);
-    //    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, 0, NULL, SPIF_SENDCHANGE);
+    // if (GameWindow::InitD3dInterface())
+    // {
+    //     g_GameErrorContext.Flush();
+    //     return 1;
+    // }
 
 restart:
     GameWindow::CreateGameWindow();
@@ -127,6 +137,7 @@ restart:
         //        }
     }
 
+
 stop:
     g_Chain.Release();
     g_SoundPlayer.Release();
@@ -134,12 +145,36 @@ stop:
     delete g_AnmManager;
     g_AnmManager = NULL;
 
+    // Clean up GL resources while the context is still valid.
+    // THPrac::THPracGuiShutdown();
+    // {
+    //     SDL_GLContext ctx = g_Renderer ? g_Renderer->glContext : nullptr;
+    //     if (g_Renderer)
+    //         g_Renderer->Release();
+    //     if (ctx)
+    //         SDL_GL_DeleteContext(ctx);
+    // }
+
     SDL_DestroyWindow(g_GameWindow.window);
     SDL_GL_DeleteContext(g_GameWindow.glContext);
-    SDL_Quit();
 
     if (renderResult == 2)
     {
+        // Clean up resources that leak across restart cycles.
+        // We cannot call Supervisor::DeletedCallback() here because
+        // ReleasePbg3() has a built-in double-free (calls Release() then
+        // delete which calls Release() again) that crashes on modern heaps.
+        // PBG3 archives are re-released internally by LoadPbg3() on reload,
+        // so only these three resources actually leak:
+        if (g_Supervisor.midiOutput != NULL)
+        {
+            g_Supervisor.midiOutput->StopPlayback();
+            delete g_Supervisor.midiOutput;
+            g_Supervisor.midiOutput = NULL;
+        }
+        TextHelper::ReleaseTextBuffer();
+        // Controller::CloseSDLController();
+
         g_GameErrorContext.ResetContext();
 
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_OPTION_CHANGED_RESTART);
@@ -148,16 +183,13 @@ stop:
         {
             SDL_ShowCursor(SDL_ENABLE);
         }
-
         goto restart;
     }
 
     FileSystem::WriteDataToFile(TH_CONFIG_FILE, &g_Supervisor.cfg, sizeof(g_Supervisor.cfg));
-    //    SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, g_GameWindow.screenSaveActive, NULL, SPIF_SENDCHANGE);
-    //    SystemParametersInfo(SPI_SETLOWPOWERACTIVE, g_GameWindow.lowPowerActive, NULL, SPIF_SENDCHANGE);
-    //    SystemParametersInfo(SPI_SETPOWEROFFACTIVE, g_GameWindow.powerOffActive, NULL, SPIF_SENDCHANGE);
 
     SDL_ShowCursor(SDL_ENABLE);
     g_GameErrorContext.Flush();
+    SDL_Quit();
     return 0;
 }

@@ -2,8 +2,8 @@
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include <SDL2/SDL_audio.h>
-#include <SDL2/SDL_rwops.h>
+#include <SDL_audio.h>
+#include <SDL_rwops.h>
 #include <atomic>
 #include <mutex>
 #include <thread>

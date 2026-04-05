@@ -3,7 +3,7 @@
 // #include <d3d8.h>
 // #include <d3dx8math.h>
 
-#include <SDL2/SDL_video.h>
+#include <SDL_video.h>
 
 #include "AnmIdx.hpp"
 #include "AnmVm.hpp"

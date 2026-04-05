@@ -4,14 +4,16 @@
 #include "Supervisor.hpp"
 #include "i18n.hpp"
 
-#include <SDL2/SDL_ttf.h>
+// #include <SDL2/SDL_ttf.h>
 #include <algorithm>
 #include <cstring>
-#include <iconv.h>
+// #include <iconv.h>
 
+#if 0
 TTF_Font *g_Font;
 ;
 iconv_t g_Iconv = (iconv_t)-1;
+#endif
 
 TextHelper::TextHelper()
 {
@@ -26,8 +28,10 @@ TextHelper::TextHelper()
 
 TextHelper::~TextHelper()
 {
+    #if 0
     TTF_Quit();
     this->ReleaseBuffer();
+    #endif
 }
 
 bool TextHelper::ReleaseBuffer()
@@ -57,6 +61,7 @@ bool TextHelper::ReleaseBuffer()
 // Extended to initialize all globals for text helper
 ZunResult TextHelper::CreateTextBuffer()
 {
+    #if 0
     TTF_Init();
 
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
@@ -82,6 +87,7 @@ ZunResult TextHelper::CreateTextBuffer()
         SDL_CreateRGBSurfaceWithFormat(0, GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 
     SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
+    #endif
 
     return ZUN_SUCCESS;
 }
@@ -228,6 +234,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                      i32 fontWidth, ZunColor textColor, ZunColor shadowColor, char *string,
                                      TextureData *outTexture)
 {
+    #if 0
     char convertedText[1024];
     SDL_Rect finalCopyDst;
     SDL_Rect finalCopySrc;
@@ -347,6 +354,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                GL_UNSIGNED_BYTE, outTexture->textureData);
 
     SDL_FreeSurface(textureSurface);
+    #endif
 
     return;
 }
@@ -354,6 +362,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 // Extended to free all globals for text helper
 void TextHelper::ReleaseTextBuffer()
 {
+    #if 0
     if (g_Font != NULL)
     {
         TTF_CloseFont(g_Font);
@@ -371,6 +380,6 @@ void TextHelper::ReleaseTextBuffer()
         SDL_FreeSurface(g_TextBufferSurface);
         g_TextBufferSurface = NULL;
     }
-
+    #endif
     return;
 }

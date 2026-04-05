@@ -1,6 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -13,13 +12,20 @@
 #endif
 
 #include "FileSystem.hpp"
+#include "GamePaths.hpp"
 #include "pbg3/Pbg3Archive.hpp"
 #include "utils.hpp"
+#ifdef __ANDROID__
+#include <SDL.h>
+#endif
 
-u32 g_LastFileSize;
+u32 g_LastFileSize = 0;
 
 FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
+#ifdef __ANDROID__
+    return NULL;
+#else
 #ifndef _WIN32
     return std::fopen(filepath, mode);
 #else
@@ -44,10 +50,14 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 
     return f;
 #endif
+#endif
 }
 
 void FileSystem::CreateDir(const char *path)
 {
+#ifdef __ANDROID__
+//todo
+#else
 #ifdef _WIN32
     _mkdir(path);
 #elif __cplusplus >= 201703L
@@ -55,6 +65,7 @@ void FileSystem::CreateDir(const char *path)
     std::filesystem::create_directory(p);
 #else
     mkdir(path, 0755);
+#endif
 #endif
 }
 
@@ -67,10 +78,14 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     const char *entryname;
     i32 pbg3Idx;
 
+    // Resolve platform-specific path (Android: assets vs user data).
+    char resolvedPath[512];
+    GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
+
     entryIdx = -1;
     if (isExternalResource == 0)
     {
-        entryname = std::strrchr(filepath, '\\');
+        entryname = strrchr(filepath, '\\');
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -79,7 +94,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
-        entryname = std::strrchr(entryname, '/');
+        entryname = strrchr(entryname, '/');
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -115,23 +130,42 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     }
     else
     {
-        utils::DebugPrint2("%s Load ... \n", filepath);
-        file = FopenUTF8(filepath, "rb");
-        if (file == NULL)
+        utils::DebugPrint2("%s Load ... \n", resolvedPath);
+#ifdef __ANDROID__
+        // On Android, use SDL_RWFromFile to transparently read from APK assets.
+        SDL_RWops *rw = SDL_RWFromFile(resolvedPath, "rb");
+        if (rw == NULL)
         {
-            utils::DebugPrint2("error : %s is not found.\n", filepath);
+            utils::DebugPrint2("error : %s is not found.\n", resolvedPath);
             return NULL;
         }
         else
         {
-            std::fseek(file, 0, SEEK_END);
-            fsize = std::ftell(file);
+            i32 rwSize = SDL_RWsize(rw);
+            fsize = (rwSize > 0) ? (size_t)rwSize : 0;
             g_LastFileSize = fsize;
-            std::fseek(file, 0, SEEK_SET);
-            data = (u8 *)std::malloc(fsize);
-            std::fread(data, 1, fsize, file);
-            std::fclose(file);
+            data = (u8 *)malloc(fsize);
+            SDL_RWread(rw, data, 1, fsize);
+            SDL_RWclose(rw);
         }
+#else
+        file = fopen(resolvedPath, "rb");
+        if (file == NULL)
+        {
+            utils::DebugPrint2("error : %s is not found.\n", resolvedPath);
+            return NULL;
+        }
+        else
+        {
+            fseek(file, 0, SEEK_END);
+            fsize = ftell(file);
+            g_LastFileSize = fsize;
+            fseek(file, 0, SEEK_SET);
+            data = (u8 *)malloc(fsize);
+            fread(data, 1, fsize, file);
+            fclose(file);
+        }
+#endif
     }
     return data;
 }
@@ -140,21 +174,26 @@ int FileSystem::WriteDataToFile(const char *path, void *data, size_t size)
 {
     FILE *f;
 
-    f = FopenUTF8(path, "wb");
+    // Resolve to writable user-data directory on Android.
+    char resolvedPath[512];
+    GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
+    GamePaths::EnsureParentDir(resolvedPath);
+
+    f = fopen(resolvedPath, "wb");
     if (f == NULL)
     {
         return -1;
     }
     else
     {
-        if (std::fwrite(data, 1, size, f) != size)
+        if (fwrite(data, 1, size, f) != size)
         {
-            std::fclose(f);
+            fclose(f);
             return -2;
         }
         else
         {
-            std::fclose(f);
+            fclose(f);
             return 0;
         }
     }

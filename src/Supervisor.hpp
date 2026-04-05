@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL2/SDL_gamecontroller.h>
-#include <SDL2/SDL_video.h>
+#include <SDL_gamecontroller.h>
+#include <SDL_video.h>
 
 #include "Chain.hpp"
 #include "Controller.hpp"

@@ -6,9 +6,11 @@
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-#include <SDL2/SDL_endian.h>
+#include <SDL_endian.h>
 #include <cstdlib>
 #include <cstring>
+
+//todo : midioutdev
 
 void MidiOutput::StartTimer(u32 delay, SDL_TimerCallback cb, void *data)
 {
@@ -240,7 +242,7 @@ ZunResult MidiOutput::Play()
     }
 
     this->LoadTracks();
-    this->midiOutDev.OpenDevice(0xFFFF'FFFF);
+    // this->midiOutDev.OpenDevice(0xFFFF'FFFF);
     this->StartTimer(1, NULL, NULL);
 
     return ZUN_SUCCESS;
@@ -255,7 +257,7 @@ ZunResult MidiOutput::StopPlayback()
     else
     {
         this->StopTimer();
-        this->midiOutDev.Close();
+        // this->midiOutDev.Close();
 
         return ZUN_SUCCESS;
     }
@@ -365,7 +367,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
 
             std::memcpy(sysExData + 1, track->curTrackDataCursor, curTrackLength);
 
-            this->midiOutDev.SendLongMsg(sysExData, curTrackLength + 1);
+            // this->midiOutDev.SendLongMsg(sysExData, curTrackLength + 1);
 
             track->curTrackDataCursor += curTrackLength;
 
@@ -500,7 +502,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
 
     if (opcode < MIDI_OPCODE_SYSTEM_EXCLUSIVE)
     {
-        this->midiOutDev.SendShortMsg(opcode, arg1, arg2);
+        // this->midiOutDev.SendShortMsg(opcode, arg1, arg2);
     }
 
     track->opcode = opcode;
@@ -526,6 +528,6 @@ void MidiOutput::FadeOutSetVolume(i32 volume)
         }
 
         // 7: Controller value number for volume (with range 0 - 127)
-        this->midiOutDev.SendShortMsg(MIDI_OPCODE_MODE_CHANGE | idx, 7, volumeClamped);
+        // this->midiOutDev.SendShortMsg(MIDI_OPCODE_MODE_CHANGE | idx, 7, volumeClamped);
     }
 }

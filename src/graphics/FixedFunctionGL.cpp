@@ -1,7 +1,7 @@
 #include "FixedFunctionGL.hpp"
 #include "GLFunc.hpp"
 #include "Supervisor.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 void FixedFunctionGL::SetContextFlags()
 {

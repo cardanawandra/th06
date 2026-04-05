@@ -3,63 +3,56 @@
 [discord]: https://discord.gg/VyGwAjrh9a
 [discord-badge]: https://img.shields.io/discord/1147558514840064030?color=%237289DA&logo=discord&logoColor=%23FFFFFF
 
-This is the readme for the portable fork of EoSD. For the readme of the decomp project, see [here](https://github.com/GensokyoClub/th06/blob/master/README.md).
+This is the readme for the crossplatform fork of EoSD. For the readme of the decomp project, see [here](https://github.com/GensokyoClub/th06/blob/master/README.md).
 
-EoSD-portable is a port of Touhou 6 using SDL2 and OpenGL (with a more general renderer abstraction layer hopefully on the way).
+EoSD-crossplatform is a port of Touhou 6 using SDL2 and OpenGL (with a more general renderer abstraction layer hopefully on the way).
 This enables theoretical portability to any system supported by SDL2, with Linux and Windows in particular being known to work.
 Builds for OS X, the BSDs, and other Unices are also almost certainly possible, but may require some slight modifications to the build system.
 
 ### Platform Requirements
 
-- SDL2, SDL2-image, and SDL2-ttf support
-- C++20 standard library support
-- A little endian architecture (though big endian support is currently being worked on)
+- SDL2.30.0, SDL2-image, and SDL2-mixer support
+- C++17 standard library support
 - OpenGL ES 1.1, OpenGL 1.3, or GL ES 2.0 / WebGL support
 
 ### Dependencies
 
 EoSD-portable has the following dependencies:
 
-- `SDL2`
+- `SDL2.30`
 - `SDL2_image`
-- `SDL2_ttf`
-- `libasound` (Optional and Linux-only, enables MIDI support. This will almost always be present as part of a desktop distro.)
-- `libiconv` (Windows-only)
+- `SDL2_mixer`
 
-In addition, building uses [`premake5`](https://premake.github.io/download) and a compiler that supports C++20.
+In addition, building uses CMAKE 3.18 and a compiler that supports C++17.
 
-#### Building
+#### Building Windows
+run "cmake -B build_sdl2 -A Win32 -DUSE_GLES=ON"
+if success then
+run "cmake --build build_sdl2 --config Release"
+result will be on "build_sdl2\Release"
 
-In the repository root directory, run `premake5` with the desired build system as an argument (a list can be seen by running `premake5 --help`).
-This will output the build files to the `build` directory, and then compilation may be done with the desired build system.
-
-##### Build Options (Use with Premake Invocation)
-`--no-asoundlib`: On Linux, doesn't build MIDI support. Removes libasound as a dev and runtime dependency
-`--use-c23-embed`: Uses `#embed` for resource inclusion instead of a lua script in the Premake file.
-
-##### Build Example (Debian-based Linux)
-
-Obtain dependencies:
-
-`sudo apt install build-essential libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libasound2-dev`
-
-Generate makefile:
-
-`premake5 gmake`
-
-Compile:
-
-`cd build && make -j16`
+#### Building Android
+-download source SDL2.30.0 and place it in android/SDL2_SRC
+-download source SDL2-mixer and place it in android/SDL2_MIXER_SRC
+-download source SDL2-image and place it in android/SDL2_image_SRC
+-set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")
+-run "cd android"
+-then "./gradlew clean assembleDebug" (for windows "gradlew.bat clean assembleDebug")
+result will be on "android\app\build\outputs\apk\debug\app_debug.apk"
 
 ### Use
 
-EoSD-portable is designed to be a drop-in replacement for the vanilla EoSD binary.
-You will also need to add a font to your game directory with the filename `msgothic.ttc`.
-This may be the actual MS Gothic, taken from a Windows machine, or a compatible font such as Kochi Gothic.
-EoSD-portable uses the Japanese filenames (e.g. 紅魔郷CM.DAT, 東方紅魔郷.cfg). English and other patches, static or thcrap, do not currently work.
+EoSD-crossplatform is designed to be a drop-in replacement for the vanilla EoSD binary.
+
 A Japanese locale is not required.
 
 # Decomp Credits
+
+special thanks to
+- Team Shanghai Alice for the games
+- Gensokyo Club for decompilation
+- toadster172 for portable branch
+- CNTianQi233 for android skeleton
 
 We would like to extend our thanks to the following individuals for their
 invaluable contributions:

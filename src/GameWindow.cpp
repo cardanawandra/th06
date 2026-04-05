@@ -11,8 +11,8 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_timer.h>
+#include <SDL.h>
+#include <SDL_timer.h>
 #include <cstring>
 
 GameWindow g_GameWindow;

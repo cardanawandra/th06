@@ -19,8 +19,8 @@
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-#include <SDL2/SDL_joystick.h>
-#include <SDL2/SDL_timer.h>
+#include <SDL_joystick.h>
+#include <SDL_timer.h>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
