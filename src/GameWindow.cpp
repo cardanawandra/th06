@@ -14,6 +14,12 @@
 #include <SDL.h>
 #include <SDL_timer.h>
 #include <cstring>
+#include <iostream>
+#define GAME_WINDOW_WIDTH_REAL 2400
+#define GAME_WINDOW_HEIGHT_REAL 1080
+void gamewindowdlog(std::string msg){
+    std::cout<<"gamewindow : "<<msg<<std::endl;
+}
 
 GameWindow g_GameWindow;
 i32 g_TickCountToEffectiveFramerate;
@@ -32,6 +38,7 @@ static struct
 
 RenderResult GameWindow::Render()
 {
+    //gamewindowdlog("render start");
     i32 res;
     f64 slowdown;
     ZunViewport viewport;
@@ -45,9 +52,11 @@ RenderResult GameWindow::Render()
 
     if (this->curFrame == 0)
     {
+    //gamewindowdlog("first frame run chains");
     RUN_CHAINS:
         if (g_Supervisor.cfg.frameskipConfig <= this->curFrame)
         {
+            //gamewindowdlog("RedrawWholeFrame");
             if (g_Supervisor.RedrawWholeFrame())
             {
                 viewport.x = 0;
@@ -56,16 +65,23 @@ RenderResult GameWindow::Render()
                 viewport.height = GAME_WINDOW_HEIGHT;
                 viewport.minZ = 0.0;
                 viewport.maxZ = 1.0;
+                //gamewindowdlog("viewport.Set");
                 viewport.Set();
+                //gamewindowdlog("g_glFuncTable.glClearColor");
                 g_glFuncTable.glClearColor(
                     ((g_Stage.skyFog.color >> 16) & 0xFF) / 255.0f, ((g_Stage.skyFog.color >> 8) & 0xFF) / 255.0f,
                     (g_Stage.skyFog.color & 0xFF) / 255.0f, (g_Stage.skyFog.color >> 24) / 255.0f);
+                //gamewindowdlog("g_glFuncTable.glClear");
                 g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                //gamewindowdlog("SetProjectionMode");
                 g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
+                //gamewindowdlog("viewport.Set");
                 g_Supervisor.viewport.Set();
             }
 
+            //gamewindowdlog("RunDrawChain");
             g_Chain.RunDrawChain();
+            //gamewindowdlog("SetCurrentTexture");
             g_AnmManager->SetCurrentTexture(0);
         }
 
@@ -73,9 +89,13 @@ RenderResult GameWindow::Render()
         g_Supervisor.viewport.y = 0;
         g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
         g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
+        //gamewindowdlog("SetProjectionMode");
         g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
+        //gamewindowdlog("viewport.Set");
         g_Supervisor.viewport.Set();
+        //gamewindowdlog("RunCalcChain");
         res = g_Chain.RunCalcChain();
+        //gamewindowdlog("PlaySounds");
         g_SoundPlayer.PlaySounds();
 
         if (res == 0)
@@ -94,11 +114,13 @@ RenderResult GameWindow::Render()
         if (this->curFrame != 0)
         {
             g_Supervisor.framerateMultiplier = 1.0;
+            //gamewindowdlog("SDL_GetTicks 2");
             slowdown = SDL_GetTicks();
             if (slowdown < g_LastFrameTime)
             {
                 g_LastFrameTime = slowdown;
             }
+            //gamewindowdlog("std::fabs");
             delta = std::fabs(slowdown - g_LastFrameTime);
             if (delta >= FRAME_TIME)
             {
@@ -116,18 +138,23 @@ RenderResult GameWindow::Render()
     }
     else
     {
+        //gamewindowdlog("second frame run chains");
         if (g_Supervisor.cfg.frameskipConfig >= this->curFrame)
         {
+            //gamewindowdlog("present second frame");
             Present();
+            //gamewindowdlog("present loaded");
             goto RUN_CHAINS;
         }
 
     I_HAVE_NO_CLUE_WHY_BUT_I_MUST_JUMP_HERE:
+        //gamewindowdlog("goto I_HAVE_NO_CLUE_WHY_BUT_I_MUST_JUMP_HERE");
         Present();
         if (g_Supervisor.framerateMultiplier == 0.f)
         {
             if (2 <= g_TickCountToEffectiveFramerate)
             {
+                //gamewindowdlog("SDL_GetTicks 3");
                 curtime = SDL_GetTicks();
                 if (curtime < g_Supervisor.lastFrameTime)
                 {
@@ -160,6 +187,7 @@ RenderResult GameWindow::Render()
         this->curFrame = 0;
         g_TickCountToEffectiveFramerate = g_TickCountToEffectiveFramerate + 1;
     }
+    //gamewindowdlog("finish");
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
@@ -167,14 +195,17 @@ void GameWindow::Present()
 {
     // In D3D, this was done after the present call, but SDL makes no guarantees
     // about the color buffer state immediately after a swap, so it has to be moved to be before it
+    //gamewindowdlog("present TakeScreenshotIfRequested");
     g_AnmManager->TakeScreenshotIfRequested();
     if (g_Supervisor.unk198 != 0)
     {
         g_Supervisor.unk198--;
     }
 
+    //gamewindowdlog("present SDL_GL_SwapWindow");
     SDL_GL_SwapWindow(g_GameWindow.window);
 
+    //gamewindowdlog("present finish");
     return;
 }
 

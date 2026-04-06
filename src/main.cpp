@@ -19,9 +19,14 @@
 #include "i18n.hpp"
 // #include "thprac_gui_integration.h"
 #include "utils.hpp"
+#include <iostream>
+void dlog(std::string msg){
+    std::cout<<msg<<std::endl;
+}
 
 int main(int argc, char *argv[])
 {
+    //dlog("Starting");
     i32 renderResult = 0;
 
 #ifdef __ANDROID__
@@ -33,6 +38,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
+    //dlog("Init Gamepath");
     GamePaths::Init();
 
     // if (utils::CheckForRunningGameInstance())
@@ -42,6 +48,7 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
+    //dlog("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
 #ifdef __ANDROID__
@@ -60,22 +67,30 @@ int main(int argc, char *argv[])
     //     g_GameErrorContext.Flush();
     //     return 1;
     // }
+    //dlog("Start the game");
 
 restart:
+    //dlog("Create game window");
     GameWindow::CreateGameWindow();
 
+    //dlog("new AnmManager");
     g_AnmManager = new AnmManager();
 
+    //dlog("InitD3dRendering");
     if (GameWindow::InitD3dRendering())
     {
         g_GameErrorContext.Flush();
         return 1;
     }
 
+    //dlog("InitializeDSound");
     g_SoundPlayer.InitializeDSound();
+    //dlog("GetJoystickCaps");
     Controller::GetJoystickCaps();
+    //dlog("ResetKeyboard");
     Controller::ResetKeyboard();
 
+    //dlog("Supervisor::RegisterChain");
     if (Supervisor::RegisterChain() != ZUN_SUCCESS)
     {
         goto stop;
@@ -87,10 +102,12 @@ restart:
 
     g_GameWindow.curFrame = 0;
 
+    //dlog("Into loop game event");
     while (true)
     {
         SDL_Event e;
 
+        //dlog("Into poolevent loop");
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
@@ -99,6 +116,7 @@ restart:
             }
         }
 
+        //dlog("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {
@@ -139,6 +157,7 @@ restart:
 
 
 stop:
+    //dlog("stop the game");
     g_Chain.Release();
     g_SoundPlayer.Release();
 

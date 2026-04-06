@@ -22,6 +22,10 @@
 #define BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE 16
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
+#include <iostream>
+void soundplayerdlog(std::string msg){
+    std::cout<<"soundplayer : "<<msg<<std::endl;
+}
 
 // DirectSound deals with volume by subtracting a number measured in hundredths of decibels from the source sound.
 //   The scale is from 0 (no volume modification) to -10,000 (subtraction of 100 decibels, and basically silent).
@@ -51,6 +55,8 @@ SoundPlayer::SoundPlayer()
 
 ZunResult SoundPlayer::InitializeDSound()
 {
+    //todo
+    return ZUN_SUCCESS;
     SDL_AudioSpec desiredAudio;
     SDL_AudioSpec obtainedAudio;
 
@@ -85,6 +91,8 @@ fail:
 
 ZunResult SoundPlayer::Release(void)
 {
+    //todo
+    return ZUN_SUCCESS;
     this->terminateFlag = true;
     this->backgroundMusicThreadHandle.join();
     this->terminateFlag = false;
@@ -112,6 +120,8 @@ ZunResult SoundPlayer::Release(void)
 
 void SoundPlayer::StopBGM()
 {
+    //todo
+    return;
     if (this->backgroundMusic.srcWav.fileStream != NULL)
     {
         this->soundBufMutex.lock();
@@ -125,6 +135,8 @@ void SoundPlayer::StopBGM()
 
 void SoundPlayer::FadeOut(f32 seconds)
 {
+    //todo
+    return;
     if (this->backgroundMusic.srcWav.fileStream != NULL)
     {
         backgroundMusic.fadeoutLen = seconds * 44100;
@@ -134,6 +146,8 @@ void SoundPlayer::FadeOut(f32 seconds)
 
 ZunResult SoundPlayer::LoadWav(char *path)
 {
+    //todo
+    return ZUN_SUCCESS;
     SDL_RWops *fileStream;
     char idBuf[4];
     u32 riffSize;
@@ -272,6 +286,8 @@ fail:
 
 ZunResult SoundPlayer::LoadPos(char *path)
 {
+    //todo
+    return ZUN_SUCCESS;
     u8 *fileData;
 
     if (this->audioDev == 0 || g_Supervisor.cfg.playSounds == 0 || backgroundMusic.srcWav.fileStream == NULL)
@@ -305,13 +321,21 @@ ZunResult SoundPlayer::LoadPos(char *path)
 
 ZunResult SoundPlayer::InitSoundBuffers()
 {
+    //todo
+    return ZUN_SUCCESS;
+    //soundplayerdlog("init sound buffer");
+    //soundplayerdlog("check audioDev");
     if (this->audioDev == 0)
     {
         return ZUN_ERROR;
     }
 
+    //soundplayerdlog("std::fill_n");
     std::fill_n(this->soundBuffersToPlay, ARRAY_SIZE(this->soundBuffersToPlay), -1);
 
+    //todo loadsound
+    #if 0
+    //soundplayerdlog("for loop");
     for (int idx = 0; idx < ARRAY_SIZE_SIGNED(g_SoundBufferIdxVol); idx++)
     {
         if (this->LoadSound(idx, g_SFXList[g_SoundBufferIdxVol[idx].bufferIdx],
@@ -324,12 +348,15 @@ ZunResult SoundPlayer::InitSoundBuffers()
         this->soundBuffers[idx].isPlaying = false;
         this->soundBuffers[idx].pos = 0;
     }
-
+    #endif
+    //soundplayerdlog("finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier)
 {
+    //todo
+    return ZUN_SUCCESS;
     SDL_AudioCVT sampleConversionDesc;
     SDL_AudioSpec wavFormat;
     u8 *wavRawData;
@@ -404,6 +431,8 @@ fail:
 
 ZunResult SoundPlayer::PlayBGM(bool isLooping)
 {
+    //todo
+    return ZUN_SUCCESS;
     utils::DebugPrint2("play BGM\n");
 
     if (this->backgroundMusic.srcWav.fileStream == NULL)
@@ -435,6 +464,8 @@ ZunResult SoundPlayer::PlayBGM(bool isLooping)
 
 void SoundPlayer::PlaySounds()
 {
+    //todo
+    return;
     i32 idx;
     i32 sndBufIdx;
 
@@ -469,6 +500,8 @@ void SoundPlayer::PlaySounds()
 
 void SoundPlayer::PlaySoundByIdx(SoundIdx idx)
 {
+    //todo
+    return;
     u32 i;
 
     for (i = 0; i < ARRAY_SIZE(this->soundBuffersToPlay); i++)
@@ -494,6 +527,8 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx)
 
 void SoundPlayer::MixAudio(u32 samples)
 {
+    //todo
+    return;
     std::vector<i16> finalBuffer(samples);
     std::vector<i32> mixBuffer(samples);
     u8 playingChannels = 0;
@@ -615,6 +650,9 @@ void SoundPlayer::MixAudio(u32 samples)
 //   in a thread keeps sound running continuously, even if the main thread runs into lag
 void SoundPlayer::BackgroundMusicPlayerThread()
 {
+    //todo
+    return;
+
     SDL_PauseAudioDevice(this->audioDev, 0);
 
     u32 latencyLimit = 14'700; // ~5 frames

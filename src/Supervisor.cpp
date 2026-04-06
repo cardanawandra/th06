@@ -24,6 +24,10 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <iostream>
+void supervisordlog(std::string msg){
+    std::cout<<"supervisor : "<<msg<<std::endl;
+}
 
 Supervisor g_Supervisor;
 ControllerMapping g_ControllerMapping = {
@@ -270,6 +274,7 @@ ChainCallbackResult Supervisor::OnDraw(Supervisor *s)
 
 ZunResult Supervisor::RegisterChain()
 {
+    //supervisordlog("trying to register chain");
     ChainElem *chain;
     Supervisor *supervisor = &g_Supervisor;
 
@@ -277,32 +282,43 @@ ZunResult Supervisor::RegisterChain()
     supervisor->curState = -1;
     supervisor->calcCount = 0;
 
+    //supervisordlog("Supervisor::OnUpdate");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnUpdate);
     chain->arg = supervisor;
+    //supervisordlog("Supervisor::AddedCallback");
     chain->addedCallback = (ChainAddedCallback)Supervisor::AddedCallback;
+    //supervisordlog("Supervisor::DeletedCallback");
     chain->deletedCallback = (ChainDeletedCallback)Supervisor::DeletedCallback;
+    //supervisordlog("g_Chain.AddToCalcChain");
     if (g_Chain.AddToCalcChain(chain, TH_CHAIN_PRIO_CALC_SUPERVISOR) != 0)
     {
+        //supervisordlog("error");
         return ZUN_ERROR;
     }
 
+    //supervisordlog("g_Chain.CreateElem");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnDraw);
     chain->arg = supervisor;
+    //supervisordlog("g_Chain.AddToDrawChain");
     g_Chain.AddToDrawChain(chain, TH_CHAIN_PRIO_DRAW_SUPERVISOR);
-
+    //supervisordlog("finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult Supervisor::AddedCallback(Supervisor *s)
 {
+    //supervisordlog("callback init");
     i32 i;
 
+    //supervisordlog("for pbg3Archives");
     for (i = 0; i < (i32)(sizeof(s->pbg3Archives) / sizeof(s->pbg3Archives[0])); i++)
     {
         s->pbg3Archives[i] = NULL;
     }
 
+    //supervisordlog("set g_Pbg3Archives");
     g_Pbg3Archives = s->pbg3Archives;
+    //supervisordlog("LoadPbg3");
     if (s->LoadPbg3(IN_PBG3_INDEX, TH_IN_DAT_FILE))
     {
         return ZUN_ERROR;
@@ -310,37 +326,50 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
 
     // D3DX code swaps twice to copy to both buffers
 
+    //supervisordlog("LoadSurface data/title/th06logo.jpg");
     g_AnmManager->LoadSurface(0, "data/title/th06logo.jpg");
+    //supervisordlog("CopySurfaceToBackBuffer");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
 
+    //supervisordlog("SDL_GL_SwapWindow");
     SDL_GL_SwapWindow(g_Supervisor.gameWindow);
 
     //
+    //supervisordlog("CopySurfaceToBackBuffer 2");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     //
 
+    //supervisordlog("SDL_GL_SwapWindow 2");
     SDL_GL_SwapWindow(g_Supervisor.gameWindow);
 
+    //supervisordlog("ReleaseSurface");
     g_AnmManager->ReleaseSurface(0);
 
+    //supervisordlog("set startupTimeBeforeMenuMusic");
     s->startupTimeBeforeMenuMusic = SDL_GetTicks();
+    //supervisordlog("Supervisor::SetupDInput");
     Supervisor::SetupDInput(s);
 
+    //supervisordlog("new MidiOutput");
     s->midiOutput = new MidiOutput();
 
     // Replacing a seeding method that used win32 timeGetTime
+    //supervisordlog("g_Rng.Initialize");
     g_Rng.Initialize((u16)std::time(NULL));
 
+    //supervisordlog("g_SoundPlayer.InitSoundBuffers");
     g_SoundPlayer.InitSoundBuffers();
+    //supervisordlog("g_AnmManager->LoadAnm");
     if (g_AnmManager->LoadAnm(ANM_FILE_TEXT, "data/text.anm", ANM_OFFSET_TEXT) != 0)
     {
         return ZUN_ERROR;
     }
 
+    //supervisordlog("AsciiManager::RegisterChain");
     if (AsciiManager::RegisterChain() != 0)
     {
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_ASCIIMANAGER_INIT_FAILED);
@@ -348,17 +377,22 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     }
 
     s->unk198 = 0;
+    //supervisordlog("g_AnmManager->SetupVertexBuffer");
     g_AnmManager->SetupVertexBuffer();
 
+    //supervisordlog("TextHelper::CreateTextBuffer");
     if (TextHelper::CreateTextBuffer() != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
+    //supervisordlog("ReleasePbg3");
     s->ReleasePbg3(IN_PBG3_INDEX);
+    //supervisordlog("LoadPbg3 MD.DAT");
     if (g_Supervisor.LoadPbg3(MD_PBG3_INDEX, TH_MD_DAT_FILE) != 0)
         return ZUN_ERROR;
 
+    //supervisordlog("callback finish");
     return ZUN_SUCCESS;
 }
 
@@ -628,6 +662,7 @@ i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, char *filename)
         }
         else
         {
+            GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, filename);
             delete this->pbg3Archives[pbg3FileIdx];
             // Let's really make sure this is null by nulling twice. I assume
             // there's some kind of inline function here, like it's actually

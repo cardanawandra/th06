@@ -18,7 +18,7 @@ static char s_userPath[512] = "";
 void Init()
 {
 #ifdef __ANDROID__
-    const char *internalPath = SDL_AndroidGetInternalStoragePath();
+    const char *internalPath = SDL_AndroidGetExternalStoragePath();
     if (internalPath)
     {
         snprintf(s_userPath, sizeof(s_userPath), "%s/", internalPath);
@@ -27,7 +27,7 @@ void Init()
     else
     {
         SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                    "GamePaths: SDL_AndroidGetInternalStoragePath() returned NULL, using cwd");
+                    "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
         s_userPath[0] = '\0';
     }
 #else

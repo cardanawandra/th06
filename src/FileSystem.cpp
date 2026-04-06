@@ -17,6 +17,9 @@
 #include "utils.hpp"
 #ifdef __ANDROID__
 #include <SDL.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <cstdio>
 #endif
 
 u32 g_LastFileSize = 0;
@@ -24,7 +27,8 @@ u32 g_LastFileSize = 0;
 FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
 #ifdef __ANDROID__
-    return NULL;
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + std::string(filepath);
+    return std::fopen(resolvedPath.c_str(), mode);
 #else
 #ifndef _WIN32
     return std::fopen(filepath, mode);
@@ -56,7 +60,8 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 void FileSystem::CreateDir(const char *path)
 {
 #ifdef __ANDROID__
-//todo
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + std::string(path);
+    mkdir(resolvedPath.c_str(),0755);
 #else
 #ifdef _WIN32
     _mkdir(path);
@@ -78,9 +83,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     const char *entryname;
     i32 pbg3Idx;
 
-    // Resolve platform-specific path (Android: assets vs user data).
+    #ifdef __ANDROID__
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + std::string(filepath);
+    #else
     char resolvedPath[512];
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
+    #endif
 
     entryIdx = -1;
     if (isExternalResource == 0)
@@ -130,29 +138,17 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     }
     else
     {
+        #ifdef __ANDROID__
+        file = fopen(resolvedPath.c_str(), "rb");
+        #else
         utils::DebugPrint2("%s Load ... \n", resolvedPath);
-#ifdef __ANDROID__
-        // On Android, use SDL_RWFromFile to transparently read from APK assets.
-        SDL_RWops *rw = SDL_RWFromFile(resolvedPath, "rb");
-        if (rw == NULL)
-        {
-            utils::DebugPrint2("error : %s is not found.\n", resolvedPath);
-            return NULL;
-        }
-        else
-        {
-            i32 rwSize = SDL_RWsize(rw);
-            fsize = (rwSize > 0) ? (size_t)rwSize : 0;
-            g_LastFileSize = fsize;
-            data = (u8 *)malloc(fsize);
-            SDL_RWread(rw, data, 1, fsize);
-            SDL_RWclose(rw);
-        }
-#else
         file = fopen(resolvedPath, "rb");
+        #endif
         if (file == NULL)
         {
+            #ifndef __ANDROID__
             utils::DebugPrint2("error : %s is not found.\n", resolvedPath);
+            #endif
             return NULL;
         }
         else
@@ -165,7 +161,6 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             fread(data, 1, fsize, file);
             fclose(file);
         }
-#endif
     }
     return data;
 }
@@ -174,12 +169,17 @@ int FileSystem::WriteDataToFile(const char *path, void *data, size_t size)
 {
     FILE *f;
 
+    #ifdef __ANDROID__
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + std::string(path);
+    f = fopen(resolvedPath.c_str(), "wb");
+    #else
     // Resolve to writable user-data directory on Android.
     char resolvedPath[512];
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
     GamePaths::EnsureParentDir(resolvedPath);
-
     f = fopen(resolvedPath, "wb");
+    #endif
+
     if (f == NULL)
     {
         return -1;
