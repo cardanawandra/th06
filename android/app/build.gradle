@@ -15,7 +15,7 @@ android {
             cmake {
                 arguments "-DANDROID_STL=c++_static"
                 // armeabi-v7a only: game file format requires sizeof(void*)==4
-                abiFilters 'armeabi-v7a'
+//                abiFilters 'arm64-v8a', 'armeabi-v7a'
             }
         }
     }

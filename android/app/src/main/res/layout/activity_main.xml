@@ -18,6 +18,12 @@
         android:orientation="vertical">
 
         <Button
+            android:id="@+id/btnShift"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="SHIFT" />
+
+        <Button
             android:id="@+id/btnZ"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
@@ -30,10 +36,10 @@
             android:text="X" />
 
         <Button
-            android:id="@+id/btnShift"
+            android:id="@+id/btnEsc"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:text="SHIFT" />
+            android:text="ESC" />
     </LinearLayout>
 
 </RelativeLayout>

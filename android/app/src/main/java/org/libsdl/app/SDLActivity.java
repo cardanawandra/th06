@@ -492,6 +492,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         Button btnZ = findViewById(R.id.btnZ);
         Button btnX = findViewById(R.id.btnX);
         Button btnShift = findViewById(R.id.btnShift);
+        Button btnEsc = findViewById(R.id.btnEsc);
 
         btnZ.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -516,6 +517,15 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 sendKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT);
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 sendKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT);
+            }
+            return true;
+        });
+
+        btnEsc.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                sendKeyDown(KeyEvent.KEYCODE_ESCAPE);
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                sendKeyUp(KeyEvent.KEYCODE_ESCAPE);
             }
             return true;
         });
@@ -589,13 +599,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     protected void onPause() {
         Log.v(TAG, "onPause()");
         super.onPause();
-
-        if (mHIDDeviceManager != null) {
-            mHIDDeviceManager.setFrozen(true);
-        }
-        if (!mHasMultiWindow) {
-            pauseNativeThread();
-        }
+//
+//        if (mHIDDeviceManager != null) {
+//            mHIDDeviceManager.setFrozen(true);
+//        }
+//        if (!mHasMultiWindow) {
+//            pauseNativeThread();
+//        }
     }
 
     @Override
