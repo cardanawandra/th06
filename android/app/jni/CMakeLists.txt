@@ -23,6 +23,7 @@ get_filename_component(TH06_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE
 set(SDL2_SRC_DIR    "${TH06_ROOT}/android/SDL2_src")
 set(SDL2_IMAGE_DIR  "${TH06_ROOT}/android/SDL2_image_src")
 set(SDL2_MIXER_DIR  "${TH06_ROOT}/android/SDL2_mixer_src")
+set(SDL2_TTF_DIR  "${TH06_ROOT}/android/SDL2_ttf_src")
 
 # SDL2 core
 add_subdirectory(${SDL2_SRC_DIR} SDL2)
@@ -47,6 +48,12 @@ set(SDL2MIXER_MIDI_FLUIDSYNTH OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_MP3 OFF CACHE BOOL "" FORCE)
 set(SDL2MIXER_WAVPACK OFF CACHE BOOL "" FORCE)
 add_subdirectory(${SDL2_MIXER_DIR} SDL2_mixer)
+
+# SDL2_ttf — disable all optional codec libraries for Android
+set(SDL2TTF_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SDL2TTF_INSTALL OFF CACHE BOOL "" FORCE)
+set(SDL2TTF_VENDORED ON CACHE BOOL "" FORCE)
+add_subdirectory(${SDL2_TTF_DIR} SDL2_ttf)
 
 # ============================================================================
 # i18n.hpp generation (same as main build)
@@ -120,14 +127,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
     ${TH06_ROOT}/src/graphics/FixedFunctionGL.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
-    # thprac
-    # ${TH06_ROOT}/src/thprac_th06.cpp
-    # ${TH06_ROOT}/src/thprac_games.cpp
-    # ${TH06_ROOT}/src/thprac_gui_components.cpp
-    # ${TH06_ROOT}/src/thprac_gui_locale.cpp
-    # ${TH06_ROOT}/src/thprac_gui_input.cpp
-    # ${TH06_ROOT}/src/thprac_locale_def.cpp
-    # ${TH06_ROOT}/src/thprac_gui_integration.cpp
     # ImGui core
     ${TH06_ROOT}/3rdparty/imgui/imgui.cpp
     ${TH06_ROOT}/3rdparty/imgui/imgui_draw.cpp
@@ -181,6 +180,7 @@ target_link_libraries(main PRIVATE
     SDL2::SDL2
     SDL2_image::SDL2_image
     SDL2_mixer::SDL2_mixer
+    SDL2_ttf::SDL2_ttf
     ${log-lib}
     ${GLESv2-lib}
     ${android-lib}

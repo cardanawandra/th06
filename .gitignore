@@ -3,6 +3,7 @@ build_sdl2
 local.properties
 android/SDL2_image_src
 android/SDL2_mixer_src
+android/SDL2_ttf_src
 android/SDL2_src
 android/app/.cxx
 diff

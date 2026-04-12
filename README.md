@@ -22,6 +22,7 @@ EoSD-portable has the following dependencies:
 - `SDL2.30`
 - `SDL2_image`
 - `SDL2_mixer`
+- `SDL2_ttf`
 
 In addition, building uses CMAKE 3.18 and a compiler that supports C++17.
 
@@ -34,8 +35,9 @@ result will be on "build_sdl2\Release"
 
 #### Building Android
 -download source SDL2.30.0 and place it in android/SDL2_SRC<br>
--download source SDL2-mixer and place it in android/SDL2_MIXER_SRC<br>
+-download source SDL2-mixer and place it in android/SDL2_mixer_SRC<br>
 -download source SDL2-image and place it in android/SDL2_image_SRC<br>
+-download source SDL2-ttf and place it in android/SDL2_ttf_SRC<br>
 -set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")<br>
 -run "cd android"<br>
 -then "./gradlew clean assembleDebug" (for windows "gradlew.bat clean assembleDebug")<br>

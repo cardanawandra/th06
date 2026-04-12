@@ -32,7 +32,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.InputDevice;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -51,6 +50,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import android.app.Instrumentation;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.Button;
+import android.view.LayoutInflater;
+import com.th06.game.JoystickView;
+import com.th06.game.R;
+
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -60,7 +72,6 @@ import java.util.Locale;
 */
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "SDL";
-    private static final String INPUT_TRACE_TAG = "SDLInputTrace";
     private static final int SDL_MAJOR_VERSION = 2;
     private static final int SDL_MINOR_VERSION = 30;
     private static final int SDL_MICRO_VERSION = 0;
@@ -91,7 +102,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 | InputDevice.SOURCE_CLASS_POSITION
                 | InputDevice.SOURCE_CLASS_TRACKBALL);
 
-        if (s2 != 0) cls += "Some_Unkown";
+        if (s2 != 0) cls += "Some_Unknown";
 
         s2 = s_copy & InputDevice.SOURCE_ANY; // keep source only, no class;
 
@@ -165,7 +176,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         if (s == FLAG_TAINTED) src += " FLAG_TAINTED";
         s2 &= ~FLAG_TAINTED;
 
-        if (s2 != 0) src += " Some_Unkown";
+        if (s2 != 0) src += " Some_Unknown";
 
         Log.v(TAG, prefix + "int=" + s_copy + " CLASS={" + cls + " } source(s):" + src);
     }
@@ -220,8 +231,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     protected static int mLastCursorID;
     protected static SDLGenericMotionListener_API12 mMotionListener;
     protected static HIDDeviceManager mHIDDeviceManager;
-    protected static final int SOFT_DIRECTION_KEY_RELEASE_TIMEOUT_MS = 750;
-    protected static final SparseArray<Runnable> mSoftDirectionKeyReleaseTasks = new SparseArray<>();
 
     // This is what SDL runs in. It invokes SDL_main(), eventually
     protected static Thread mSDLThread;
@@ -285,7 +294,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     // Load the .so
     public void loadLibraries() {
        for (String lib : getLibraries()) {
-          SDL.loadLibrary(lib);
+          SDL.loadLibrary(lib, this);
        }
     }
 
@@ -431,6 +440,126 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 SDLActivity.onNativeDropFile(filename);
             }
         }
+
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View overlay = inflater.inflate(R.layout.activity_main, null);
+
+        mLayout.addView(overlay);
+
+        JoystickView joystick = findViewById(R.id.joystick);
+
+        joystick.setListener(direction -> {
+            switch (direction) {
+
+                case UP:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, -1);
+                    break;
+
+                case DOWN:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, -1);
+                    break;
+
+                case LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_LEFT, -1);
+                    break;
+
+                case RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_RIGHT, -1);
+                    break;
+
+                case UP_LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_LEFT);
+                    break;
+
+                case UP_RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_RIGHT);
+                    break;
+
+                case DOWN_LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
+                    break;
+
+                case DOWN_RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
+                    break;
+
+                case CENTER:
+                    releaseKeys(); // 🔥 STOP ALL
+                    break;
+            }
+        });
+        Button btnZ = findViewById(R.id.btnZ);
+        Button btnX = findViewById(R.id.btnX);
+        Button btnShift = findViewById(R.id.btnShift);
+
+        btnZ.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                sendKeyDown(KeyEvent.KEYCODE_Z);
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                sendKeyUp(KeyEvent.KEYCODE_Z);
+            }
+            return true;
+        });
+
+        btnX.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                sendKeyDown(KeyEvent.KEYCODE_X);
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                sendKeyUp(KeyEvent.KEYCODE_X);
+            }
+            return true;
+        });
+
+        btnShift.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                sendKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT);
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                sendKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT);
+            }
+            return true;
+        });
+    }
+
+    private int lastKey1 = -1;
+    private int lastKey2 = -1;
+
+    private void releaseKeys() {
+        if (lastKey1 != -1) {
+            SDLActivity.onNativeKeyUp(lastKey1);
+            lastKey1 = -1;
+        }
+        if (lastKey2 != -1) {
+            SDLActivity.onNativeKeyUp(lastKey2);
+            lastKey2 = -1;
+        }
+    }
+
+    private void pressKeys(int key1, int key2) {
+        releaseKeys();
+
+        if (key1 != -1) {
+            SDLActivity.onNativeKeyDown(key1);
+            lastKey1 = key1;
+        }
+
+        if (key2 != -1) {
+            SDLActivity.onNativeKeyDown(key2);
+            lastKey2 = key2;
+        }
+    }
+    
+    private void sendKeyDown(int keyCode) {
+        SDLActivity.onNativeKeyDown(keyCode);
+    }
+
+    private void sendKeyUp(int keyCode) {
+        SDLActivity.onNativeKeyUp(keyCode);
+    }
+
+    private void sendKeyPress(int keyCode) {
+        sendKeyDown(keyCode);
+        sendKeyUp(keyCode);
     }
 
     protected void pauseNativeThread() {
@@ -794,6 +923,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                                 window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                                 SDLActivity.mFullscreenModeActive = false;
                             }
+                            if (Build.VERSION.SDK_INT >= 28 /* Android 9 (Pie) */) {
+                                window.getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                            }
                         }
                     } else {
                         Log.e(TAG, "error handling message, getContext() returned no Activity");
@@ -999,8 +1131,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         /* No valid hint, nothing is explicitly allowed */
         if (!is_portrait_allowed && !is_landscape_allowed) {
             if (resizable) {
-                /* All orientations are allowed */
-                req = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+                /* All orientations are allowed, respecting user orientation lock setting */
+                req = ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
             } else {
                 /* Fixed window and nothing specified. Get orientation from w/h of created window */
                 req = (w > h ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
@@ -1009,8 +1141,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             /* At least one orientation is allowed */
             if (resizable) {
                 if (is_portrait_allowed && is_landscape_allowed) {
-                    /* hint allows both landscape and portrait, promote to full sensor */
-                    req = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
+                    /* hint allows both landscape and portrait, promote to full user */
+                    req = ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
                 } else {
                     /* Use the only one allowed "orientation" */
                     req = (is_landscape_allowed ? orientation_landscape : orientation_portrait);
@@ -1312,99 +1444,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         return event.isPrintingKey() || event.getKeyCode() == KeyEvent.KEYCODE_SPACE;
     }
 
-    private static boolean isSoftKeyboardEvent(KeyEvent event) {
-        if ((event.getFlags() & KeyEvent.FLAG_SOFT_KEYBOARD) != 0) {
-            return true;
-        }
-
-        if (event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD) {
-            return true;
-        }
-
-        InputDevice device = InputDevice.getDevice(event.getDeviceId());
-        return device != null && device.isVirtual();
-    }
-
-    private static boolean isDirectionalPadKey(int keyCode) {
-        return keyCode == KeyEvent.KEYCODE_DPAD_UP ||
-               keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
-               keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
-               keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
-    }
-
-    private static String describeKeyAction(int action) {
-        switch (action) {
-        case KeyEvent.ACTION_DOWN:
-            return "DOWN";
-        case KeyEvent.ACTION_UP:
-            return "UP";
-        case KeyEvent.ACTION_MULTIPLE:
-            return "MULTIPLE";
-        default:
-            return "UNKNOWN(" + action + ")";
-        }
-    }
-
-    private static String describeKeyEventForLog(int keyCode, KeyEvent event, int source, boolean isSoftDirectionalEvent,
-                                                 boolean isTextInputEvent, boolean isJoystickDevice) {
-        return "action=" + describeKeyAction(event.getAction())
-                + " key=" + KeyEvent.keyCodeToString(keyCode) + "(" + keyCode + ")"
-                + " repeat=" + event.getRepeatCount()
-                + " unicode=" + event.getUnicodeChar()
-                + " flags=0x" + Integer.toHexString(event.getFlags())
-                + " source=" + SDLControllerManager.describeSourceForLog(source)
-                + " deviceId=" + event.getDeviceId()
-                + " device={" + SDLControllerManager.describeDeviceForLog(event.getDeviceId()) + "}"
-                + " softDirectional=" + isSoftDirectionalEvent
-                + " textInput=" + isTextInputEvent
-                + " joystickDevice=" + isJoystickDevice;
-    }
-
-    private static void cancelSoftDirectionKeyRelease(int keyCode) {
-        if (mSingleton == null) {
-            return;
-        }
-
-        Runnable pending = mSoftDirectionKeyReleaseTasks.get(keyCode);
-        if (pending != null) {
-            mSingleton.commandHandler.removeCallbacks(pending);
-            mSoftDirectionKeyReleaseTasks.remove(keyCode);
-            Log.d(INPUT_TRACE_TAG, "soft-direction cancel key=" + KeyEvent.keyCodeToString(keyCode) + "(" + keyCode + ")");
-        }
-    }
-
-    private static boolean hasSoftDirectionKeyRelease(int keyCode) {
-        return mSoftDirectionKeyReleaseTasks.get(keyCode) != null;
-    }
-
-    private static void scheduleSoftDirectionKeyRelease(final int keyCode) {
-        if (mSingleton == null) {
-            return;
-        }
-
-        cancelSoftDirectionKeyRelease(keyCode);
-
-        Runnable releaseTask = new Runnable() {
-            @Override
-            public void run() {
-                mSoftDirectionKeyReleaseTasks.remove(keyCode);
-                Log.d(INPUT_TRACE_TAG, "soft-direction timeout key=" + KeyEvent.keyCodeToString(keyCode)
-                        + "(" + keyCode + ") -> native key up");
-                SDLActivity.onNativeKeyUp(keyCode);
-            }
-        };
-
-        mSoftDirectionKeyReleaseTasks.put(keyCode, releaseTask);
-        mSingleton.commandHandler.postDelayed(releaseTask, SOFT_DIRECTION_KEY_RELEASE_TIMEOUT_MS);
-        Log.d(INPUT_TRACE_TAG, "soft-direction schedule key=" + KeyEvent.keyCodeToString(keyCode)
-                + "(" + keyCode + ") timeoutMs=" + SOFT_DIRECTION_KEY_RELEASE_TIMEOUT_MS);
-    }
-
     public static boolean handleKeyEvent(View v, int keyCode, KeyEvent event, InputConnection ic) {
         int deviceId = event.getDeviceId();
         int source = event.getSource();
-        boolean isSoftDirectionalEvent = isDirectionalPadKey(keyCode) && isSoftKeyboardEvent(event);
-        boolean isTextInput = isTextInputEvent(event);
 
         if (source == InputDevice.SOURCE_UNKNOWN) {
             InputDevice device = InputDevice.getDevice(deviceId);
@@ -1413,6 +1455,12 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         }
 
+//        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+//            Log.v("SDL", "key down: " + keyCode + ", deviceId = " + deviceId + ", source = " + source);
+//        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+//            Log.v("SDL", "key up: " + keyCode + ", deviceId = " + deviceId + ", source = " + source);
+//        }
+
         // Dispatch the different events depending on where they come from
         // Some SOURCE_JOYSTICK, SOURCE_DPAD or SOURCE_GAMEPAD are also SOURCE_KEYBOARD
         // So, we try to process them as JOYSTICK/DPAD/GAMEPAD events first, if that fails we try them as KEYBOARD
@@ -1420,24 +1468,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         // Furthermore, it's possible a game controller has SOURCE_KEYBOARD and
         // SOURCE_JOYSTICK, while its key events arrive from the keyboard source
         // So, retrieve the device itself and check all of its sources
-        boolean isJoystickDevice = SDLControllerManager.isDeviceSDLJoystick(deviceId);
-        Log.d(INPUT_TRACE_TAG, "handleKeyEvent " + describeKeyEventForLog(keyCode, event, source,
-                isSoftDirectionalEvent, isTextInput, isJoystickDevice));
-
-        if (isJoystickDevice) {
+        if (SDLControllerManager.isDeviceSDLJoystick(deviceId)) {
             // Note that we process events with specific key codes here
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                int nativeResult = SDLControllerManager.onNativePadDown(deviceId, keyCode);
-                Log.d(INPUT_TRACE_TAG, "dispatch padDown key=" + KeyEvent.keyCodeToString(keyCode)
-                        + "(" + keyCode + ") deviceId=" + deviceId + " nativeResult=" + nativeResult);
-                if (nativeResult == 0) {
+                if (SDLControllerManager.onNativePadDown(deviceId, keyCode) == 0) {
                     return true;
                 }
             } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                int nativeResult = SDLControllerManager.onNativePadUp(deviceId, keyCode);
-                Log.d(INPUT_TRACE_TAG, "dispatch padUp key=" + KeyEvent.keyCodeToString(keyCode)
-                        + "(" + keyCode + ") deviceId=" + deviceId + " nativeResult=" + nativeResult);
-                if (nativeResult == 0) {
+                if (SDLControllerManager.onNativePadUp(deviceId, keyCode) == 0) {
                     return true;
                 }
             }
@@ -1452,52 +1490,26 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 case KeyEvent.ACTION_UP:
                     // mark the event as handled or it will be handled by system
                     // handling KEYCODE_BACK by system will call onBackPressed()
-                    Log.d(INPUT_TRACE_TAG, "ignore mouse navigation key=" + KeyEvent.keyCodeToString(keyCode)
-                            + "(" + keyCode + ") deviceId=" + deviceId);
                     return true;
                 }
             }
         }
 
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (isSoftDirectionalEvent) {
-                Log.d(INPUT_TRACE_TAG, "dispatch native key down via soft-direction path key="
-                        + KeyEvent.keyCodeToString(keyCode) + "(" + keyCode + ")");
-                onNativeKeyDown(keyCode);
-                scheduleSoftDirectionKeyRelease(keyCode);
-                return true;
-            }
-            if (isTextInput) {
+            if (isTextInputEvent(event)) {
                 if (ic != null) {
                     ic.commitText(String.valueOf((char) event.getUnicodeChar()), 1);
                 } else {
                     SDLInputConnection.nativeCommitText(String.valueOf((char) event.getUnicodeChar()), 1);
                 }
-                Log.d(INPUT_TRACE_TAG, "commit text key=" + KeyEvent.keyCodeToString(keyCode)
-                        + "(" + keyCode + ") unicode=" + event.getUnicodeChar());
             }
-            Log.d(INPUT_TRACE_TAG, "dispatch native key down key=" + KeyEvent.keyCodeToString(keyCode)
-                    + "(" + keyCode + ")");
             onNativeKeyDown(keyCode);
             return true;
         } else if (event.getAction() == KeyEvent.ACTION_UP) {
-            if (isSoftDirectionalEvent) {
-                boolean hadPendingRelease = hasSoftDirectionKeyRelease(keyCode);
-                cancelSoftDirectionKeyRelease(keyCode);
-                Log.d(INPUT_TRACE_TAG, "soft-direction key up key=" + KeyEvent.keyCodeToString(keyCode)
-                        + "(" + keyCode + ") hadPendingRelease=" + hadPendingRelease);
-                if (!hadPendingRelease) {
-                    return true;
-                }
-            }
-            Log.d(INPUT_TRACE_TAG, "dispatch native key up key=" + KeyEvent.keyCodeToString(keyCode)
-                    + "(" + keyCode + ")");
             onNativeKeyUp(keyCode);
             return true;
         }
 
-        Log.d(INPUT_TRACE_TAG, "unhandled key event " + describeKeyEventForLog(keyCode, event, source,
-                isSoftDirectionalEvent, isTextInput, isJoystickDevice));
         return false;
     }
 

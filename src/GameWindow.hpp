@@ -13,6 +13,10 @@
 // The actual resolution used for the output window and viewport scaling
 //   At some point there should be a method to change this without recompiling but for now
 //   this'll do
+#ifdef __ANDROID__
+#define GAME_WINDOW_WIDTH_REAL 1600
+#define GAME_WINDOW_HEIGHT_REAL 720
+#endif
 #ifndef GAME_WINDOW_WIDTH_REAL
 #define GAME_WINDOW_WIDTH_REAL (GAME_WINDOW_WIDTH)
 #endif

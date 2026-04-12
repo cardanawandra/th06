@@ -4,12 +4,12 @@
 #include "Supervisor.hpp"
 #include "diffbuild.hpp"
 #include "i18n.hpp"
-#include "thprac_gui_input.h"
 #include "utils.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 
+static i32 g_FocusButtonConflictState = 0;
 static SDL_GameController *g_SDLController = NULL;
 static SDL_Joystick *g_SDLJoystick = NULL;
 static i32 g_SDLJoystickNumButtons = 0;
@@ -485,7 +485,6 @@ void Controller::ResetKeyboard(void)
     SDL_ResetKeyboard();
     SDL_FlushEvents(SDL_KEYDOWN, SDL_KEYUP);
     SDL_PumpEvents();
-    THPrac::Gui::ResetKeyboardState();
 }
 
 void Controller::ResetInputState(void)

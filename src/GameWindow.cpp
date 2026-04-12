@@ -15,8 +15,6 @@
 #include <SDL_timer.h>
 #include <cstring>
 #include <iostream>
-#define GAME_WINDOW_WIDTH_REAL 2400
-#define GAME_WINDOW_HEIGHT_REAL 1080
 void gamewindowdlog(std::string msg){
     std::cout<<"gamewindow : "<<msg<<std::endl;
 }
@@ -211,7 +209,7 @@ void GameWindow::Present()
 
 void GameWindow::CreateGameWindow()
 {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 
     u32 flags = SDL_WINDOW_OPENGL;
     i32 height = GAME_WINDOW_HEIGHT_REAL;
@@ -222,11 +220,15 @@ void GameWindow::CreateGameWindow()
     g_GameWindow.window = NULL;
     g_GameWindow.glContext = NULL;
 
+    #ifdef __ANDROID__
+    flags |= SDL_WINDOW_FULLSCREEN;
+    #else
     if (g_Supervisor.cfg.windowed == 0)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
-
+    #endif
+    
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
         s_RenderBackends[i].setContextFlags();

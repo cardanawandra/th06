@@ -4,16 +4,16 @@
 #include "Supervisor.hpp"
 #include "i18n.hpp"
 
-// #include <SDL2/SDL_ttf.h>
+#include <SDL_ttf.h>
 #include <algorithm>
 #include <cstring>
-// #include <iconv.h>
+#include "ShittyIconv.hpp"
+#include "GamePaths.hpp"
 
-#if 0
+
 TTF_Font *g_Font;
 ;
-iconv_t g_Iconv = (iconv_t)-1;
-#endif
+
 
 TextHelper::TextHelper()
 {
@@ -28,10 +28,8 @@ TextHelper::TextHelper()
 
 TextHelper::~TextHelper()
 {
-    #if 0
     TTF_Quit();
     this->ReleaseBuffer();
-    #endif
 }
 
 bool TextHelper::ReleaseBuffer()
@@ -61,33 +59,33 @@ bool TextHelper::ReleaseBuffer()
 // Extended to initialize all globals for text helper
 ZunResult TextHelper::CreateTextBuffer()
 {
-    #if 0
     TTF_Init();
 
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
     // Fallback is Noto Sans Regular (JP) which is redistributable
-    if ((g_Font = TTF_OpenFont(TH_PRIMARY_FONT_FILENAME, 10), g_Font == NULL) &&
-        (std::printf("%s\n", TTF_GetError()), g_Font = TTF_OpenFont(TH_FALLBACK_FONT_FILENAME, 10), g_Font == NULL))
+    #ifdef __ANDROID__
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + std::string("th06.ttc");
+    if (g_Font = TTF_OpenFont(resolvedPath.c_str(), 10), g_Font == NULL)
     {
         std::printf("%s\n", TTF_GetError());
 
-        GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
+        // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
         return ZUN_ERROR;
     }
-
-    g_Iconv = iconv_open("UTF-8", "CP932");
-
-    if (g_Iconv == (iconv_t)-1)
+    #else
+    if (g_Font = TTF_OpenFont("th06.ttc", 10), g_Font == NULL)
     {
-        GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ICONV_INIT_FAILED);
+        std::printf("%s\n", TTF_GetError());
+
+        // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
         return ZUN_ERROR;
     }
+    #endif
 
     g_TextBufferSurface =
         SDL_CreateRGBSurfaceWithFormat(0, GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 
     SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
-    #endif
 
     return ZUN_SUCCESS;
 }
@@ -234,7 +232,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                      i32 fontWidth, ZunColor textColor, ZunColor shadowColor, char *string,
                                      TextureData *outTexture)
 {
-    #if 0
+    
     char convertedText[1024];
     SDL_Rect finalCopyDst;
     SDL_Rect finalCopySrc;
@@ -243,23 +241,9 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     if (!isUTF8Encoded(string))
     {
-        // Standard doesn't specify what happens with the length fields during state reset, so give a value to be safe
-        size_t outBytes = 1024;
-        size_t stringBytes = 1024;
-
-        iconv(g_Iconv, NULL, &stringBytes, NULL, &outBytes); // Resets iconv state
-
-        stringBytes = std::strlen(string);
-        outBytes = sizeof(convertedText) - 1;
-        char *convEnd = convertedText;
-
-        if (iconv(g_Iconv, (char **)&string, &stringBytes, &convEnd, &outBytes) == (size_t)-1)
-        {
-            // Just don't render text in case of error
-            return;
-        }
-
-        *convEnd = '\0';
+        std::string outputUtf;
+    	sjis_to_utf8(string, strlen(string), outputUtf);
+        std::strcpy(convertedText, outputUtf.c_str());
     }
     else
     {
@@ -354,7 +338,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                GL_UNSIGNED_BYTE, outTexture->textureData);
 
     SDL_FreeSurface(textureSurface);
-    #endif
+    
 
     return;
 }
@@ -362,17 +346,11 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 // Extended to free all globals for text helper
 void TextHelper::ReleaseTextBuffer()
 {
-    #if 0
+    
     if (g_Font != NULL)
     {
         TTF_CloseFont(g_Font);
         g_Font = NULL;
-    }
-
-    if (g_Iconv != (iconv_t)-1)
-    {
-        iconv_close(g_Iconv);
-        g_Iconv = (iconv_t)-1;
     }
 
     if (g_TextBufferSurface != NULL)
@@ -380,6 +358,6 @@ void TextHelper::ReleaseTextBuffer()
         SDL_FreeSurface(g_TextBufferSurface);
         g_TextBufferSurface = NULL;
     }
-    #endif
+    
     return;
 }

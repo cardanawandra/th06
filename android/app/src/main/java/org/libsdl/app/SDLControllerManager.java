@@ -1,7 +1,6 @@
 package org.libsdl.app;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,7 +10,6 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -40,8 +38,7 @@ public class SDLControllerManager
     protected static SDLJoystickHandler mJoystickHandler;
     protected static SDLHapticHandler mHapticHandler;
 
-    static final String TAG = "SDLControllerManager";
-    private static final SparseArray<String> mLoggedDeviceClassifications = new SparseArray<>();
+    private static final String TAG = "SDLControllerManager";
 
     public static void initialize() {
         if (mJoystickHandler == null) {
@@ -118,67 +115,10 @@ public class SDLControllerManager
         }
         */
 
-        boolean isJoystick = ((sources & InputDevice.SOURCE_CLASS_JOYSTICK) != 0 ||
+        return ((sources & InputDevice.SOURCE_CLASS_JOYSTICK) != 0 ||
                 ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD) ||
                 ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD)
         );
-
-        String classification = (isJoystick ? "joystick" : "non-joystick") + " " + describeInputDevice(device);
-        String previousClassification = mLoggedDeviceClassifications.get(deviceId);
-        if (!classification.equals(previousClassification)) {
-            Log.i(TAG, "device classify deviceId=" + deviceId + " => " + classification);
-            mLoggedDeviceClassifications.put(deviceId, classification);
-        }
-
-        return isJoystick;
-    }
-
-    static String describeSourceForLog(int sources) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("0x%08x", sources));
-        if ((sources & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD) {
-            builder.append("|KEYBOARD");
-        }
-        if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD) {
-            builder.append("|DPAD");
-        }
-        if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
-            builder.append("|GAMEPAD");
-        }
-        if ((sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
-            builder.append("|JOYSTICK");
-        }
-        if ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
-            builder.append("|MOUSE");
-        }
-        if ((sources & InputDevice.SOURCE_TOUCHSCREEN) == InputDevice.SOURCE_TOUCHSCREEN) {
-            builder.append("|TOUCHSCREEN");
-        }
-        if ((sources & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {
-            builder.append("|TOUCHPAD");
-        }
-        if ((sources & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-            builder.append("|CLASS_JOYSTICK");
-        }
-        return builder.toString();
-    }
-
-    static String describeDeviceForLog(int deviceId) {
-        return describeInputDevice(InputDevice.getDevice(deviceId));
-    }
-
-    private static String describeInputDevice(InputDevice device) {
-        if (device == null) {
-            return "device=<null>";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("name=").append(device.getName());
-        builder.append(",descriptor=").append(device.getDescriptor());
-        builder.append(",virtual=").append(device.isVirtual());
-        builder.append(",sources=").append(describeSourceForLog(device.getSources()));
-        builder.append(",keyboardType=").append(device.getKeyboardType());
-        return builder.toString();
     }
 
 }
@@ -210,9 +150,6 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
         public String desc;
         public ArrayList<InputDevice.MotionRange> axes;
         public ArrayList<InputDevice.MotionRange> hats;
-        public float[] lastAxisValues;
-        public int[] lastHatXValues;
-        public int[] lastHatYValues;
     }
     static class RangeComparator implements Comparator<InputDevice.MotionRange> {
         @Override
@@ -296,28 +233,10 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
                         }
                     }
 
-                    joystick.lastAxisValues = new float[joystick.axes.size()];
-                    Arrays.fill(joystick.lastAxisValues, Float.NaN);
-                    joystick.lastHatXValues = new int[joystick.hats.size() / 2];
-                    joystick.lastHatYValues = new int[joystick.hats.size() / 2];
-
-                    int vendorId = getVendorId(joystickDevice);
-                    int productId = getProductId(joystickDevice);
-                    int buttonMask = getButtonMask(joystickDevice);
-                    int axisMask = getAxisMask(joystick.axes);
-
                     mJoysticks.add(joystick);
-                    Log.i(SDLControllerManager.TAG, "register joystick deviceId=" + joystick.device_id
-                            + " " + SDLControllerManager.describeDeviceForLog(joystick.device_id)
-                            + " axes=" + joystick.axes.size()
-                            + " hats=" + (joystick.hats.size() / 2)
-                            + " vendor=" + vendorId
-                            + " product=" + productId
-                            + " buttonMask=0x" + Integer.toHexString(buttonMask)
-                            + " axisMask=0x" + Integer.toHexString(axisMask));
                     SDLControllerManager.nativeAddJoystick(joystick.device_id, joystick.name, joystick.desc,
-                            vendorId, productId, false,
-                            buttonMask, joystick.axes.size(), axisMask, joystick.hats.size()/2, 0);
+                            getVendorId(joystickDevice), getProductId(joystickDevice), false,
+                            getButtonMask(joystickDevice), joystick.axes.size(), getAxisMask(joystick.axes), joystick.hats.size()/2, 0);
                 }
             }
         }
@@ -340,7 +259,6 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
 
         if (removedDevices != null) {
             for (int device_id : removedDevices) {
-                Log.i(SDLControllerManager.TAG, "remove joystick deviceId=" + device_id + " " + SDLControllerManager.describeDeviceForLog(device_id));
                 SDLControllerManager.nativeRemoveJoystick(device_id);
                 for (int i = 0; i < mJoysticks.size(); i++) {
                     if (mJoysticks.get(i).device_id == device_id) {
@@ -372,55 +290,16 @@ class SDLJoystickHandler_API16 extends SDLJoystickHandler {
                     InputDevice.MotionRange range = joystick.axes.get(i);
                     /* Normalize the value to -1...1 */
                     float value = (event.getAxisValue(range.getAxis(), actionPointerIndex) - range.getMin()) / range.getRange() * 2.0f - 1.0f;
-                    if (shouldLogAxisValue(joystick, i, value)) {
-                        Log.d(SDLControllerManager.TAG, "motion axis deviceId=" + joystick.device_id
-                                + " axisIndex=" + i
-                                + " androidAxis=" + range.getAxis()
-                                + " raw=" + event.getAxisValue(range.getAxis(), actionPointerIndex)
-                                + " normalized=" + value
-                                + " range=[" + range.getMin() + "," + range.getMax() + "]"
-                                + " source=" + SDLControllerManager.describeSourceForLog(event.getSource()));
-                    }
                     SDLControllerManager.onNativeJoy(joystick.device_id, i, value);
                 }
                 for (int i = 0; i < joystick.hats.size() / 2; i++) {
                     int hatX = Math.round(event.getAxisValue(joystick.hats.get(2 * i).getAxis(), actionPointerIndex));
                     int hatY = Math.round(event.getAxisValue(joystick.hats.get(2 * i + 1).getAxis(), actionPointerIndex));
-                    if (joystick.lastHatXValues[i] != hatX || joystick.lastHatYValues[i] != hatY) {
-                        Log.d(SDLControllerManager.TAG, "motion hat deviceId=" + joystick.device_id
-                                + " hatIndex=" + i
-                                + " x=" + hatX
-                                + " y=" + hatY
-                                + " source=" + SDLControllerManager.describeSourceForLog(event.getSource()));
-                        joystick.lastHatXValues[i] = hatX;
-                        joystick.lastHatYValues[i] = hatY;
-                    }
                     SDLControllerManager.onNativeHat(joystick.device_id, i, hatX, hatY);
                 }
-            } else {
-                Log.d(SDLControllerManager.TAG, "motion ignored for unregistered deviceId=" + event.getDeviceId()
-                        + " source=" + SDLControllerManager.describeSourceForLog(event.getSource())
-                        + " device=" + SDLControllerManager.describeDeviceForLog(event.getDeviceId()));
             }
         }
         return true;
-    }
-
-    private boolean shouldLogAxisValue(SDLJoystick joystick, int axisIndex, float value) {
-        float previousValue = joystick.lastAxisValues[axisIndex];
-        joystick.lastAxisValues[axisIndex] = value;
-
-        if (Float.isNaN(previousValue)) {
-            return true;
-        }
-
-        if (Math.abs(previousValue - value) >= 0.05f) {
-            return true;
-        }
-
-        boolean previousActive = Math.abs(previousValue) >= 0.20f;
-        boolean currentActive = Math.abs(value) >= 0.20f;
-        return previousActive != currentActive;
     }
 
     public String getJoystickDescriptor(InputDevice joystickDevice) {
@@ -667,13 +546,15 @@ class SDLHapticHandler {
             if (haptic == null) {
                 InputDevice device = InputDevice.getDevice(deviceIds[i]);
                 Vibrator vib = device.getVibrator();
-                if (vib.hasVibrator()) {
-                    haptic = new SDLHaptic();
-                    haptic.device_id = deviceIds[i];
-                    haptic.name = device.getName();
-                    haptic.vib = vib;
-                    mHaptics.add(haptic);
-                    SDLControllerManager.nativeAddHaptic(haptic.device_id, haptic.name);
+                if (vib != null) {
+                    if (vib.hasVibrator()) {
+                        haptic = new SDLHaptic();
+                        haptic.device_id = deviceIds[i];
+                        haptic.name = device.getName();
+                        haptic.vib = vib;
+                        mHaptics.add(haptic);
+                        SDLControllerManager.nativeAddHaptic(haptic.device_id, haptic.name);
+                    }
                 }
             }
         }

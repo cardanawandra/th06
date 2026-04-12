@@ -188,12 +188,12 @@
 
 #define TH_EN_UNKNOWN_SPELLCARD "??????"
 
-#define TH_EN_CM_DAT_FILE "CM.dat"
-#define TH_EN_ED_DAT_FILE "ED.dat"
-#define TH_EN_IN_DAT_FILE "IN.dat"
-#define TH_EN_MD_DAT_FILE "MD.dat"
-#define TH_EN_ST_DAT_FILE "ST.dat"
-#define TH_EN_TL_DAT_FILE "TL.dat"
+#define TH_EN_CM_DAT_FILE "紅魔郷CM.dat"
+#define TH_EN_ED_DAT_FILE "紅魔郷ED.dat"
+#define TH_EN_IN_DAT_FILE "紅魔郷IN.dat"
+#define TH_EN_MD_DAT_FILE "紅魔郷MD.dat"
+#define TH_EN_ST_DAT_FILE "紅魔郷ST.dat"
+#define TH_EN_TL_DAT_FILE "紅魔郷TL.dat"
 #define TH_CONCAT_HELPER(x, y) x##y
 
 #define TH_MAKE_LANG_STR(lang, id) TH_CONCAT_HELPER(lang, id)
