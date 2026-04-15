@@ -1,5 +1,6 @@
 package org.libsdl.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -73,8 +74,8 @@ import java.util.Locale;
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 2;
-    private static final int SDL_MINOR_VERSION = 30;
-    private static final int SDL_MICRO_VERSION = 0;
+    private static final int SDL_MINOR_VERSION = 32;
+    private static final int SDL_MICRO_VERSION = 8;
 /*
     // Display InputType.SOURCE/CLASS of events and devices
     //
@@ -330,6 +331,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     }
 
     // Setup
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.v(TAG, "Device: " + Build.DEVICE);
@@ -492,6 +494,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         Button btnZ = findViewById(R.id.btnZ);
         Button btnX = findViewById(R.id.btnX);
         Button btnShift = findViewById(R.id.btnShift);
+        Button btnShiftZ = findViewById(R.id.btnShiftZ);
         Button btnEsc = findViewById(R.id.btnEsc);
 
         btnZ.setOnTouchListener((v, event) -> {
@@ -508,6 +511,17 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 sendKeyDown(KeyEvent.KEYCODE_X);
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 sendKeyUp(KeyEvent.KEYCODE_X);
+            }
+            return true;
+        });
+
+        btnShiftZ.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                sendKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT);
+                sendKeyDown(KeyEvent.KEYCODE_Z);
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                sendKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT);
+                sendKeyUp(KeyEvent.KEYCODE_Z);
             }
             return true;
         });

@@ -2,24 +2,27 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.th06.game"
-    compileSdkVersion 34
-    ndkVersion "21.4.7075529"
+    compileSdkVersion 36
+    ndkVersion "29.0.14206865"
 
     defaultConfig {
         applicationId "com.th06.game"
-        minSdkVersion 23
-        targetSdkVersion 34
+        minSdkVersion 24
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_STL=c++_static"
+//                arguments "APP_PLATFORM=android-24"
                 // armeabi-v7a only: game file format requires sizeof(void*)==4
-//                abiFilters 'arm64-v8a', 'armeabi-v7a'
+                 abiFilters 'armeabi-v7a', 'arm64-v8a'
             }
         }
     }
     buildTypes {
+        debug {
+            debuggable true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

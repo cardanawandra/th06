@@ -9,6 +9,7 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "utils.hpp"
+#include <SDL.h>
 
 namespace EnemyEclInstr
 {
@@ -231,7 +232,9 @@ i32 *GetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
 
 f32 *GetVarFloat(Enemy *enemy, f32 *eclVarId, EclValueType *valueType)
 {
-    i32 varId = *eclVarId;
+    //TODO : cek benar
+    i32 varId;
+    std::memcpy(&varId, eclVarId, sizeof(varId));
     i32 *res = GetVar(enemy, (EclVarId *)&varId, valueType);
     if (res == &varId)
     {

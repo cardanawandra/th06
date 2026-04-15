@@ -12,6 +12,7 @@
 #include "Rng.hpp"
 #include "Stage.hpp"
 #include "utils.hpp"
+#include <SDL.h>
 
 i32 g_SpellcardScore[64] = {200000, 200000, 200000, 200000, 200000, 200000, 200000, 250000, 250000, 250000, 250000,
                             250000, 250000, 250000, 300000, 300000, 300000, 300000, 300000, 300000, 300000, 300000,
@@ -103,7 +104,6 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
         {
             goto HANDLE_INTERRUPT;
         }
-
     YOLO:
         if (enemy->currentContext.time.current == instruction->time)
         {
@@ -113,6 +113,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
+            SDL_Log("ECL Manager : %d",instruction->opCode);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -304,7 +305,12 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                                                      args->anmSetSlot.scriptIdx + ANM_SCRIPT_ENEMY_START);
                 break;
             case ECL_OPCODE_MOVEPOSITION:
-                enemy->position = instruction->args.move.pos;
+//                SDL_Log("ECL_OPCODE_MOVEPOSITION 1");
+                {
+                    ZunVec3 tmp = instruction->args.move.pos;
+//                    SDL_Log("ECL_OPCODE_MOVEPOSITION 1.5");
+                    enemy->position = tmp;
+                }
                 enemy->position.x = *EnemyEclInstr::GetVarFloat(enemy, &enemy->position.x, NULL);
                 enemy->position.y = *EnemyEclInstr::GetVarFloat(enemy, &enemy->position.y, NULL);
                 enemy->position.z = *EnemyEclInstr::GetVarFloat(enemy, &enemy->position.z, NULL);
@@ -478,8 +484,8 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             case ECL_OPCODE_LASERROTATE:
                 if (enemy->lasers[instruction->args.laserOp.laserIdx] != NULL)
                 {
-                    enemy->lasers[instruction->args.laserOp.laserIdx]->angle +=
-                        *EnemyEclInstr::GetVarFloat(enemy, &instruction->args.laserOp.arg1.x, NULL);
+                    f32 tmp = *EnemyEclInstr::GetVarFloat(enemy, &instruction->args.laserOp.arg1.x, NULL);
+                    enemy->lasers[instruction->args.laserOp.laserIdx]->angle += tmp;
                 }
                 break;
             case ECL_OPCODE_LASERROTATEFROMPLAYER:
@@ -540,6 +546,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 }
                 break;
             case ECL_OPCODE_SPELLCARDEFFECT:
+                if(true)break;
                 local_6c = &instruction->args.spellcardEffect;
                 enemy->effectArray[enemy->effectIdx] = g_EffectManager.SpawnParticles(
                     0xd, &enemy->position, 1, (ZunColor)g_EffectsColor[local_6c->effectColorId]);
@@ -920,6 +927,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
         }
         else
         {
+            // SDL_Log("ECL Manager : flags unk1 %d",enemy->flags.unk1);
             switch (enemy->flags.unk1)
             {
             case 1:

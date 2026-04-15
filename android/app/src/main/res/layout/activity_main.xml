@@ -7,16 +7,36 @@
         android:id="@+id/joystick"
         android:layout_width="200dp"
         android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_centerVertical="true" />
-
+        android:layout_margin="30dp" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
+        android:layout_margin="30dp"
         android:orientation="vertical">
 
+        <Button
+            android:id="@+id/btnEsc"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="ESC" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="30dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnShiftZ"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="SHIFT + Z" />
         <Button
             android:id="@+id/btnShift"
             android:layout_width="80dp"
@@ -34,12 +54,6 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="X" />
-
-        <Button
-            android:id="@+id/btnEsc"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:text="ESC" />
     </LinearLayout>
 
 </RelativeLayout>

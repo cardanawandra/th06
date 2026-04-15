@@ -3,10 +3,7 @@
 
 #include <new>
 #include <iostream>
-void chaindlog(std::string msg){
-    std::cout<<"chain : "<<msg<<std::endl;
-}
-
+#include <SDL.h>
 Chain g_Chain;
 
 Chain::~Chain()
@@ -46,15 +43,15 @@ Chain::Chain()
 
 int Chain::AddToCalcChain(ChainElem *elem, int priority)
 {
-    //chaindlog("init");
+    //-SDL_Log("Chain : init");
     ChainElem *cur;
 
     cur = &this->calcChain;
-    //chaindlog("debug print 2");
+    //-SDL_Log("Chain : debug print 2");
     utils::DebugPrint2("add calc chain (pri = %d)\n", priority);
     elem->priority = priority;
 
-    //chaindlog("while 1");
+    //-SDL_Log("Chain : while 1");
     while (cur->next != NULL)
     {
         if (cur->priority > priority)
@@ -65,7 +62,7 @@ int Chain::AddToCalcChain(ChainElem *elem, int priority)
         cur = cur->next;
     }
 
-    //chaindlog("while 2");
+    //-SDL_Log("Chain : while 2");
     if (cur->priority > priority)
     {
         elem->next = cur;
@@ -85,19 +82,19 @@ int Chain::AddToCalcChain(ChainElem *elem, int priority)
         cur->next = elem;
     }
 
-    //chaindlog("addedCallback check");
+    //-SDL_Log("Chain : addedCallback check");
     if (elem->addedCallback != NULL)
     {
-        //chaindlog("addedCallback set");
+        //-SDL_Log("Chain : addedCallback set");
         int res = elem->addedCallback(elem->arg);
         elem->addedCallback = NULL;
 
-        //chaindlog("finish");
+        //-SDL_Log("Chain : finish success");
         return res;
     }
     else
     {
-        //chaindlog("finish");
+        //-SDL_Log("Chain : finish error");
         return 0;
     }
 }
@@ -164,6 +161,7 @@ restart_from_first_job:
         if (current->callback != NULL)
         {
         execute_again:
+            // SDL_Log("Chain Execute Calc");
             switch (current->callback(current->arg))
             {
             case CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB:
@@ -198,7 +196,7 @@ restart_from_first_job:
 
         current = current->next;
     }
-
+    // SDL_Log("Chain Execute Calc done");
     return updatedCount;
 }
 
@@ -216,6 +214,7 @@ int Chain::RunDrawChain(void)
         if (current->callback != NULL)
         {
         execute_again:
+//            SDL_Log("Chain Execute Draw");
             switch (current->callback(current->arg))
             {
             case CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB:
@@ -247,6 +246,7 @@ int Chain::RunDrawChain(void)
 
         current = current->next;
     }
+//    SDL_Log("Chain Execute Draw Done");
 
     return updatedCount;
 }

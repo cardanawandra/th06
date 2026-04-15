@@ -9,7 +9,7 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "utils.hpp"
-
+#include <SDL.h>
 #define ITEM_SPAWNS 3
 #define ITEM_TABLES 8
 
@@ -86,6 +86,7 @@ EnemyManager::EnemyManager()
 
 Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i16 life, i16 itemDrop, i32 score)
 {
+    //-SDL_Log("Enemy Manager : spawn");
     Enemy *newEnemy;
     i32 idx;
 
@@ -93,16 +94,22 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i16 life, i16 itemDr
     idx = 0;
     for (; idx < ARRAY_SIZE_SIGNED(this->enemies) - 1; idx++, newEnemy++)
     {
+        //-SDL_Log("Enemy Manager : spawn for loop array signed");
         if (newEnemy->flags.active)
             continue;
 
+        //-SDL_Log("Enemy Manager : this->enemyTemplate");
         *newEnemy = this->enemyTemplate;
 
+        //-SDL_Log("Enemy Manager : newEnemy->life");
         if (0 <= life)
             newEnemy->life = life;
 
+        //-SDL_Log("Enemy Manager : newEnemy->position");
         newEnemy->position = *pos;
+        //-SDL_Log("Enemy Manager : newEnemy->CallEclSub");
         g_EclManager.CallEclSub(&newEnemy->currentContext, eclSubId);
+        //-SDL_Log("Enemy Manager : newEnemy->RunEcl");
         g_EclManager.RunEcl(newEnemy);
         newEnemy->color = newEnemy->primaryVm.color;
         newEnemy->itemDrop = itemDrop;
@@ -116,6 +123,7 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i16 life, i16 itemDr
         newEnemy->maxLife = newEnemy->life;
         break;
     }
+    //-SDL_Log("Enemy Manager : spawn success");
     return newEnemy;
 }
 
@@ -152,6 +160,7 @@ void EnemyManager::RunEclTimeline()
     {
         this->timelineInstr = g_EclManager.timeline;
     }
+    //-SDL_Log("Enemy Manager : g_Gui.HasCurrentMsgIdx");
     if (g_Gui.HasCurrentMsgIdx() == 0)
     {
         // Unclear what this is? It looks like it increases the subrank at
@@ -159,15 +168,18 @@ void EnemyManager::RunEclTimeline()
         // number of lives lost?
         subrankIncreaseFrame = 10 * 4 * 60;
         subrankIncreaseFrame -= g_GameManager.livesRemaining * 4 * 60;
+        //-SDL_Log("Enemy Manager : g_GameManager.IncreaseSubrank");
         if (this->timelineTime.HasTicked() && this->timelineTime.AsFrames() % subrankIncreaseFrame == 0)
         {
             g_GameManager.IncreaseSubrank(100);
         }
+        //-SDL_Log("Enemy Manager : done");
     }
     while (0 <= this->timelineInstr->time)
     {
         if (this->timelineTime.current == this->timelineInstr->time)
         {
+            // SDL_Log("Enemy Manager : OP CODE %d",this->timelineInstr->opCode);
             switch (this->timelineInstr->opCode)
             {
             case 0:
@@ -319,15 +331,20 @@ void EnemyManager::RunEclTimeline()
         }
         else if (this->timelineTime.current < this->timelineInstr->time)
         {
+            //-SDL_Log("Enemy Manager : this->timelineTime.current < this->timelineInstr->time");
             break;
         }
 
+        //-SDL_Log("Enemy Manager : this->timelineInstr = (EclTimelineInstr *)(((u8 *)this->timelineInstr) + this->timelineInstr->size);");
         this->timelineInstr = (EclTimelineInstr *)(((u8 *)this->timelineInstr) + this->timelineInstr->size);
+        //-SDL_Log("Enemy Manager : while this->timelineInstr->time done");
     }
+    //-SDL_Log("Enemy Manager : !g_Gui.HasCurrentMsgIdx");
     if (!g_Gui.HasCurrentMsgIdx())
     {
         g_GameManager.counat++;
     }
+    // SDL_Log("Enemy Manager : !g_Gui.HasCurrentMsgIdx done");
     return;
 }
 
@@ -521,6 +538,7 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
     bool local_8;
 
     local_8 = false;
+    // SDL_Log("EnemyManager : RunEclTimeline");
     mgr->RunEclTimeline();
     for (curEnemy = &mgr->enemies[0], mgr->enemyCount = 0, enemyIdx = 0; enemyIdx < ARRAY_SIZE_SIGNED(mgr->enemies) - 1;
          enemyIdx++, curEnemy++)
@@ -731,7 +749,10 @@ ChainCallbackResult EnemyManager::OnUpdate(EnemyManager *mgr)
             curEnemy->bossTimer.Tick();
         }
     }
+    //--SDL_Log("EnemyManager : for loop done");
+    //--SDL_Log("EnemyManager : timelineTime.Tick");
     mgr->timelineTime.Tick();
+    // SDL_Log("EnemyManager : timelineTime.Tick done");
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
