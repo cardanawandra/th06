@@ -63,6 +63,12 @@ import android.widget.Button;
 import android.view.LayoutInflater;
 import com.th06.game.JoystickView;
 import com.th06.game.R;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import android.content.res.AssetManager;
 
 import java.util.Hashtable;
 import java.util.Locale;
@@ -330,10 +336,48 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         return new SDLSurface(context);
     }
 
+    public void ensureAssetFile(Context context, String assetFileName, String outFileName) {
+        File outFile = new File(context.getExternalFilesDir(null), outFileName);
+
+        // ✅ Check if file already exists
+        if (outFile.exists()) {
+            return; // File already there, do nothing
+        }
+
+        AssetManager assetManager = context.getAssets();
+
+        try (InputStream in = assetManager.open(assetFileName);
+            OutputStream out = new FileOutputStream(outFile)) {
+
+            byte[] buffer = new byte[1024];
+            int read;
+
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+            out.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // Setup
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        ensureAssetFile(this, "IN.DAT", "紅魔郷IN.DAT");
+        ensureAssetFile(this, "MD.DAT", "紅魔郷MD.DAT");
+        ensureAssetFile(this, "ST.DAT", "紅魔郷ST.DAT");
+        ensureAssetFile(this, "TL.DAT", "紅魔郷TL.DAT");
+        ensureAssetFile(this, "CM.DAT", "紅魔郷CM.DAT");
+        ensureAssetFile(this, "ED.DAT", "紅魔郷ED.DAT");
+
+        ensureAssetFile(this, "th06.ttc", "th06.ttc");
+
+
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
         Log.v(TAG, "onCreate()");
