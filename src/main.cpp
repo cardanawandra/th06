@@ -1,4 +1,3 @@
-#include "sdl2_compat.hpp"
 #include <SDL.h>
 #include <stdio.h>
 
@@ -9,7 +8,6 @@
 #include "GameErrorContext.hpp"
 #include "GamePaths.hpp"
 #include "GameWindow.hpp"
-#include "IRenderer.hpp"
 #include "MidiOutput.hpp"
 #include "SoundPlayer.hpp"
 #include "Stage.hpp"

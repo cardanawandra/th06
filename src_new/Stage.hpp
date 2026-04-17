@@ -1,0 +1,136 @@
+#pragma once
+
+#include "AnmVm.hpp"
+#include "Chain.hpp"
+#include "ZunTimer.hpp"
+#include "inttypes.hpp"
+// #include "zwave.hpp"
+// #include <d3d8.h>
+// #include <d3dx8math.h>
+
+struct RawStageHeader
+{
+    i16 nbObjects;
+    i16 nbFaces;
+    i32 facesOffset;
+    i32 scriptOffset;
+    i32 unk_c;
+    char stageName[128];
+    char songNames[4][128];
+    char songPaths[4][128];
+};
+
+struct RawStageQuadBasic
+{
+    i16 type;
+    i16 byteSize;
+    i16 anmScript;
+    i16 vmIdx;
+    ZunVec3 position;
+    ZunVec2 size;
+};
+
+struct RawStageObject
+{
+    i16 id;
+    i8 zLevel;
+    i8 flags;
+    ZunVec3 position;
+    ZunVec3 size;
+    RawStageQuadBasic firstQuad;
+};
+
+struct RawStageObjectInstance
+{
+    i16 id;
+    i16 unk2;
+    ZunVec3 position;
+};
+
+struct RawStageInstr
+{
+    i32 frame;
+    i16 opcode;
+    i16 size;
+    i32 args[3];
+};
+
+struct StageCameraSky
+{
+    f32 nearPlane;
+    f32 farPlane;
+    ZunColor color;
+};
+
+enum SpellcardState
+{
+    NOT_RUNNING,
+    RUNNING,
+    RAN_FOR_60_FRAMES
+};
+
+struct StageFile
+{
+    char *anmFile;
+    char *stdFile;
+};
+
+enum StageOpcode
+{
+    STDOP_CAMERA_POSITION_KEY,
+    STDOP_FOG,
+    STDOP_CAMERA_FACING,
+    STDOP_CAMERA_FACING_INTERP_LINEAR,
+    STDOP_FOG_INTERP,
+    STDOP_PAUSE,
+};
+
+struct Stage
+{
+    Stage();
+    static ZunResult RegisterChain(u32 stage);
+    static void CutChain();
+    static ChainCallbackResult OnUpdate(Stage *stage);
+    static ChainCallbackResult OnDrawHighPrio(Stage *stage);
+    static ChainCallbackResult OnDrawLowPrio(Stage *stage);
+    static ZunResult AddedCallback(Stage *stage);
+    static ZunResult DeletedCallback(Stage *stage);
+
+    ZunResult LoadStageData(char *anmpath, char *stdpath);
+    ZunResult UpdateObjects();
+    ZunResult RenderObjects(i32 zLevel);
+
+    AnmVm *quadVms;
+    RawStageHeader *stdData;
+    i32 quadCount;
+    i32 objectsCount;
+    RawStageObject **objects;
+    RawStageObjectInstance *objectInstances;
+    RawStageInstr *beginningOfScript;
+    ZunTimer scriptTime;
+    i32 instructionIndex;
+    ZunTimer timer;
+    u32 stage;
+    ZunVec3 position;
+    StageCameraSky skyFog;
+    StageCameraSky skyFogInterpInitial;
+    StageCameraSky skyFogInterpFinal;
+    i32 skyFogInterpDuration;
+    ZunTimer skyFogInterpTimer;
+    i8 skyFogNeedsSetup;
+    SpellcardState spellcardState;
+    i32 ticksSinceSpellcardStarted;
+    AnmVm spellcardBackground;
+    AnmVm unk2;
+    u8 unpauseFlag;
+    ZunVec3 facingDirInterpInitial;
+    ZunVec3 facingDirInterpFinal;
+    i32 facingDirInterpDuration;
+    ZunTimer facingDirInterpTimer;
+    ZunVec3 positionInterpFinal;
+    i32 positionInterpEndTime;
+    ZunVec3 positionInterpInitial;
+    i32 positionInterpStartTime;
+};
+
+extern Stage g_Stage;

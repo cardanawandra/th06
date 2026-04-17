@@ -10,7 +10,6 @@
 #include "Rng.hpp"
 #include "utils.hpp"
 #include <SDL.h>
-
 namespace EnemyEclInstr
 {
 #define MAX_BOSS_TIME 7200
@@ -232,9 +231,8 @@ i32 *GetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
 
 f32 *GetVarFloat(Enemy *enemy, f32 *eclVarId, EclValueType *valueType)
 {
-    //TODO : cek benar
-    i32 varId;
-    std::memcpy(&varId, eclVarId, sizeof(varId));
+
+    i32 varId = uf32(eclVarId);
     i32 *res = GetVar(enemy, (EclVarId *)&varId, valueType);
     if (res == &varId)
     {
@@ -269,118 +267,101 @@ void MathAdd(Enemy *enemy, EclVarId outVarId, EclVarId *lhsVarId, EclVarId *rhsV
 {
     EclValueType outType;
     i32 *outPtr;
-    i32 *lhsPtr;
-    i32 *rhsPtr;
 
     // Get output variable.
     outPtr = GetVar(enemy, &outVarId, &outType);
     if (outType == ECL_VALUE_TYPE_INT)
     {
-        lhsPtr = GetVar(enemy, lhsVarId, NULL);
-        rhsPtr = GetVar(enemy, rhsVarId, NULL);
+        i32 *lhsPtr = GetVar(enemy, lhsVarId, NULL);
+        i32 *rhsPtr = GetVar(enemy, rhsVarId, NULL);
         *outPtr = *lhsPtr + *rhsPtr;
     }
     else if (outType == ECL_VALUE_TYPE_FLOAT)
     {
-        lhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
-        rhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
-        *(f32 *)outPtr = *(f32 *)lhsPtr + *(f32 *)rhsPtr;
+        f32 lhsPtr = *GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
+        f32 rhsPtr = *GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
+        *(f32 *)outPtr = lhsPtr + rhsPtr;
     }
-    return;
 }
 
 void MathSub(Enemy *enemy, EclVarId outVarId, EclVarId *lhsVarId, EclVarId *rhsVarId)
 {
     EclValueType outType;
     i32 *outPtr;
-    i32 *lhsPtr;
-    i32 *rhsPtr;
 
     outPtr = GetVar(enemy, &outVarId, &outType);
     if (outType == ECL_VALUE_TYPE_INT)
     {
-        lhsPtr = GetVar(enemy, lhsVarId, NULL);
-        rhsPtr = GetVar(enemy, rhsVarId, NULL);
+        i32 *lhsPtr = GetVar(enemy, lhsVarId, NULL);
+        i32 *rhsPtr = GetVar(enemy, rhsVarId, NULL);
         *outPtr = *lhsPtr - *rhsPtr;
     }
     else if (outType == ECL_VALUE_TYPE_FLOAT)
     {
-        lhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
-        rhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
-        *(f32 *)outPtr = *(f32 *)lhsPtr - *(f32 *)rhsPtr;
+        f32 lhsPtr = *GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
+        f32 rhsPtr = *GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
+        *(f32 *)outPtr = lhsPtr - rhsPtr;
     }
-    return;
 }
 
 void MathMul(Enemy *enemy, EclVarId outVarId, EclVarId *lhsVarId, EclVarId *rhsVarId)
 {
     EclValueType outType;
     i32 *outPtr;
-    i32 *lhsPtr;
-    i32 *rhsPtr;
 
-    lhsPtr = GetVar(enemy, lhsVarId, NULL);
-    rhsPtr = GetVar(enemy, rhsVarId, NULL);
     outPtr = GetVar(enemy, &outVarId, &outType);
     if (outType == ECL_VALUE_TYPE_INT)
     {
-        lhsPtr = GetVar(enemy, lhsVarId, NULL);
-        rhsPtr = GetVar(enemy, rhsVarId, NULL);
+        i32 *lhsPtr = GetVar(enemy, lhsVarId, NULL);
+        i32 *rhsPtr = GetVar(enemy, rhsVarId, NULL);
         *outPtr = *lhsPtr * *rhsPtr;
     }
     else if (outType == ECL_VALUE_TYPE_FLOAT)
     {
-        lhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
-        rhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
-        *(f32 *)outPtr = *(f32 *)lhsPtr * *(f32 *)rhsPtr;
+        f32 lhsPtr = *GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
+        f32 rhsPtr = *GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
+        *(f32 *)outPtr = lhsPtr * rhsPtr;
     }
-    return;
 }
 
 void MathDiv(Enemy *enemy, EclVarId outVarId, EclVarId *lhsVarId, EclVarId *rhsVarId)
 {
     EclValueType outType;
     i32 *outPtr;
-    i32 *lhsPtr;
-    i32 *rhsPtr;
 
     outPtr = GetVar(enemy, &outVarId, &outType);
     if (outType == ECL_VALUE_TYPE_INT)
     {
-        lhsPtr = GetVar(enemy, lhsVarId, NULL);
-        rhsPtr = GetVar(enemy, rhsVarId, NULL);
+        i32 *lhsPtr = GetVar(enemy, lhsVarId, NULL);
+        i32 *rhsPtr = GetVar(enemy, rhsVarId, NULL);
         *outPtr = *lhsPtr / *rhsPtr;
     }
     else if (outType == ECL_VALUE_TYPE_FLOAT)
     {
-        lhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
-        rhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
-        *(f32 *)outPtr = *(f32 *)lhsPtr / *(f32 *)rhsPtr;
+        f32 lhsPtr = *GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
+        f32 rhsPtr = *GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
+        *(f32 *)outPtr = lhsPtr / rhsPtr;
     }
-    return;
 }
 
 void MathMod(Enemy *enemy, EclVarId outVarId, EclVarId *lhsVarId, EclVarId *rhsVarId)
 {
     EclValueType outType;
     i32 *outPtr;
-    i32 *lhsPtr;
-    i32 *rhsPtr;
 
     outPtr = GetVar(enemy, &outVarId, &outType);
     if (outType == ECL_VALUE_TYPE_INT)
     {
-        lhsPtr = GetVar(enemy, lhsVarId, NULL);
-        rhsPtr = GetVar(enemy, rhsVarId, NULL);
+        i32 *lhsPtr = GetVar(enemy, lhsVarId, NULL);
+        i32 *rhsPtr = GetVar(enemy, rhsVarId, NULL);
         *outPtr = *lhsPtr % *rhsPtr;
     }
     else if (outType == ECL_VALUE_TYPE_FLOAT)
     {
-        lhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
-        rhsPtr = (i32 *)GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
-        *(f32 *)outPtr = ZUN_FMODF(*(f32 *)lhsPtr, *(f32 *)rhsPtr);
+        f32 lhsPtr = *GetVarFloat(enemy, (f32 *)lhsVarId, NULL);
+        f32 rhsPtr = *GetVarFloat(enemy, (f32 *)rhsVarId, NULL);
+        *(f32 *)outPtr = ZUN_FMODF(lhsPtr, rhsPtr);
     }
-    return;
 }
 
 void MathAtan2(Enemy *enemy, EclVarId outVarId, f32 *x1, f32 *y1, f32 *y2, f32 *x2)

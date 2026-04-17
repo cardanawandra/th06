@@ -86,7 +86,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/BulletData.cpp
     ${TH06_ROOT}/src/BulletManager.cpp
     ${TH06_ROOT}/src/Chain.cpp
-    ${TH06_ROOT}/src/CMyFont.cpp
     ${TH06_ROOT}/src/Controller.cpp
     ${TH06_ROOT}/src/EclManager.cpp
     ${TH06_ROOT}/src/EffectManager.cpp
@@ -114,7 +113,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/TextHelper.cpp
     ${TH06_ROOT}/src/utils.cpp
     ${TH06_ROOT}/src/ZunTimer.cpp
-    # ${TH06_ROOT}/src/zwave.cpp
     # GLES renderer only (no fixed-function RendererGL on Android)
     # ${TH06_ROOT}/src/RendererGLES.cpp
     # sdl2_renderer.cpp is EXCLUDED: uses GL 1.x fixed-function calls
@@ -127,14 +125,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
     ${TH06_ROOT}/src/graphics/FixedFunctionGL.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
-    # ImGui core
-    ${TH06_ROOT}/3rdparty/imgui/imgui.cpp
-    ${TH06_ROOT}/3rdparty/imgui/imgui_draw.cpp
-    ${TH06_ROOT}/3rdparty/imgui/imgui_tables.cpp
-    ${TH06_ROOT}/3rdparty/imgui/imgui_widgets.cpp
-    # ImGui SDL2 + OpenGL3/ES backend (NOT opengl2 — it uses fixed-function)
-    ${TH06_ROOT}/3rdparty/imgui/imgui_impl_sdl.cpp
-    ${TH06_ROOT}/3rdparty/imgui/imgui_impl_opengl3.cpp
 )
 
 add_library(main SHARED ${TH06_GAME_SOURCES})

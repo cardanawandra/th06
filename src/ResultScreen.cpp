@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <SDL.h>
 
 f32 g_DifficultyWeightsList[5] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
 
@@ -579,12 +580,15 @@ i32 ResultScreen::HandleResultKeyboard()
         }
 
         this->hscr.base.unk_9 = 1;
+        
+        SDL_Log("strcpy 1");
         std::strcpy(this->hscr.name, "        ");
 
         if (this->LinkScoreEx(&this->hscr, this->diffSelected, this->charUsed * 2 + g_GameManager.shotType) >= 10)
             goto RETURN_TO_STATS_SCREEN_WITHOUT_SOUND;
 
         this->cursor = 0;
+        SDL_Log("strcpy 2");
         std::strcpy(this->replayName, "");
     }
     if (this->frameTimer < 30)
@@ -725,7 +729,9 @@ i32 ResultScreen::HandleResultKeyboard()
         {
             sprite->pendingInterrupt = 2;
         }
-        std::strcpy(this->replayName, this->hscr.name);
+        SDL_Log("strcpy 3");
+        std::snprintf(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
+//        std::strcpy(this->replayName, this->hscr.name);
     }
     return 0;
 }
@@ -1777,6 +1783,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfff0f0ff;
 
+                            SDL_Log("strcpy 4");
                             std::strcpy(name, "        ");
                             name[8] = 0;
 
@@ -1824,6 +1831,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfffff0f0;
 
+                            SDL_Log("strcpy 5");
                             std::strcpy(name, "        ");
                             name[8] = 0;
 
@@ -2001,6 +2009,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                                              resultScreen->defaultReplay.score);
                 g_AsciiManager.color = 0xfff0f0ff;
 
+                SDL_Log("strcpy 6");
                 std::strcpy(name, "        ");
 
                 name[8] = 0;
@@ -2106,6 +2115,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
 
                 resultScreen->LinkScoreEx(resultScreen->defaultScore[i][characterShot] + slot, i, characterShot);
 
+                SDL_Log("strcpy 7");
                 std::strcpy(resultScreen->defaultScore[i][characterShot][slot].name, DEFAULT_HIGH_SCORE_NAME);
             }
         }

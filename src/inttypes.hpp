@@ -12,3 +12,15 @@ typedef std::uint64_t u64;
 typedef std::intptr_t iptr;
 typedef float f32;
 typedef double f64;
+
+inline f32 uf32(const f32* ptr) {
+    u32 temp = *(const u32*)ptr;
+    __asm__ volatile ("":"+r"(temp));
+    return __builtin_bit_cast(float, temp);
+}
+
+inline u32 uu32(const u32* ptr) {
+    u32 temp = *(const u32*)ptr;
+    __asm__ volatile ("":"+r"(temp));
+    return __builtin_bit_cast(std::uint32_t, temp);
+}

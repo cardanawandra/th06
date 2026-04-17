@@ -5,8 +5,8 @@
 
     <com.th06.game.JoystickView
         android:id="@+id/joystick"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_margin="30dp" />
@@ -33,15 +33,16 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnShiftZ"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="SHIFT + Z" />
-        <Button
             android:id="@+id/btnShift"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="SHIFT" />
+
+        <Button
+            android:id="@+id/btnShiftZ"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="SHIFT + Z" />
 
         <Button
             android:id="@+id/btnZ"

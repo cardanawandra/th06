@@ -21,7 +21,6 @@
 #include "Supervisor.hpp"
 #include "i18n.hpp"
 #include "utils.hpp"
-#include <SDL.h>
 
 Player g_Player;
 
@@ -251,7 +250,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 }
                 else
                 {
-//                    g_GameManager.livesRemaining--;
+                    g_GameManager.livesRemaining--;
                     g_Gui.flags.flag0 = 2;
                     if (g_GameManager.difficulty < 4 && g_GameManager.isInPracticeMode == 0)
                     {
@@ -602,31 +601,24 @@ ChainCallbackResult Player::OnDrawHighPrio(Player *p)
         if (p->orbState != ORB_HIDDEN &&
             (p->playerState == PLAYER_STATE_ALIVE || p->playerState == PLAYER_STATE_INVULNERABLE))
         {
-            //-SDL_Log("Player::OnDrawHighPrio 1");
             p->orbsSprite[0].pos = p->orbsPosition[0];
             p->orbsSprite[0].pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
             p->orbsSprite[0].pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
             p->orbsSprite[0].pos.z = 0.491;
-            //-SDL_Log("Player::OnDrawHighPrio 2");
             p->orbsSprite[1].pos = p->orbsPosition[1];
             p->orbsSprite[1].pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
             p->orbsSprite[1].pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
             p->orbsSprite[1].pos.z = 0.491;
-            //-SDL_Log("Player::OnDrawHighPrio orbsSprite[0]");
             g_AnmManager->Draw(&p->orbsSprite[0]);
-            //-SDL_Log("Player::OnDrawHighPrio orbsSprite[1]");
             g_AnmManager->Draw(&p->orbsSprite[1]);
         }
     }
-    //-SDL_Log("Player::OnDrawHighPrio done");
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
 ChainCallbackResult Player::OnDrawLowPrio(Player *p)
 {
-    //-SDL_Log("Player::OnDrawLowPrio");
     Player::DrawBulletExplosions(p);
-    //-SDL_Log("Player::OnDrawLowPrio done");
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 

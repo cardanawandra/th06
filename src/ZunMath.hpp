@@ -100,7 +100,7 @@ struct ZunVec2
     {
         return (f64)this->VectorLength();
     }
-} __attribute__((packed));
+};
 static_assert(sizeof(ZunVec2) == 0x08, "ZunVec2 has additional padding between struct members!");
 
 // Replacing all former uses of D3DXVECTOR3
@@ -211,7 +211,7 @@ struct ZunVec3
         bottomRightCorner->x = size->x / 2.0f + centerPosition->x;
         bottomRightCorner->y = size->y / 2.0f + centerPosition->y;
     }
-} __attribute__((packed));
+}__attribute__((packed));
 static_assert(sizeof(ZunVec3) == 0x0C, "ZunVec3 has additional padding between struct members!");
 
 struct ZunVec4
@@ -232,7 +232,7 @@ struct ZunVec4
         this->z = z;
         this->w = w;
     }
-} __attribute__((packed));
+};
 static_assert(sizeof(ZunVec4) == 0x10, "ZunVec4 has additional padding between struct members!");
 
 // Replacing all former uses of D3DXMATRIX
@@ -358,7 +358,7 @@ struct ZunMatrix
         this->m[3][2] = 0.0f;
         this->m[3][3] = 1.0f;
     }
-} __attribute__((packed));
+};
 static_assert(sizeof(ZunMatrix) == 0x40, "ZunMatrix has additional padding between struct members!");
 
 // A viewport using D3D conventions (x, y is the top left corner of the viewport)
