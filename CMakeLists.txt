@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(th06_sdl2 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Option: build with OpenGL ES 2.0 shader-based renderer instead of fixed-function GL
 option(USE_GLES "Build with OpenGL ES 2.0 renderer (RendererGLES) instead of fixed-function RendererGL" OFF)
@@ -93,34 +93,6 @@ if(TH06_USE_SDL2)
   endif()
 endif()
 
-add_executable(th06_sdl2_test src/sdl2_test.cpp)
-
-target_link_libraries(th06_sdl2_test PRIVATE
-    SDL2::SDL2main
-    SDL2::SDL2
-    SDL2_image::SDL2_image
-    SDL2_mixer::SDL2_mixer
-    SDL2_ttf::SDL2_ttf
-)
-
-if(WIN32)
-    add_custom_command(TARGET th06_sdl2_test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2.dll"
-            $<TARGET_FILE_DIR:th06_sdl2_test>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.dll"
-            $<TARGET_FILE_DIR:th06_sdl2_test>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_MIXER_DIR}/lib/${SDL2_ARCH}/SDL2_mixer.dll"
-            $<TARGET_FILE_DIR:th06_sdl2_test>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.dll"
-            $<TARGET_FILE_DIR:th06_sdl2_test>
-        COMMENT "复制 SDL2 DLL 到输出目录"
-    )
-endif()
-
 set(TH06_GAME_SOURCES
     src/main.cpp
     src/GLFunc.cpp
@@ -130,7 +102,6 @@ set(TH06_GAME_SOURCES
     src/BulletData.cpp
     src/BulletManager.cpp
     src/Chain.cpp
-    src/CMyFont.cpp
     src/Controller.cpp
     src/EclManager.cpp
     src/EffectManager.cpp
@@ -152,14 +123,12 @@ set(TH06_GAME_SOURCES
     src/ResultScreen.cpp
     src/Rng.cpp
     src/ScreenEffect.cpp
-    src/sdl2_renderer.cpp
     src/SoundPlayer.cpp
     src/Stage.cpp
     src/Supervisor.cpp
     src/TextHelper.cpp
     src/utils.cpp
     src/ZunTimer.cpp
-#    src/zwave.cpp
     # graphics n midi
     src/midi/MidiDefault.cpp
     src/graphics/FixedFunctionGL.cpp
@@ -169,12 +138,6 @@ set(TH06_GAME_SOURCES
     src/pbg3/IPbg3Parser.cpp
     src/pbg3/Pbg3Archive.cpp
     src/pbg3/Pbg3Parser.cpp
-    3rdparty/imgui/imgui.cpp
-    3rdparty/imgui/imgui_draw.cpp
-    3rdparty/imgui/imgui_tables.cpp
-    3rdparty/imgui/imgui_widgets.cpp
-    3rdparty/imgui/imgui_impl_sdl.cpp
-    3rdparty/imgui/imgui_impl_opengl2.cpp
 )
 
 # Always compile both renderers and both ImGui GL backends for runtime switching
