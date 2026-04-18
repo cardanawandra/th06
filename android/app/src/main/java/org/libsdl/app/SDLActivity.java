@@ -368,15 +368,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        ensureAssetFile(this, "IN.DAT", "紅魔郷IN.DAT");
-        ensureAssetFile(this, "MD.DAT", "紅魔郷MD.DAT");
-        ensureAssetFile(this, "ST.DAT", "紅魔郷ST.DAT");
-        ensureAssetFile(this, "TL.DAT", "紅魔郷TL.DAT");
-        ensureAssetFile(this, "CM.DAT", "紅魔郷CM.DAT");
-        ensureAssetFile(this, "ED.DAT", "紅魔郷ED.DAT");
-
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
-
 
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
