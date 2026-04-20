@@ -114,7 +114,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
-            SDL_Log("Ecl OPCODE : %d",instruction->opCode);
+//            SDL_Log("Ecl OPCODE : %d",instruction->opCode);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -319,39 +319,29 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 enemy->flags.unk1 = 0;
                 break;
             case ECL_OPCODE_MOVEVELOCITY:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->angle = *EnemyEclInstr::GetVarFloat(enemy, &local_8.x, NULL);
                 enemy->speed = *EnemyEclInstr::GetVarFloat(enemy, &local_8.y, NULL);
                 enemy->flags.unk1 = 1;
                 break;
             case ECL_OPCODE_MOVEANGULARVELOCITY:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->angularVelocity = *EnemyEclInstr::GetVarFloat(enemy, &local_8.x, NULL);
                 enemy->flags.unk1 = 1;
                 break;
             case ECL_OPCODE_MOVEATPLAYER:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->angle = g_Player.AngleToPlayer(&enemy->position) + local_8.x;
                 enemy->speed = *EnemyEclInstr::GetVarFloat(enemy, &local_8.y, NULL);
                 enemy->flags.unk1 = 1;
                 break;
             case ECL_OPCODE_MOVESPEED:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->speed = *EnemyEclInstr::GetVarFloat(enemy, &local_8.x, NULL);
                 enemy->flags.unk1 = 1;
                 break;
             case ECL_OPCODE_MOVEACCELERATION:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->acceleration = *EnemyEclInstr::GetVarFloat(enemy, &local_8.x, NULL);
                 enemy->flags.unk1 = 1;
                 break;
@@ -623,15 +613,11 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 enemy->flags.shouldClampPos = 0;
                 break;
             case ECL_OPCODE_MOVERAND:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->angle = g_Rng.GetRandomF32InRange(local_8.y - local_8.x) + local_8.x;
                 break;
             case ECL_OPCODE_MOVERANDINBOUND:
-                local_8.x = uf32(&instruction->args.move.pos.x);
-                local_8.y = uf32(&instruction->args.move.pos.y);
-                local_8.z = uf32(&instruction->args.move.pos.z);
+                local_8 = instruction->args.move.pos;
                 enemy->angle = g_Rng.GetRandomF32InRange(local_8.y - local_8.x) + local_8.x;
                 if (enemy->position.x < enemy->lowerMoveLimit.x + 96.0f)
                 {
