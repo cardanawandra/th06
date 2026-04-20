@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.th06.game.JoystickView
-        android:id="@+id/joystick"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="30dp" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,37 +17,118 @@
             android:layout_height="wrap_content"
             android:text="ESC" />
     </LinearLayout>
+
+    <GridLayout
+        android:rowCount="3"
+        android:columnCount="3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="30dp"
+        android:gravity="center">
+
+        <!-- Row 1 -->
+        <Button
+            android:id="@+id/up_left"
+            android:text="↖"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/up"
+            android:text="↑"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/up_right"
+            android:text="↗"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <!-- Row 2 -->
+        <Button
+            android:id="@+id/left"
+            android:text="←"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/zSticky"
+            android:text="Z"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/right"
+            android:text="→"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <!-- Row 3 -->
+        <Button
+            android:id="@+id/down_left"
+            android:text="↙"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/down"
+            android:text="↓"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+        <Button
+            android:id="@+id/down_right"
+            android:text="↘"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"/>
+
+    </GridLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="30dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/btnShift"
             android:layout_width="80dp"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
             android:text="SHIFT" />
-
-        <Button
-            android:id="@+id/btnShiftZ"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:text="SHIFT + Z" />
-
-        <Button
-            android:id="@+id/btnZ"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:text="Z" />
 
         <Button
             android:id="@+id/btnX"
             android:layout_width="80dp"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
             android:text="X" />
+
+        <Button
+            android:id="@+id/btnZ"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="Z" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -211,7 +211,7 @@ struct ZunVec3
         bottomRightCorner->x = size->x / 2.0f + centerPosition->x;
         bottomRightCorner->y = size->y / 2.0f + centerPosition->y;
     }
-}__attribute__((packed));
+};
 static_assert(sizeof(ZunVec3) == 0x0C, "ZunVec3 has additional padding between struct members!");
 
 struct ZunVec4

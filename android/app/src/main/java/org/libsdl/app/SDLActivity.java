@@ -363,12 +363,20 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         }
     }
     // Setup
+    int normalColor = 0xFF444444;   // dark gray
+    int pressedColor = 0xFFFF4444;  // red
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
+        ensureAssetFile(this, "CM.DAT", "紅魔郷CM.DAT");
+        ensureAssetFile(this, "ED.DAT", "紅魔郷ED.DAT");
+        ensureAssetFile(this, "IN.DAT", "紅魔郷IN.DAT");
+        ensureAssetFile(this, "MD.DAT", "紅魔郷MD.DAT");
+        ensureAssetFile(this, "ST.DAT", "紅魔郷ST.DAT");
+        ensureAssetFile(this, "TL.DAT", "紅魔郷TL.DAT");
 
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
@@ -485,128 +493,94 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         mLayout.addView(overlay);
 
-        JoystickView joystick = findViewById(R.id.joystick);
+         // 4-direction
+        bindButton(R.id.up, KeyEvent.KEYCODE_DPAD_UP);
+        bindButton(R.id.down, KeyEvent.KEYCODE_DPAD_DOWN);
+        bindButton(R.id.left, KeyEvent.KEYCODE_DPAD_LEFT);
+        bindButton(R.id.right, KeyEvent.KEYCODE_DPAD_RIGHT);
 
-        joystick.setListener(direction -> {
-            switch (direction) {
+        // diagonals (2 keys at once)
+        bindDiagonal(R.id.up_left,
+                KeyEvent.KEYCODE_DPAD_UP,
+                KeyEvent.KEYCODE_DPAD_LEFT);
 
-                case UP:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, -1);
-                    break;
+        bindDiagonal(R.id.up_right,
+                KeyEvent.KEYCODE_DPAD_UP,
+                KeyEvent.KEYCODE_DPAD_RIGHT);
 
-                case DOWN:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, -1);
-                    break;
+        bindDiagonal(R.id.down_left,
+                KeyEvent.KEYCODE_DPAD_DOWN,
+                KeyEvent.KEYCODE_DPAD_LEFT);
 
-                case LEFT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_LEFT, -1);
-                    break;
+        bindDiagonal(R.id.down_right,
+                KeyEvent.KEYCODE_DPAD_DOWN,
+                KeyEvent.KEYCODE_DPAD_RIGHT);
 
-                case RIGHT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_RIGHT, -1);
-                    break;
+        bindButton(R.id.btnEsc, KeyEvent.KEYCODE_ESCAPE);
+        bindButton(R.id.btnZ, KeyEvent.KEYCODE_Z);
+        bindButton(R.id.btnX, KeyEvent.KEYCODE_X);
+        bindButton(R.id.btnShift, KeyEvent.KEYCODE_SHIFT_LEFT);
 
-                case UP_LEFT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_LEFT);
-                    break;
+        bindButtonSticky(R.id.zSticky, KeyEvent.KEYCODE_Z);
+    }
 
-                case UP_RIGHT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    break;
-
-                case DOWN_LEFT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
-                    break;
-
-                case DOWN_RIGHT:
-                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    break;
-
-                case CENTER:
-                    releaseKeys(); // 🔥 STOP ALL
-                    break;
-            }
-        });
-        Button btnZ = findViewById(R.id.btnZ);
-        Button btnX = findViewById(R.id.btnX);
-        Button btnShift = findViewById(R.id.btnShift);
-        Button btnShiftZ = findViewById(R.id.btnShiftZ);
-        Button btnEsc = findViewById(R.id.btnEsc);
-
-        btnZ.setOnTouchListener((v, event) -> {
+    boolean zSticky = false;
+    // Single direction
+    private void bindButtonSticky(int id, int keyCode) {
+        Button btn = findViewById(id);
+        btn.setBackgroundColor(normalColor);
+ 
+        btn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                sendKeyDown(KeyEvent.KEYCODE_Z);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                sendKeyUp(KeyEvent.KEYCODE_Z);
-            }
-            return true;
-        });
-
-        btnX.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                sendKeyDown(KeyEvent.KEYCODE_X);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                sendKeyUp(KeyEvent.KEYCODE_X);
-            }
-            return true;
-        });
-
-        btnShiftZ.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                sendKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT);
-                sendKeyDown(KeyEvent.KEYCODE_Z);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                sendKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT);
-                sendKeyUp(KeyEvent.KEYCODE_Z);
-            }
-            return true;
-        });
-
-        btnShift.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                sendKeyDown(KeyEvent.KEYCODE_SHIFT_LEFT);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                sendKeyUp(KeyEvent.KEYCODE_SHIFT_LEFT);
-            }
-            return true;
-        });
-
-        btnEsc.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                sendKeyDown(KeyEvent.KEYCODE_ESCAPE);
-            } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                sendKeyUp(KeyEvent.KEYCODE_ESCAPE);
+                zSticky = !zSticky;
+                if(zSticky){
+                    btn.setBackgroundColor(pressedColor);
+                    SDLActivity.onNativeKeyDown(keyCode);
+                }else{
+                    btn.setBackgroundColor(normalColor);
+                    SDLActivity.onNativeKeyUp(keyCode);    
+                }
             }
             return true;
         });
     }
 
-    private int lastKey1 = -1;
-    private int lastKey2 = -1;
-
-    private void releaseKeys() {
-        if (lastKey1 != -1) {
-            SDLActivity.onNativeKeyUp(lastKey1);
-            lastKey1 = -1;
-        }
-        if (lastKey2 != -1) {
-            SDLActivity.onNativeKeyUp(lastKey2);
-            lastKey2 = -1;
-        }
+    // Single direction
+    private void bindButton(int id, int keyCode) {
+        Button btn = findViewById(id);
+        btn.setBackgroundColor(normalColor);
+ 
+        btn.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                btn.setBackgroundColor(pressedColor);
+                SDLActivity.onNativeKeyDown(keyCode);
+            } else if (event.getAction() == MotionEvent.ACTION_UP ||
+                       event.getAction() == MotionEvent.ACTION_CANCEL) {
+                btn.setBackgroundColor(normalColor);
+                SDLActivity.onNativeKeyUp(keyCode);
+            }
+            return true;
+        });
     }
 
-    private void pressKeys(int key1, int key2) {
-        releaseKeys();
+    // Diagonal (press 2 keys)
+    private void bindDiagonal(int id, int key1, int key2) {
+        Button btn = findViewById(id);
+        btn.setBackgroundColor(normalColor);
 
-        if (key1 != -1) {
-            SDLActivity.onNativeKeyDown(key1);
-            lastKey1 = key1;
-        }
-
-        if (key2 != -1) {
-            SDLActivity.onNativeKeyDown(key2);
-            lastKey2 = key2;
-        }
+        btn.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                btn.setBackgroundColor(pressedColor);
+                SDLActivity.onNativeKeyDown(key1);
+                SDLActivity.onNativeKeyDown(key2);
+            } else if (event.getAction() == MotionEvent.ACTION_UP ||
+                       event.getAction() == MotionEvent.ACTION_CANCEL) {
+                btn.setBackgroundColor(normalColor);
+                SDLActivity.onNativeKeyUp(key1);
+                SDLActivity.onNativeKeyUp(key2);
+            }
+            return true;
+        });
     }
     
     private void sendKeyDown(int keyCode) {
