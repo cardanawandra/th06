@@ -9,6 +9,7 @@
 #include "Player.hpp"
 #include "Rng.hpp"
 #include "utils.hpp"
+#include <SDL.h>
 
 #define ITEM_SPAWNS 3
 #define ITEM_TABLES 8
@@ -101,7 +102,9 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, ZunVec3 *pos, i16 life, i16 itemDr
         if (0 <= life)
             newEnemy->life = life;
 
-        newEnemy->position = *pos;
+        newEnemy->position.x = uf32(&pos->x);
+        newEnemy->position.y = uf32(&pos->y);
+        newEnemy->position.z = uf32(&pos->z);
         g_EclManager.CallEclSub(&newEnemy->currentContext, eclSubId);
         g_EclManager.RunEcl(newEnemy);
         newEnemy->color = newEnemy->primaryVm.color;
@@ -168,6 +171,7 @@ void EnemyManager::RunEclTimeline()
     {
         if (this->timelineTime.current == this->timelineInstr->time)
         {
+            // SDL_Log("OP CODE %d", this->timelineInstr->opCode);
             switch (this->timelineInstr->opCode)
             {
             case 0:
@@ -206,16 +210,18 @@ void EnemyManager::RunEclTimeline()
                 if (!g_Gui.BossPresent())
                 {
                     args3 = &this->timelineInstr->args;
-                    pos1 = *args3->Var1AsVec();
-                    if (args3->Var1AsVec()->x <= -990.0f)
+                    pos1.x = uf32(&args3->Var1AsVec()->x);
+                    pos1.y = uf32(&args3->Var1AsVec()->y);
+                    pos1.z = uf32(&args3->Var1AsVec()->z);
+                    if (pos1.x <= -990.0f)
                     {
                         pos1.x = g_Rng.GetRandomF32InRange(g_GameManager.playerMovementAreaSize.x);
                     }
-                    if (args3->Var1AsVec()->y <= -990.0f)
+                    if (pos1.y <= -990.0f)
                     {
                         pos1.y = g_Rng.GetRandomF32InRange(g_GameManager.playerMovementAreaSize.y);
                     }
-                    if (args3->Var1AsVec()->z <= -990.0f)
+                    if (pos1.z <= -990.0f)
                     {
                         pos1.z = g_Rng.GetRandomF32InRange(800.0f);
                     }
@@ -226,7 +232,9 @@ void EnemyManager::RunEclTimeline()
             case 5:
                 if (!g_Gui.BossPresent())
                 {
-                    pos2 = *this->timelineInstr->args.Var1AsVec();
+                    pos2.x = uf32(&this->timelineInstr->args.Var1AsVec()->x);
+                    pos2.y = uf32(&this->timelineInstr->args.Var1AsVec()->y);
+                    pos2.z = uf32(&this->timelineInstr->args.Var1AsVec()->z);
                     if (pos2.x <= -990.0f)
                     {
                         pos2.x = g_Rng.GetRandomF32InRange(g_GameManager.playerMovementAreaSize.x);
@@ -246,16 +254,18 @@ void EnemyManager::RunEclTimeline()
                 if (!g_Gui.BossPresent())
                 {
                     args4 = &this->timelineInstr->args;
-                    pos3 = *args4->Var1AsVec();
-                    if (args4->Var1AsVec()->x <= -990.0f)
+                    pos3.x = uf32(&args4->Var1AsVec()->x);
+                    pos3.y = uf32(&args4->Var1AsVec()->y);
+                    pos3.z = uf32(&args4->Var1AsVec()->z);
+                    if (pos3.x <= -990.0f)
                     {
                         pos3.x = g_Rng.GetRandomF32InRange(g_GameManager.playerMovementAreaSize.x);
                     }
-                    if (args4->Var1AsVec()->y <= -990.0f)
+                    if (pos3.y <= -990.0f)
                     {
                         pos3.y = g_Rng.GetRandomF32InRange(g_GameManager.playerMovementAreaSize.y);
                     }
-                    if (args4->Var1AsVec()->z <= -990.0f)
+                    if (pos3.z <= -990.0f)
                     {
                         pos3.z = g_Rng.GetRandomF32InRange(800.0f);
                     }

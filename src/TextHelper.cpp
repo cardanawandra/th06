@@ -14,6 +14,7 @@
 TTF_Font *g_Font;
 ;
 
+bool textNotExist;
 
 TextHelper::TextHelper()
 {
@@ -68,9 +69,9 @@ ZunResult TextHelper::CreateTextBuffer()
     if (g_Font = TTF_OpenFont(resolvedPath.c_str(), 10), g_Font == NULL)
     {
         std::printf("%s\n", TTF_GetError());
-
         // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
-        return ZUN_ERROR;
+        textNotExist = true;
+        return ZUN_SUCCESS;
     }
     #else
     if (g_Font = TTF_OpenFont("th06.ttc", 10), g_Font == NULL)
@@ -78,7 +79,8 @@ ZunResult TextHelper::CreateTextBuffer()
         std::printf("%s\n", TTF_GetError());
 
         // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
-        return ZUN_ERROR;
+        textNotExist = true;
+        return ZUN_SUCCESS;
     }
     #endif
 
@@ -92,6 +94,7 @@ ZunResult TextHelper::CreateTextBuffer()
 
 bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight)
 {
+    if(textNotExist) return true;
     u8 *bufferCursor;
     i32 gradientArea;
     i32 i = 0;
@@ -125,6 +128,7 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight)
 // Shift_JIS. This also does not check for overlong encoding, but that shouldn't matter
 bool isUTF8Encoded(char *string)
 {
+    if(textNotExist) return true;
 #define UTF8_1BYTE_MASK 0x80
 #define UTF8_2BYTE_MASK 0xE0
 #define UTF8_3BYTE_MASK 0xF0
@@ -198,6 +202,7 @@ bool isUTF8Encoded(char *string)
 
 void SurfaceOverwriteBlend(SDL_Surface *srcSurface, SDL_Surface *dstSurface, u32 x)
 {
+    if(textNotExist) return;
     // Source surface is A8R8G8B8
     // Dest surface is RGBA32
     // We want to overwrite dest unless source has alpha 0
@@ -232,6 +237,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                      i32 fontWidth, ZunColor textColor, ZunColor shadowColor, char *string,
                                      TextureData *outTexture)
 {
+    if(textNotExist) return;
     
     char convertedText[1024];
     SDL_Rect finalCopyDst;
@@ -346,7 +352,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 // Extended to free all globals for text helper
 void TextHelper::ReleaseTextBuffer()
 {
-    
+    if(textNotExist) return;
     if (g_Font != NULL)
     {
         TTF_CloseFont(g_Font);

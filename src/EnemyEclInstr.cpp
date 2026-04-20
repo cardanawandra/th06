@@ -73,18 +73,18 @@ void MovePosTime(Enemy *enemy, EclRawInstr *instr)
 
 void MoveTime(Enemy *enemy, EclRawInstr *instr)
 {
-    EclRawInstrAluArgs *alu;
     f32 angle;
-
-    alu = &instr->args.alu;
+    SDL_Log("mt 1");
+    EclVarId res = instr->args.alu.res;
+    SDL_Log("mt 2");
     angle = *GetVarFloat(enemy, &enemy->angle, NULL);
 
-    enemy->moveInterp.x = ZUN_COSF(angle) * enemy->speed * alu->res / 2.0f;
-    enemy->moveInterp.y = ZUN_SINF(angle) * enemy->speed * alu->res / 2.0f;
+    enemy->moveInterp.x = ZUN_COSF(angle) * enemy->speed * res / 2.0f;
+    enemy->moveInterp.y = ZUN_SINF(angle) * enemy->speed * res / 2.0f;
     enemy->moveInterp.z = 0.0f;
 
     enemy->moveInterpStartPos = enemy->position;
-    enemy->moveInterpStartTime = alu->res;
+    enemy->moveInterpStartTime = res;
 
     enemy->moveInterpTimer.SetCurrent(enemy->moveInterpStartTime);
 

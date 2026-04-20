@@ -113,9 +113,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/TextHelper.cpp
     ${TH06_ROOT}/src/utils.cpp
     ${TH06_ROOT}/src/ZunTimer.cpp
-    # GLES renderer only (no fixed-function RendererGL on Android)
-    # ${TH06_ROOT}/src/RendererGLES.cpp
-    # sdl2_renderer.cpp is EXCLUDED: uses GL 1.x fixed-function calls
     # pbg3 archive
     ${TH06_ROOT}/src/pbg3/FileAbstraction.cpp
     ${TH06_ROOT}/src/pbg3/IPbg3Parser.cpp
@@ -163,7 +160,6 @@ endif()
 
 # Find Android system libraries
 find_library(log-lib log)
-find_library(GLESv2-lib GLESv2)
 find_library(android-lib android)
 
 target_link_libraries(main PRIVATE
@@ -172,6 +168,5 @@ target_link_libraries(main PRIVATE
     SDL2_mixer::SDL2_mixer
     SDL2_ttf::SDL2_ttf
     ${log-lib}
-    ${GLESv2-lib}
     ${android-lib}
 )
