@@ -70,10 +70,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import android.content.res.AssetManager;
 import android.widget.Toast;
+import android.provider.OpenableColumns;
+import android.database.Cursor;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.core.content.FileProvider;
 
 import java.util.Hashtable;
 import java.util.Locale;
@@ -84,6 +87,7 @@ import java.util.Locale;
 */
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
     private static final int REQUEST_CODE_OPEN_TREE = 1001;
+    private static final int PICK_FILE  = 1002;
 
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 2;
@@ -452,17 +456,119 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         }
     }
 
+    // =========================
+    // SHARE
+    // =========================
+    private void shareLatestScore() {
+        File file = getLatestScoreFile();
+
+        if (file == null) {
+            Toast.makeText(this, "No score files found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Uri uri = FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".provider",
+                file
+        );
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivity(Intent.createChooser(intent, "Share score file"));
+    }
+
+    private File getLatestScoreFile() {
+        File dir = new File(getExternalFilesDir(null), "replay");
+
+        if (!dir.exists() || !dir.isDirectory()) return null;
+
+        File[] files = dir.listFiles();
+        if (files == null || files.length == 0) return null;
+
+        File latest = files[0];
+        for (File f : files) {
+            if (f.lastModified() > latest.lastModified()) {
+                latest = f;
+            }
+        }
+
+        return latest;
+    }
+
+    // =========================
+    // IMPORT
+    // =========================
+    private void openFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        startActivityForResult(intent, PICK_FILE);
+    }
+
+    private void importFile(Uri uri) {
+        try {
+            File dir = new File(getExternalFilesDir(null), "replay");
+            if (!dir.exists()) dir.mkdirs();
+
+            String fileName = getFileName(uri);
+            if (fileName == null) fileName = "imported_file";
+
+            File outFile = new File(dir, fileName);
+
+            InputStream in = getContentResolver().openInputStream(uri);
+            FileOutputStream out = new FileOutputStream(outFile, false); // overwrite
+
+            byte[] buffer = new byte[4096];
+            int len;
+
+            while ((len = in.read(buffer)) > 0) {
+                out.write(buffer, 0, len);
+            }
+
+            in.close();
+            out.close();
+
+            Toast.makeText(this, "Imported: " + fileName, Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Import failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String getFileName(Uri uri) {
+        String result = null;
+
+        if ("content".equals(uri.getScheme())) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (cursor.moveToFirst() && nameIndex >= 0) {
+                    result = cursor.getString(nameIndex);
+                }
+                cursor.close();
+            }
+        }
+
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+
+        return result;
+    }
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
         File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
 
         if (!targetFile.exists()) {
             openFolderPicker();
-        } else {
-            Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
         }
         
         Log.v(TAG, "Device: " + Build.DEVICE);
@@ -579,6 +685,12 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         View overlay = inflater.inflate(R.layout.activity_main, null);
 
         mLayout.addView(overlay);
+        Button btnShare = findViewById(R.id.btnShare);
+        Button btnImport = findViewById(R.id.btnImport);
+
+        btnShare.setOnClickListener(v -> shareLatestScore());
+
+        btnImport.setOnClickListener(v -> openFilePicker());
 
          // 4-direction
         bindButton(R.id.up, KeyEvent.KEYCODE_DPAD_UP);
