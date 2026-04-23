@@ -454,6 +454,10 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 }).start();
             }
         }
+        if (requestCode == PICK_FILE && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            importFile(uri);
+        }
     }
 
     // =========================

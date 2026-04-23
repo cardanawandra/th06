@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:text="ESC" />
         <Space 
-            android:layout_height="10dp"
+            android:layout_height="2dp"
             android:layout_width="80dp"
         />
         <Button
@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:text="SHARE" />
         <Space 
-            android:layout_height="10dp"
+            android:layout_height="2dp"
             android:layout_width="80dp"
         />
         <Button
