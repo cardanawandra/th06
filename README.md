@@ -24,7 +24,7 @@ EoSD-portable has the following dependencies:
 - `SDL2_mixer`
 - `SDL2_ttf`
 
-In addition, building uses CMAKE 3.18 and a compiler that supports C++17.
+In addition, building uses CMAKE 3.19 and a compiler that supports C++20.
 
 #### Building Windows
 run "cmake -B build_sdl2 -A Win32 -DUSE_GLES=ON"<br>
@@ -34,7 +34,7 @@ run "cmake --build build_sdl2 --config Release"<br>
 result will be on "build_sdl2\Release"
 
 #### Building Android
--download source SDL2.30.0 and place it in android/SDL2_SRC<br>
+-download source SDL2.32.8 and place it in android/SDL2_SRC<br>
 -download source SDL2-mixer and place it in android/SDL2_mixer_SRC<br>
 -download source SDL2-image and place it in android/SDL2_image_SRC<br>
 -download source SDL2-ttf and place it in android/SDL2_ttf_SRC<br>
@@ -46,7 +46,7 @@ result will be on "android\app\build\outputs\apk\debug\app_debug.apk"
 
 ### Use
 
-EoSD-crossplatform is designed to be a drop-in replacement for the vanilla EoSD binary.
+EoSD-crossplatform is designed to be a drop-in replacement for the vanilla EoSD binary for android.
 
 A Japanese locale is not required.
 
@@ -57,6 +57,7 @@ special thanks to
 - Gensokyo Club for decompilation
 - toadster172 for portable branch
 - CNTianQi233 for android skeleton
+- 32th system for portable iconv
 
 We would like to extend our thanks to the following individuals for their
 invaluable contributions:

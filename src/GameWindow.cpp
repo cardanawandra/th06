@@ -107,7 +107,9 @@ RenderResult GameWindow::Render()
         this->curFrame++;
     }
 
-    if (g_Supervisor.cfg.windowed || g_Supervisor.ShouldRunAt60Fps())
+    //TODO check windowed
+    if(true)
+    // if (g_Supervisor.cfg.windowed || g_Supervisor.ShouldRunAt60Fps())
     {
         if (this->curFrame != 0)
         {
@@ -232,7 +234,6 @@ void GameWindow::CreateGameWindow()
         g_GameWindow.GAME_WINDOW_WIDTH_REAL = width;
         g_GameWindow.GAME_WINDOW_HEIGHT_REAL = height;
     }
-    g_Supervisor.cfg.windowed = 0;
     #endif
     SDL_Log("WIDTH %d",width);
     SDL_Log("HEIGHT %d",height);
@@ -359,7 +360,8 @@ i32 GameWindow::InitD3dRendering(void)
     //    using_d3d_hal = 1;
     //    std::memset(&present_params, 0, sizeof(D3DPRESENT_PARAMETERS));
     //    g_Supervisor.d3dIface->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &display_mode);
-    if (!g_Supervisor.cfg.windowed)
+    //TODO check windowed 2
+    if (!g_Supervisor.cfg.windowed && false)
     {
         if ((((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) == 1))
         {
