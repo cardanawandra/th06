@@ -25,6 +25,7 @@ struct GLFuncTable
     void (GLAPIENTRY *glDeleteTextures)(GLsizei n, const GLuint *textures);
     void (GLAPIENTRY *glDepthFunc)(GLenum func);
     void (GLAPIENTRY *glDepthMask)(GLboolean flag);
+    void (GLAPIENTRY *glDisable)(GLenum cap);
     void (GLAPIENTRY *glDisableClientState)(GLenum cap);
     void (GLAPIENTRY *glDrawArrays)(GLenum mode, GLint first, GLsizei count);
     void (GLAPIENTRY *glEnable)(GLenum cap);

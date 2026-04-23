@@ -13,10 +13,8 @@
 // The actual resolution used for the output window and viewport scaling
 //   At some point there should be a method to change this without recompiling but for now
 //   this'll do
-#ifdef __ANDROID__
-#define GAME_WINDOW_WIDTH_REAL 1600
-#define GAME_WINDOW_HEIGHT_REAL 720
-#endif
+
+/*
 #ifndef GAME_WINDOW_WIDTH_REAL
 #define GAME_WINDOW_WIDTH_REAL (GAME_WINDOW_WIDTH)
 #endif
@@ -45,6 +43,7 @@
 
 #define WIDTH_RESOLUTION_SCALE (((f32)VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH)
 #define HEIGHT_RESOLUTION_SCALE (((f32)VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT)
+*/
 
 enum RenderResult
 {
@@ -72,6 +71,28 @@ struct GameWindow
     i32 lowPowerActive;
     i32 powerOffActive;
     u32 renderBackendIndex;
+
+    i32 GAME_WINDOW_WIDTH_REAL = GAME_WINDOW_WIDTH;
+    i32 GAME_WINDOW_HEIGHT_REAL = GAME_WINDOW_HEIGHT;
+    i32 VIEWPORT_WIDTH = GAME_WINDOW_WIDTH;
+    i32 VIEWPORT_OFF_X = 0;
+    i32 VIEWPORT_HEIGHT = GAME_WINDOW_HEIGHT;
+    i32 VIEWPORT_OFF_Y = 0;
+    f32 WIDTH_RESOLUTION_SCALE;
+    f32 HEIGHT_RESOLUTION_SCALE;
+    void CONFIGURE_VIEW(){
+        this->VIEWPORT_WIDTH = GAME_WINDOW_WIDTH_REAL;
+        this->VIEWPORT_HEIGHT = GAME_WINDOW_HEIGHT_REAL;
+        if ((this->GAME_WINDOW_WIDTH_REAL * 3) > (this->GAME_WINDOW_HEIGHT_REAL * 4)){
+            this->VIEWPORT_WIDTH=(u32)((this->GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f);
+            this->VIEWPORT_OFF_X=((this->GAME_WINDOW_WIDTH_REAL - this->VIEWPORT_WIDTH) / 2);
+        }else if((this->GAME_WINDOW_WIDTH_REAL * 3) < (this->GAME_WINDOW_HEIGHT_REAL * 4)){
+            this->VIEWPORT_HEIGHT=(u32)((this->GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f);
+            this->VIEWPORT_OFF_Y=((this->GAME_WINDOW_HEIGHT_REAL - this->VIEWPORT_HEIGHT) / 2);
+        }
+        this->WIDTH_RESOLUTION_SCALE=((f32)this->VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH;
+        this->HEIGHT_RESOLUTION_SCALE=((f32)this->VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT;
+    }
 };
 
 extern GameWindow g_GameWindow;

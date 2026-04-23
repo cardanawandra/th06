@@ -69,6 +69,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import android.content.res.AssetManager;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.documentfile.provider.DocumentFile;
 
 import java.util.Hashtable;
 import java.util.Locale;
@@ -78,6 +83,8 @@ import java.util.Locale;
     SDL Activity
 */
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
+    private static final int REQUEST_CODE_OPEN_TREE = 1001;
+
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 2;
     private static final int SDL_MINOR_VERSION = 32;
@@ -366,18 +373,98 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     int normalColor = 0xFF444444;   // dark gray
     int pressedColor = 0xFFFF4444;  // red
 
+    private void openFolderPicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(intent, REQUEST_CODE_OPEN_TREE);
+    }
+
+    private void copyFolderContents(Uri treeUri) {
+        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
+        File destDir = getExternalFilesDir(null);
+
+        if (pickedDir == null || destDir == null) return;
+
+        for (DocumentFile file : pickedDir.listFiles()) {
+            copyDocumentFile(file, destDir);
+        }
+    }
+
+    private void copyDocumentFile(DocumentFile source, File destDir) {
+        if (source == null || source.getName() == null) return;
+
+        if (source.isDirectory()) {
+            File newDir = new File(destDir, source.getName());
+            if (!newDir.exists()) {
+                newDir.mkdirs();
+            }
+
+            for (DocumentFile child : source.listFiles()) {
+                copyDocumentFile(child, newDir);
+            }
+
+        } else if (source.isFile()) {
+            File destFile = new File(destDir, source.getName());
+
+            try (InputStream input =
+                         getContentResolver().openInputStream(source.getUri());
+                 OutputStream output = new FileOutputStream(destFile)) {
+
+                if (input != null) {
+                    byte[] buffer = new byte[8192];
+                    int len;
+                    while ((len = input.read(buffer)) > 0) {
+                        output.write(buffer, 0, len);
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_OPEN_TREE && resultCode == RESULT_OK) {
+            if (data != null && data.getData() != null) {
+                Uri treeUri = data.getData();
+
+                getContentResolver().takePersistableUriPermission(
+                        treeUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                );
+
+                // Run copy in background thread
+                new Thread(() -> {
+                    copyFolderContents(treeUri);
+
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Copy finished", Toast.LENGTH_LONG).show()
+                    );
+                }).start();
+            }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
-        ensureAssetFile(this, "CM.DAT", "紅魔郷CM.DAT");
-        ensureAssetFile(this, "ED.DAT", "紅魔郷ED.DAT");
-        ensureAssetFile(this, "IN.DAT", "紅魔郷IN.DAT");
-        ensureAssetFile(this, "MD.DAT", "紅魔郷MD.DAT");
-        ensureAssetFile(this, "ST.DAT", "紅魔郷ST.DAT");
-        ensureAssetFile(this, "TL.DAT", "紅魔郷TL.DAT");
+        File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
 
+        if (!targetFile.exists()) {
+            openFolderPicker();
+        } else {
+            Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
+        }
+        
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
         Log.v(TAG, "onCreate()");

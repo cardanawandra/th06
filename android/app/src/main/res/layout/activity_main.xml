@@ -7,7 +7,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
         android:layout_margin="30dp"
         android:orientation="vertical">
 
@@ -16,6 +15,19 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="ESC" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="30dp"
+        android:orientation="vertical">
+        <Button
+            android:id="@+id/zSticky"
+            android:text="Z(sticky)"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <GridLayout
@@ -32,24 +44,24 @@
         <Button
             android:id="@+id/up_left"
             android:text="↖"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
         <Button
             android:id="@+id/up"
             android:text="↑"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
         <Button
             android:id="@+id/up_right"
             android:text="↗"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
@@ -57,24 +69,22 @@
         <Button
             android:id="@+id/left"
             android:text="←"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
-        <Button
-            android:id="@+id/zSticky"
-            android:text="Z"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
         <Button
             android:id="@+id/right"
             android:text="→"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
@@ -82,24 +92,24 @@
         <Button
             android:id="@+id/down_left"
             android:text="↙"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
         <Button
             android:id="@+id/down"
             android:text="↓"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
         <Button
             android:id="@+id/down_right"
             android:text="↘"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_rowWeight="1"
             android:layout_columnWeight="1"/>
 
@@ -111,24 +121,24 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="30dp"
         android:orientation="vertical">
-
         <Button
-            android:id="@+id/btnShift"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:text="SHIFT" />
+            android:id="@+id/btnZ"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="Z" />
 
         <Button
             android:id="@+id/btnX"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:text="X" />
 
         <Button
-            android:id="@+id/btnZ"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:text="Z" />
+            android:id="@+id/btnShift"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="SHIFT" />
+
     </LinearLayout>
 
 </RelativeLayout>

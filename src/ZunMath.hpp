@@ -373,10 +373,10 @@ struct ZunViewport
 
     void Set()
     {
-        g_glFuncTable.glViewport(this->x * WIDTH_RESOLUTION_SCALE + VIEWPORT_OFF_X,
-                                 (GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * HEIGHT_RESOLUTION_SCALE)) -
-                                     VIEWPORT_OFF_Y,
-                                 this->width * WIDTH_RESOLUTION_SCALE, this->height * HEIGHT_RESOLUTION_SCALE);
+        g_glFuncTable.glViewport(this->x * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
+                                 (g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE)) -
+                                     g_GameWindow.VIEWPORT_OFF_Y,
+                                 this->width * g_GameWindow.WIDTH_RESOLUTION_SCALE, this->height * g_GameWindow.HEIGHT_RESOLUTION_SCALE);
         g_glFuncTable.glDepthRangef(this->minZ, this->maxZ);
     }
 
@@ -388,10 +388,10 @@ struct ZunViewport
         g_glFuncTable.glGetIntegerv(GL_VIEWPORT, viewPortGet);
         g_glFuncTable.glGetFloatv(GL_DEPTH_RANGE, depthRangeGet);
 
-        this->x = (viewPortGet[0] - VIEWPORT_OFF_X) / WIDTH_RESOLUTION_SCALE;
-        this->y = (viewPortGet[1] - VIEWPORT_OFF_Y) / HEIGHT_RESOLUTION_SCALE;
-        this->width = viewPortGet[2] / WIDTH_RESOLUTION_SCALE;
-        this->height = viewPortGet[3] / HEIGHT_RESOLUTION_SCALE;
+        this->x = (viewPortGet[0] - g_GameWindow.VIEWPORT_OFF_X) / g_GameWindow.WIDTH_RESOLUTION_SCALE;
+        this->y = (viewPortGet[1] - g_GameWindow.VIEWPORT_OFF_Y) / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
+        this->width = viewPortGet[2] / g_GameWindow.WIDTH_RESOLUTION_SCALE;
+        this->height = viewPortGet[3] / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
         this->minZ = depthRangeGet[0];
         this->maxZ = depthRangeGet[1];
 

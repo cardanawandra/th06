@@ -212,8 +212,8 @@ void GameWindow::CreateGameWindow()
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
 
     u32 flags = SDL_WINDOW_OPENGL;
-    i32 height = GAME_WINDOW_HEIGHT_REAL;
-    i32 width = GAME_WINDOW_WIDTH_REAL;
+    i32 height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    i32 width = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
     i32 x = SDL_WINDOWPOS_UNDEFINED;
     i32 y = SDL_WINDOWPOS_UNDEFINED;
 
@@ -221,14 +221,28 @@ void GameWindow::CreateGameWindow()
     g_GameWindow.glContext = NULL;
 
     #ifdef __ANDROID__
-    flags |= SDL_WINDOW_FULLSCREEN;
-    #else
+    SDL_DisplayMode mode;
+    if (SDL_GetCurrentDisplayMode(0, &mode) == 0) {
+        SDL_Log("format: %u\n", mode.format);
+        SDL_Log("w: %d\n", mode.w);
+        SDL_Log("h: %d\n", mode.h);
+        SDL_Log("refresh_rate: %d\n", mode.refresh_rate);
+        width = mode.w;
+        height = mode.h;
+        g_GameWindow.GAME_WINDOW_WIDTH_REAL = width;
+        g_GameWindow.GAME_WINDOW_HEIGHT_REAL = height;
+    }
+    g_Supervisor.cfg.windowed = 1;
+    #endif
+    SDL_Log("WIDTH %d",width);
+    SDL_Log("HEIGHT %d",height);
+    g_GameWindow.CONFIGURE_VIEW();
+    SDL_Log("VIEWPORT WIDTH %d",g_GameWindow.VIEWPORT_WIDTH);
+    SDL_Log("VIEWPORT HEIGHT %d",g_GameWindow.VIEWPORT_HEIGHT);
     if (g_Supervisor.cfg.windowed == 0)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
     }
-    #endif
-    
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
         s_RenderBackends[i].setContextFlags();
