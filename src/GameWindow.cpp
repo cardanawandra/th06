@@ -232,7 +232,7 @@ void GameWindow::CreateGameWindow()
         g_GameWindow.GAME_WINDOW_WIDTH_REAL = width;
         g_GameWindow.GAME_WINDOW_HEIGHT_REAL = height;
     }
-    g_Supervisor.cfg.windowed = 1;
+    g_Supervisor.cfg.windowed = 0;
     #endif
     SDL_Log("WIDTH %d",width);
     SDL_Log("HEIGHT %d",height);

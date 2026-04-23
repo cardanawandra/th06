@@ -692,35 +692,55 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         btnImport.setOnClickListener(v -> openFilePicker());
 
-         // 4-direction
-        bindButton(R.id.up, KeyEvent.KEYCODE_DPAD_UP);
-        bindButton(R.id.down, KeyEvent.KEYCODE_DPAD_DOWN);
-        bindButton(R.id.left, KeyEvent.KEYCODE_DPAD_LEFT);
-        bindButton(R.id.right, KeyEvent.KEYCODE_DPAD_RIGHT);
-
-        // diagonals (2 keys at once)
-        bindDiagonal(R.id.up_left,
-                KeyEvent.KEYCODE_DPAD_UP,
-                KeyEvent.KEYCODE_DPAD_LEFT);
-
-        bindDiagonal(R.id.up_right,
-                KeyEvent.KEYCODE_DPAD_UP,
-                KeyEvent.KEYCODE_DPAD_RIGHT);
-
-        bindDiagonal(R.id.down_left,
-                KeyEvent.KEYCODE_DPAD_DOWN,
-                KeyEvent.KEYCODE_DPAD_LEFT);
-
-        bindDiagonal(R.id.down_right,
-                KeyEvent.KEYCODE_DPAD_DOWN,
-                KeyEvent.KEYCODE_DPAD_RIGHT);
-
         bindButton(R.id.btnEsc, KeyEvent.KEYCODE_ESCAPE);
         bindButton(R.id.btnZ, KeyEvent.KEYCODE_Z);
         bindButton(R.id.btnX, KeyEvent.KEYCODE_X);
         bindButton(R.id.btnShift, KeyEvent.KEYCODE_SHIFT_LEFT);
 
         bindButtonSticky(R.id.zSticky, KeyEvent.KEYCODE_Z);
+
+        JoystickView joystick = findViewById(R.id.joystick);
+
+        joystick.setListener(direction -> {
+            switch (direction) {
+
+                case UP:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, -1);
+                    break;
+
+                case DOWN:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, -1);
+                    break;
+
+                case LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_LEFT, -1);
+                    break;
+
+                case RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_RIGHT, -1);
+                    break;
+
+                case UP_LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_LEFT);
+                    break;
+
+                case UP_RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_RIGHT);
+                    break;
+
+                case DOWN_LEFT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT);
+                    break;
+
+                case DOWN_RIGHT:
+                    pressKeys(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT);
+                    break;
+
+                case CENTER:
+                    releaseKeys(); // 🔥 STOP ALL
+                    break;
+            }
+        });
     }
 
     boolean zSticky = false;
@@ -744,6 +764,34 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         });
     }
 
+    private int lastKey1 = -1;
+    private int lastKey2 = -1;
+    
+    private void releaseKeys() {
+        if (lastKey1 != -1) {
+            SDLActivity.onNativeKeyUp(lastKey1);
+            lastKey1 = -1;
+        }
+        if (lastKey2 != -1) {
+            SDLActivity.onNativeKeyUp(lastKey2);
+            lastKey2 = -1;
+        }
+    }
+
+    private void pressKeys(int key1, int key2) {
+        releaseKeys();
+
+        if (key1 != -1) {
+            SDLActivity.onNativeKeyDown(key1);
+            lastKey1 = key1;
+        }
+
+        if (key2 != -1) {
+            SDLActivity.onNativeKeyDown(key2);
+            lastKey2 = key2;
+        }
+    }
+
     // Single direction
     private void bindButton(int id, int keyCode) {
         Button btn = findViewById(id);
@@ -761,40 +809,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             return true;
         });
     }
-
-    // Diagonal (press 2 keys)
-    private void bindDiagonal(int id, int key1, int key2) {
-        Button btn = findViewById(id);
-        btn.setBackgroundColor(normalColor);
-
-        btn.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                btn.setBackgroundColor(pressedColor);
-                SDLActivity.onNativeKeyDown(key1);
-                SDLActivity.onNativeKeyDown(key2);
-            } else if (event.getAction() == MotionEvent.ACTION_UP ||
-                       event.getAction() == MotionEvent.ACTION_CANCEL) {
-                btn.setBackgroundColor(normalColor);
-                SDLActivity.onNativeKeyUp(key1);
-                SDLActivity.onNativeKeyUp(key2);
-            }
-            return true;
-        });
-    }
     
-    private void sendKeyDown(int keyCode) {
-        SDLActivity.onNativeKeyDown(keyCode);
-    }
-
-    private void sendKeyUp(int keyCode) {
-        SDLActivity.onNativeKeyUp(keyCode);
-    }
-
-    private void sendKeyPress(int keyCode) {
-        sendKeyDown(keyCode);
-        sendKeyUp(keyCode);
-    }
-
     protected void pauseNativeThread() {
         mNextNativeState = NativeState.PAUSED;
         mIsResumedCalled = false;
