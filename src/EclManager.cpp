@@ -734,7 +734,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 csum = 0;
                 if (!g_GameManager.isInReplay)
                 {
-                    strcpy(local_70->name, instruction->args.spellcardStart.spellcardName);
+                    std::snprintf(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
                     local_74 = strlen(local_70->name);
                     while (0 < local_74)
                     {
