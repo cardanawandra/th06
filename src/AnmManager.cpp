@@ -1396,8 +1396,8 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->flags.flip ^= 1;
             vm->scaleX *= -1.f;
             break;
-        case AnmOpcode_25:
-            vm->flags.flag5 = AnmI32Arg(0);
+        case AnmOpcode_UsePosOffset:
+            vm->flags.usePosOffset = AnmI32Arg(0);
             break;
         case AnmOpcode_FlipY:
             vm->flags.flip ^= 2;
@@ -1418,11 +1418,13 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->scaleInterpFinalY = AnmF32Arg(1);
             vm->scaleInterpEndTime = 0;
             break;
-        case AnmOpcode_30:
+        case AnmOpcode_ScaleTime:
             vm->scaleInterpFinalX = AnmF32Arg(0);
             vm->scaleInterpFinalY = AnmF32Arg(1);
+
             vm->scaleInterpEndTime = AnmI16Arg(2);
             vm->scaleInterpTime.InitializeForPopup();
+
             vm->scaleInterpInitialX = vm->scaleX;
             vm->scaleInterpInitialY = vm->scaleY;
             break;
@@ -1439,7 +1441,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             vm->flags.blendMode = AnmVmBlendMode_InvSrcAlpha;
             break;
         case AnmOpcode_SetPosition:
-            if (vm->flags.flag5 == 0)
+            if (vm->flags.usePosOffset == 0)
             {
                 vm->pos = ZunVec3(AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
             }
@@ -1457,7 +1459,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case AnmOpcode_PosTimeLinear:
             vm->flags.posTime = 0;
         PosTimeDoStuff:
-            if (vm->flags.flag5 == 0)
+            if (vm->flags.usePosOffset == 0)
             {
                 // This was supposedly originally a memcpy, but any sane compiler should compile a struct assignment to
                 // a memcpy
@@ -1478,7 +1480,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case AnmOpcode_Stop:
             if (vm->pendingInterrupt == 0)
             {
-                vm->flags.flag13 = 1;
+                vm->flags.isStopped = 1;
                 vm->currentTimeInScript.Decrement(1);
                 goto stop;
             }
@@ -1496,7 +1498,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
             }
 
             vm->pendingInterrupt = 0;
-            vm->flags.flag13 = 0;
+            vm->flags.isStopped = 0;
             if (curInstr->opcode != AnmOpcode_InterruptLabel)
             {
                 if (nextInstr == NULL)
@@ -1515,13 +1517,13 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case AnmOpcode_SetVisibility:
             vm->flags.isVisible = AnmI32Arg(0);
             break;
-        case AnmOpcode_23:
+        case AnmOpcode_AnchorTopLeft:
             vm->flags.anchor = AnmVmAnchor_TopLeft;
             break;
         case AnmOpcode_SetAutoRotate:
             vm->autoRotate = AnmI32Arg(0);
             break;
-        case AnmOpcode_27:
+        case AnmOpcode_UVScrollX:
             vm->uvScrollPos.x += AnmF32Arg(0);
             if (vm->uvScrollPos.x >= 1.0f)
             {
@@ -1532,7 +1534,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 vm->uvScrollPos.x += 1.0f;
             }
             break;
-        case AnmOpcode_28:
+        case AnmOpcode_UVScrollY:
             vm->uvScrollPos.y += AnmF32Arg(0);
             if (vm->uvScrollPos.y >= 1.0f)
             {
@@ -1543,7 +1545,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 vm->uvScrollPos.y += 1.0f;
             }
             break;
-        case AnmOpcode_31:
+        case AnmOpcode_SetZWriteDisable:
             vm->flags.zWriteDisable = AnmI32Arg(0);
             break;
         case AnmOpcode_Nop:
@@ -1651,7 +1653,7 @@ stop:
             local_3c = 1.0f - local_3c;
             break;
         }
-        if (vm->flags.flag5 == 0)
+        if (vm->flags.usePosOffset == 0)
         {
             vm->pos.x = local_3c * vm->posInterpFinal.x + (1.0f - local_3c) * vm->posInterpInitial.x;
             vm->pos.y = local_3c * vm->posInterpFinal.y + (1.0f - local_3c) * vm->posInterpInitial.y;
@@ -1701,7 +1703,8 @@ void AnmManager::DrawTextToSprite(u32 textureDstIdx, i32 xPos, i32 yPos, i32 spr
     return;
 }
 
-void AnmManager::DrawVmTextFmt(AnmManager *anmMgr, AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
+
+void AnmManager::DrawVmTextFmt(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
 {
     u32 fontWidth;
     char buffer[64];
@@ -1711,14 +1714,14 @@ void AnmManager::DrawVmTextFmt(AnmManager *anmMgr, AnmVm *vm, ZunColor textColor
     va_start(argptr, fmt);
     vsprintf(buffer, fmt, argptr);
     va_end(argptr);
-    anmMgr->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+    this->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
                              vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
                              fontWidth, vm->fontHeight, textColor, shadowColor, buffer);
     vm->flags.isVisible = true;
     return;
 }
 
-void AnmManager::DrawStringFormat(AnmManager *mgr, AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
+void AnmManager::DrawStringFormat(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
 {
     char buf[64];
     va_list args;
@@ -1729,19 +1732,19 @@ void AnmManager::DrawStringFormat(AnmManager *mgr, AnmVm *vm, ZunColor textColor
     va_start(args, fmt);
     vsprintf(buf, fmt, args);
     va_end(args);
-    mgr->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+    this->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
                           vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
                           fontWidth, vm->fontHeight, textColor, shadowColor, " ");
     secondPartStartX =
         vm->sprite->startPixelInclusive.x + vm->sprite->textureWidth - ((f32)strlen(buf) * (f32)(fontWidth + 1) / 2.0f);
-    mgr->DrawTextToSprite(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
+    this->DrawTextToSprite(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
                           vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
                           shadowColor, buf);
     vm->flags.isVisible = true;
     return;
 }
 
-void AnmManager::DrawStringFormat2(AnmManager *mgr, AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
+void AnmManager::DrawStringFormat2(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, char *fmt, ...)
 {
     char buf[64];
     va_list args;
@@ -1752,12 +1755,12 @@ void AnmManager::DrawStringFormat2(AnmManager *mgr, AnmVm *vm, ZunColor textColo
     va_start(args, fmt);
     vsprintf(buf, fmt, args);
     va_end(args);
-    mgr->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+    this->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
                           vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
                           fontWidth, vm->fontHeight, textColor, shadowColor, " ");
     secondPartStartX = vm->sprite->startPixelInclusive.x + vm->sprite->textureWidth / 2.0f -
                        ((f32)strlen(buf) * (f32)(fontWidth + 1) / 4.0f);
-    mgr->DrawTextToSprite(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
+    this->DrawTextToSprite(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
                           vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
                           shadowColor, buf);
     vm->flags.isVisible = true;
@@ -1919,13 +1922,8 @@ void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, i32 dstX, i32 dstY,
         return;
     }
 
-    SDL_Rect srcRect{rectLeft, rectTop, rectWidth, rectHeight};
-    SDL_Rect dstRect{dstX, dstY, rectWidth, rectHeight};
-
+    SDL_Rect srcRect{rectLeft, rectTop, rectWidth, rectHeight}, dstRect{dstX, dstY, rectWidth, rectHeight};
     ApplySurfaceToColorBuffer(srcSurface, srcRect, dstRect);
-    // ApplySurfaceToColorBuffer(srcSurface, (SDL_Rect){.x = rectLeft, .y = rectTop, .w = rectWidth, .h = rectHeight},
-    //                           (SDL_Rect){.x = dstX, .y = dstY, .w = rectWidth, .h = rectHeight});
-
     //
     //    IDirect3DSurface8 *D3D_Surface;
     //    if (g_Supervisor.d3dDevice->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &D3D_Surface) != D3D_OK)
