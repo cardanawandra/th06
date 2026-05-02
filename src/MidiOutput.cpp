@@ -93,7 +93,7 @@ MidiOutput::~MidiOutput()
     }
 }
 
-ZunResult MidiOutput::ReadFileData(u32 idx, char *path)
+ZunResult MidiOutput::ReadFileData(u32 idx, const char *path)
 {
     if (g_Supervisor.cfg.musicMode != MIDI)
     {
@@ -143,7 +143,9 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 {
     u8 hdrRaw[8];
     u32 trackLength;
-    u8 *currentCursor, *currentCursorTrack, *endOfHeaderPointer;
+    const u8 *currentCursor;
+    const u8 *currentCursorTrack;
+    const u8 *endOfHeaderPointer;
     i32 trackIdx;
     u32 hdrLength;
 
@@ -202,7 +204,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     return ZUN_SUCCESS;
 }
 
-ZunResult MidiOutput::LoadFile(char *midiPath)
+ZunResult MidiOutput::LoadFile(const char *midiPath)
 {
     if (this->ReadFileData(0x1f, midiPath) != ZUN_SUCCESS)
     {

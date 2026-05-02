@@ -11,7 +11,7 @@
 #include "GamePaths.hpp"
 
 
-TTF_Font *g_Font;
+static TTF_Font *g_Font;
 ;
 
 bool textNotExist;
@@ -30,29 +30,6 @@ TextHelper::TextHelper()
 TextHelper::~TextHelper()
 {
     TTF_Quit();
-    this->ReleaseBuffer();
-}
-
-bool TextHelper::ReleaseBuffer()
-{
-    //    if (this->hdc)
-    //    {
-    //        SelectObject(this->hdc, this->gdiObj);
-    //        DeleteDC(this->hdc);
-    //        DeleteObject(this->gdiObj2);
-    //        this->format = (D3DFORMAT)-1;
-    //        this->width = 0;
-    //        this->height = 0;
-    //        this->hdc = 0;
-    //        this->gdiObj2 = 0;
-    //        this->gdiObj = 0;
-    //        this->buffer = NULL;
-    return true;
-    //    }
-    //    else
-    //    {
-    //        return false;
-    //    }
 }
 
 #define TEXT_BUFFER_HEIGHT 64
@@ -126,7 +103,7 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight)
 
 // Text strings in asset files are encoded using Shift_JIS. This allows RenderTextToTexture to handle both UTF-8 and
 // Shift_JIS. This also does not check for overlong encoding, but that shouldn't matter
-bool isUTF8Encoded(char *string)
+bool isUTF8Encoded(const char *string)
 {
     if(textNotExist) return true;
 #define UTF8_1BYTE_MASK 0x80
@@ -234,7 +211,7 @@ void SurfaceOverwriteBlend(SDL_Surface *srcSurface, SDL_Surface *dstSurface, u32
 }
 
 void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
-                                     i32 fontWidth, ZunColor textColor, ZunColor shadowColor, char *string,
+                                     i32 fontWidth, ZunColor textColor, ZunColor shadowColor, const char *string,
                                      TextureData *outTexture)
 {
     if(textNotExist) return;

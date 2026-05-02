@@ -15,7 +15,6 @@
 #include "TextHelper.hpp"
 #include "ZunResult.hpp"
 #include "i18n.hpp"
-// #include "thprac_gui_integration.h"
 #include "utils.hpp"
 #include <iostream>
 void dlog(std::string msg){

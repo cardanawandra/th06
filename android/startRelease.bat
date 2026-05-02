@@ -1,0 +1,1 @@
+C:\Users\user\AppData\Local\Android\Sdk\platform-tools\adb.exe install app\build\outputs\apk\release\app-release.apk

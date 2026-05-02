@@ -22,27 +22,28 @@
 #include <ctime>
 #include <SDL.h>
 
-f32 g_DifficultyWeightsList[5] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
-
-u32 g_DefaultMagic = 'DMYS';
-
-// EoSD assumes every character in this array is a single byte, which is a safe assumption in SJIS, but not
-//   in UTF-8, so we have to encode '･' with an escape sequence
-char *g_AlphabetList =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,:;\xA5@abcdefghijklmnopqrstuvwxyz+-/*=%0123456789(){}[]<>#!?'\"$      --";
-
-char *g_CharacterList[6] = {TH_HAKUREI_REIMU_SPIRIT, TH_HAKUREI_REIMU_DREAM, TH_KIRISAME_MARISA_DEVIL,
+static const f32 g_DifficultyWeightsList[5] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
+ 
+static const u32 g_DefaultMagic = 'DMYS';
+ 
+ // EoSD assumes every character in this array is a single byte, which is a safe assumption in SJIS, but not
+ //   in UTF-8, so we have to encode '･' with an escape sequence
+static const char *const g_AlphabetList =
+     "ABCDEFGHIJKLMNOPQRSTUVWXYZ.,:;\xA5@abcdefghijklmnopqrstuvwxyz+-/*=%0123456789(){}[]<>#!?'\"$      --";
+ 
+static const char *const g_CharacterList[6] = {
+                            TH_HAKUREI_REIMU_SPIRIT, TH_HAKUREI_REIMU_DREAM, TH_KIRISAME_MARISA_DEVIL,
                             TH_KIRISAME_MARISA_LOVE, TH_SATSUKI_RIN_FLOWER,  TH_SATSUKI_RIN_WIND};
-
-f32 g_SpellcardsWeightsList[5] = {1.0f, 1.5f, 1.5f, 2.0f, 2.5f};
-
-char *g_RightAlignedDifficultyList[5] = {"     Easy", "   Normal", "     Hard", "  Lunatic", "    Extra"};
-
-char *g_ShortCharacterList2[4] = {"ReimuA ", "ReimuB ", "MarisaA", "MarisaB"};
-
+ 
+static const f32 g_SpellcardsWeightsList[5] = {1.0f, 1.5f, 1.5f, 2.0f, 2.5f};
+ 
+static const char *const g_RightAlignedDifficultyList[5] = {"     Easy", "   Normal", "     Hard", "  Lunatic", "    Extra"};
+ 
+static const char *const g_ShortCharacterList2[4] = {"ReimuA ", "ReimuB ", "MarisaA", "MarisaB"};
+ 
 #define DEFAULT_HIGH_SCORE_NAME "Nanashi "
-
-ScoreDat *ResultScreen::OpenScore(char *path)
+ 
+ScoreDat *ResultScreen::OpenScore(const char *path)
 {
     u8 *bytes;
     i32 bytesShifted;
@@ -232,7 +233,7 @@ ZunResult ResultScreen::ParseCatk(ScoreDat *scoreDat, Catk *outCatk)
 
     i32 cursor;
     Catk *parsedCatk;
-    ScoreRaw *header;
+    const ScoreRaw *header;
     header = scoreDat->rawScoreFile;
 
     if (outCatk == NULL)
@@ -261,7 +262,7 @@ ZunResult ResultScreen::ParseClrd(ScoreDat *scoreDat, Clrd *outClrd)
 {
     i32 cursor;
     Clrd *parsedClrd;
-    ScoreRaw *header;
+    const ScoreRaw *header;
     i32 characterShotType;
     i32 difficulty;
     header = scoreDat->rawScoreFile;
@@ -309,7 +310,7 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outClrd)
 {
     i32 cursor;
     Pscr *parsedPscr;
-    ScoreRaw *header;
+    const ScoreRaw *header;
     i32 stage;
     i32 character;
     i32 difficulty;
@@ -383,11 +384,11 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
     i32 remainingSize;
     i32 shotType;
     i32 stage;
-    Pscr *pscr;
+    const Pscr *pscr;
     Catk *catk;
     Clrd *clrd;
     i32 character;
-    ScoreListNode *currentCharacter;
+    const ScoreListNode *currentCharacter;
     i32 sizeOfFile;
     u8 *bytes;
     i32 difficulty;
@@ -743,11 +744,11 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
     char replayPath[64];
     i32 replayNameCharacter;
     char replayToReadPath[64];
-    ReplayHeader *replayLoaded;
+    const ReplayHeader *replayLoaded;
     i32 idx;
     i32 saveInterrupt;
     std::time_t time;
-    std::tm *tm;
+    const std::tm *tm;
 
     time = std::time(NULL);
     tm = std::localtime(&time);
@@ -877,7 +878,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
                 {
                     this->replays[idx] = *replayLoaded;
                 }
-                std::free(replayLoaded);
+                std::free((void*)replayLoaded);
             }
         }
 
@@ -1198,12 +1199,12 @@ ZunResult ResultScreen::CheckConfirmButton()
     return ZUN_SUCCESS;
 }
 
-u32 ResultScreen::DrawFinalStats()
+u32 ResultScreen::DrawFinalStats() const
 {
     f32 completion;
     f32 unknownFloat;
     ZunVec3 strPos;
-    AnmVm *viewport;
+    const AnmVm *viewport;
     i32 color;
     f32 slowdownRate;
 
@@ -1729,10 +1730,10 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
 
     i32 spellcardIdx;
     ZunVec3 spritePos;
-    ScoreListNode *ShootScoreListNodeB;
+    const ScoreListNode *ShootScoreListNodeB;
     i32 column;
     i32 row;
-    ScoreListNode *ShootScoreListNodeA;
+    const ScoreListNode *ShootScoreListNodeA;
 
     char name[9];
 
