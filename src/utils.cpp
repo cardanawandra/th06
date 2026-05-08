@@ -1,6 +1,6 @@
 #ifdef DEBUG
 #include <cstdarg>
-#include <cstdio>
+#include <stdio.h>
 #endif
 
 #include "ZunMath.hpp"
@@ -13,13 +13,13 @@ void DebugPrint(const char *fmt, ...)
 {
 #ifdef DEBUG
     char tmpBuffer[512];
-    std::va_list args;
+    va_list args;
 
     va_start(args, fmt);
-    std::vsnprintf(tmpBuffer, 511, fmt, args);
+    vsnprintf(tmpBuffer, 511, fmt, args);
     va_end(args);
 
-    std::printf("DEBUG2: %s\n", tmpBuffer);
+    printf("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
 
@@ -59,13 +59,13 @@ void DebugPrint2(const char *fmt, ...)
 {
 #ifdef DEBUG
     char tmpBuffer[512];
-    std::va_list args;
+    va_list args;
 
     va_start(args, fmt);
-    std::vsnprintf(tmpBuffer, 511, fmt, args);
+    vsnprintf(tmpBuffer, 511, fmt, args);
     va_end(args);
 
-    std::printf("DEBUG2: %s\n", tmpBuffer);
+    printf("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
 }; // namespace utils

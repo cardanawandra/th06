@@ -1,6 +1,6 @@
 #include "BombData.hpp"
 
-#include <cmath>
+#include <math.h>
 
 #include "EffectManager.hpp"
 #include "Gui.hpp"
@@ -9,23 +9,36 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 #include <SDL.h>
-extern const BombData g_BombData[4] = {
+BombData g_BombData[4] = {
     /* ReimuA  */ {BombData::BombReimuACalc, BombData::BombReimuADraw},
     /* ReimuB  */ {BombData::BombReimuBCalc, BombData::BombReimuBDraw},
     /* MarisaA */ {BombData::BombMarisaACalc, BombData::BombMarisaADraw},
     /* MarisaB */ {BombData::BombMarisaBCalc, BombData::BombMarisaBDraw},
 };
 
+// extern BombData g_BombData[4];
+
+// void BombData::Init(){
+//     g_BombData[0].calc=BombData::BombReimuACalc;
+//     g_BombData[0].draw=BombData::BombReimuADraw;
+//     g_BombData[1].calc=BombData::BombReimuBCalc;
+//     g_BombData[1].draw=BombData::BombReimuBDraw;
+//     g_BombData[2].calc=BombData::BombMarisaACalc;
+//     g_BombData[2].draw=BombData::BombMarisaADraw;
+//     g_BombData[3].calc=BombData::BombMarisaBCalc;
+//     g_BombData[3].draw=BombData::BombMarisaBDraw;
+// }
+
 void BombData::BombReimuACalc(Player *player)
 {
-    SDL_Log("bra start");
+    //SDL_LOG("bra start");
     i32 i;
     f32 vecLength;
     i32 bombIdx;
     ZunVec3 bombPivot;
     AnmVm *bombSprite;
     ZunVec2 angle;
-    SDL_Log("bra 1");
+    //SDL_LOG("bra 1");
 
     if (player->bombInfo.timer >= player->bombInfo.duration)
     {
@@ -34,7 +47,7 @@ void BombData::BombReimuACalc(Player *player)
         return;
     }
 
-    SDL_Log("bra 2");
+    //SDL_LOG("bra 2");
     if (player->bombInfo.timer.HasTicked() && player->bombInfo.timer == 0)
     {
         g_Gui.ShowBombNamePortrait(ANM_SCRIPT_FACE_BOMB_PORTRAIT, TH_REIMU_A_BOMB_NAME);
@@ -54,7 +67,7 @@ void BombData::BombReimuACalc(Player *player)
         player->bombProjectiles[8].sizeX = 256.0f;
         player->bombProjectiles[8].sizeY = 256.0f;
     }
-    SDL_Log("bra 3");
+    //SDL_LOG("bra 3");
     if (player->bombInfo.timer >= 60 && player->bombInfo.timer < 180)
     {
 
@@ -81,7 +94,7 @@ void BombData::BombReimuACalc(Player *player)
         }
     }
     player->playerState = PLAYER_STATE_INVULNERABLE;
-    SDL_Log("bra 4");
+    //SDL_LOG("bra 4");
     for (i = 0; i < ARRAY_SIZE_SIGNED(player->bombInfo.reimuABombProjectilesState); i++)
     {
         if (player->bombInfo.reimuABombProjectilesState[i] == 0)
@@ -173,42 +186,42 @@ void BombData::BombReimuACalc(Player *player)
                 player->bombInfo.reimuABombProjectilesState[i] = 0;
             }
         }
-        SDL_Log("bra 5");
+        //SDL_LOG("bra 5");
         player->bombInfo.bombRegionPositions[i].x +=
             g_Supervisor.effectiveFramerateMultiplier * player->bombInfo.bombRegionVelocities[i].x;
         player->bombInfo.bombRegionPositions[i].y +=
             g_Supervisor.effectiveFramerateMultiplier * player->bombInfo.bombRegionVelocities[i].y;
 
-        SDL_Log("bra 6");
+        //SDL_LOG("bra 6");
         g_AnmManager->ExecuteScript(&player->bombInfo.sprites[0][i * 4]);
         g_AnmManager->ExecuteScript(&player->bombInfo.sprites[0][i * 4 + 1]);
         g_AnmManager->ExecuteScript(&player->bombInfo.sprites[0][i * 4 + 2]);
         g_AnmManager->ExecuteScript(&player->bombInfo.sprites[0][i * 4 + 3]);
     }
-    SDL_Log("bra finish");
+    //SDL_LOG("bra finish");
     player->bombInfo.timer.Tick();
 }
 
 void BombData::BombReimuADraw(Player *player)
 {
-    SDL_Log("brad start");
+    //SDL_LOG("brad start");
     i32 idx;
     AnmVm *bombSprite;
 
-    SDL_Log("brad 1");
+    //SDL_LOG("brad 1");
     BombData::DarkenViewport(player);
     bombSprite = &player->bombInfo.sprites[0][0];
-    SDL_Log("brad 2");
+    //SDL_LOG("brad 2");
     for (idx = 0; idx < ARRAY_SIZE_SIGNED(player->bombInfo.sprites); idx++)
     {
-        SDL_Log("brad 3");
+        //SDL_LOG("brad 3");
         if (player->bombInfo.reimuABombProjectilesState[idx] == 0)
         {
             bombSprite = &bombSprite[4];
             continue;
         }
 
-        SDL_Log("brad 4");
+        //SDL_LOG("brad 4");
         bombSprite->pos.x = uf32(&player->bombInfo.bombRegionPositions[idx].x) + uf32(&bombSprite->posOffset.x);
         bombSprite->pos.y = uf32(&player->bombInfo.bombRegionPositions[idx].y) + uf32(&bombSprite->posOffset.y);
         bombSprite->pos.z = uf32(&player->bombInfo.bombRegionPositions[idx].z) + uf32(&bombSprite->posOffset.z);
@@ -216,7 +229,7 @@ void BombData::BombReimuADraw(Player *player)
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        SDL_Log("brad 5");
+        //SDL_LOG("brad 5");
         bombSprite->pos.x = uf32(&player->bombInfo.bombRegionPositions[idx].x) + uf32(&bombSprite->posOffset.x);
         bombSprite->pos.y = uf32(&player->bombInfo.bombRegionPositions[idx].y) + uf32(&bombSprite->posOffset.y);
         bombSprite->pos.z = uf32(&player->bombInfo.bombRegionPositions[idx].z) + uf32(&bombSprite->posOffset.z);
@@ -224,7 +237,7 @@ void BombData::BombReimuADraw(Player *player)
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        SDL_Log("brad 6");
+        //SDL_LOG("brad 6");
         bombSprite->pos.x = uf32(&player->bombInfo.bombRegionPositions[idx].x) + uf32(&bombSprite->posOffset.x);
         bombSprite->pos.y = uf32(&player->bombInfo.bombRegionPositions[idx].y) + uf32(&bombSprite->posOffset.y);
         bombSprite->pos.z = uf32(&player->bombInfo.bombRegionPositions[idx].z) + uf32(&bombSprite->posOffset.z);
@@ -232,7 +245,7 @@ void BombData::BombReimuADraw(Player *player)
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        SDL_Log("brad 7");
+        //SDL_LOG("brad 7");
         bombSprite->pos.x = uf32(&player->bombInfo.bombRegionPositions[idx].x) + uf32(&bombSprite->posOffset.x);
         bombSprite->pos.y = uf32(&player->bombInfo.bombRegionPositions[idx].y) + uf32(&bombSprite->posOffset.y);
         bombSprite->pos.z = uf32(&player->bombInfo.bombRegionPositions[idx].z) + uf32(&bombSprite->posOffset.z);
@@ -240,7 +253,7 @@ void BombData::BombReimuADraw(Player *player)
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
     }
-    SDL_Log("brad finish");
+    //SDL_LOG("brad finish");
 }
 
 void BombData::DarkenViewport(Player *player)

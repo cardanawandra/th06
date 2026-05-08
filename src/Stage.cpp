@@ -286,7 +286,7 @@ ChainCallbackResult Stage::OnDrawLowPrio(Stage *stage)
     g_Supervisor.viewport.maxZ = 0.5;
     GameManager::SetupCameraStageBackground(0);
     g_Supervisor.viewport.Set();
-    g_AnmManager->SetFogRange(1'000.0f, 2'000.0f);
+    g_AnmManager->SetFogRange(1000.0f, 2000.0f);
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 

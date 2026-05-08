@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_gamecontroller.h>
+#include <SDL_joystick.h>
 #include <SDL_video.h>
 
 #include "Chain.hpp"
@@ -129,9 +129,6 @@ struct Supervisor
 
     u32 RedrawWholeFrame() const
     {
-        // SDL makes no guarantees about frame state after buffer swap,
-        //   and Wayland will "reuse" old framebuffers in a nondeterministic
-        //   way, so we're basically required to always redraw to avoid UI corruption
         return (this->cfg.opts >> GCOS_CLEAR_BACKBUFFER_ON_REFRESH & 1) |
                (this->cfg.opts >> GCOS_DISPLAY_MINIMUM_GRAPHICS & 1) | 1;
     }
@@ -141,21 +138,19 @@ struct Supervisor
         return (this->cfg.opts >> GCOS_FORCE_60FPS & 1) || this->vsyncEnabled;
     }
 
-    //    HINSTANCE hInstance;
-    //    PDIRECT3D8 d3dIface;
-    //    PDIRECT3DDEVICE8 d3dDevice;
-    //    LPDIRECTINPUT8 dinputIface;
-    //    LPDIRECTINPUTDEVICE8A keyboard;
-    //    LPDIRECTINPUTDEVICE8A controller;
-    SDL_GameController *gameController;
-    //    DIDEVCAPS controllerCaps;
-    SDL_Window *gameWindow;
+    // SDL1.2 joystick (no GameController API)
+    SDL_Joystick *joystick;
+
+    // SDL1.2 uses SDL_Surface instead of SDL_Window
+    SDL_Surface *gameWindow;
+
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;
     ZunViewport viewport;
-    //    D3DPRESENT_PARAMETERS presentParameters;
+
     GameConfiguration cfg;
     GameConfiguration defaultConfig;
+
     i32 calcCount;
     i32 wantedState;
     i32 curState;
@@ -168,6 +163,7 @@ struct Supervisor
 
     i32 vsyncEnabled;
     u32 lastFrameTime;
+
     f32 effectiveFramerateMultiplier;
     f32 framerateMultiplier;
 
@@ -184,7 +180,6 @@ struct Supervisor
     u8 colorMode16Bits;
 
     u32 startupTimeBeforeMenuMusic;
-    //    D3DCAPS8 d3dCaps;
 };
 
 extern ControllerMapping g_ControllerMapping;

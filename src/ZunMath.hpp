@@ -3,8 +3,8 @@
 #include "GLFunc.hpp"
 #include "GameWindow.hpp"
 #include "inttypes.hpp"
-#include <cmath>
-#include <cstring>
+#include <math.h>
+#include <string.h>
 
 #ifndef __has_builtin
 #define __has_builtin(name) 0
@@ -14,15 +14,15 @@
 #include <bit>
 inline u32 BitCeil(u32 n)
 {
-    return std::bit_ceil(n);
+    return bit_ceil(n);
 }
 inline u32 CountrZero(u32 n)
 {
-    return std::countr_zero(n);
+    return countr_zero(n);
 }
 inline u16 RotateLeft16(u16 n, u8 s)
 {
-    return std::rotl(n, s);
+    return rotl(n, s);
 }
 #else
 
@@ -89,15 +89,15 @@ inline u16 RotateLeft16(u16 n, u8 s)
 //   These were mostly added to C++ with C++17, but GNU bikeshedded so hard, they didn't add
 //   them to their headers until 2023. To allow compilation where the older headers are
 //   still used, these macros force the overloaded float version of the base math function.
-#define ZUN_SINF(angle) (std::sin((f32)(angle)))
-#define ZUN_COSF(angle) (std::cos((f32)(angle)))
-#define ZUN_TANF(angle) (std::tan((f32)(angle)))
-#define ZUN_SQRTF(n) (std::sqrt((f32)(n)))
-#define ZUN_FABSF(n) (std::fabs((f32)(n)))
-#define ZUN_FMODF(x, y) (std::fmod((f32)(x), (f32)(y)))
-#define ZUN_ATAN2F(x, y) (std::atan2((f32)(x), (f32)(y)))
-#define ZUN_POWF(x, y) (std::pow((f32)(x), (f32)(y)))
-#define ZUN_RINTF(n) (std::rintf((f32)(x)))
+#define ZUN_SINF(angle) (sin((f32)(angle)))
+#define ZUN_COSF(angle) (cos((f32)(angle)))
+#define ZUN_TANF(angle) (tan((f32)(angle)))
+#define ZUN_SQRTF(n) (sqrt((f32)(n)))
+#define ZUN_FABSF(n) (fabs((f32)(n)))
+#define ZUN_FMODF(x, y) (fmod((f32)(x), (f32)(y)))
+#define ZUN_ATAN2F(x, y) (atan2((f32)(x), (f32)(y)))
+#define ZUN_POWF(x, y) (pow((f32)(x), (f32)(y)))
+#define ZUN_RINTF(n) (rintf((f32)(x)))
 
 // sizeof checks kept in because technically, the standard does allow compilers to add more padding than is required
 
@@ -107,19 +107,9 @@ struct ZunVec2
     f32 x;
     f32 y;
 
-    ZunVec2()
-    {
-    }
-
-    ZunVec2(f32 x, f32 y)
-    {
-        this->x = x;
-        this->y = y;
-    }
-
     f32 VectorLength() const
     {
-        return std::sqrt((f64)(this->x * this->x + this->y * this->y));
+        return sqrt((f64)(this->x * this->x + this->y * this->y));
     }
 
     f64 VectorLengthF64() const
@@ -127,7 +117,8 @@ struct ZunVec2
         return (f64)this->VectorLength();
     }
 };
-static_assert(sizeof(ZunVec2) == 0x08, "ZunVec2 has additional padding between struct members!");
+
+//static_assert(sizeof(ZunVec2) == 0x08, "ZunVec2 has additional padding between struct members!");
 
 // Replacing all former uses of D3DXVECTOR3
 struct ZunVec3
@@ -136,25 +127,20 @@ struct ZunVec3
     f32 y;
     f32 z;
 
-    ZunVec3()
-    {
-    }
-
-    ZunVec3(f32 x, f32 y, f32 z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
-
     ZunVec3 operator-() const
     {
-        return ZunVec3(-this->x, -this->y, -this->z);
+        ZunVec3 v = { -this->x, -this->y, -this->z };
+        return v;
     }
 
     ZunVec3 operator+(const ZunVec3 &b) const
     {
-        return ZunVec3(this->x + b.x, this->y + b.y, this->z + b.z);
+        ZunVec3 v = {
+            this->x + b.x,
+            this->y + b.y,
+            this->z + b.z
+        };
+        return v;
     }
 
     ZunVec3 &operator+=(const ZunVec3 &b)
@@ -168,7 +154,12 @@ struct ZunVec3
 
     ZunVec3 operator-(const ZunVec3 &b) const
     {
-        return ZunVec3(this->x - b.x, this->y - b.y, this->z - b.z);
+        ZunVec3 v = {
+            this->x - b.x,
+            this->y - b.y,
+            this->z - b.z
+        };
+        return v;
     }
 
     ZunVec3 &operator-=(const ZunVec3 &b)
@@ -182,7 +173,12 @@ struct ZunVec3
 
     ZunVec3 operator*(const f32 mult) const
     {
-        return ZunVec3(this->x * mult, this->y * mult, this->z * mult);
+        ZunVec3 v = {
+            this->x * mult,
+            this->y * mult,
+            this->z * mult
+        };
+        return v;
     }
 
     ZunVec3 &operator*=(const f32 mult)
@@ -196,7 +192,12 @@ struct ZunVec3
 
     ZunVec3 operator/(const f32 divisor) const
     {
-        return ZunVec3(this->x / divisor, this->y / divisor, this->z / divisor);
+        ZunVec3 v = {
+            this->x / divisor,
+            this->y / divisor,
+            this->z / divisor
+        };
+        return v;
     }
 
     ZunVec3 &operator/=(const f32 div)
@@ -210,7 +211,11 @@ struct ZunVec3
 
     f32 getMagnitude() const
     {
-        return ZUN_SQRTF(this->x * this->x + this->y * this->y + this->z * this->z);
+        return ZUN_SQRTF(
+            this->x * this->x +
+            this->y * this->y +
+            this->z * this->z
+        );
     }
 
     void getNormalized(ZunVec3 &norm) const
@@ -220,25 +225,42 @@ struct ZunVec3
 
     void calcCross(ZunVec3 &dst, const ZunVec3 &vec) const
     {
-        dst = ZunVec3(this->y * vec.z - this->z * vec.y, this->z * vec.x - this->x * vec.z,
-                      this->x * vec.y - this->y * vec.x);
+        dst.x = this->y * vec.z - this->z * vec.y;
+        dst.y = this->z * vec.x - this->x * vec.z;
+        dst.z = this->x * vec.y - this->y * vec.x;
     }
 
     f32 calcDot(const ZunVec3 &vec) const
     {
-        return this->x * vec.x + this->y * vec.y + this->z * vec.z;
+        return this->x * vec.x +
+               this->y * vec.y +
+               this->z * vec.z;
     }
 
-    static void SetVecCorners(ZunVec3 *topLeftCorner, ZunVec3 *bottomRightCorner, const ZunVec3 *centerPosition,
-                              const ZunVec3 *size)
+    static void SetVecCorners(
+        ZunVec3 *topLeftCorner,
+        ZunVec3 *bottomRightCorner,
+        const ZunVec3 *centerPosition,
+        const ZunVec3 *size)
     {
-        topLeftCorner->x = centerPosition->x - size->x / 2.0f;
-        topLeftCorner->y = centerPosition->y - size->y / 2.0f;
-        bottomRightCorner->x = size->x / 2.0f + centerPosition->x;
-        bottomRightCorner->y = size->y / 2.0f + centerPosition->y;
+        topLeftCorner->x =
+            centerPosition->x - size->x / 2.0f;
+
+        topLeftCorner->y =
+            centerPosition->y - size->y / 2.0f;
+
+        bottomRightCorner->x =
+            size->x / 2.0f + centerPosition->x;
+
+        bottomRightCorner->y =
+            size->y / 2.0f + centerPosition->y;
     }
 };
-static_assert(sizeof(ZunVec3) == 0x0C, "ZunVec3 has additional padding between struct members!");
+inline ZunVec3 ZunProcVec3(f32 x, f32 y, f32 z){
+    ZunVec3 result = {x,y,z};
+    return result;
+}
+//static_assert(sizeof(ZunVec3) == 0x0C, "ZunVec3 has additional padding between struct members!");
 
 struct ZunVec4
 {
@@ -259,7 +281,7 @@ struct ZunVec4
         this->w = w;
     }
 };
-static_assert(sizeof(ZunVec4) == 0x10, "ZunVec4 has additional padding between struct members!");
+//static_assert(sizeof(ZunVec4) == 0x10, "ZunVec4 has additional padding between struct members!");
 
 // Replacing all former uses of D3DXMATRIX
 struct ZunMatrix
@@ -288,7 +310,7 @@ struct ZunMatrix
 
     ZunVec3 operator*(const ZunVec3 &b) const
     {
-        ZunVec3 result(0.0f, 0.0f, 0.0f);
+        ZunVec3 result = {0.0f, 0.0f, 0.0f};
 
         result.x = this->m[0][0] * b.x + this->m[1][0] * b.y + this->m[2][0] * b.z + this->m[3][0];
         result.y = this->m[0][1] * b.x + this->m[1][1] * b.y + this->m[2][1] * b.z + this->m[3][1];
@@ -299,7 +321,7 @@ struct ZunMatrix
 
     void Identity()
     {
-        std::memset(this->m, 0, sizeof(m));
+        memset(this->m, 0, sizeof(m));
         m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
     }
 
@@ -385,7 +407,7 @@ struct ZunMatrix
         this->m[3][3] = 1.0f;
     }
 };
-static_assert(sizeof(ZunMatrix) == 0x40, "ZunMatrix has additional padding between struct members!");
+//static_assert(sizeof(ZunMatrix) == 0x40, "ZunMatrix has additional padding between struct members!");
 
 // A viewport using D3D conventions (x, y is the top left corner of the viewport)
 struct ZunViewport
@@ -403,7 +425,10 @@ struct ZunViewport
                                  (g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE)) -
                                      g_GameWindow.VIEWPORT_OFF_Y,
                                  this->width * g_GameWindow.WIDTH_RESOLUTION_SCALE, this->height * g_GameWindow.HEIGHT_RESOLUTION_SCALE);
-        g_glFuncTable.glDepthRangef(this->minZ, this->maxZ);
+        g_glFuncTable.glDepthRange(
+            (GLclampd)this->minZ,
+            (GLclampd)this->maxZ
+        );
     }
 
     void Get()
@@ -434,14 +459,14 @@ struct ZunViewport
 
 inline void fsincos_wrapper(f32 *out_sine, f32 *out_cosine, f32 angle)
 {
-    *out_sine = std::sin(angle);
-    *out_cosine = std::cos(angle);
+    *out_sine = sin(angle);
+    *out_cosine = cos(angle);
 }
 
 inline void sincosmul(ZunVec3 *out_vel, f32 input, f32 multiplier)
 {
-    out_vel->x = std::cos(input) * multiplier;
-    out_vel->y = std::sin(input) * multiplier;
+    out_vel->x = cos(input) * multiplier;
+    out_vel->y = sin(input) * multiplier;
 }
 
 inline f32 invertf(f32 x)
@@ -516,7 +541,7 @@ inline ZunMatrix perspectiveMatrixFromFOV(f32 verticalFOV, f32 aspectRatio, f32 
 
     ZunMatrix perspectiveMatrix;
 
-    std::memset(perspectiveMatrix.m, 0, sizeof(perspectiveMatrix.m));
+    memset(perspectiveMatrix.m, 0, sizeof(perspectiveMatrix.m));
 
     perspectiveMatrix.m[0][0] = nearPlane / horizontal;
     perspectiveMatrix.m[1][1] = nearPlane / vertical;
@@ -562,7 +587,10 @@ inline ZunMatrix inverseViewportMatrix()
     inverseMatrix.Scale(1.0f / (viewport.width / 2.0f), -1.0f / (viewport.height / 2.0f), 2.0f);
     inverseMatrix.Translate(-viewport.x, -viewport.y, 0.0f);
 
-    g_glFuncTable.glDepthRangef(0.0f, 1.0f);
+    g_glFuncTable.glDepthRange(
+        (GLclampd)0.0f,
+        (GLclampd)1.0f
+    );
 
     return inverseMatrix;
 }

@@ -163,7 +163,7 @@ ChainCallbackResult GameManager::OnUpdate(GameManager *gameManager)
     SetupCamera(0);
 
     g_Supervisor.viewport.Set();
-    g_glFuncTable.glClearDepthf(1.0f);
+    g_glFuncTable.glClearDepth((GLclampd)1.0f);
     g_glFuncTable.glClear(GL_DEPTH_BUFFER_BIT);
 
     //    g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);

@@ -1,9 +1,10 @@
 #include "GamePaths.hpp"
 
 #include <SDL.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
-
+#include <cstddef>
+#include <cstdlib>
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -21,12 +22,12 @@ void Init()
     const char *internalPath = SDL_AndroidGetExternalStoragePath();
     if (internalPath)
     {
-        snprintf(s_userPath, sizeof(s_userPath), "%s/", internalPath);
-        SDL_Log("GamePaths: user data path = %s", s_userPath);
+        safe_sprintf(s_userPath, sizeof(s_userPath), "%s/", internalPath);
+        //SDL_LOG("GamePaths: user data path = %s", s_userPath);
     }
     else
     {
-        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
+        //SDL_LOGWarn(//SDL_LOG_CATEGORY_APPLICATION,
                     "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
         s_userPath[0] = '\0';
     }
@@ -69,7 +70,13 @@ bool IsAssetPath(const char *path)
 
     return false;
 }
-
+void safe_sprintf(char* out, size_t cap, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(out, fmt, args);
+    va_end(args);
+}
 void Resolve(char *outBuf, size_t outBufSize, const char *path)
 {
     if (!path || !*path)
@@ -86,12 +93,12 @@ void Resolve(char *outBuf, size_t outBufSize, const char *path)
     {
         // Asset: keep the relative path as-is.
         // SDL_RWFromFile on Android reads from APK assets/ automatically.
-        snprintf(outBuf, outBufSize, "%s", path);
+        safe_sprintf(outBuf, outBufSize, "%s", path);
     }
     else
     {
         // User data: prepend the writable user-data directory.
-        snprintf(outBuf, outBufSize, "%s%s", s_userPath, path);
+        safe_sprintf(outBuf, outBufSize, "%s%s", s_userPath, path);
     }
 }
 
@@ -99,7 +106,7 @@ void EnsureParentDir(const char *resolvedPath)
 {
     // Find the last directory separator and create the directory.
     char dirBuf[512];
-    snprintf(dirBuf, sizeof(dirBuf), "%s", resolvedPath);
+    safe_sprintf(dirBuf, sizeof(dirBuf), "%s", resolvedPath);
 
     char *lastSep = strrchr(dirBuf, '/');
 #ifdef _WIN32

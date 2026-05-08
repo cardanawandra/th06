@@ -1,6 +1,6 @@
 #include "EffectManager.hpp"
 
-#include <cmath>
+#include <math.h>
 
 #include "AnmManager.hpp"
 #include "Chain.hpp"
@@ -122,7 +122,9 @@ i32 EffectManager::EffectUpdateCallback4(Effect *effect)
 
     if (posMagnitude * posMagnitude < 0)
     {
-        normalizedPos = ZunVec3(1.0f, 0.0f, 0.0f);
+        normalizedPos.x = 1.0f;
+        normalizedPos.y = 0.0f;
+        normalizedPos.z = 0.0f;
     }
     else
     {

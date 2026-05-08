@@ -1,0 +1,1 @@
+E:\library\msvc6\MSVC600-master\Common\MSDev98\Bin\MSDEV.EXE th06_sdl.dsw /MAKE "th06 - Win32 Release"

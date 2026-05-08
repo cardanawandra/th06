@@ -9,23 +9,26 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 #include <cstring>
 #include <new>
 
 #include <SDL_image.h>
 #include <SDL_rwops.h>
-#include <SDL_surface.h>
+#include "SDLCompat.hpp"
+// #include <iostream>
+// void anmmanagerlog(string msg){
+//     cout<<"anmmanager : "<<msg<<endl;
+// }
+
 
 static VertexTex1Xyzrhw g_PrimitivesToDrawVertexBuf[4];
 static VertexTex1DiffuseXyzrhw g_PrimitivesToDrawNoVertexBuf[4];
 static VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
 AnmManager *g_AnmManager;
  
-static const SDL_PixelFormatEnum g_TextureFormatSDLMapping[6] = {SDL_PIXELFORMAT_UNKNOWN,  SDL_PIXELFORMAT_RGBA32,
-                                                    SDL_PIXELFORMAT_RGBA5551, SDL_PIXELFORMAT_RGB565,
-                                                    SDL_PIXELFORMAT_RGB24,    SDL_PIXELFORMAT_RGBA4444};
+static PixelFormatSDL1 g_TextureFormatSDLMapping[6];
  
 static const GLenum g_TextureFormatGLFormatMapping[6] = {0, GL_RGBA, GL_RGBA, GL_RGB, GL_RGB, GL_RGBA};
  
@@ -46,13 +49,15 @@ void AnmManager::CreateTextureObject()
     g_glFuncTable.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
-SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PixelFormatEnum format, u8 **fileData)
+SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelFormatSDL1 format, u8 **fileData)
 {
+    printf("LoadToSurfaceWithFormat 1");
     u8 *data;
     SDL_Surface *imageSrcSurface;
     SDL_Surface *imageTargetSurface;
     SDL_RWops *rwData;
 
+    printf("LoadToSurfaceWithFormat 2");
     data = FileSystem::OpenPath(filename, 0);
 
     if (data == NULL)
@@ -60,24 +65,30 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_Pixel
         return NULL;
     }
 
+    printf("LoadToSurfaceWithFormat 3");
     rwData = SDL_RWFromConstMem(data, g_LastFileSize);
 
     if (rwData == NULL)
     {
-        std::free(data);
+        free(data);
         return NULL;
     }
 
+    printf("LoadToSurfaceWithFormat 4");
     imageSrcSurface = IMG_Load_RW(rwData, 1);
 
+    printf("LoadToSurfaceWithFormat 4.5");
     if (imageSrcSurface == NULL)
     {
-        std::free(data);
+        printf(IMG_GetError());
+        free(data);
         return NULL;
     }
 
+    printf("LoadToSurfaceWithFormat 5");
     imageTargetSurface = SDL_ConvertSurfaceFormat(imageSrcSurface, format, 0);
 
+    printf("LoadToSurfaceWithFormat 6");
     SDL_FreeSurface(imageSrcSurface);
 
     if (imageTargetSurface != NULL && fileData != NULL)
@@ -86,28 +97,94 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_Pixel
     }
     else
     {
-        std::free(data);
+        free(data);
     }
-
+    printf("LoadToSurfaceWithFormat finish");
     return imageTargetSurface;
 }
 
-u8 *AnmManager::ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth)
+u8 *AnmManager::ExtractSurfacePixels(SDL_Surface *src, u8 format, ZunColor colorKey)
 {
+    u8 pixelDepth = g_TextureFormatBytesPerPixel[format];
     SDL_LockSurface(src);
 
-    const i32 dstPitch = src->w * pixelDepth;
-    const i32 srcPitch = src->pitch;
+    const int w = src->w;
+    const int h = src->h;
 
-    u8 *pixelData = new u8[dstPitch * src->h];
-    u8 *dstPtr = pixelData;
+    u8 *pixelData = new u8[w * h * pixelDepth];
+
     const u8 *srcPtr = (u8 *)src->pixels;
+    u8 *dstPtr = pixelData;
 
-    for (int i = 0; i < src->h; i++)
+    int srcBpp = src->format->BytesPerPixel;
+
+    for (int y = 0; y < h; y++)
     {
-        std::memcpy(dstPtr, srcPtr, dstPitch);
-        dstPtr += dstPitch;
-        srcPtr += srcPitch;
+        const u8 *row = srcPtr + y * src->pitch;
+
+        for (int x = 0; x < w; x++)
+        {
+            Uint32 pixel = 0;
+            memcpy(&pixel, row + x * srcBpp, srcBpp);
+
+            Uint8 r, g, b, a;
+            SDL_GetRGBA(pixel, src->format, &r, &g, &b, &a);
+
+            Uint8 keyR, keyG, keyB, keyA;
+            SDL_GetRGBA(colorKey, src->format, &keyR, &keyG, &keyB, &keyA);
+
+            if (r == keyR && g == keyG && b == keyB)
+            {
+                a = 0;
+            }
+
+            // remove those
+            if (a == 0)
+            {
+                r = g = b = 0;
+            }
+
+            // write based on requested format
+            if (format == 1) // RGBA32
+            {
+                dstPtr[0] = r;
+                dstPtr[1] = g;
+                dstPtr[2] = b;
+                dstPtr[3] = a;
+            }
+            else if (format == 4) // RGB24
+            {
+                dstPtr[0] = r;
+                dstPtr[1] = g;
+                dstPtr[2] = b;
+            }
+            else if (pixelDepth == 2) // RGB565 or similar
+            {
+                Uint16 packed;
+                if(format==3){
+                    packed = ((r >> 3) << 11) |
+                        ((g >> 3) << 6)  |
+                        ((b >> 3) << 1)  |
+                        (a > 0 ? 0 : 1);
+                }else if(format==4){
+                    packed =
+                        ((r >> 3) << 11) |
+                        ((g >> 2) << 5)  |
+                        (b >> 3);
+                }else{
+                    // r = 255; g = 255; b = 255; a = 255;
+                    packed =
+                        ((r >> 4) << 12) |
+                        ((g >> 4) << 8)  |
+                        ((b >> 4) << 4)  |
+                        (a >> 4);
+                }
+
+                memcpy(dstPtr, &packed, 2);
+            }
+
+            dstPtr += pixelDepth;
+        }
     }
 
     SDL_UnlockSurface(src);
@@ -133,12 +210,12 @@ void AnmManager::FlipSurface(SDL_Surface *surface)
     lowIndex = 0;
     highPtr = ((u8 *)surface->pixels) + (surface->h - 1) * surface->pitch;
 
-    std::memcpy(copyBuf, surface->pixels, surface->h / 2 * surface->pitch);
+    memcpy(copyBuf, surface->pixels, surface->h / 2 * surface->pitch);
 
     for (int i = 0; i < surface->h / 2; i++)
     {
-        std::memcpy(((u8 *)surface->pixels) + lowIndex, highPtr, surface->pitch);
-        std::memcpy(highPtr, copyBuf + lowIndex, surface->pitch);
+        memcpy(((u8 *)surface->pixels) + lowIndex, highPtr, surface->pitch);
+        memcpy(highPtr, copyBuf + lowIndex, surface->pitch);
 
         lowIndex += surface->pitch;
         highPtr -= surface->pitch;
@@ -195,10 +272,22 @@ AnmManager::~AnmManager()
 AnmManager::AnmManager()
 {
     IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+    // UNKNOWN <= index 0
+    g_TextureFormatSDLMapping[0] = SDL1_PIXELFORMAT_UNKNOWN; 
+    // RGBA32 (RGBA8888) <= index 1
+    g_TextureFormatSDLMapping[1] = SDL1_PIXELFORMAT_RGBA32;
+    // RGBA5551 <= index 2
+    g_TextureFormatSDLMapping[2] = SDL1_PIXELFORMAT_RGBA5551;
+    // RGB565 <= index 3
+    g_TextureFormatSDLMapping[3] = SDL1_PIXELFORMAT_RGB565;
+    // RGB24 <= index 4
+    g_TextureFormatSDLMapping[4] = SDL1_PIXELFORMAT_RGB24;
+    // RGBA4444 <= index 5
+    g_TextureFormatSDLMapping[5] = SDL1_PIXELFORMAT_RGBA4444;
 
     this->maybeLoadedSpriteCount = 0;
 
-    std::memset(this, 0, sizeof(AnmManager));
+    memset(this, 0, sizeof(AnmManager));
 
     for (i32 spriteIndex = 0; spriteIndex < ARRAY_SIZE_SIGNED(this->sprites); spriteIndex++)
     {
@@ -315,24 +404,24 @@ void AnmManager::SetupVertexBuffer()
 
 ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
+    printf("LoadTexture 1");
     u8 *rawTextureData;
     SDL_Surface *textureSurface;
 
+    printf("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
     if (((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) != 0)
     {
-        if (g_TextureFormatSDLMapping[textureFormat] == SDL_PIXELFORMAT_RGBA32 ||
-            g_TextureFormatSDLMapping[textureFormat] == SDL_PIXELFORMAT_UNKNOWN)
-        {
-            textureFormat = TEX_FMT_A4R4G4B4;
-        }
-        else if (g_TextureFormatSDLMapping[textureFormat] == SDL_PIXELFORMAT_RGB24)
-        {
+        //use indexing instead
+        if(textureFormat == 1 || textureFormat == 0){
+            textureFormat = TEX_FMT_A4R4G4B4;            
+        }else if(textureFormat==4){    
             textureFormat = TEX_FMT_R5G6B5;
         }
     }
 
+    printf("LoadTexture 3");
     textureSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat],
                                              (u8 **)&this->textures[textureIdx].fileData);
 
@@ -340,12 +429,25 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     const AnmRawEntry *entry = this->anmFiles[textureIdx];
     if (textureSurface->w != entry->width || textureSurface->h != entry->height)
     {
-        SDL_Surface *textureSurface2 = SDL_CreateRGBSurfaceWithFormat(0, entry->width, entry->height,
-                                                                      g_TextureFormatBytesPerPixel[textureFormat] * 8,
-                                                                      g_TextureFormatSDLMapping[textureFormat]);
-        SDL_Rect srcRect = {0, 0, textureSurface->w, textureSurface->h};
-        SDL_Rect dstRect = {0, 0, entry->width, entry->height};
+        const PixelFormatSDL1* fmt = &g_TextureFormatSDLMapping[textureFormat];
+
+        printf("LoadTexture 4");
+        SDL_Surface *textureSurface2 = SDL_CreateRGBSurface(
+            SDL_SWSURFACE,
+            entry->width,
+            entry->height,
+            fmt->bpp,
+            fmt->rmask,
+            fmt->gmask,
+            fmt->bmask,
+            fmt->amask
+        );
+        SDL_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
+        SDL_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
+        printf("LoadTexture 5");
         SDL_BlitScaled(textureSurface, &srcRect, textureSurface2, &dstRect);
+        printf("LoadTexture 6");
+        printf("Blits %s",textureName);
         SDL_FreeSurface(textureSurface);
         textureSurface = textureSurface2;
     }
@@ -355,6 +457,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         return ZUN_ERROR;
     }
 
+    printf("LoadTexture 7");
     CreateTextureObject();
 
     // Clear any errors that might be pending
@@ -362,7 +465,8 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     {
     }
 
-    rawTextureData = ExtractSurfacePixels(textureSurface, g_TextureFormatBytesPerPixel[textureFormat]);
+    printf("LoadTexture 8");
+    rawTextureData = ExtractSurfacePixels(textureSurface, textureFormat,colorKey);
 
     this->textures[textureIdx].handle = this->currentTextureHandle;
     this->textures[textureIdx].textureData = rawTextureData;
@@ -375,10 +479,12 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     // of those should be globally disabled for the texture unit anyway This also drops colorKey (an equivalent doesn't
     // exist in OpenGL). I'm not sure its use ever matters anyway
 
+    printf("LoadTexture 9");
     g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[textureFormat], textureSurface->w,
                                textureSurface->h, 0, g_TextureFormatGLFormatMapping[textureFormat],
                                g_TextureFormatGLTypeMapping[textureFormat], rawTextureData);
 
+    printf("LoadTexture 10");
     SDL_FreeSurface(textureSurface);
 
     if (g_glFuncTable.glGetError() != GL_NO_ERROR)
@@ -388,6 +494,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         return ZUN_ERROR;
     }
 
+    printf("LoadTexture finish");
     return ZUN_SUCCESS;
 }
 
@@ -503,11 +610,15 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, 
 
 ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 {
+    printf("LoadAnm 1");
     this->ReleaseAnm(anmIdx);
+    printf("LoadAnm 2");
     this->anmFiles[anmIdx] = (AnmRawEntry *)FileSystem::OpenPath(path, 0);
 
+    printf("LoadAnm 3");
     AnmRawEntry *anm = this->anmFiles[anmIdx];
 
+    printf("LoadAnm 4");
     if (anm == NULL)
     {
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, path);
@@ -516,15 +627,17 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     anm->textureIdx = anmIdx;
 
+    printf("LoadAnm 5");
     const char *anmName = (char *)((u8 *)anm + anm->nameOffset);
 
     // D3D seems to treat unknown texture format as a wildcard, but SDL treats it as an error
     //   This is a hack to avoid that for now
-    if (anm->format == TEX_FMT_UNKNOWN)
+    if (anm->format == TEX_FMT_UNKNOWN || anm->format == 5)
     {
         anm->format = TEX_FMT_A8R8G8B8;
     }
 
+    printf("LoadAnm 6");
     if (*anmName == '@')
     {
         this->CreateEmptyTexture(anm->textureIdx, anm->width, anm->height, anm->format);
@@ -534,7 +647,9 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_TEXTURE_CORRUPTED, anmName);
         return ZUN_ERROR;
     }
+    printf("LoadAnm 7");
 
+    printf("LoadAnm 8");
     if (anm->alphaNameOffset != 0)
     {
         anmName = (char *)((u8 *)anm + anm->alphaNameOffset);
@@ -552,6 +667,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 index;
     const AnmRawSprite *rawSprite;
 
+    printf("LoadAnm 9");
     for (index = 0; index < this->anmFiles[anmIdx]->numSprites; index++, curSpriteOffset++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)anm + *curSpriteOffset);
@@ -567,6 +683,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         this->LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
     }
 
+    printf("LoadAnm 10");
     for (index = 0; index < anm->numScripts; index++, curSpriteOffset += 2)
     {
         this->scripts[curSpriteOffset[0] + spriteIdxOffset] = (AnmRawInstr *)((u8 *)anm + curSpriteOffset[1]);
@@ -575,6 +692,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     this->anmFilesSpriteIndexOffsets[anmIdx] = spriteIdxOffset;
 
+    printf("LoadAnm finish");
     return ZUN_SUCCESS;
 }
 
@@ -740,6 +858,7 @@ void AnmManager::SetRenderStateForVm(const AnmVm *vm)
 
 void AnmManager::UpdateDirtyStates()
 {
+    u32 i = 0, i2 = 0;
     while (this->dirtyFlags != 0)
     {
         u32 currFlagIndex = CountrZero(this->dirtyFlags);
@@ -802,9 +921,9 @@ void AnmManager::UpdateDirtyStates()
             break;
         }
         case DIRTY_VERTEX_ATTRIBUTE_ARRAY:
-            for (u32 i = 0; i < 3; i++)
+            for (i = 0; i < 3; i++)
             {
-                if (!std::memcmp(&this->attribArrays[i], &this->dirtyAttribArrays[i], sizeof(*this->attribArrays)))
+                if (!memcmp(&this->attribArrays[i], &this->dirtyAttribArrays[i], sizeof(*this->attribArrays)))
                 {
                     continue;
                 }
@@ -817,16 +936,16 @@ void AnmManager::UpdateDirtyStates()
 
             break;
         case DIRTY_COLOR_OP:
-            for (u32 i = 0; i < 2; i++)
+            for (i2 = 0; i2 < 2; i2++)
             {
-                if (this->colorOps[i] == this->dirtyColorOps[i])
+                if (this->colorOps[i2] == this->dirtyColorOps[i2])
                 {
                     continue;
                 }
 
-                this->colorOps[i] = this->dirtyColorOps[i];
+                this->colorOps[i2] = this->dirtyColorOps[i2];
 
-                gfxBackend->SetColorOp((TextureOpComponent)i, this->colorOps[i]);
+                gfxBackend->SetColorOp((TextureOpComponent)i2, this->colorOps[i2]);
             }
 
             break;
@@ -838,7 +957,7 @@ void AnmManager::UpdateDirtyStates()
         case DIRTY_VIEW_MATRIX:
         case DIRTY_PROJECTION_MATRIX:
         case DIRTY_TEXTURE_MATRIX:
-            std::memcpy(&this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
+            memcpy(&this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         &this->dirtyTransformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         sizeof(*this->transformMatrices));
             gfxBackend->SetTransformMatrix((TransformMatrix)(currFlagIndex - DIRTY_MODEL_MATRIX),
@@ -855,13 +974,13 @@ ZunResult AnmManager::DrawOrthographic(const AnmVm *vm, bool roundToPixel)
         //   pixels. This has been changed to round to OpenGL pixels. See comment in inverseViewportMatrix()
         //   for a more detailed explanation and porting notes.
 
-        g_PrimitivesToDrawVertexBuf[0].position.x = rintf(g_PrimitivesToDrawVertexBuf[0].position.x);
+        g_PrimitivesToDrawVertexBuf[0].position.x = (float)((int)(g_PrimitivesToDrawVertexBuf[0].position.x));
         g_PrimitivesToDrawVertexBuf[2].position.x = g_PrimitivesToDrawVertexBuf[0].position.x;
-        g_PrimitivesToDrawVertexBuf[1].position.x = rintf(g_PrimitivesToDrawVertexBuf[1].position.x);
+        g_PrimitivesToDrawVertexBuf[1].position.x = (float)((int)(g_PrimitivesToDrawVertexBuf[1].position.x));
         g_PrimitivesToDrawVertexBuf[3].position.x = g_PrimitivesToDrawVertexBuf[1].position.x;
-        g_PrimitivesToDrawVertexBuf[0].position.y = rintf(g_PrimitivesToDrawVertexBuf[0].position.y);
+        g_PrimitivesToDrawVertexBuf[0].position.y = (float)((int)(g_PrimitivesToDrawVertexBuf[0].position.y));
         g_PrimitivesToDrawVertexBuf[1].position.y = g_PrimitivesToDrawVertexBuf[0].position.y;
-        g_PrimitivesToDrawVertexBuf[2].position.y = rintf(g_PrimitivesToDrawVertexBuf[2].position.y);
+        g_PrimitivesToDrawVertexBuf[2].position.y = (float)((int)(g_PrimitivesToDrawVertexBuf[2].position.y));
         g_PrimitivesToDrawVertexBuf[3].position.y = g_PrimitivesToDrawVertexBuf[2].position.y;
     }
     g_PrimitivesToDrawVertexBuf[0].position.z = g_PrimitivesToDrawVertexBuf[1].position.z =
@@ -1025,10 +1144,10 @@ ZunResult AnmManager::Draw(const AnmVm *vm)
     }
     z = vm->rotation.z;
     fsincos_wrapper(&zSine, &zCosine, z);
-    xOffset = rintf(vm->pos.x);
-    yOffset = rintf(vm->pos.y);
-    spriteXCenter = rintf((vm->sprite->widthPx * vm->scaleX) / 2.0f);
-    spriteYCenter = rintf((vm->sprite->heightPx * vm->scaleY) / 2.0f);
+    xOffset = (float)((int)(vm->pos.x));
+    yOffset = (float)((int)(vm->pos.y));
+    spriteXCenter = (float)((int)((vm->sprite->widthPx * vm->scaleX) / 2.0f));
+    spriteYCenter = (float)((int)((vm->sprite->heightPx * vm->scaleY) / 2.0f));
     this->TranslateRotation(&g_PrimitivesToDrawVertexBuf[0], -spriteXCenter - 0.5f, -spriteYCenter - 0.5f, zSine,
                             zCosine, xOffset, yOffset);
     this->TranslateRotation(&g_PrimitivesToDrawVertexBuf[1], spriteXCenter - 0.5f, -spriteYCenter - 0.5f, zSine,
@@ -1257,8 +1376,8 @@ ZunResult AnmManager::Draw2(const AnmVm *vm)
     SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
 
     worldTransformMatrix = vm->matrix;
-    worldTransformMatrix.m[3][0] = rintf(vm->pos.x) - 0.5f;
-    worldTransformMatrix.m[3][1] = -rintf(vm->pos.y) + 0.5f;
+    worldTransformMatrix.m[3][0] = (float)((int)(vm->pos.x)) - 0.5f;
+    worldTransformMatrix.m[3][1] = -(float)((int)(vm->pos.y)) + 0.5f;
     if ((vm->flags.anchor & AnmVmAnchor_Left) != 0)
     {
         worldTransformMatrix.m[3][0] += (vm->sprite->widthPx * vm->scaleX) / 2.0f;
@@ -1443,11 +1562,15 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case AnmOpcode_SetPosition:
             if (vm->flags.usePosOffset == 0)
             {
-                vm->pos = ZunVec3(AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
+                vm->pos.x = AnmF32Arg(0);
+                vm->pos.y = AnmF32Arg(1);
+                vm->pos.z = AnmF32Arg(2);
             }
             else
             {
-                vm->posOffset = ZunVec3(AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
+                vm->posOffset.x = AnmF32Arg(0);
+                vm->posOffset.y = AnmF32Arg(1);
+                vm->posOffset.z = AnmF32Arg(2);
             }
             break;
         case AnmOpcode_PosTimeAccel:
@@ -1471,7 +1594,9 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 // a memcpy
                 vm->posInterpInitial = vm->posOffset;
             }
-            vm->posInterpFinal = ZunVec3(AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
+            vm->posInterpFinal.x = AnmF32Arg(0);
+            vm->posInterpFinal.y = AnmF32Arg(1);
+            vm->posInterpFinal.z = AnmF32Arg(2);
             vm->posInterpEndTime = AnmI32Arg(3);
             vm->posInterpTime.InitializeForPopup();
             break;
@@ -1774,7 +1899,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
         this->ReleaseSurface(surfaceIdx);
     }
 
-    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, SDL_PIXELFORMAT_RGB24, NULL);
+    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, SDL1_PIXELFORMAT_RGB24, NULL);
 
     if (this->surfaces[surfaceIdx] == NULL)
     {
@@ -1860,7 +1985,7 @@ void AnmManager::ReleaseSurface(i32 surfaceIdx)
     }
 }
 
-void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 srcX, i32 srcY, i32 dstX, i32 dstY)
+void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 srcX, Sint16 srcY, Sint16 dstX, Sint16 dstY)
 {
     SDL_Surface *srcSurface = this->surfaces[surfaceIdx];
 
@@ -1912,8 +2037,8 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i32 srcX, i32 srcY, i32
     //    destSurface->Release();
 }
 
-void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, i32 dstX, i32 dstY, i32 rectLeft, i32 rectTop,
-                                             i32 rectWidth, i32 rectHeight)
+void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 dstX, Sint16 dstY, Sint16 rectLeft, Sint16 rectTop,
+                                             Uint16 rectWidth, Uint16 rectHeight)
 {
     SDL_Surface *srcSurface = this->surfaces[surfaceIdx];
 
@@ -1922,7 +2047,8 @@ void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, i32 dstX, i32 dstY,
         return;
     }
 
-    SDL_Rect srcRect{rectLeft, rectTop, rectWidth, rectHeight}, dstRect{dstX, dstY, rectWidth, rectHeight};
+    SDL_Rect srcRect = {rectLeft, rectTop, rectWidth, rectHeight}; 
+    SDL_Rect dstRect = {dstX, dstY, rectWidth, rectHeight};
     ApplySurfaceToColorBuffer(srcSurface, srcRect, dstRect);
     //
     //    IDirect3DSurface8 *D3D_Surface;
@@ -1993,12 +2119,29 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
                                width * g_GameWindow.WIDTH_RESOLUTION_SCALE, height * g_GameWindow.HEIGHT_RESOLUTION_SCALE, GL_RGBA,
                                GL_UNSIGNED_BYTE, backBufferPixels);
 
-    unstretchedSurface = SDL_CreateRGBSurfaceWithFormatFrom(backBufferPixels, width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
-                                                            height * g_GameWindow.HEIGHT_RESOLUTION_SCALE, 32,
-                                                            width * g_GameWindow.WIDTH_RESOLUTION_SCALE * 4, SDL_PIXELFORMAT_RGBA32);
-    stretchedSurface = SDL_CreateRGBSurfaceWithFormat(0, this->textures[textureId].width,
-                                                      this->textures[textureId].height, 32, SDL_PIXELFORMAT_RGBA32);
+    const PixelFormatSDL1* fmt = &g_TextureFormatSDLMapping[1];
 
+    unstretchedSurface = SDL_CreateRGBSurfaceFrom(
+        backBufferPixels,
+        width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
+        height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
+        fmt->bpp,
+        width * g_GameWindow.WIDTH_RESOLUTION_SCALE * 4,
+        fmt->rmask,
+        fmt->gmask,
+        fmt->bmask,
+        fmt->amask
+    );
+    stretchedSurface = SDL_CreateRGBSurface(
+        SDL_SWSURFACE,
+        this->textures[textureId].width,
+        this->textures[textureId].height,
+        fmt->bpp,
+        fmt->rmask,
+        fmt->gmask,
+        fmt->bmask,
+        fmt->amask
+    );
     if (unstretchedSurface == NULL || stretchedSurface == NULL)
     {
         goto cleanup;
@@ -2032,7 +2175,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     }
 
     dstFormatPixels =
-        ExtractSurfacePixels(dstFormatSurface, g_TextureFormatBytesPerPixel[this->textures[textureId].format]);
+        ExtractSurfacePixels(dstFormatSurface, this->textures[textureId].format,0);
 
     g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[this->textures[textureId].format],
                                this->textures[textureId].width, this->textures[textureId].height, 0,
@@ -2079,7 +2222,8 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
     g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE,
                                NULL);
 
-    u8 *surfaceData = ExtractSurfacePixels(src, 3);
+    // it's now index, not content
+    u8 *surfaceData = ExtractSurfacePixels(src, 4, 0);
 
     g_glFuncTable.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, src->w, src->h, GL_RGB, GL_UNSIGNED_BYTE, surfaceData);
 
@@ -2087,15 +2231,30 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
 
     VertexTex1DiffuseXyz verts[4];
 
-    verts[0].position = ZunVec3(dstRect.x, dstRect.y, 0.0f);
-    verts[1].position = ZunVec3(dstRect.x + dstRect.w, dstRect.y, 0.0f);
-    verts[2].position = ZunVec3(dstRect.x, dstRect.y + dstRect.h, 0.0f);
-    verts[3].position = ZunVec3(dstRect.x + dstRect.w, dstRect.y + dstRect.h, 0.0f);
+    verts[0].position.x = dstRect.x;
+    verts[0].position.y = dstRect.y;
+    verts[0].position.z = 0.0f;
 
-    verts[0].textureUV = ZunVec2(0.0f, 0.0f);
-    verts[1].textureUV = ZunVec2(((f32)src->w) / textureWidth, 0.0f);
-    verts[2].textureUV = ZunVec2(0.0f, ((f32)src->h) / textureHeight);
-    verts[3].textureUV = ZunVec2(((f32)src->w) / textureWidth, ((f32)src->h) / textureHeight);
+    verts[1].position.x = dstRect.x + dstRect.w;
+    verts[1].position.y = dstRect.y;
+    verts[1].position.z = 0.0f;
+
+    verts[2].position.x = dstRect.x;
+    verts[2].position.y = dstRect.y + dstRect.h;
+    verts[2].position.z = 0.0f;
+
+    verts[3].position.x = dstRect.x + dstRect.w;
+    verts[3].position.y = dstRect.y + dstRect.h;
+    verts[3].position.z = 0.0f;
+
+    verts[0].textureUV.x = 0.0f;
+    verts[0].textureUV.y = 0.0f;
+    verts[1].textureUV.x = ((f32)src->w) / textureWidth;
+    verts[1].textureUV.y = 0.0f;
+    verts[2].textureUV.x = 0.0f;
+    verts[2].textureUV.y = ((f32)src->h) / textureHeight;
+    verts[3].textureUV.x = ((f32)src->w) / textureWidth;
+    verts[3].textureUV.y = ((f32)src->h) / textureHeight;
 
     this->SetVertexAttributes(VERTEX_ATTR_TEX_COORD);
 

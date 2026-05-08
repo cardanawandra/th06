@@ -71,11 +71,11 @@ bool MusicRoom::ProcessInput()
         // Update description to match newly selected song
         for (i = 0; i < ARRAY_SIZE_SIGNED(this->descriptionSprites); i++)
         {
-            std::memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
+            memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
 
-            if (i % 2 == 0 || std::strlen(this->trackDescriptors[this->selectedSongIndex].description[i / 2]) > 32)
+            if (i % 2 == 0 || strlen(this->trackDescriptors[this->selectedSongIndex].description[i / 2]) > 32)
             {
-                std::memcpy(lineCharBuffer,
+                memcpy(lineCharBuffer,
                             &this->trackDescriptors[this->selectedSongIndex].description[i / 2][(i % 2) * 32], 32);
             }
 
@@ -112,7 +112,7 @@ ZunResult MusicRoom::RegisterChain()
     MusicRoom *musicRoom;
 
     musicRoom = &g_MusicRoom;
-    std::memset(musicRoom, 0, sizeof(MusicRoom));
+    memset(musicRoom, 0, sizeof(MusicRoom));
 
     musicRoom->calc_chain = g_Chain.CreateElem((ChainCallback)MusicRoom::OnUpdate);
     musicRoom->calc_chain->arg = musicRoom;
@@ -323,7 +323,7 @@ ZunResult MusicRoom::AddedCallback(MusicRoom *musicRoom)
                     break;
                 }
 
-                std::memset(musicRoom->trackDescriptors[i].description[lineIndex], 0,
+                memset(musicRoom->trackDescriptors[i].description[lineIndex], 0,
                             sizeof(musicRoom->trackDescriptors[i].description[lineIndex]));
                 charIndex = 0;
                 while (*currChar != '\n' && *currChar != '\r')
@@ -371,7 +371,7 @@ finishMusiccmtRead:
     for (i = 0; i < ARRAY_SIZE_SIGNED(musicRoom->descriptionSprites); i++)
     {
         g_AnmManager->InitializeAndSetSprite(&musicRoom->descriptionSprites[i], ANM_SCRIPT_TEXT_MUSIC_ROOM_DESC + i);
-        std::memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
+        memset(lineCharBuffer, 0, sizeof(lineCharBuffer));
 
         if (i % 2 == 0 || strlen(musicRoom->trackDescriptors[musicRoom->selectedSongIndex].description[i / 2]) > 32)
         {
@@ -395,7 +395,7 @@ finishMusiccmtRead:
         musicRoom->descriptionSprites[i].flags.anchor = AnmVmAnchor_TopLeft;
     }
 
-    std::free(fileBase);
+    free(fileBase);
 
     return ZUN_SUCCESS;
 }

@@ -1,5 +1,5 @@
 #include <cstddef>
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -207,17 +207,17 @@ ChainCallbackResult ReplayManager::OnDraw(ReplayManager *mgr)
 
 inline StageReplayData *AllocateStageReplayData(i32 size)
 {
-    return (StageReplayData *)std::malloc(size);
+    return (StageReplayData *)malloc(size);
 }
 
 inline void ReleaseReplayData(void *data)
 {
-    return std::free(data);
+    free(data);
 }
 
 inline void ReleaseStageReplayData(void *data)
 {
-    return std::free(data);
+    free(data);
 }
 
 ZunResult ReplayManager::AddedCallback(ReplayManager *mgr)
@@ -231,11 +231,11 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *mgr)
     {
         mgr->replayData = new ReplayData();
         mgr->replayData->header = new ReplayHeader();
-        std::memcpy(&mgr->replayData->header->magic[0], "T6RP", 4);
+        memcpy(&mgr->replayData->header->magic[0], "T6RP", 4);
         mgr->replayData->header->shottypeChara = g_GameManager.character * 2 + g_GameManager.shotType;
         mgr->replayData->header->version = 0x102;
         mgr->replayData->header->difficulty = g_GameManager.difficulty;
-        std::memcpy(&mgr->replayData->header->name, "NO NAME", 4);
+        memcpy(&mgr->replayData->header->name, "NO NAME", 4);
         for (idx = 0; idx < ARRAY_SIZE_SIGNED(mgr->replayData->stageReplayData); idx += 1)
         {
             mgr->replayData->stageReplayData[idx] = NULL;
@@ -278,7 +278,7 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *mgr)
     mgr->frameId = 0;
     if (mgr->replayData == NULL)
     {
-        mgr->replayData = (ReplayData *)std::malloc(sizeof(ReplayData));
+        mgr->replayData = (ReplayData *)malloc(sizeof(ReplayData));
 
         mgr->replayData->header = (ReplayHeader *)FileSystem::OpenPath(mgr->replayFile, g_GameManager.demoMode == 0);
         if (ValidateReplayData(mgr->replayData->header, g_LastFileSize) != ZUN_SUCCESS)
@@ -332,7 +332,7 @@ ZunResult ReplayManager::DeletedCallback(ReplayManager *mgr)
         g_Chain.Cut(mgr->calcChainDemoHighPrio);
         mgr->calcChainDemoHighPrio = NULL;
     }
-    std::free(g_ReplayManager->replayData->header);
+    free(g_ReplayManager->replayData->header);
     ReleaseReplayData(g_ReplayManager->replayData);
     delete g_ReplayManager;
     g_ReplayManager = NULL;
@@ -369,11 +369,11 @@ void ReplayManager::SaveReplay(const char *replayPath, char *replayName)
     size_t stageReplayPos;
     f32 slowDown;
     i32 stageIdx;
-    std::time_t time;
-    const std::tm *tm;
+    time_t timeV;
+    const tm *tm;
 
-    time = std::time(NULL);
-    tm = std::localtime(&time);
+    timeV = time(NULL);
+    tm = localtime(&timeV);
 
     if (g_ReplayManager != NULL)
     {
@@ -411,8 +411,8 @@ void ReplayManager::SaveReplay(const char *replayPath, char *replayName)
                 replayCopy.slowdownRate3 = replayCopy.slowdownRate + 2.34f;
                 mgr->replayData->stageReplayData[g_GameManager.currentStage - 1]->score = g_GameManager.score;
 
-                std::snprintf(replayCopy.name, sizeof(replayCopy.name), "%s", replayName);
-                std::sprintf(replayCopy.date, "%02i/%02i/%02i", tm->tm_mon, tm->tm_mday, tm->tm_year % 100);
+                _snprintf(replayCopy.name, sizeof(replayCopy.name), "%s", replayName);
+                sprintf(replayCopy.date, "%02i/%02i/%02i", tm->tm_mon, tm->tm_mday, tm->tm_year % 100);
                 replayCopy.key = g_Rng.GetRandomU16InRange(128) + 64;
                 replayCopy.rngValue3 = g_Rng.GetRandomU16InRange(256);
                 replayCopy.rngValue1 = g_Rng.GetRandomU16InRange(256);
@@ -467,18 +467,18 @@ void ReplayManager::SaveReplay(const char *replayPath, char *replayName)
 
                 // Write the data to the replay file.
                 file = FileSystem::FopenUTF8(replayPath, "wb");
-                std::fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
+                fwrite(&replayCopy, sizeof(ReplayHeader), 1, file);
                 for (stageIdx = 0; stageIdx < ARRAY_SIZE_SIGNED(mgr->replayData->stageReplayData); stageIdx += 1)
                 {
                     if (mgr->replayData->stageReplayData[stageIdx] != NULL)
                     {
-                        std::fwrite(mgr->replayData->stageReplayData[stageIdx], 1,
+                        fwrite(mgr->replayData->stageReplayData[stageIdx], 1,
                                     ((iptr)mgr->replayInputStageBookmarks[stageIdx]) -
                                         ((iptr)mgr->replayData->stageReplayData[stageIdx]),
                                     file);
                     }
                 }
-                std::fclose(file);
+                fclose(file);
             }
             for (stageIdx = 0; stageIdx < ARRAY_SIZE_SIGNED(mgr->replayData->stageReplayData); stageIdx += 1)
             {

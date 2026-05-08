@@ -2,11 +2,9 @@
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
+#include <SDL.h>
 #include <SDL_audio.h>
 #include <SDL_rwops.h>
-#include <atomic>
-#include <mutex>
-#include <thread>
 
 enum SoundIdx
 {
@@ -79,7 +77,6 @@ struct MusicStream
 struct SoundPlayer
 {
     SoundPlayer();
-
     ZunResult InitializeDSound();
     ZunResult InitSoundBuffers();
     ZunResult Release(void);
@@ -94,14 +91,22 @@ struct SoundPlayer
     ZunResult LoadWav(const char *path);
     ZunResult LoadPos(const char *path);
 
-    void BackgroundMusicPlayerThread();
+    // SDL1.2 audio system
+    static void AudioCallback(void *userdata, Uint8 *stream, int len);
     void MixAudio(u32 samples);
 
     SoundData soundBuffers[128];
-    std::mutex soundBufMutex;
-    SDL_AudioDeviceID audioDev;
-    std::thread backgroundMusicThreadHandle;
-    std::atomic_bool terminateFlag;
+
+    // removed SDL_AudioDeviceID
+    SDL_AudioSpec obtainedSpec;   // store opened audio format
+
+    // threading (optional but kept)
+    //todo remove thread
+    SDL_Thread* backgroundMusicThreadHandle;
+    
+    static int BackgroundMusicPlayerThread(void* data);
+    int terminateFlag;
+
     i32 soundBuffersToPlay[3];
     MusicStream backgroundMusic;
     bool isLooping;

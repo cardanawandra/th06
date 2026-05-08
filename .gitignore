@@ -1,5 +1,6 @@
 .vs
 build
+build_sdl
 build_sdl2
 local.properties
 android/SDL2_image_src
@@ -26,3 +27,13 @@ config_*
 
 android/startDebug.bat
 src_bak
+
+source3rdparty
+pc98/SDL*
+pc98/Release
+pc98/CMakeFiles
+pc98/*ds*
+pc98/cmake_install.cmake
+pc98/th06.plg
+pc98/.clang-format
+pc98/CMakeCache.txt

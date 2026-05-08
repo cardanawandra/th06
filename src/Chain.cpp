@@ -2,10 +2,10 @@
 #include "utils.hpp"
 
 #include <new>
-#include <iostream>
-void chaindlog(std::string msg){
-    std::cout<<"chain : "<<msg<<std::endl;
-}
+// #include <iostream>
+// void chaindlog(string msg){
+//     cout<<"chain : "<<msg<<endl;
+// }
 
 Chain g_Chain;
 

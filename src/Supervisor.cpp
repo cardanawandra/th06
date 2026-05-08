@@ -21,13 +21,25 @@
 
 #include <SDL_joystick.h>
 #include <SDL_timer.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 #include <ctime>
-#include <iostream>
-void supervisordlog(std::string msg){
-    std::cout<<"supervisor : "<<msg<<std::endl;
-}
+
+#define SDL_CONTROLLER_BUTTON_A                0
+#define SDL_CONTROLLER_BUTTON_B                1
+#define SDL_CONTROLLER_BUTTON_X                2
+#define SDL_CONTROLLER_BUTTON_Y                3
+#define SDL_CONTROLLER_BUTTON_LEFTSHOULDER     4
+#define SDL_CONTROLLER_BUTTON_RIGHTSHOULDER    5
+#define SDL_CONTROLLER_BUTTON_BACK             6
+#define SDL_CONTROLLER_BUTTON_START            7
+#define SDL_CONTROLLER_BUTTON_LEFTSTICK        8
+#define SDL_CONTROLLER_BUTTON_RIGHTSTICK       9
+
+#define SDL_CONTROLLER_BUTTON_DPAD_UP          10
+#define SDL_CONTROLLER_BUTTON_DPAD_DOWN        11
+#define SDL_CONTROLLER_BUTTON_DPAD_LEFT        12
+#define SDL_CONTROLLER_BUTTON_DPAD_RIGHT       13
 
 Supervisor g_Supervisor;
 ControllerMapping g_ControllerMapping = {
@@ -54,8 +66,11 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
     //    {
     //        g_SoundPlayer.backgroundMusic->UpdateFadeOut();
     //    }
+    printf("Supervisor::OnUpdate 1");
     g_LastFrameInput = g_CurFrameInput;
+    printf("Supervisor::OnUpdate 2");
     g_CurFrameInput = Controller::GetInput();
+    printf("Supervisor::OnUpdate 3");
     g_IsEigthFrameOfHeldInput = 0;
     if (g_LastFrameInput == g_CurFrameInput)
     {
@@ -274,7 +289,7 @@ ChainCallbackResult Supervisor::OnDraw(Supervisor *s)
 
 ZunResult Supervisor::RegisterChain()
 {
-    //supervisordlog("trying to register chain");
+    printf("trying to register chain");
     ChainElem *chain;
     Supervisor *supervisor = &g_Supervisor;
 
@@ -282,43 +297,43 @@ ZunResult Supervisor::RegisterChain()
     supervisor->curState = -1;
     supervisor->calcCount = 0;
 
-    //supervisordlog("Supervisor::OnUpdate");
+    printf("Supervisor::OnUpdate");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnUpdate);
     chain->arg = supervisor;
-    //supervisordlog("Supervisor::AddedCallback");
+    printf("Supervisor::AddedCallback");
     chain->addedCallback = (ChainAddedCallback)Supervisor::AddedCallback;
-    //supervisordlog("Supervisor::DeletedCallback");
+    printf("Supervisor::DeletedCallback");
     chain->deletedCallback = (ChainDeletedCallback)Supervisor::DeletedCallback;
-    //supervisordlog("g_Chain.AddToCalcChain");
+    printf("g_Chain.AddToCalcChain");
     if (g_Chain.AddToCalcChain(chain, TH_CHAIN_PRIO_CALC_SUPERVISOR) != 0)
     {
-        //supervisordlog("error");
+        printf("error");
         return ZUN_ERROR;
     }
 
-    //supervisordlog("g_Chain.CreateElem");
+    printf("g_Chain.CreateElem");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnDraw);
     chain->arg = supervisor;
-    //supervisordlog("g_Chain.AddToDrawChain");
+    printf("g_Chain.AddToDrawChain");
     g_Chain.AddToDrawChain(chain, TH_CHAIN_PRIO_DRAW_SUPERVISOR);
-    //supervisordlog("finish");
+    printf("finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult Supervisor::AddedCallback(Supervisor *s)
 {
-    //supervisordlog("callback init");
+    printf("callback init");
     i32 i;
 
-    //supervisordlog("for pbg3Archives");
+    printf("for pbg3Archives");
     for (i = 0; i < (i32)(sizeof(s->pbg3Archives) / sizeof(s->pbg3Archives[0])); i++)
     {
         s->pbg3Archives[i] = NULL;
     }
 
-    //supervisordlog("set g_Pbg3Archives");
+    printf("set g_Pbg3Archives");
     g_Pbg3Archives = s->pbg3Archives;
-    //supervisordlog("LoadPbg3");
+    printf("LoadPbg3");
     if (s->LoadPbg3(IN_PBG3_INDEX, TH_IN_DAT_FILE))
     {
         return ZUN_ERROR;
@@ -326,50 +341,50 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
 
     // D3DX code swaps twice to copy to both buffers
 
-    //supervisordlog("LoadSurface data/title/th06logo.jpg");
+    printf("LoadSurface data/title/th06logo.jpg");
     g_AnmManager->LoadSurface(0, "data/title/th06logo.jpg");
-    //supervisordlog("CopySurfaceToBackBuffer");
+    printf("CopySurfaceToBackBuffer");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
 
-    //supervisordlog("SDL_GL_SwapWindow");
-    SDL_GL_SwapWindow(g_Supervisor.gameWindow);
-
+    printf("SDL_GL_SwapWindow");
+    SDL_GL_SwapBuffers();
+    
     //
-    //supervisordlog("CopySurfaceToBackBuffer 2");
+    printf("CopySurfaceToBackBuffer 2");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     //
 
-    //supervisordlog("SDL_GL_SwapWindow 2");
-    SDL_GL_SwapWindow(g_Supervisor.gameWindow);
+    printf("SDL_GL_SwapWindow 2");
+    SDL_GL_SwapBuffers();
 
-    //supervisordlog("ReleaseSurface");
+    printf("ReleaseSurface");
     g_AnmManager->ReleaseSurface(0);
 
-    //supervisordlog("set startupTimeBeforeMenuMusic");
+    printf("set startupTimeBeforeMenuMusic");
     s->startupTimeBeforeMenuMusic = SDL_GetTicks();
-    //supervisordlog("Supervisor::SetupDInput");
+    printf("Supervisor::SetupDInput");
     Supervisor::SetupDInput(s);
 
-    //supervisordlog("new MidiOutput");
+    printf("new MidiOutput");
     s->midiOutput = new MidiOutput();
 
     // Replacing a seeding method that used win32 timeGetTime
-    //supervisordlog("g_Rng.Initialize");
-    g_Rng.Initialize((u16)std::time(NULL));
+    printf("g_Rng.Initialize");
+    g_Rng.Initialize((u16)time(NULL));
 
-    //supervisordlog("g_SoundPlayer.InitSoundBuffers");
+    printf("g_SoundPlayer.InitSoundBuffers");
     g_SoundPlayer.InitSoundBuffers();
-    //supervisordlog("g_AnmManager->LoadAnm");
+    printf("g_AnmManager->LoadAnm");
     if (g_AnmManager->LoadAnm(ANM_FILE_TEXT, "data/text.anm", ANM_OFFSET_TEXT) != 0)
     {
         return ZUN_ERROR;
     }
 
-    //supervisordlog("AsciiManager::RegisterChain");
+    printf("AsciiManager::RegisterChain");
     if (AsciiManager::RegisterChain() != 0)
     {
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_ASCIIMANAGER_INIT_FAILED);
@@ -377,22 +392,22 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     }
 
     s->unk198 = 0;
-    //supervisordlog("g_AnmManager->SetupVertexBuffer");
+    printf("g_AnmManager->SetupVertexBuffer");
     g_AnmManager->SetupVertexBuffer();
 
-    //supervisordlog("TextHelper::CreateTextBuffer");
+    printf("TextHelper::CreateTextBuffer");
     if (TextHelper::CreateTextBuffer() != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    //supervisordlog("ReleasePbg3");
+    printf("ReleasePbg3");
     s->ReleasePbg3(IN_PBG3_INDEX);
-    //supervisordlog("LoadPbg3 MD.DAT");
+    printf("LoadPbg3 MD.DAT");
     if (g_Supervisor.LoadPbg3(MD_PBG3_INDEX, TH_MD_DAT_FILE) != 0)
         return ZUN_ERROR;
 
-    //supervisordlog("callback finish");
+    printf("callback finish");
     return ZUN_SUCCESS;
 }
 
@@ -470,9 +485,8 @@ ZunResult Supervisor::SetupDInput(Supervisor *supervisor)
 
     for (int i = 0; i < numSticks; i++)
     {
-        if (SDL_IsGameController(i) && (supervisor->gameController = SDL_GameControllerOpen(i)) != NULL)
+        if ((supervisor->joystick = SDL_JoystickOpen(i)) != NULL)
         {
-
             break;
         }
     }
@@ -543,10 +557,10 @@ ZunResult Supervisor::DeletedCallback(Supervisor *s)
     //    {
     //        s->controller->Unacquire();
     //    }
-    if (s->gameController != NULL)
+    if (s->joystick != NULL)
     {
-        SDL_GameControllerClose(s->gameController);
-        s->gameController = NULL;
+        SDL_JoystickClose(s->joystick);
+        s->joystick = NULL;
     }
     //    if (s->dinputIface != NULL)
     //    {
@@ -649,10 +663,10 @@ i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
         utils::DebugPrint("%s open ...\n", filename);
         if (this->pbg3Archives[pbg3FileIdx]->Load(filename) != 0)
         {
-            std::strcpy(this->pbg3ArchiveNames[pbg3FileIdx], filename);
+            strcpy(this->pbg3ArchiveNames[pbg3FileIdx], filename);
 
             char verPath[128];
-            std::sprintf(verPath, "ver%.4x.dat", GAME_VERSION);
+            sprintf(verPath, "ver%.4x.dat", GAME_VERSION);
             i32 res = this->pbg3Archives[pbg3FileIdx]->FindEntry(verPath);
             if (res < 0)
             {
@@ -681,7 +695,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
     FILE *wavFile;
     FILE *wavFile2;
 
-    std::memset(&g_Supervisor.cfg, 0, sizeof(GameConfiguration));
+    memset(&g_Supervisor.cfg, 0, sizeof(GameConfiguration));
     g_Supervisor.cfg.opts = g_Supervisor.cfg.opts | (1 << GCOS_USE_D3D_HW_TEXTURE_BLENDING);
     data = (GameConfiguration *)FileSystem::OpenPath(path, 1);
     if (data == NULL)
@@ -696,7 +710,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
         if (wavFile != NULL)
         {
             g_Supervisor.cfg.musicMode = WAV;
-            std::fclose(wavFile);
+            fclose(wavFile);
         }
         else
         {
@@ -729,7 +743,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
             if (wavFile2 != NULL)
             {
                 g_Supervisor.cfg.musicMode = WAV;
-                std::fclose(wavFile2);
+                fclose(wavFile2);
             }
             else
             {
@@ -741,7 +755,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
             g_Supervisor.cfg.windowed = false;
             g_Supervisor.cfg.frameskipConfig = 0;
             g_Supervisor.cfg.controllerMapping = g_ControllerMapping;
-            std::memset(&g_Supervisor.cfg.opts, 0, sizeof(GameConfigOptsShifts));
+            memset(&g_Supervisor.cfg.opts, 0, sizeof(GameConfigOptsShifts));
             g_Supervisor.cfg.opts |= (1 << GCOS_USE_D3D_HW_TEXTURE_BLENDING);
             GameErrorContext::Log(&g_GameErrorContext, TH_ERR_CONFIG_CORRUPTED);
         }
@@ -857,13 +871,13 @@ ZunResult Supervisor::PlayAudio(const char *path)
     }
     else if (g_Supervisor.cfg.musicMode == WAV)
     {
-        std::strcpy(wavName, path);
-        std::strcpy(wavPos, path);
-        pathExtension = std::strrchr(wavName, L'.');
+        strcpy(wavName, path);
+        strcpy(wavPos, path);
+        pathExtension = strrchr(wavName, L'.');
         pathExtension[1] = 'w';
         pathExtension[2] = 'a';
         pathExtension[3] = 'v';
-        pathExtension = std::strrchr(wavPos, L'.');
+        pathExtension = strrchr(wavPos, L'.');
         pathExtension[1] = 'p';
         pathExtension[2] = 'o';
         pathExtension[3] = 's';

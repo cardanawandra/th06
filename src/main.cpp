@@ -1,5 +1,5 @@
-#include <SDL.h>
 #include <stdio.h>
+#include <SDL.h>
 
 #include "AnmManager.hpp"
 #include "Chain.hpp"
@@ -16,14 +16,18 @@
 #include "ZunResult.hpp"
 #include "i18n.hpp"
 #include "utils.hpp"
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #include <iostream>
-void dlog(std::string msg){
-    std::cout<<msg<<std::endl;
+FILE _iob[] = { *stdin, *stdout, *stderr }; 
+extern "C" FILE* __cdecl __iob_func(void)
+{
+    return _iob;
 }
+#endif
 
 int main(int argc, char *argv[])
 {
-    //dlog("Starting");
+    printf("Starting");
     i32 renderResult = 0;
 
 #ifdef __ANDROID__
@@ -35,7 +39,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    //dlog("Init Gamepath");
+    printf("Init Gamepath");
     GamePaths::Init();
 
     // if (utils::CheckForRunningGameInstance())
@@ -45,14 +49,14 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
-    //dlog("Load CONF File");
+    printf("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
 #ifdef __ANDROID__
         // On Android, config file may not exist on first run.
         // LoadConfig sets defaults and tries to write — if write fails,
         // continue anyway with defaults.
-        SDL_Log("LoadConfig failed (first run?), continuing with defaults");
+        //SDL_LOG("LoadConfig failed (first run?), continuing with defaults");
 #else
         g_GameErrorContext.Flush();
         return -1;
@@ -64,30 +68,30 @@ int main(int argc, char *argv[])
     //     g_GameErrorContext.Flush();
     //     return 1;
     // }
-    //dlog("Start the game");
+    printf("Start the game");
 
 restart:
-    //dlog("Create game window");
+    printf("Create game window");
     GameWindow::CreateGameWindow();
 
-    //dlog("new AnmManager");
+    printf("new AnmManager");
     g_AnmManager = new AnmManager();
 
-    //dlog("InitD3dRendering");
+    printf("InitD3dRendering");
     if (GameWindow::InitD3dRendering())
     {
         g_GameErrorContext.Flush();
         return 1;
     }
 
-    //dlog("InitializeDSound");
+    printf("InitializeDSound");
     g_SoundPlayer.InitializeDSound();
-    //dlog("GetJoystickCaps");
+    printf("GetJoystickCaps");
     Controller::GetJoystickCaps();
-    //dlog("ResetKeyboard");
+    printf("ResetKeyboard");
     Controller::ResetKeyboard();
 
-    //dlog("Supervisor::RegisterChain");
+    printf("Supervisor::RegisterChain");
     if (Supervisor::RegisterChain() != ZUN_SUCCESS)
     {
         goto stop;
@@ -99,12 +103,12 @@ restart:
 
     g_GameWindow.curFrame = 0;
 
-    //dlog("Into loop game event");
+    printf("Into loop game event");
     while (true)
     {
         SDL_Event e;
 
-        //dlog("Into poolevent loop");
+        printf("Into poolevent loop");
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
@@ -113,7 +117,7 @@ restart:
             }
         }
 
-        //dlog("g_GameWindow.Render");
+        printf("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {
@@ -154,7 +158,7 @@ restart:
 
 
 stop:
-    //dlog("stop the game");
+    printf("stop the game");
     g_Chain.Release();
     g_SoundPlayer.Release();
 
@@ -170,9 +174,6 @@ stop:
     //     if (ctx)
     //         SDL_GL_DeleteContext(ctx);
     // }
-
-    SDL_DestroyWindow(g_GameWindow.window);
-    SDL_GL_DeleteContext(g_GameWindow.glContext);
 
     if (renderResult == 2)
     {

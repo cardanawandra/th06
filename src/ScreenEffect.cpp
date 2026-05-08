@@ -22,9 +22,9 @@ void ScreenEffect::Clear(ZunColor color)
     // For now let's copy that behaviour
 
     g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SDL_GL_SwapWindow(g_GameWindow.window);
+    SDL_GL_SwapBuffers();
     g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SDL_GL_SwapWindow(g_GameWindow.window);
+    SDL_GL_SwapBuffers();
 
     return;
 }
@@ -141,7 +141,7 @@ ScreenEffect *ScreenEffect::RegisterChain(i32 effect, u32 ticks, u32 effectParam
         return NULL;
     }
 
-    std::memset(createdEffect, 0, sizeof(*createdEffect));
+    memset(createdEffect, 0, sizeof(*createdEffect));
 
     switch (effect)
     {

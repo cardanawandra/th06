@@ -51,7 +51,7 @@ struct GfxInterface
     virtual void SetFogRange(f32 nearPlane, f32 farPlane) = 0;
     virtual void SetFogColor(ZunColor color) = 0;
     virtual void ToggleVertexAttribute(u8 attr, bool enable) = 0;
-    virtual void SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr) = 0;
+    virtual void SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr) = 0;
     virtual void SetColorOp(TextureOpComponent component, ColorOp op) = 0;
     virtual void SetTextureFactor(ZunColor factor) = 0;
     virtual void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix) = 0;

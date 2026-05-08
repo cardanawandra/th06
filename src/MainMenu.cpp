@@ -1,5 +1,5 @@
 // #include <D3DX8.h>
-#include <cstdio>
+#include <stdio.h>
 // #include <direct.h>
 // #include <windows.h>
 
@@ -21,7 +21,7 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include <SDL_gamecontroller.h>
+#include <SDL_joystick.h>
 #include <SDL_timer.h>
 #include <cstring>
 
@@ -127,7 +127,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
             g_GameManager.demoMode = 1;
             g_GameManager.demoFrames = 0;
             g_Supervisor.framerateMultiplier = 1.0;
-            std::strcpy((char *)g_GameManager.replayFile, "data/demo/demo00.rpy");
+            strcpy((char *)g_GameManager.replayFile, "data/demo/demo00.rpy");
             g_GameManager.currentStage = 3;
             g_GameManager.difficulty = LUNATIC;
             g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
@@ -330,7 +330,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
                     pos1.x = 0.0;
                     pos1.y = 0.0;
                     pos1.z = 0.0;
-                    std::memcpy(&vmList->posOffset, &pos1, sizeof(ZunVec3));
+                    memcpy(&vmList->posOffset, &pos1, sizeof(ZunVec3));
                     vmList->alphaInterpEndTime = 0;
                 }
                 else
@@ -346,7 +346,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
                     pos2.x = -6.0f;
                     pos2.y = -6.0f;
                     pos2.z = 0.0;
-                    std::memcpy(&vmList->posOffset, &pos2, sizeof(ZunVec3));
+                    memcpy(&vmList->posOffset, &pos2, sizeof(ZunVec3));
                 }
             }
             vmList->flags.flag1 = 0;
@@ -370,7 +370,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
                 pos3.x = -6.0f;
                 pos3.y = -6.0f;
                 pos3.z = 0.0;
-                std::memcpy(&vmList->posOffset, &pos3, sizeof(ZunVec3));
+                memcpy(&vmList->posOffset, &pos3, sizeof(ZunVec3));
             }
         }
         if (WAS_PRESSED(TH_BUTTON_RETURNMENU))
@@ -1274,18 +1274,18 @@ i32 MainMenu::ReplayHandling()
                 replayFileIdx = 0;
                 for (cur = 0; cur < 15; cur++)
                 {
-                    std::sprintf(replayFilePath, "./replay/th6_%.2d.rpy", cur + 1);
+                    sprintf(replayFilePath, "./replay/th6_%.2d.rpy", cur + 1);
                     replayData = (ReplayHeader *)FileSystem::OpenPath(replayFilePath, 1);
                     if (replayData == NULL)
                     {
-                        std::free(replayData);
+                        free(replayData);
                         continue;
                     }
                     if (!ReplayManager::ValidateReplayData(replayData, g_LastFileSize))
                     {
                         this->replayFileData[replayFileIdx].header = replayData;
-                        std::strcpy(this->replayFilePaths[replayFileIdx], replayFilePath);
-                        std::sprintf(this->replayFileName[replayFileIdx], "No.%.2d", cur + 1);
+                        strcpy(this->replayFilePaths[replayFileIdx], replayFilePath);
+                        sprintf(this->replayFileName[replayFileIdx], "No.%.2d", cur + 1);
                         replayFileIdx++;
                     }
                 }
@@ -1359,7 +1359,7 @@ i32 MainMenu::ReplayHandling()
                 this->stateTimer = 0;
                 this->cursor = 0;
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT);
-                this->currentReplay = (ReplayData *)std::malloc(sizeof(ReplayData));
+                this->currentReplay = (ReplayData *)malloc(sizeof(ReplayData));
                 this->currentReplay->header =
                     (ReplayHeader *)FileSystem::OpenPath(this->replayFilePaths[this->chosenReplay], 1);
                 ReplayManager::ValidateReplayData(this->currentReplay->header, g_LastFileSize);
@@ -1433,7 +1433,7 @@ i32 MainMenu::ReplayHandling()
         {
             g_GameManager.isInReplay = 1;
             g_Supervisor.framerateMultiplier = 1.0;
-            std::strcpy((char *)g_GameManager.replayFile, this->replayFilePaths[this->chosenReplay]);
+            strcpy((char *)g_GameManager.replayFile, this->replayFilePaths[this->chosenReplay]);
             g_GameManager.difficulty = (Difficulty)this->currentReplay->header->difficulty;
             g_GameManager.character = this->currentReplay->header->shottypeChara / 2;
             g_GameManager.shotType = this->currentReplay->header->shottypeChara % 2;
@@ -1444,8 +1444,8 @@ i32 MainMenu::ReplayHandling()
             }
             g_GameManager.livesRemaining = this->currentReplay->stageReplayData[cur]->livesRemaining;
             g_GameManager.bombsRemaining = this->currentReplay->stageReplayData[cur]->bombsRemaining;
-            std::free(this->currentReplay->header);
-            std::free(this->currentReplay);
+            free(this->currentReplay->header);
+            free(this->currentReplay);
             this->currentReplay = NULL;
             g_GameManager.currentStage = this->cursor;
             g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
@@ -1453,8 +1453,8 @@ i32 MainMenu::ReplayHandling()
         }
         if (WAS_PRESSED(TH_BUTTON_RETURNMENU))
         {
-            std::free(this->currentReplay->header);
-            std::free(this->currentReplay);
+            free(this->currentReplay->header);
+            free(this->currentReplay);
             this->currentReplay = NULL;
             this->gameState = STATE_REPLAY_ANIM;
             this->stateTimer = 0;
@@ -1592,7 +1592,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
         }
         vm->scaleX = 1.0;
         vm->scaleY = 1.0;
-        vm->posOffset = ZunVec3(0.0, 0.0, 0.0);
+        vm->posOffset = ZunProcVec3(0.0, 0.0, 0.0);
     }
     else
     {
@@ -1608,7 +1608,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
         {
             g_AnmManager->SetActiveSprite(vm, vm->baseSpriteIndex + (ANM_OFFSET_TITLE04S - ANM_OFFSET_TITLE04));
         }
-        vm->posOffset = ZunVec3(-2.0, -2.0, 0.0);
+        vm->posOffset = ZunProcVec3(-2.0, -2.0, 0.0);
     }
 
     if (item != this->cursor)
@@ -1622,7 +1622,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
             vm->color = COLOR_SET_ALPHA2(vm->color, 128);
         }
 
-        vm->posOffset += ZunVec3(0.0, 0.0, 0.0);
+        vm->posOffset += ZunProcVec3(0.0, 0.0, 0.0);
     }
     else
     {
@@ -1635,7 +1635,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
             vm->color = COLOR_SET_ALPHA2(vm->color, 255);
         }
 
-        vm->posOffset += ZunVec3(-4.0, -4.0, 0.0);
+        vm->posOffset += ZunProcVec3(-4.0, -4.0, 0.0);
     }
 }
 
@@ -1889,7 +1889,7 @@ ZunResult MainMenu::ChoosePracticeLevel() const
 {
     if (this->gameState == STATE_PRACTICE_LVL_SELECT)
     {
-        ZunVec3 textPos(320.0, 200.0, 0.0);
+        ZunVec3 textPos = {320.0, 200.0, 0.0};
         u32 color = (this->stateTimer < 30) ? this->stateTimer * 0xFF / 30 : 0xff;
         i32 charShotType = (g_GameManager.character << 1) + g_GameManager.shotType;
         i32 selectedStage =
@@ -1986,14 +1986,14 @@ ChainCallbackResult MainMenu::OnDraw(MainMenu *menu)
         }
         if (shouldDraw)
         {
-            std::memcpy(&posBackup, &curVm->pos, sizeof(ZunVec3));
+            memcpy(&posBackup, &curVm->pos, sizeof(ZunVec3));
             offset = &curVm->posOffset;
             pos = &curVm->pos;
             pos->x += offset->x;
             pos->y += offset->y;
             pos->z += offset->z;
             g_AnmManager->Draw(curVm);
-            std::memcpy(&curVm->pos, &posBackup, sizeof(ZunVec3));
+            memcpy(&curVm->pos, &posBackup, sizeof(ZunVec3));
         }
     }
     switch (menu->gameState)
@@ -2120,7 +2120,7 @@ ZunResult MainMenu::LoadDiffCharSelect(MainMenu *menu)
         {
             vm->color = COLOR_WHITE;
         }
-        vm->posOffset = ZunVec3(0, 0, 0);
+        vm->posOffset = ZunProcVec3(0, 0, 0);
         vm->baseSpriteIndex = vm->activeSpriteIndex;
         vm->flags.zWriteDisable = 1;
     }
@@ -2162,7 +2162,7 @@ ZunResult MainMenu::LoadReplayMenu(MainMenu *menu)
         {
             vm->color = COLOR_WHITE;
         }
-        vm->posOffset = ZunVec3(0, 0, 0);
+        vm->posOffset = ZunProcVec3(0, 0, 0);
         vm->baseSpriteIndex = vm->activeSpriteIndex;
         vm->flags.zWriteDisable = 1;
     }
@@ -2173,7 +2173,7 @@ ZunResult MainMenu::RegisterChain(u32 isDemo)
 {
     MainMenu *menu = &g_MainMenu;
 
-    std::memset(menu, 0, sizeof(MainMenu));
+    memset(menu, 0, sizeof(MainMenu));
     g_GameManager.isInGameMenu = 0;
     menu->gameState = isDemo ? STATE_REPLAY_LOAD : STATE_STARTUP;
     g_Supervisor.framerateMultiplier = 0.0;

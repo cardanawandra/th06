@@ -17,7 +17,7 @@ i32 Ending::ReadEndFileParameter()
 {
     i32 readResult;
 
-    readResult = std::atol(this->endFileDataPtr);
+    readResult = atol(this->endFileDataPtr);
     while (this->endFileDataPtr[0] != '\0')
     {
         this->endFileDataPtr++;
@@ -441,7 +441,7 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
         this->timer1.InitializeForPopup();
         if (endFileDat != NULL)
         {
-            std::free(endFileDat);
+            free(endFileDat);
         }
         return ZUN_SUCCESS;
     }
@@ -624,7 +624,7 @@ ZunResult Ending::DeletedCallback(Ending *ending)
     // be correct since ending->endFileData was allocated with malloc. One way to solve it, would be to do the same with
     // ending, and align both variables with var_order, but that would be "incorrect", weird...
     char *endfiledata = ending->endFileData;
-    std::free(endfiledata);
+    free(endfiledata);
 
     g_Chain.Cut(ending->drawChain);
     ending->drawChain = NULL;

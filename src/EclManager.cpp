@@ -117,7 +117,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
-            SDL_Log("Ecl OPCODE : %d",instruction->opCode);
+            //SDL_LOG("Ecl OPCODE : %d",instruction->opCode);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -737,7 +737,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 csum = 0;
                 if (!g_GameManager.isInReplay)
                 {
-                    std::snprintf(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
+                    _snprintf(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
                     local_74 = strlen(local_70->name);
                     while (0 < local_74)
                     {
@@ -984,7 +984,9 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 {
                     enemy->flags.unk1 = 0;
                     enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
-                    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
+                    enemy->axisSpeed.x = 0.0f;
+                    enemy->axisSpeed.y = 0.0f;
+                    enemy->axisSpeed.z = 0.0f;
                 }
                 break;
             }

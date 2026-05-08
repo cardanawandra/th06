@@ -13,6 +13,7 @@
 #include "ZunTimer.hpp"
 #include "graphics/GfxInterface.hpp"
 #include "inttypes.hpp"
+#include "SDLCompat.hpp"
 
 #define TEX_FMT_UNKNOWN 0
 #define TEX_FMT_A8R8G8B8 1
@@ -53,7 +54,7 @@ struct ColorData
         b = color & 0xFF;
     };
 };
-static_assert(sizeof(ColorData) == 0x04, "ColorData has additional padding between struct members");
+//static_assert(sizeof(ColorData) == 0x04, "ColorData has additional padding between struct members");
 
 // NOTE: Every usage of a position with RHW in EoSD simply sets RHW to 1.0f
 // D3D8 interprets vertices with D3DFVF_XYZRHW as having already been transformed, so Zun
@@ -100,7 +101,7 @@ enum ProjectionMode
 struct VertexAttribArrayState
 {
     void *ptr;
-    std::size_t stride;
+    size_t stride;
 };
 
 enum DirtyRenderStateBitShifts
@@ -317,12 +318,12 @@ struct AnmManager
         this->dirtyFlags |= (1 << DIRTY_FOG);
     }
 
-    void SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr)
+    void SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr)
     {
         this->dirtyAttribArrays[attr].ptr = ptr;
         this->dirtyAttribArrays[attr].stride = stride;
 
-        if (!std::memcmp(&this->dirtyAttribArrays[attr], &this->attribArrays[attr], sizeof(*this->dirtyAttribArrays)))
+        if (!memcmp(&this->dirtyAttribArrays[attr], &this->attribArrays[attr], sizeof(*this->dirtyAttribArrays)))
         {
             return;
         }
@@ -345,9 +346,9 @@ struct AnmManager
 
     void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
     {
-        std::memcpy(&this->dirtyTransformMatrices[type], &matrix, sizeof(matrix));
+        memcpy(&this->dirtyTransformMatrices[type], &matrix, sizeof(matrix));
 
-        if (!std::memcmp(&this->transformMatrices[type], &matrix, sizeof(matrix)))
+        if (!memcmp(&this->transformMatrices[type], &matrix, sizeof(matrix)))
         {
             this->dirtyFlags &= ~(1 << (DIRTY_MODEL_MATRIX + (DirtyRenderStateBitShifts)type));
         }
@@ -374,9 +375,9 @@ struct AnmManager
     void ReleaseSurfaces(void);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
     void ReleaseSurface(i32 surfaceIdx);
-    void CopySurfaceToBackBuffer(i32 surfaceIdx, i32 left, i32 top, i32 x, i32 y);
-    void CopySurfaceRectToBackBuffer(i32 surfaceIdx, i32 rectX, i32 rectY, i32 rectLeft, i32 rectTop, i32 width,
-                                     i32 height);
+    void CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 left, Sint16 top, Sint16 x, Sint16 y);
+    void CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 rectX, Sint16 rectY, Sint16 rectLeft, Sint16 rectTop, Uint16 width,
+                                     Uint16 height);
 
     void TranslateRotation(VertexTex1Xyzrhw *param_1, float x, float y, float sine, float cosine, float xOffset,
                            float yOffset);
@@ -386,8 +387,13 @@ struct AnmManager
     void ExecuteAnmIdx(AnmVm *vm, i32 anmFileIdx)
     {
         vm->anmFileIndex = anmFileIdx;
-        vm->pos = ZunVec3(0, 0, 0);
-        vm->posOffset = ZunVec3(0, 0, 0);
+        vm->pos.x = 0.0f;
+        vm->pos.y = 0.0f;
+        vm->pos.z = 0.0f;
+
+        vm->posOffset.x = 0.0f;
+        vm->posOffset.y = 0.0f;
+        vm->posOffset.z = 0.0f;
         vm->fontHeight = 15;
         vm->fontWidth = 15;
 
@@ -405,8 +411,8 @@ struct AnmManager
         this->screenshotHeight = GAME_REGION_HEIGHT;
     }
 
-    static SDL_Surface *LoadToSurfaceWithFormat(const char *filename, SDL_PixelFormatEnum format, u8 **fileData);
-    static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth);
+    static SDL_Surface *LoadToSurfaceWithFormat(const char *filename, PixelFormatSDL1 format, u8 **fileData);
+    static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth, ZunColor colorKey);
     static void FlipSurface(SDL_Surface *surface);
     void ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &srcRect, const SDL_Rect &dstRect);
     // Creates, binds, and set parameters for a new texture

@@ -16,7 +16,7 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 // #include <direct.h>
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -63,7 +63,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     {
     FAILED_TO_READ:
         scoreDatSize = sizeof(ScoreRaw);
-        scoreRaw = (ScoreRaw *)std::malloc(scoreDatSize);
+        scoreRaw = (ScoreRaw *)malloc(scoreDatSize);
         scoreRaw->dataOffset = sizeof(ScoreRaw);
         scoreRaw->fileLen = sizeof(ScoreRaw);
     }
@@ -123,7 +123,7 @@ ScoreDat *ResultScreen::OpenScore(const char *path)
     scoreDat->rawScoreFile = scoreRaw;
 
     scoreListNodeSize = sizeof(ScoreListNode);
-    scoreDat->scores = (ScoreListNode *)std::malloc(scoreListNodeSize);
+    scoreDat->scores = (ScoreListNode *)malloc(scoreListNodeSize);
     scoreDat->scores->next = NULL;
     scoreDat->scores->data = NULL;
     scoreDat->scores->prev = NULL;
@@ -208,7 +208,7 @@ i32 ResultScreen::LinkScore(ScoreListNode *prevNode, Hscr *newScore)
     nextNode = prevNode->next;
     scoreNodeSize = sizeof(ScoreListNode);
 
-    prevNode->next = (ScoreListNode *)std::malloc(scoreNodeSize);
+    prevNode->next = (ScoreListNode *)malloc(scoreNodeSize);
     prevNode->next->prev = prevNode;
     prevNode = prevNode->next;
     prevNode->data = newScore;
@@ -329,7 +329,7 @@ ZunResult ResultScreen::ParsePscr(ScoreDat *scoreDat, Pscr *outClrd)
             for (difficulty = 0; difficulty < PSCR_NUM_DIFFICULTIES; difficulty++, pscr++)
             {
 
-                std::memset(pscr, 0, sizeof(Pscr));
+                memset(pscr, 0, sizeof(Pscr));
 
                 pscr->base.magic = PSCR_MAGIC;
                 pscr->base.unkLen = sizeof(Pscr);
@@ -398,7 +398,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
     fileBufferSize = SCORE_DAT_FILE_BUFFER_SIZE;
     fileBuffer = (u8 *)malloc(fileBufferSize);
 
-    std::memcpy(fileBuffer + sizeOfFile, resultScreen->scoreDat->rawScoreFile, sizeof(ScoreRaw));
+    memcpy(fileBuffer + sizeOfFile, resultScreen->scoreDat->rawScoreFile, sizeof(ScoreRaw));
 
     sizeOfFile += sizeof(ScoreRaw);
     resultScreen->fileHeader.magic = TH6K_MAGIC;
@@ -406,7 +406,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
     resultScreen->fileHeader.th6kLen = sizeof(Th6k);
     resultScreen->fileHeader.version = TH6K_VERSION;
 
-    std::memcpy(fileBuffer + sizeOfFile, &resultScreen->fileHeader, sizeof(Th6k));
+    memcpy(fileBuffer + sizeOfFile, &resultScreen->fileHeader, sizeof(Th6k));
     sizeOfFile += sizeof(Th6k);
 
     for (difficulty = 0; difficulty < HSCR_NUM_DIFFICULTIES; difficulty++)
@@ -429,7 +429,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
                         currentCharacter->data->base.th6kLen = sizeof(Hscr);
                         currentCharacter->data->base.version = TH6K_VERSION;
                         currentCharacter->data->base.unk_9 = 0;
-                        std::memcpy(fileBuffer + sizeOfFile, currentCharacter->data, sizeof(Hscr));
+                        memcpy(fileBuffer + sizeOfFile, currentCharacter->data, sizeof(Hscr));
                         sizeOfFile += sizeof(Hscr);
                     }
                     currentCharacter = currentCharacter->next;
@@ -456,7 +456,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
         clrd->base.unkLen = sizeof(Clrd);
         clrd->base.th6kLen = sizeof(Clrd);
         clrd->base.version = TH6K_VERSION;
-        std::memcpy(fileBuffer + sizeOfFile, clrd, sizeof(Clrd));
+        memcpy(fileBuffer + sizeOfFile, clrd, sizeof(Clrd));
 
         sizeOfFile += sizeof(Clrd);
     }
@@ -469,7 +469,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
             catk->base.unkLen = sizeof(Catk);
             catk->base.th6kLen = sizeof(Catk);
             catk->base.version = TH6K_VERSION;
-            std::memcpy(fileBuffer + sizeOfFile, catk, sizeof(Catk));
+            memcpy(fileBuffer + sizeOfFile, catk, sizeof(Catk));
             sizeOfFile += sizeof(Catk);
         }
     }
@@ -482,7 +482,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
             {
                 if (pscr->score != 0)
                 {
-                    std::memcpy(fileBuffer + sizeOfFile, pscr, sizeof(Pscr));
+                    memcpy(fileBuffer + sizeOfFile, pscr, sizeof(Pscr));
                     sizeOfFile += sizeof(Pscr);
                 }
             }
@@ -520,7 +520,7 @@ void ResultScreen::WriteScore(ResultScreen *resultScreen)
         remainingSize--;
     }
     FileSystem::WriteDataToFile("score.dat", fileBuffer, sizeOfFile);
-    std::free(fileBuffer);
+    free(fileBuffer);
 }
 
 i32 ResultScreen::LinkScoreEx(Hscr *out, i32 difficulty, i32 character)
@@ -582,15 +582,15 @@ i32 ResultScreen::HandleResultKeyboard()
 
         this->hscr.base.unk_9 = 1;
         
-        SDL_Log("strcpy 1");
-        std::strcpy(this->hscr.name, "        ");
+        //SDL_LOG("strcpy 1");
+        strcpy(this->hscr.name, "        ");
 
         if (this->LinkScoreEx(&this->hscr, this->diffSelected, this->charUsed * 2 + g_GameManager.shotType) >= 10)
             goto RETURN_TO_STATS_SCREEN_WITHOUT_SOUND;
 
         this->cursor = 0;
-        SDL_Log("strcpy 2");
-        std::strcpy(this->replayName, "");
+        //SDL_LOG("strcpy 2");
+        strcpy(this->replayName, "");
     }
     if (this->frameTimer < 30)
     {
@@ -730,9 +730,9 @@ i32 ResultScreen::HandleResultKeyboard()
         {
             sprite->pendingInterrupt = 2;
         }
-        SDL_Log("strcpy 3");
-        std::snprintf(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
-//        std::strcpy(this->replayName, this->hscr.name);
+        //SDL_LOG("strcpy 3");
+        _snprintf(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
+//        strcpy(this->replayName, this->hscr.name);
     }
     return 0;
 }
@@ -747,11 +747,11 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
     const ReplayHeader *replayLoaded;
     i32 idx;
     i32 saveInterrupt;
-    std::time_t time;
-    const std::tm *tm;
+    time_t now;
+    struct tm *tm_info;
 
-    time = std::time(NULL);
-    tm = std::localtime(&time);
+    now = time(NULL);
+    tm_info = localtime(&now);
 
     switch (this->resultScreenState)
     {
@@ -867,7 +867,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
 
             for (idx = 0; idx < ARRAY_SIZE_SIGNED(this->replays); idx++)
             {
-                std::sprintf(replayToReadPath, "./replay/th6_%.2d.rpy", idx + 1);
+                sprintf(replayToReadPath, "./replay/th6_%.2d.rpy", idx + 1);
                 replayLoaded = (ReplayHeader *)FileSystem::OpenPath(replayToReadPath, 1);
                 if (replayLoaded == NULL)
                 {
@@ -878,7 +878,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
                 {
                     this->replays[idx] = *replayLoaded;
                 }
-                std::free((void*)replayLoaded);
+                free((void*)replayLoaded);
             }
         }
 
@@ -894,7 +894,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT);
             this->replayNumber = this->cursor;
             this->frameTimer = 0;
-            sprintf(this->defaultReplay.date, "%02i/%02i/%02i", tm->tm_mon, tm->tm_mday, tm->tm_year % 100);
+            sprintf(this->defaultReplay.date, "%02i/%02i/%02i", tm_info->tm_mon+1, tm_info->tm_mday, tm_info->tm_year % 100);
             (this->defaultReplay).score = g_GameManager.score;
             if (*(i32 *)&this->replays[this->cursor].magic != *(i32 *)&"T6RP" ||
                 this->replays[this->cursor].version != GAME_VERSION)
@@ -1033,7 +1033,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
             }
             else
             {
-                std::sprintf(replayPath, "./replay/th6_%.2d.rpy", this->replayNumber + 1);
+                sprintf(replayPath, "./replay/th6_%.2d.rpy", this->replayNumber + 1);
                 ReplayManager::SaveReplay(replayPath, this->replayName);
                 this->frameTimer = 0;
                 this->resultScreenState = RESULT_SCREEN_STATE_EXITING;
@@ -1365,7 +1365,7 @@ ZunResult ResultScreen::RegisterChain(i32 unk)
 ResultScreen::ResultScreen()
 {
     i32 unused[12];
-    std::memset(this, 0, sizeof(ResultScreen));
+    memset(this, 0, sizeof(ResultScreen));
     this->cursor = 1;
 }
 
@@ -1416,7 +1416,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                         vm->color = COLOR_WHITE;
                     }
 
-                    vm->posOffset = ZunVec3(-4.0f, -4.0f, 0.0f);
+                    vm->posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
                 }
                 else
                 {
@@ -1428,7 +1428,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                     {
                         vm->color = COLOR_SET_ALPHA(COLOR_WHITE, 176);
                     }
-                    vm->posOffset = ZunVec3(0.0f, 0.0f, 0.0f);
+                    vm->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
                 }
             }
         }
@@ -1458,7 +1458,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                 {
                     vm->color = COLOR_WHITE;
                 }
-                vm->posOffset = ZunVec3(-4.0f, -4.0f, 0.0f);
+                vm->posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
             }
             else
             {
@@ -1470,7 +1470,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                 {
                     vm->color = COLOR_SET_ALPHA(COLOR_WHITE, 176);
                 }
-                vm->posOffset = ZunVec3(0.0f, 0.0f, 0.0f);
+                vm->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
             }
         }
 
@@ -1786,8 +1786,8 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfff0f0ff;
 
-                            SDL_Log("strcpy 4");
-                            std::strcpy(name, "        ");
+                            //SDL_LOG("strcpy 4");
+                            strcpy(name, "        ");
                             name[8] = 0;
 
                             name[resultScreen->cursor >= 8 ? 7 : resultScreen->cursor] = '_';
@@ -1834,8 +1834,8 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfffff0f0;
 
-                            SDL_Log("strcpy 5");
-                            std::strcpy(name, "        ");
+                            //SDL_LOG("strcpy 5");
+                            strcpy(name, "        ");
                             name[8] = 0;
 
                             name[resultScreen->cursor >= 8 ? 7 : resultScreen->cursor] = '_';
@@ -1922,7 +1922,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
     if (resultScreen->resultScreenState == RESULT_SCREEN_STATE_WRITING_HIGHSCORE_NAME ||
         resultScreen->resultScreenState == RESULT_SCREEN_STATE_WRITING_REPLAY_NAME)
     {
-        spritePos = ZunVec3(160.0f, 356.0f, 0.0f);
+        spritePos = ZunProcVec3(160.0f, 356.0f, 0.0f);
 
         for (row = 0; row < RESULT_KEYBOARD_ROWS; row++)
         {
@@ -2012,8 +2012,8 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                                              resultScreen->defaultReplay.score);
                 g_AsciiManager.color = 0xfff0f0ff;
 
-                SDL_Log("strcpy 6");
-                std::strcpy(name, "        ");
+                //SDL_LOG("strcpy 6");
+                strcpy(name, "        ");
 
                 name[8] = 0;
 
@@ -2080,8 +2080,8 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
         for (i = 0; i < ARRAY_SIZE_SIGNED(resultScreen->unk_40); i++, sprite++)
         {
 
-            sprite->pos = ZunVec3(0.0f, 0.0f, 0.0f);
-            sprite->posOffset = ZunVec3(0.0f, 0.0f, 0.0f);
+            sprite->pos = ZunProcVec3(0.0f, 0.0f, 0.0f);
+            sprite->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
 
             // Execute all the scripts from the start of result00 to the end of result02
             g_AnmManager->SetAndExecuteScriptIdx(sprite, ANM_SCRIPT_RESULT00_START + i);
@@ -2092,7 +2092,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
         {
             g_AnmManager->InitializeAndSetSprite(sprite, ANM_SCRIPT_TEXT_RESULTSCREEN_CHARACTER_NAME + i);
 
-            sprite->pos = ZunVec3(0.0f, 0.0f, 0.0f);
+            sprite->pos = ZunProcVec3(0.0f, 0.0f, 0.0f);
 
             sprite->flags.anchor = AnmVmAnchor_TopLeft;
 
@@ -2118,8 +2118,8 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
 
                 resultScreen->LinkScoreEx(resultScreen->defaultScore[i][characterShot] + slot, i, characterShot);
 
-                SDL_Log("strcpy 7");
-                std::strcpy(resultScreen->defaultScore[i][characterShot][slot].name, DEFAULT_HIGH_SCORE_NAME);
+                //SDL_LOG("strcpy 7");
+                strcpy(resultScreen->defaultScore[i][characterShot][slot].name, DEFAULT_HIGH_SCORE_NAME);
             }
         }
     }

@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <string>
+#include <inttypes.hpp>
 
 // First byte for all of these is 0xEF so I omit it, while still storing
 // UTF-8 bytes directly. Maybe not the best idea? Made sense to me though.
@@ -1997,46 +1996,62 @@ uint16_t sjis_table_2[] = {
 	0x0000,	0x9F6D,	0x9F70,	0x9F75
 };
 
-void cp_append(std::string& out, uint32_t cp) {
-	char chars[4] = {};
+void cp_append(char* out, size_t& len, uint32_t cp)
+{
+    char chars[4];
 
-	if (cp <= 0x7F) {
-		out.push_back((char)cp);
-	}
-	else if (cp <= 0x7FF) {
-		chars[0] = (char)(((cp >> 6) & 0x1F) | 0xC0);
-		chars[1] = (char)(((cp >> 0) & 0x3F) | 0x80);
-		out.append(chars, 2);
-	}
-	else if (cp <= 0xFFFF) {
-		chars[0] = (char)(((cp >> 12) & 0x0F) | 0xE0);
-		chars[1] = (char)(((cp >> 6) & 0x3F) | 0x80);
-		chars[2] = (char)(((cp >> 0) & 0x3F) | 0x80);
-		out.append(chars, 3);
-	}
-	else if (cp <= 0x10FFFF) {
-		chars[0] = (char)(((cp >> 18) & 0x07) | 0xF0);
-		chars[1] = (char)(((cp >> 12) & 0x3F) | 0x80);
-		chars[2] = (char)(((cp >> 6) & 0x3F) | 0x80);
-		chars[3] = (char)(((cp >> 0) & 0x3F) | 0x80);
-		out.append(chars, 4);
-	}
-	else {
-		out.append({ static_cast<char>(0xef), static_cast<char>(0xbf), static_cast<char>(0xbd) }, 3);
-	}
+    if (cp <= 0x7F) {
+        out[len++] = (char)cp;
+    }
+    else if (cp <= 0x7FF) {
+        chars[0] = (char)(((cp >> 6) & 0x1F) | 0xC0);
+        chars[1] = (char)(((cp >> 0) & 0x3F) | 0x80);
+
+        out[len++] = chars[0];
+        out[len++] = chars[1];
+    }
+    else if (cp <= 0xFFFF) {
+        chars[0] = (char)(((cp >> 12) & 0x0F) | 0xE0);
+        chars[1] = (char)(((cp >> 6) & 0x3F) | 0x80);
+        chars[2] = (char)(((cp >> 0) & 0x3F) | 0x80);
+
+        out[len++] = chars[0];
+        out[len++] = chars[1];
+        out[len++] = chars[2];
+    }
+    else if (cp <= 0x10FFFF) {
+        chars[0] = (char)(((cp >> 18) & 0x07) | 0xF0);
+        chars[1] = (char)(((cp >> 12) & 0x3F) | 0x80);
+        chars[2] = (char)(((cp >> 6) & 0x3F) | 0x80);
+        chars[3] = (char)(((cp >> 0) & 0x3F) | 0x80);
+
+        out[len++] = chars[0];
+        out[len++] = chars[1];
+        out[len++] = chars[2];
+        out[len++] = chars[3];
+    }
+    else {
+        // UTF-8 replacement character (EF BF BD)
+        out[len++] = (char)0xEF;
+        out[len++] = (char)0xBF;
+        out[len++] = (char)0xBD;
+    }
 }
-
 // I kinda hate that we're converting to UTF-8 and passing that to SDL.
 // Cause what's the first thing a text rendering library would need to do
 // to actually render text to screen? Extract the Unicode codepoints from
 // the UTF-8. Maybe SDL_TTF has that but when I took a glance at it, I
 // didn't find a text rendering function that takes UTF-32
-bool sjis_to_utf8(const char* str, size_t len, std::string& utf8) {
-	for (size_t i = 0; i < len;) {
-		if (!(str[i] & 0x80)) {
-			utf8.push_back(str[i++]);
-			continue;
-		}
+bool sjis_to_utf8(const char* str, size_t len, char* utf8)
+{
+	size_t outLen=0;
+    for (size_t i = 0; i < len; )
+    {
+        if (!(str[i] & 0x80))
+        {
+            utf8[outLen++] = str[i++];
+            continue;
+        }
 		switch (str[i]) {
 		case 0x80:
 		case 0xA0:
@@ -2047,12 +2062,9 @@ bool sjis_to_utf8(const char* str, size_t len, std::string& utf8) {
 		}
 
 		if (str[i] >= 0xA1 && str[i] <= 0xDF) {
-			utf8.push_back(0xEF);
-			utf8.append(
-				reinterpret_cast<const char*>(
-					sjis_halfwidth_table[str[i++] - 0xA1]
-				), 
-				2);
+			utf8[outLen++] = (0xEF);
+			utf8[outLen++] = sjis_halfwidth_table[str[i] - 0xA1][0];
+			utf8[outLen++] = sjis_halfwidth_table[str[i] - 0xA1][1];
 			continue;
 		}
 
@@ -2078,313 +2090,313 @@ bool sjis_to_utf8(const char* str, size_t len, std::string& utf8) {
 		// going through cp_append since I'm already doing that with halfwidth
 		// kana
 		switch (twobyte_char) {
-			case 0x87A0: cp_append(utf8, 0x2000B); continue;
-			case 0x8861: cp_append(utf8, 0x2123D); continue;
-			case 0x886B: cp_append(utf8, 0x2131B); continue;
-			case 0x8880: cp_append(utf8, 0x2146E); continue;
-			case 0x889B: cp_append(utf8, 0x218BD); continue;
-			case 0x9873: cp_append(utf8, 0x20B9F); continue;
-			case 0x9883: cp_append(utf8, 0x216B4); continue;
-			case 0x988E: cp_append(utf8, 0x21E34); continue;
-			case 0xEB59: cp_append(utf8, 0x231C4); continue;
-			case 0xEB92: cp_append(utf8, 0x235C4); continue;
-			case 0xEBA7: cp_append(utf8, 0x2373F); continue;
-			case 0xEBB0: cp_append(utf8, 0x23763); continue;
-			case 0xEBDE: cp_append(utf8, 0x23CFE); continue;
-			case 0xEC8C: cp_append(utf8, 0x247F1); continue;
-			case 0xECFC: cp_append(utf8, 0x2548E); continue;
-			case 0xED48: cp_append(utf8, 0x2550E); continue;
-			case 0xED66: cp_append(utf8, 0x25771); continue;
-			case 0xED73: cp_append(utf8, 0x259C4); continue;
-			case 0xED8E: cp_append(utf8, 0x25DA1); continue;
-			case 0xEDDB: cp_append(utf8, 0x26AFF); continue;
-			case 0xEE52: cp_append(utf8, 0x26E40); continue;
-			case 0xEE68: cp_append(utf8, 0x270F4); continue;
-			case 0xEE8C: cp_append(utf8, 0x27684); continue;
-			case 0xEEC7: cp_append(utf8, 0x28277); continue;
-			case 0xEECF: cp_append(utf8, 0x283CD); continue;
-			case 0xEFE4: cp_append(utf8, 0x2A190); continue;
-			case 0xF040: cp_append(utf8, 0x20089); continue;
-			case 0xF04A: cp_append(utf8, 0x200A2); continue;
-			case 0xF04D: cp_append(utf8, 0x200A4); continue;
-			case 0xF055: cp_append(utf8, 0x201A2); continue;
-			case 0xF065: cp_append(utf8, 0x20213); continue;
-			case 0xF090: cp_append(utf8, 0x2032B); continue;
-			case 0xF097: cp_append(utf8, 0x20381); continue;
-			case 0xF099: cp_append(utf8, 0x20371); continue;
-			case 0xF141: cp_append(utf8, 0x203F9); continue;
-			case 0xF144: cp_append(utf8, 0x2044A); continue;
-			case 0xF146: cp_append(utf8, 0x20509); continue;
-			case 0xF150: cp_append(utf8, 0x205D6); continue;
-			case 0xF151: cp_append(utf8, 0x20628); continue;
-			case 0xF157: cp_append(utf8, 0x2074F); continue;
-			case 0xF15E: cp_append(utf8, 0x20807); continue;
-			case 0xF160: cp_append(utf8, 0x2083A); continue;
-			case 0xF169: cp_append(utf8, 0x208B9); continue;
-			case 0xF171: cp_append(utf8, 0x2097C); continue;
-			case 0xF172: cp_append(utf8, 0x2099D); continue;
-			case 0xF178: cp_append(utf8, 0x20AD3); continue;
-			case 0xF17B: cp_append(utf8, 0x20B1D); continue;
-			case 0xF197: cp_append(utf8, 0x20D45); continue;
-			case 0xF1A8: cp_append(utf8, 0x20DE1); continue;
-			case 0xF1AF: cp_append(utf8, 0x20E95); continue;
-			case 0xF1B0: cp_append(utf8, 0x20E6D); continue;
-			case 0xF1B8: cp_append(utf8, 0x20E64); continue;
-			case 0xF1BB: cp_append(utf8, 0x20F5F); continue;
-			case 0xF1D7: cp_append(utf8, 0x21201); continue;
-			case 0xF1DA: cp_append(utf8, 0x21255); continue;
-			case 0xF1DC: cp_append(utf8, 0x2127B); continue;
-			case 0xF1E1: cp_append(utf8, 0x21274); continue;
-			case 0xF1E8: cp_append(utf8, 0x212E4); continue;
-			case 0xF1E9: cp_append(utf8, 0x212D7); continue;
-			case 0xF1F0: cp_append(utf8, 0x212FD); continue;
-			case 0xF1F2: cp_append(utf8, 0x21336); continue;
-			case 0xF1F3: cp_append(utf8, 0x21344); continue;
-			case 0xF244: cp_append(utf8, 0x213C4); continue;
-			case 0xF251: cp_append(utf8, 0x2146D); continue;
-			case 0xF25D: cp_append(utf8, 0x215D7); continue;
-			case 0xF263: cp_append(utf8, 0x26C29); continue;
-			case 0xF266: cp_append(utf8, 0x21647); continue;
-			case 0xF274: cp_append(utf8, 0x21706); continue;
-			case 0xF275: cp_append(utf8, 0x21742); continue;
-			case 0xF29E: cp_append(utf8, 0x219C3); continue;
-			case 0xF0AE: cp_append(utf8, 0x21C56); continue;
-			case 0xF0B5: cp_append(utf8, 0x21D2D); continue;
-			case 0xF0B6: cp_append(utf8, 0x21D45); continue;
-			case 0xF0B8: cp_append(utf8, 0x21D78); continue;
-			case 0xF0B9: cp_append(utf8, 0x21D62); continue;
-			case 0xF0BD: cp_append(utf8, 0x21DA1); continue;
-			case 0xF0BE: cp_append(utf8, 0x21D9C); continue;
-			case 0xF0C3: cp_append(utf8, 0x21D92); continue;
-			case 0xF0C6: cp_append(utf8, 0x21DB7); continue;
-			case 0xF0C8: cp_append(utf8, 0x21DE0); continue;
-			case 0xF0C9: cp_append(utf8, 0x21E33); continue;
-			case 0xF0D9: cp_append(utf8, 0x21F1E); continue;
-			case 0xF0E4: cp_append(utf8, 0x21F76); continue;
-			case 0xF0EA: cp_append(utf8, 0x21FFA); continue;
-			case 0xF2A0: cp_append(utf8, 0x2217B); continue;
-			case 0xF2A9: cp_append(utf8, 0x2231E); continue;
-			case 0xF2AE: cp_append(utf8, 0x223AD); continue;
-			case 0xF2CE: cp_append(utf8, 0x226F3); continue;
-			case 0xF2E3: cp_append(utf8, 0x2285B); continue;
-			case 0xF2EB: cp_append(utf8, 0x228AB); continue;
-			case 0xF2F0: cp_append(utf8, 0x2298F); continue;
-			case 0xF343: cp_append(utf8, 0x22AB8); continue;
-			case 0xF348: cp_append(utf8, 0x22B4F); continue;
-			case 0xF349: cp_append(utf8, 0x22B50); continue;
-			case 0xF351: cp_append(utf8, 0x22B46); continue;
-			case 0xF353: cp_append(utf8, 0x22C1D); continue;
-			case 0xF354: cp_append(utf8, 0x22BA6); continue;
-			case 0xF358: cp_append(utf8, 0x22C24); continue;
-			case 0xF375: cp_append(utf8, 0x22DE1); continue;
-			case 0xF39D: cp_append(utf8, 0x231C3); continue;
-			case 0xF3A1: cp_append(utf8, 0x231F5); continue;
-			case 0xF3A2: cp_append(utf8, 0x231B6); continue;
-			case 0xF3B8: cp_append(utf8, 0x23372); continue;
-			case 0xF3BA: cp_append(utf8, 0x233D3); continue;
-			case 0xF3BB: cp_append(utf8, 0x233D2); continue;
-			case 0xF3C0: cp_append(utf8, 0x233D0); continue;
-			case 0xF3C1: cp_append(utf8, 0x233E4); continue;
-			case 0xF3C2: cp_append(utf8, 0x233D5); continue;
-			case 0xF3C5: cp_append(utf8, 0x233DA); continue;
-			case 0xF3C7: cp_append(utf8, 0x233DF); continue;
-			case 0xF3D3: cp_append(utf8, 0x2344A); continue;
-			case 0xF3D4: cp_append(utf8, 0x23451); continue;
-			case 0xF3D5: cp_append(utf8, 0x2344B); continue;
-			case 0xF3D9: cp_append(utf8, 0x23465); continue;
-			case 0xF3F5: cp_append(utf8, 0x234E4); continue;
-			case 0xF3F6: cp_append(utf8, 0x2355A); continue;
-			case 0xF449: cp_append(utf8, 0x23594); continue;
-			case 0xF45E: cp_append(utf8, 0x23639); continue;
-			case 0xF45F: cp_append(utf8, 0x23647); continue;
-			case 0xF461: cp_append(utf8, 0x23638); continue;
-			case 0xF462: cp_append(utf8, 0x2363A); continue;
-			case 0xF46D: cp_append(utf8, 0x2371C); continue;
-			case 0xF478: cp_append(utf8, 0x2370C); continue;
-			case 0xF481: cp_append(utf8, 0x23764); continue;
-			case 0xF489: cp_append(utf8, 0x237FF); continue;
-			case 0xF48A: cp_append(utf8, 0x237E7); continue;
-			case 0xF490: cp_append(utf8, 0x23824); continue;
-			case 0xF495: cp_append(utf8, 0x2383D); continue;
-			case 0xF4A1: cp_append(utf8, 0x23A98); continue;
-			case 0xF4B2: cp_append(utf8, 0x23C7F); continue;
-			case 0xF4C7: cp_append(utf8, 0x23D00); continue;
-			case 0xF4DA: cp_append(utf8, 0x23D40); continue;
-			case 0xF4DC: cp_append(utf8, 0x23DFA); continue;
-			case 0xF4DD: cp_append(utf8, 0x23DF9); continue;
-			case 0xF4DE: cp_append(utf8, 0x23DD3); continue;
-			case 0xF551: cp_append(utf8, 0x23F7E); continue;
-			case 0xF566: cp_append(utf8, 0x24096); continue;
-			case 0xF56C: cp_append(utf8, 0x24103); continue;
-			case 0xF581: cp_append(utf8, 0x241C6); continue;
-			case 0xF584: cp_append(utf8, 0x241FE); continue;
-			case 0xF5A0: cp_append(utf8, 0x243BC); continue;
-			case 0xF5B1: cp_append(utf8, 0x24629); continue;
-			case 0xF5B7: cp_append(utf8, 0x246A5); continue;
-			case 0xF5D1: cp_append(utf8, 0x24896); continue;
-			case 0xF5F9: cp_append(utf8, 0x24A4D); continue;
-			case 0xF64D: cp_append(utf8, 0x24B56); continue;
-			case 0xF64F: cp_append(utf8, 0x24B6F); continue;
-			case 0xF654: cp_append(utf8, 0x24C16); continue;
-			case 0xF663: cp_append(utf8, 0x24D14); continue;
-			case 0xF67C: cp_append(utf8, 0x24E0E); continue;
-			case 0xF681: cp_append(utf8, 0x24E37); continue;
-			case 0xF686: cp_append(utf8, 0x24E6A); continue;
-			case 0xF689: cp_append(utf8, 0x24E8B); continue;
-			case 0xF695: cp_append(utf8, 0x2504A); continue;
-			case 0xF697: cp_append(utf8, 0x25055); continue;
-			case 0xF69A: cp_append(utf8, 0x25122); continue;
-			case 0xF69F: cp_append(utf8, 0x251A9); continue;
-			case 0xF6A1: cp_append(utf8, 0x251E5); continue;
-			case 0xF6A2: cp_append(utf8, 0x251CD); continue;
-			case 0xF6A6: cp_append(utf8, 0x2521E); continue;
-			case 0xF6AA: cp_append(utf8, 0x2524C); continue;
-			case 0xF6BB: cp_append(utf8, 0x2542E); continue;
-			case 0xF6C6: cp_append(utf8, 0x254D9); continue;
-			case 0xF6D9: cp_append(utf8, 0x255A7); continue;
-			case 0xF6F3: cp_append(utf8, 0x257A9); continue;
-			case 0xF6F4: cp_append(utf8, 0x257B4); continue;
-			case 0xF751: cp_append(utf8, 0x259D4); continue;
-			case 0xF75C: cp_append(utf8, 0x25AE4); continue;
-			case 0xF75D: cp_append(utf8, 0x25AE3); continue;
-			case 0xF75F: cp_append(utf8, 0x25AF1); continue;
-			case 0xF771: cp_append(utf8, 0x25BB2); continue;
-			case 0xF77C: cp_append(utf8, 0x25C4B); continue;
-			case 0xF77D: cp_append(utf8, 0x25C64); continue;
-			case 0xF793: cp_append(utf8, 0x25E2E); continue;
-			case 0xF794: cp_append(utf8, 0x25E56); continue;
-			case 0xF795: cp_append(utf8, 0x25E65); continue;
-			case 0xF797: cp_append(utf8, 0x25E62); continue;
-			case 0xF79B: cp_append(utf8, 0x25ED8); continue;
-			case 0xF79D: cp_append(utf8, 0x25EC2); continue;
-			case 0xF7A0: cp_append(utf8, 0x25EE8); continue;
-			case 0xF7A2: cp_append(utf8, 0x25F23); continue;
-			case 0xF7A5: cp_append(utf8, 0x25F5C); continue;
-			case 0xF7AC: cp_append(utf8, 0x25FE0); continue;
-			case 0xF7AD: cp_append(utf8, 0x25FD4); continue;
-			case 0xF7B2: cp_append(utf8, 0x2600C); continue;
-			case 0xF7B3: cp_append(utf8, 0x25FFB); continue;
-			case 0xF7BB: cp_append(utf8, 0x26017); continue;
-			case 0xF7C0: cp_append(utf8, 0x26060); continue;
-			case 0xF7CD: cp_append(utf8, 0x260ED); continue;
-			case 0xF7E7: cp_append(utf8, 0x26270); continue;
-			case 0xF7E9: cp_append(utf8, 0x26286); continue;
-			case 0xF7F0: cp_append(utf8, 0x2634C); continue;
-			case 0xF7F3: cp_append(utf8, 0x23D0E); continue;
-			case 0xF7F7: cp_append(utf8, 0x26402); continue;
-			case 0xF854: cp_append(utf8, 0x2667E); continue;
-			case 0xF859: cp_append(utf8, 0x266B0); continue;
-			case 0xF865: cp_append(utf8, 0x2671D); continue;
-			case 0xF875: cp_append(utf8, 0x268DD); continue;
-			case 0xF877: cp_append(utf8, 0x268EA); continue;
-			case 0xF879: cp_append(utf8, 0x26951); continue;
-			case 0xF87C: cp_append(utf8, 0x2696F); continue;
-			case 0xF87E: cp_append(utf8, 0x269DD); continue;
-			case 0xF883: cp_append(utf8, 0x26A1E); continue;
-			case 0xF88A: cp_append(utf8, 0x26A58); continue;
-			case 0xF890: cp_append(utf8, 0x26A8C); continue;
-			case 0xF893: cp_append(utf8, 0x26AB7); continue;
-			case 0xF8C2: cp_append(utf8, 0x26C73); continue;
-			case 0xF8CC: cp_append(utf8, 0x26CDD); continue;
-			case 0xF8DB: cp_append(utf8, 0x26E65); continue;
-			case 0xF8F3: cp_append(utf8, 0x26F94); continue;
-			case 0xF8FC: cp_append(utf8, 0x26FF8); continue;
-			case 0xF940: cp_append(utf8, 0x26FF6); continue;
-			case 0xF941: cp_append(utf8, 0x26FF7); continue;
-			case 0xF952: cp_append(utf8, 0x2710D); continue;
-			case 0xF955: cp_append(utf8, 0x27139); continue;
-			case 0xF984: cp_append(utf8, 0x273DB); continue;
-			case 0xF985: cp_append(utf8, 0x273DA); continue;
-			case 0xF98B: cp_append(utf8, 0x273FE); continue;
-			case 0xF98E: cp_append(utf8, 0x27410); continue;
-			case 0xF993: cp_append(utf8, 0x27449); continue;
-			case 0xF9A7: cp_append(utf8, 0x27615); continue;
-			case 0xF9A8: cp_append(utf8, 0x27614); continue;
-			case 0xF9AA: cp_append(utf8, 0x27631); continue;
-			case 0xF9B2: cp_append(utf8, 0x27693); continue;
-			case 0xF9BA: cp_append(utf8, 0x2770E); continue;
-			case 0xF9BC: cp_append(utf8, 0x27723); continue;
-			case 0xF9C0: cp_append(utf8, 0x27752); continue;
-			case 0xF9D4: cp_append(utf8, 0x27985); continue;
-			case 0xF9E1: cp_append(utf8, 0x27A84); continue;
-			case 0xF9F5: cp_append(utf8, 0x27BB3); continue;
-			case 0xF9F7: cp_append(utf8, 0x27BBE); continue;
-			case 0xF9F8: cp_append(utf8, 0x27BC7); continue;
-			case 0xFA44: cp_append(utf8, 0x27CB8); continue;
-			case 0xFA4E: cp_append(utf8, 0x27DA0); continue;
-			case 0xFA51: cp_append(utf8, 0x27E10); continue;
-			case 0xFA58: cp_append(utf8, 0x27FB7); continue;
-			case 0xFA61: cp_append(utf8, 0x2808A); continue;
-			case 0xFA67: cp_append(utf8, 0x280BB); continue;
-			case 0xFA78: cp_append(utf8, 0x28282); continue;
-			case 0xFA7D: cp_append(utf8, 0x282F3); continue;
-			case 0xFA86: cp_append(utf8, 0x2840C); continue;
-			case 0xFA8B: cp_append(utf8, 0x28455); continue;
-			case 0xFA9A: cp_append(utf8, 0x2856B); continue;
-			case 0xFA9E: cp_append(utf8, 0x285C8); continue;
-			case 0xFA9F: cp_append(utf8, 0x285C9); continue;
-			case 0xFAAA: cp_append(utf8, 0x286D7); continue;
-			case 0xFAAD: cp_append(utf8, 0x286FA); continue;
-			case 0xFACD: cp_append(utf8, 0x28949); continue;
-			case 0xFACE: cp_append(utf8, 0x28946); continue;
-			case 0xFAD5: cp_append(utf8, 0x2896B); continue;
-			case 0xFAE3: cp_append(utf8, 0x28987); continue;
-			case 0xFAE4: cp_append(utf8, 0x28988); continue;
-			case 0xFAEF: cp_append(utf8, 0x289BA); continue;
-			case 0xFAF0: cp_append(utf8, 0x289BB); continue;
-			case 0xFAFC: cp_append(utf8, 0x28A1E); continue;
-			case 0xFB40: cp_append(utf8, 0x28A29); continue;
-			case 0xFB4B: cp_append(utf8, 0x28A71); continue;
-			case 0xFB4C: cp_append(utf8, 0x28A43); continue;
-			case 0xFB55: cp_append(utf8, 0x28A99); continue;
-			case 0xFB56: cp_append(utf8, 0x28ACD); continue;
-			case 0xFB5C: cp_append(utf8, 0x28AE4); continue;
-			case 0xFB5D: cp_append(utf8, 0x28ADD); continue;
-			case 0xFB6D: cp_append(utf8, 0x28BC1); continue;
-			case 0xFB6E: cp_append(utf8, 0x28BEF); continue;
-			case 0xFB76: cp_append(utf8, 0x28D10); continue;
-			case 0xFB79: cp_append(utf8, 0x28D71); continue;
-			case 0xFB7B: cp_append(utf8, 0x28DFB); continue;
-			case 0xFB7C: cp_append(utf8, 0x28E1F); continue;
-			case 0xFB81: cp_append(utf8, 0x28E36); continue;
-			case 0xFB85: cp_append(utf8, 0x28E89); continue;
-			case 0xFB87: cp_append(utf8, 0x28EEB); continue;
-			case 0xFB89: cp_append(utf8, 0x28F32); continue;
-			case 0xFB91: cp_append(utf8, 0x28FF8); continue;
-			case 0xFBA0: cp_append(utf8, 0x292A0); continue;
-			case 0xFBA1: cp_append(utf8, 0x292B1); continue;
-			case 0xFBB6: cp_append(utf8, 0x29490); continue;
-			case 0xFBC0: cp_append(utf8, 0x295CF); continue;
-			case 0xFBCA: cp_append(utf8, 0x2967F); continue;
-			case 0xFBD4: cp_append(utf8, 0x296F0); continue;
-			case 0xFBD7: cp_append(utf8, 0x29719); continue;
-			case 0xFBDB: cp_append(utf8, 0x29750); continue;
-			case 0xFBF4: cp_append(utf8, 0x298C6); continue;
-			case 0xFC4B: cp_append(utf8, 0x29A72); continue;
-			case 0xFC6A: cp_append(utf8, 0x29DDB); continue;
-			case 0xFC6B: cp_append(utf8, 0x29E3D); continue;
-			case 0xFC78: cp_append(utf8, 0x29E15); continue;
-			case 0xFC7A: cp_append(utf8, 0x29E8A); continue;
-			case 0xFC7C: cp_append(utf8, 0x29E49); continue;
-			case 0xFC87: cp_append(utf8, 0x29EC4); continue;
-			case 0xFC8D: cp_append(utf8, 0x29EE9); continue;
-			case 0xFC90: cp_append(utf8, 0x29EDB); continue;
-			case 0xFCA3: cp_append(utf8, 0x29FCE); continue;
-			case 0xFCA7: cp_append(utf8, 0x2A02F); continue;
-			case 0xFCA9: cp_append(utf8, 0x2A01A); continue;
-			case 0xFCB0: cp_append(utf8, 0x2A0F9); continue;
-			case 0xFCB3: cp_append(utf8, 0x2A082); continue;
-			case 0xFCD1: cp_append(utf8, 0x22218); continue;
-			case 0xFCD6: cp_append(utf8, 0x2A38C); continue;
-			case 0xFCD8: cp_append(utf8, 0x2A437); continue;
-			case 0xFCEC: cp_append(utf8, 0x2A5F1); continue;
-			case 0xFCEE: cp_append(utf8, 0x2A602); continue;
-			case 0xFCF0: cp_append(utf8, 0x2A61A); continue;
-			case 0xFCF4: cp_append(utf8, 0x2A6B2); continue;
+			case 0x87A0: cp_append(utf8, outLen, 0x2000B); continue;
+			case 0x8861: cp_append(utf8, outLen, 0x2123D); continue;
+			case 0x886B: cp_append(utf8, outLen, 0x2131B); continue;
+			case 0x8880: cp_append(utf8, outLen, 0x2146E); continue;
+			case 0x889B: cp_append(utf8, outLen, 0x218BD); continue;
+			case 0x9873: cp_append(utf8, outLen, 0x20B9F); continue;
+			case 0x9883: cp_append(utf8, outLen, 0x216B4); continue;
+			case 0x988E: cp_append(utf8, outLen, 0x21E34); continue;
+			case 0xEB59: cp_append(utf8, outLen, 0x231C4); continue;
+			case 0xEB92: cp_append(utf8, outLen, 0x235C4); continue;
+			case 0xEBA7: cp_append(utf8, outLen, 0x2373F); continue;
+			case 0xEBB0: cp_append(utf8, outLen, 0x23763); continue;
+			case 0xEBDE: cp_append(utf8, outLen, 0x23CFE); continue;
+			case 0xEC8C: cp_append(utf8, outLen, 0x247F1); continue;
+			case 0xECFC: cp_append(utf8, outLen, 0x2548E); continue;
+			case 0xED48: cp_append(utf8, outLen, 0x2550E); continue;
+			case 0xED66: cp_append(utf8, outLen, 0x25771); continue;
+			case 0xED73: cp_append(utf8, outLen, 0x259C4); continue;
+			case 0xED8E: cp_append(utf8, outLen, 0x25DA1); continue;
+			case 0xEDDB: cp_append(utf8, outLen, 0x26AFF); continue;
+			case 0xEE52: cp_append(utf8, outLen, 0x26E40); continue;
+			case 0xEE68: cp_append(utf8, outLen, 0x270F4); continue;
+			case 0xEE8C: cp_append(utf8, outLen, 0x27684); continue;
+			case 0xEEC7: cp_append(utf8, outLen, 0x28277); continue;
+			case 0xEECF: cp_append(utf8, outLen, 0x283CD); continue;
+			case 0xEFE4: cp_append(utf8, outLen, 0x2A190); continue;
+			case 0xF040: cp_append(utf8, outLen, 0x20089); continue;
+			case 0xF04A: cp_append(utf8, outLen, 0x200A2); continue;
+			case 0xF04D: cp_append(utf8, outLen, 0x200A4); continue;
+			case 0xF055: cp_append(utf8, outLen, 0x201A2); continue;
+			case 0xF065: cp_append(utf8, outLen, 0x20213); continue;
+			case 0xF090: cp_append(utf8, outLen, 0x2032B); continue;
+			case 0xF097: cp_append(utf8, outLen, 0x20381); continue;
+			case 0xF099: cp_append(utf8, outLen, 0x20371); continue;
+			case 0xF141: cp_append(utf8, outLen, 0x203F9); continue;
+			case 0xF144: cp_append(utf8, outLen, 0x2044A); continue;
+			case 0xF146: cp_append(utf8, outLen, 0x20509); continue;
+			case 0xF150: cp_append(utf8, outLen, 0x205D6); continue;
+			case 0xF151: cp_append(utf8, outLen, 0x20628); continue;
+			case 0xF157: cp_append(utf8, outLen, 0x2074F); continue;
+			case 0xF15E: cp_append(utf8, outLen, 0x20807); continue;
+			case 0xF160: cp_append(utf8, outLen, 0x2083A); continue;
+			case 0xF169: cp_append(utf8, outLen, 0x208B9); continue;
+			case 0xF171: cp_append(utf8, outLen, 0x2097C); continue;
+			case 0xF172: cp_append(utf8, outLen, 0x2099D); continue;
+			case 0xF178: cp_append(utf8, outLen, 0x20AD3); continue;
+			case 0xF17B: cp_append(utf8, outLen, 0x20B1D); continue;
+			case 0xF197: cp_append(utf8, outLen, 0x20D45); continue;
+			case 0xF1A8: cp_append(utf8, outLen, 0x20DE1); continue;
+			case 0xF1AF: cp_append(utf8, outLen, 0x20E95); continue;
+			case 0xF1B0: cp_append(utf8, outLen, 0x20E6D); continue;
+			case 0xF1B8: cp_append(utf8, outLen, 0x20E64); continue;
+			case 0xF1BB: cp_append(utf8, outLen, 0x20F5F); continue;
+			case 0xF1D7: cp_append(utf8, outLen, 0x21201); continue;
+			case 0xF1DA: cp_append(utf8, outLen, 0x21255); continue;
+			case 0xF1DC: cp_append(utf8, outLen, 0x2127B); continue;
+			case 0xF1E1: cp_append(utf8, outLen, 0x21274); continue;
+			case 0xF1E8: cp_append(utf8, outLen, 0x212E4); continue;
+			case 0xF1E9: cp_append(utf8, outLen, 0x212D7); continue;
+			case 0xF1F0: cp_append(utf8, outLen, 0x212FD); continue;
+			case 0xF1F2: cp_append(utf8, outLen, 0x21336); continue;
+			case 0xF1F3: cp_append(utf8, outLen, 0x21344); continue;
+			case 0xF244: cp_append(utf8, outLen, 0x213C4); continue;
+			case 0xF251: cp_append(utf8, outLen, 0x2146D); continue;
+			case 0xF25D: cp_append(utf8, outLen, 0x215D7); continue;
+			case 0xF263: cp_append(utf8, outLen, 0x26C29); continue;
+			case 0xF266: cp_append(utf8, outLen, 0x21647); continue;
+			case 0xF274: cp_append(utf8, outLen, 0x21706); continue;
+			case 0xF275: cp_append(utf8, outLen, 0x21742); continue;
+			case 0xF29E: cp_append(utf8, outLen, 0x219C3); continue;
+			case 0xF0AE: cp_append(utf8, outLen, 0x21C56); continue;
+			case 0xF0B5: cp_append(utf8, outLen, 0x21D2D); continue;
+			case 0xF0B6: cp_append(utf8, outLen, 0x21D45); continue;
+			case 0xF0B8: cp_append(utf8, outLen, 0x21D78); continue;
+			case 0xF0B9: cp_append(utf8, outLen, 0x21D62); continue;
+			case 0xF0BD: cp_append(utf8, outLen, 0x21DA1); continue;
+			case 0xF0BE: cp_append(utf8, outLen, 0x21D9C); continue;
+			case 0xF0C3: cp_append(utf8, outLen, 0x21D92); continue;
+			case 0xF0C6: cp_append(utf8, outLen, 0x21DB7); continue;
+			case 0xF0C8: cp_append(utf8, outLen, 0x21DE0); continue;
+			case 0xF0C9: cp_append(utf8, outLen, 0x21E33); continue;
+			case 0xF0D9: cp_append(utf8, outLen, 0x21F1E); continue;
+			case 0xF0E4: cp_append(utf8, outLen, 0x21F76); continue;
+			case 0xF0EA: cp_append(utf8, outLen, 0x21FFA); continue;
+			case 0xF2A0: cp_append(utf8, outLen, 0x2217B); continue;
+			case 0xF2A9: cp_append(utf8, outLen, 0x2231E); continue;
+			case 0xF2AE: cp_append(utf8, outLen, 0x223AD); continue;
+			case 0xF2CE: cp_append(utf8, outLen, 0x226F3); continue;
+			case 0xF2E3: cp_append(utf8, outLen, 0x2285B); continue;
+			case 0xF2EB: cp_append(utf8, outLen, 0x228AB); continue;
+			case 0xF2F0: cp_append(utf8, outLen, 0x2298F); continue;
+			case 0xF343: cp_append(utf8, outLen, 0x22AB8); continue;
+			case 0xF348: cp_append(utf8, outLen, 0x22B4F); continue;
+			case 0xF349: cp_append(utf8, outLen, 0x22B50); continue;
+			case 0xF351: cp_append(utf8, outLen, 0x22B46); continue;
+			case 0xF353: cp_append(utf8, outLen, 0x22C1D); continue;
+			case 0xF354: cp_append(utf8, outLen, 0x22BA6); continue;
+			case 0xF358: cp_append(utf8, outLen, 0x22C24); continue;
+			case 0xF375: cp_append(utf8, outLen, 0x22DE1); continue;
+			case 0xF39D: cp_append(utf8, outLen, 0x231C3); continue;
+			case 0xF3A1: cp_append(utf8, outLen, 0x231F5); continue;
+			case 0xF3A2: cp_append(utf8, outLen, 0x231B6); continue;
+			case 0xF3B8: cp_append(utf8, outLen, 0x23372); continue;
+			case 0xF3BA: cp_append(utf8, outLen, 0x233D3); continue;
+			case 0xF3BB: cp_append(utf8, outLen, 0x233D2); continue;
+			case 0xF3C0: cp_append(utf8, outLen, 0x233D0); continue;
+			case 0xF3C1: cp_append(utf8, outLen, 0x233E4); continue;
+			case 0xF3C2: cp_append(utf8, outLen, 0x233D5); continue;
+			case 0xF3C5: cp_append(utf8, outLen, 0x233DA); continue;
+			case 0xF3C7: cp_append(utf8, outLen, 0x233DF); continue;
+			case 0xF3D3: cp_append(utf8, outLen, 0x2344A); continue;
+			case 0xF3D4: cp_append(utf8, outLen, 0x23451); continue;
+			case 0xF3D5: cp_append(utf8, outLen, 0x2344B); continue;
+			case 0xF3D9: cp_append(utf8, outLen, 0x23465); continue;
+			case 0xF3F5: cp_append(utf8, outLen, 0x234E4); continue;
+			case 0xF3F6: cp_append(utf8, outLen, 0x2355A); continue;
+			case 0xF449: cp_append(utf8, outLen, 0x23594); continue;
+			case 0xF45E: cp_append(utf8, outLen, 0x23639); continue;
+			case 0xF45F: cp_append(utf8, outLen, 0x23647); continue;
+			case 0xF461: cp_append(utf8, outLen, 0x23638); continue;
+			case 0xF462: cp_append(utf8, outLen, 0x2363A); continue;
+			case 0xF46D: cp_append(utf8, outLen, 0x2371C); continue;
+			case 0xF478: cp_append(utf8, outLen, 0x2370C); continue;
+			case 0xF481: cp_append(utf8, outLen, 0x23764); continue;
+			case 0xF489: cp_append(utf8, outLen, 0x237FF); continue;
+			case 0xF48A: cp_append(utf8, outLen, 0x237E7); continue;
+			case 0xF490: cp_append(utf8, outLen, 0x23824); continue;
+			case 0xF495: cp_append(utf8, outLen, 0x2383D); continue;
+			case 0xF4A1: cp_append(utf8, outLen, 0x23A98); continue;
+			case 0xF4B2: cp_append(utf8, outLen, 0x23C7F); continue;
+			case 0xF4C7: cp_append(utf8, outLen, 0x23D00); continue;
+			case 0xF4DA: cp_append(utf8, outLen, 0x23D40); continue;
+			case 0xF4DC: cp_append(utf8, outLen, 0x23DFA); continue;
+			case 0xF4DD: cp_append(utf8, outLen, 0x23DF9); continue;
+			case 0xF4DE: cp_append(utf8, outLen, 0x23DD3); continue;
+			case 0xF551: cp_append(utf8, outLen, 0x23F7E); continue;
+			case 0xF566: cp_append(utf8, outLen, 0x24096); continue;
+			case 0xF56C: cp_append(utf8, outLen, 0x24103); continue;
+			case 0xF581: cp_append(utf8, outLen, 0x241C6); continue;
+			case 0xF584: cp_append(utf8, outLen, 0x241FE); continue;
+			case 0xF5A0: cp_append(utf8, outLen, 0x243BC); continue;
+			case 0xF5B1: cp_append(utf8, outLen, 0x24629); continue;
+			case 0xF5B7: cp_append(utf8, outLen, 0x246A5); continue;
+			case 0xF5D1: cp_append(utf8, outLen, 0x24896); continue;
+			case 0xF5F9: cp_append(utf8, outLen, 0x24A4D); continue;
+			case 0xF64D: cp_append(utf8, outLen, 0x24B56); continue;
+			case 0xF64F: cp_append(utf8, outLen, 0x24B6F); continue;
+			case 0xF654: cp_append(utf8, outLen, 0x24C16); continue;
+			case 0xF663: cp_append(utf8, outLen, 0x24D14); continue;
+			case 0xF67C: cp_append(utf8, outLen, 0x24E0E); continue;
+			case 0xF681: cp_append(utf8, outLen, 0x24E37); continue;
+			case 0xF686: cp_append(utf8, outLen, 0x24E6A); continue;
+			case 0xF689: cp_append(utf8, outLen, 0x24E8B); continue;
+			case 0xF695: cp_append(utf8, outLen, 0x2504A); continue;
+			case 0xF697: cp_append(utf8, outLen, 0x25055); continue;
+			case 0xF69A: cp_append(utf8, outLen, 0x25122); continue;
+			case 0xF69F: cp_append(utf8, outLen, 0x251A9); continue;
+			case 0xF6A1: cp_append(utf8, outLen, 0x251E5); continue;
+			case 0xF6A2: cp_append(utf8, outLen, 0x251CD); continue;
+			case 0xF6A6: cp_append(utf8, outLen, 0x2521E); continue;
+			case 0xF6AA: cp_append(utf8, outLen, 0x2524C); continue;
+			case 0xF6BB: cp_append(utf8, outLen, 0x2542E); continue;
+			case 0xF6C6: cp_append(utf8, outLen, 0x254D9); continue;
+			case 0xF6D9: cp_append(utf8, outLen, 0x255A7); continue;
+			case 0xF6F3: cp_append(utf8, outLen, 0x257A9); continue;
+			case 0xF6F4: cp_append(utf8, outLen, 0x257B4); continue;
+			case 0xF751: cp_append(utf8, outLen, 0x259D4); continue;
+			case 0xF75C: cp_append(utf8, outLen, 0x25AE4); continue;
+			case 0xF75D: cp_append(utf8, outLen, 0x25AE3); continue;
+			case 0xF75F: cp_append(utf8, outLen, 0x25AF1); continue;
+			case 0xF771: cp_append(utf8, outLen, 0x25BB2); continue;
+			case 0xF77C: cp_append(utf8, outLen, 0x25C4B); continue;
+			case 0xF77D: cp_append(utf8, outLen, 0x25C64); continue;
+			case 0xF793: cp_append(utf8, outLen, 0x25E2E); continue;
+			case 0xF794: cp_append(utf8, outLen, 0x25E56); continue;
+			case 0xF795: cp_append(utf8, outLen, 0x25E65); continue;
+			case 0xF797: cp_append(utf8, outLen, 0x25E62); continue;
+			case 0xF79B: cp_append(utf8, outLen, 0x25ED8); continue;
+			case 0xF79D: cp_append(utf8, outLen, 0x25EC2); continue;
+			case 0xF7A0: cp_append(utf8, outLen, 0x25EE8); continue;
+			case 0xF7A2: cp_append(utf8, outLen, 0x25F23); continue;
+			case 0xF7A5: cp_append(utf8, outLen, 0x25F5C); continue;
+			case 0xF7AC: cp_append(utf8, outLen, 0x25FE0); continue;
+			case 0xF7AD: cp_append(utf8, outLen, 0x25FD4); continue;
+			case 0xF7B2: cp_append(utf8, outLen, 0x2600C); continue;
+			case 0xF7B3: cp_append(utf8, outLen, 0x25FFB); continue;
+			case 0xF7BB: cp_append(utf8, outLen, 0x26017); continue;
+			case 0xF7C0: cp_append(utf8, outLen, 0x26060); continue;
+			case 0xF7CD: cp_append(utf8, outLen, 0x260ED); continue;
+			case 0xF7E7: cp_append(utf8, outLen, 0x26270); continue;
+			case 0xF7E9: cp_append(utf8, outLen, 0x26286); continue;
+			case 0xF7F0: cp_append(utf8, outLen, 0x2634C); continue;
+			case 0xF7F3: cp_append(utf8, outLen, 0x23D0E); continue;
+			case 0xF7F7: cp_append(utf8, outLen, 0x26402); continue;
+			case 0xF854: cp_append(utf8, outLen, 0x2667E); continue;
+			case 0xF859: cp_append(utf8, outLen, 0x266B0); continue;
+			case 0xF865: cp_append(utf8, outLen, 0x2671D); continue;
+			case 0xF875: cp_append(utf8, outLen, 0x268DD); continue;
+			case 0xF877: cp_append(utf8, outLen, 0x268EA); continue;
+			case 0xF879: cp_append(utf8, outLen, 0x26951); continue;
+			case 0xF87C: cp_append(utf8, outLen, 0x2696F); continue;
+			case 0xF87E: cp_append(utf8, outLen, 0x269DD); continue;
+			case 0xF883: cp_append(utf8, outLen, 0x26A1E); continue;
+			case 0xF88A: cp_append(utf8, outLen, 0x26A58); continue;
+			case 0xF890: cp_append(utf8, outLen, 0x26A8C); continue;
+			case 0xF893: cp_append(utf8, outLen, 0x26AB7); continue;
+			case 0xF8C2: cp_append(utf8, outLen, 0x26C73); continue;
+			case 0xF8CC: cp_append(utf8, outLen, 0x26CDD); continue;
+			case 0xF8DB: cp_append(utf8, outLen, 0x26E65); continue;
+			case 0xF8F3: cp_append(utf8, outLen, 0x26F94); continue;
+			case 0xF8FC: cp_append(utf8, outLen, 0x26FF8); continue;
+			case 0xF940: cp_append(utf8, outLen, 0x26FF6); continue;
+			case 0xF941: cp_append(utf8, outLen, 0x26FF7); continue;
+			case 0xF952: cp_append(utf8, outLen, 0x2710D); continue;
+			case 0xF955: cp_append(utf8, outLen, 0x27139); continue;
+			case 0xF984: cp_append(utf8, outLen, 0x273DB); continue;
+			case 0xF985: cp_append(utf8, outLen, 0x273DA); continue;
+			case 0xF98B: cp_append(utf8, outLen, 0x273FE); continue;
+			case 0xF98E: cp_append(utf8, outLen, 0x27410); continue;
+			case 0xF993: cp_append(utf8, outLen, 0x27449); continue;
+			case 0xF9A7: cp_append(utf8, outLen, 0x27615); continue;
+			case 0xF9A8: cp_append(utf8, outLen, 0x27614); continue;
+			case 0xF9AA: cp_append(utf8, outLen, 0x27631); continue;
+			case 0xF9B2: cp_append(utf8, outLen, 0x27693); continue;
+			case 0xF9BA: cp_append(utf8, outLen, 0x2770E); continue;
+			case 0xF9BC: cp_append(utf8, outLen, 0x27723); continue;
+			case 0xF9C0: cp_append(utf8, outLen, 0x27752); continue;
+			case 0xF9D4: cp_append(utf8, outLen, 0x27985); continue;
+			case 0xF9E1: cp_append(utf8, outLen, 0x27A84); continue;
+			case 0xF9F5: cp_append(utf8, outLen, 0x27BB3); continue;
+			case 0xF9F7: cp_append(utf8, outLen, 0x27BBE); continue;
+			case 0xF9F8: cp_append(utf8, outLen, 0x27BC7); continue;
+			case 0xFA44: cp_append(utf8, outLen, 0x27CB8); continue;
+			case 0xFA4E: cp_append(utf8, outLen, 0x27DA0); continue;
+			case 0xFA51: cp_append(utf8, outLen, 0x27E10); continue;
+			case 0xFA58: cp_append(utf8, outLen, 0x27FB7); continue;
+			case 0xFA61: cp_append(utf8, outLen, 0x2808A); continue;
+			case 0xFA67: cp_append(utf8, outLen, 0x280BB); continue;
+			case 0xFA78: cp_append(utf8, outLen, 0x28282); continue;
+			case 0xFA7D: cp_append(utf8, outLen, 0x282F3); continue;
+			case 0xFA86: cp_append(utf8, outLen, 0x2840C); continue;
+			case 0xFA8B: cp_append(utf8, outLen, 0x28455); continue;
+			case 0xFA9A: cp_append(utf8, outLen, 0x2856B); continue;
+			case 0xFA9E: cp_append(utf8, outLen, 0x285C8); continue;
+			case 0xFA9F: cp_append(utf8, outLen, 0x285C9); continue;
+			case 0xFAAA: cp_append(utf8, outLen, 0x286D7); continue;
+			case 0xFAAD: cp_append(utf8, outLen, 0x286FA); continue;
+			case 0xFACD: cp_append(utf8, outLen, 0x28949); continue;
+			case 0xFACE: cp_append(utf8, outLen, 0x28946); continue;
+			case 0xFAD5: cp_append(utf8, outLen, 0x2896B); continue;
+			case 0xFAE3: cp_append(utf8, outLen, 0x28987); continue;
+			case 0xFAE4: cp_append(utf8, outLen, 0x28988); continue;
+			case 0xFAEF: cp_append(utf8, outLen, 0x289BA); continue;
+			case 0xFAF0: cp_append(utf8, outLen, 0x289BB); continue;
+			case 0xFAFC: cp_append(utf8, outLen, 0x28A1E); continue;
+			case 0xFB40: cp_append(utf8, outLen, 0x28A29); continue;
+			case 0xFB4B: cp_append(utf8, outLen, 0x28A71); continue;
+			case 0xFB4C: cp_append(utf8, outLen, 0x28A43); continue;
+			case 0xFB55: cp_append(utf8, outLen, 0x28A99); continue;
+			case 0xFB56: cp_append(utf8, outLen, 0x28ACD); continue;
+			case 0xFB5C: cp_append(utf8, outLen, 0x28AE4); continue;
+			case 0xFB5D: cp_append(utf8, outLen, 0x28ADD); continue;
+			case 0xFB6D: cp_append(utf8, outLen, 0x28BC1); continue;
+			case 0xFB6E: cp_append(utf8, outLen, 0x28BEF); continue;
+			case 0xFB76: cp_append(utf8, outLen, 0x28D10); continue;
+			case 0xFB79: cp_append(utf8, outLen, 0x28D71); continue;
+			case 0xFB7B: cp_append(utf8, outLen, 0x28DFB); continue;
+			case 0xFB7C: cp_append(utf8, outLen, 0x28E1F); continue;
+			case 0xFB81: cp_append(utf8, outLen, 0x28E36); continue;
+			case 0xFB85: cp_append(utf8, outLen, 0x28E89); continue;
+			case 0xFB87: cp_append(utf8, outLen, 0x28EEB); continue;
+			case 0xFB89: cp_append(utf8, outLen, 0x28F32); continue;
+			case 0xFB91: cp_append(utf8, outLen, 0x28FF8); continue;
+			case 0xFBA0: cp_append(utf8, outLen, 0x292A0); continue;
+			case 0xFBA1: cp_append(utf8, outLen, 0x292B1); continue;
+			case 0xFBB6: cp_append(utf8, outLen, 0x29490); continue;
+			case 0xFBC0: cp_append(utf8, outLen, 0x295CF); continue;
+			case 0xFBCA: cp_append(utf8, outLen, 0x2967F); continue;
+			case 0xFBD4: cp_append(utf8, outLen, 0x296F0); continue;
+			case 0xFBD7: cp_append(utf8, outLen, 0x29719); continue;
+			case 0xFBDB: cp_append(utf8, outLen, 0x29750); continue;
+			case 0xFBF4: cp_append(utf8, outLen, 0x298C6); continue;
+			case 0xFC4B: cp_append(utf8, outLen, 0x29A72); continue;
+			case 0xFC6A: cp_append(utf8, outLen, 0x29DDB); continue;
+			case 0xFC6B: cp_append(utf8, outLen, 0x29E3D); continue;
+			case 0xFC78: cp_append(utf8, outLen, 0x29E15); continue;
+			case 0xFC7A: cp_append(utf8, outLen, 0x29E8A); continue;
+			case 0xFC7C: cp_append(utf8, outLen, 0x29E49); continue;
+			case 0xFC87: cp_append(utf8, outLen, 0x29EC4); continue;
+			case 0xFC8D: cp_append(utf8, outLen, 0x29EE9); continue;
+			case 0xFC90: cp_append(utf8, outLen, 0x29EDB); continue;
+			case 0xFCA3: cp_append(utf8, outLen, 0x29FCE); continue;
+			case 0xFCA7: cp_append(utf8, outLen, 0x2A02F); continue;
+			case 0xFCA9: cp_append(utf8, outLen, 0x2A01A); continue;
+			case 0xFCB0: cp_append(utf8, outLen, 0x2A0F9); continue;
+			case 0xFCB3: cp_append(utf8, outLen, 0x2A082); continue;
+			case 0xFCD1: cp_append(utf8, outLen, 0x22218); continue;
+			case 0xFCD6: cp_append(utf8, outLen, 0x2A38C); continue;
+			case 0xFCD8: cp_append(utf8, outLen, 0x2A437); continue;
+			case 0xFCEC: cp_append(utf8, outLen, 0x2A5F1); continue;
+			case 0xFCEE: cp_append(utf8, outLen, 0x2A602); continue;
+			case 0xFCF0: cp_append(utf8, outLen, 0x2A61A); continue;
+			case 0xFCF4: cp_append(utf8, outLen, 0x2A6B2); continue;
 		}
 
 		if (twobyte_char <= 0x9FFC) {
-			cp_append(utf8, sjis_table_1[twobyte_char - 0x8140]);
+			cp_append(utf8, outLen, sjis_table_1[twobyte_char - 0x8140]);
 
 			// Another special case that could either massively complicate the
 			// main tables, or be solved like this
@@ -2394,24 +2406,28 @@ bool sjis_to_utf8(const char* str, size_t len, std::string& utf8) {
 			case 0x8669:
 			case 0x866B:
 			case 0x866D:
-				utf8.append({ static_cast<char>(0xcc), static_cast<char>(0x80) }, 2);
+				utf8[outLen++] = static_cast<char>(0xcc);
+				utf8[outLen++] = static_cast<char>(0x80);
 				break;
 			case 0x8668:
 			case 0x866A:
 			case 0x866C:
 			case 0x866E:
-				utf8.append({ static_cast<char>(0xcc), static_cast<char>(0x80) }, 2);
+				utf8[outLen++] = static_cast<char>(0xcc);
+				utf8[outLen++] = static_cast<char>(0x80);
 				break;
 			case 0x8685:
-				utf8.append({ static_cast<char>(0xcb), static_cast<char>(0xa5) }, 2);
+				utf8[outLen++] = static_cast<char>(0xcb);
+				utf8[outLen++] = static_cast<char>(0xa5);
 				break;
 			case 0x8686:
-				utf8.append({ static_cast<char>(0xcb), static_cast<char>(0xa9) }, 2);
+				utf8[outLen++] = static_cast<char>(0xcb);
+				utf8[outLen++] = static_cast<char>(0xa9);
 				break;
 			}
 		}
 		else if (twobyte_char >= 0xE040) {
-			cp_append(utf8, sjis_table_2[twobyte_char - 0xE040]);
+			cp_append(utf8, outLen, sjis_table_2[twobyte_char - 0xE040]);
 		}
 	}
 	return true;

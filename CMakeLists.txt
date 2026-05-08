@@ -1,95 +1,86 @@
 cmake_minimum_required(VERSION 3.20)
-project(th06_sdl2 LANGUAGES CXX)
+project(th06_sdl LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Option: build with OpenGL ES 2.0 shader-based renderer instead of fixed-function GL
-option(USE_GLES "Build with OpenGL ES 2.0 renderer (RendererGLES) instead of fixed-function RendererGL" OFF)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+option(TH06_USE_SDL "TH06 SDL" ON)
 
-option(TH06_USE_SDL2 "TH06 SDL" ON)
-option(TH06_BUILD_ORIGINAL "D3D8" OFF)
-
-if(TH06_USE_SDL2)
+if(TH06_USE_SDL)
   if(WIN32)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(SDL2_ARCH "x64")
+        set(SDL_ARCH "x64")
     else()
-        set(SDL2_ARCH "x86")
+        set(SDL_ARCH "x86")
     endif()
 
-    set(SDL2_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2")
-    set(SDL2_IMAGE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2_image")
-    set(SDL2_MIXER_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2_mixer")
-    set(SDL2_TTF_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2_ttf")
+    set(SDL_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL")
+    set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_image")
+    set(SDL_MIXER_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_mixer")
+    set(SDL_TTF_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_ttf")
 
-    add_library(SDL2::SDL2 SHARED IMPORTED)
-    set_target_properties(SDL2::SDL2 PROPERTIES
-        IMPORTED_LOCATION "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2.dll"
-        IMPORTED_IMPLIB   "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_DIR}/include"
+    add_library(SDL::SDLmain STATIC IMPORTED)
+    set_target_properties(SDL::SDLmain PROPERTIES
+        IMPORTED_LOCATION "${SDL_DIR}/lib/${SDL_ARCH}/SDLmain.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_DIR}/include"
     )
 
-    add_library(SDL2::SDL2main STATIC IMPORTED)
-    set_target_properties(SDL2::SDL2main PROPERTIES
-        IMPORTED_LOCATION "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2main.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_DIR}/include"
+    add_library(SDL::SDL SHARED IMPORTED)
+    set_target_properties(SDL::SDL PROPERTIES
+        IMPORTED_LOCATION "${SDL_DIR}/lib/${SDL_ARCH}/SDL.dll"
+        IMPORTED_IMPLIB   "${SDL_DIR}/lib/${SDL_ARCH}/SDL.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_DIR}/include"
     )
 
-    add_library(SDL2_image::SDL2_image SHARED IMPORTED)
-    set_target_properties(SDL2_image::SDL2_image PROPERTIES
-        IMPORTED_LOCATION "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.dll"
-        IMPORTED_IMPLIB   "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_IMAGE_DIR}/include"
+    add_library(SDL_image::SDL_image SHARED IMPORTED)
+    set_target_properties(SDL_image::SDL_image PROPERTIES
+        IMPORTED_LOCATION "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.dll"
+        IMPORTED_IMPLIB   "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_IMAGE_DIR}/include"
     )
 
-    add_library(SDL2_mixer::SDL2_mixer SHARED IMPORTED)
-    set_target_properties(SDL2_mixer::SDL2_mixer PROPERTIES
-        IMPORTED_LOCATION "${SDL2_MIXER_DIR}/lib/${SDL2_ARCH}/SDL2_mixer.dll"
-        IMPORTED_IMPLIB   "${SDL2_MIXER_DIR}/lib/${SDL2_ARCH}/SDL2_mixer.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_MIXER_DIR}/include"
+    add_library(SDL_mixer::SDL_mixer SHARED IMPORTED)
+    set_target_properties(SDL_mixer::SDL_mixer PROPERTIES
+        IMPORTED_LOCATION "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.dll"
+        IMPORTED_IMPLIB   "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_MIXER_DIR}/include"
     )
 
-    add_library(SDL2_ttf::SDL2_ttf SHARED IMPORTED)
-    set_target_properties(SDL2_ttf::SDL2_ttf PROPERTIES
-        IMPORTED_LOCATION "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.dll"
-        IMPORTED_IMPLIB   "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_TTF_DIR}/include"
+    add_library(SDL_ttf::SDL_ttf SHARED IMPORTED)
+    set_target_properties(SDL_ttf::SDL_ttf PROPERTIES
+        IMPORTED_LOCATION "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.dll"
+        IMPORTED_IMPLIB   "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_TTF_DIR}/include"
     )
 
-    message(STATUS "SDL2 DIR: ${SDL2_DIR}")
-    message(STATUS "SDL2_image DIR: ${SDL2_IMAGE_DIR}")
-    message(STATUS "SDL2_mixer DIR: ${SDL2_MIXER_DIR}")
-    message(STATUS "SDL2_ttf DIR: ${SDL2_TTF_DIR}")
-    message(STATUS "目标架构: ${SDL2_ARCH}")
+    message(STATUS "SDL DIR: ${SDL_DIR}")
+    message(STATUS "SDL_image DIR: ${SDL_IMAGE_DIR}")
+    message(STATUS "SDL_mixer DIR: ${SDL_MIXER_DIR}")
+    message(STATUS "SDL_ttf DIR: ${SDL_TTF_DIR}")
+    message(STATUS "ARCH DIR: ${SDL_ARCH}")
   else()
-    # Linux/macOS: 通过 pkg-config 查找系统安装的 SDL2
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2)
-    pkg_check_modules(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
-    pkg_check_modules(SDL2_MIXER REQUIRED IMPORTED_TARGET SDL2_mixer)
+    pkg_check_modules(SDL REQUIRED IMPORTED_TARGET sdl)
+    pkg_check_modules(SDL_IMAGE REQUIRED IMPORTED_TARGET SDL_image)
+    pkg_check_modules(SDL_MIXER REQUIRED IMPORTED_TARGET SDL_mixer)
 
-    # 创建兼容的 target 别名
-    if(NOT TARGET SDL2::SDL2)
-        add_library(SDL2::SDL2 ALIAS PkgConfig::SDL2)
+    if(NOT TARGET SDL::SDL)
+        add_library(SDL::SDL ALIAS PkgConfig::SDL)
     endif()
-    if(NOT TARGET SDL2_image::SDL2_image)
-        add_library(SDL2_image::SDL2_image ALIAS PkgConfig::SDL2_IMAGE)
+    if(NOT TARGET SDL_image::SDL_image)
+        add_library(SDL_image::SDL_image ALIAS PkgConfig::SDL_IMAGE)
     endif()
-    if(NOT TARGET SDL2_mixer::SDL2_mixer)
-        add_library(SDL2_mixer::SDL2_mixer ALIAS PkgConfig::SDL2_MIXER)
+    if(NOT TARGET SDL_mixer::SDL_mixer)
+        add_library(SDL_mixer::SDL_mixer ALIAS PkgConfig::SDL_MIXER)
     endif()
-    if(NOT TARGET SDL2_ttf::SDL2_ttf)
-        add_library(SDL2_ttf::SDL2_ttf ALIAS PkgConfig::SDL2_MIXER)
+    if(NOT TARGET SDL_ttf::SDL_ttf)
+        add_library(SDL_ttf::SDL_ttf ALIAS PkgConfig::SDL_MIXER)
     endif()
 
-    # Linux 不需要 SDL2main
-    add_library(SDL2::SDL2main INTERFACE IMPORTED)
-
-    message(STATUS "SDL2 VERSION: ${SDL2_VERSION}")
-    message(STATUS "SDL2_image VERSION: ${SDL2_IMAGE_VERSION}")
-    message(STATUS "SDL2_mixer VERSION: ${SDL2_MIXER_VERSION}")
-    message(STATUS "SDL2_ttf VERSION: ${SDL2_TTF_VERSION}")
+    add_library(SDL::SDLmain INTERFACE IMPORTED)
+    message(STATUS "SDL VERSION: ${SDL_VERSION}")
+    message(STATUS "SDL_image VERSION: ${SDL_IMAGE_VERSION}")
+    message(STATUS "SDL_mixer VERSION: ${SDL_MIXER_VERSION}")
+    message(STATUS "SDL_ttf VERSION: ${SDL_TTF_VERSION}")
   endif()
 endif()
 
@@ -142,26 +133,20 @@ set(TH06_GAME_SOURCES
 
 add_executable(th06 ${TH06_GAME_SOURCES})
 
-# Always define TH06_USE_GLES so both backends are available at runtime
-target_compile_definitions(th06 PRIVATE TH06_USE_GLES=1)
-
-# MSVC: Generate map file for debugging
 if(MSVC)
     target_link_options(th06 PRIVATE /MAP)
 endif()
 
-# GCC/Clang: 游戏文件格式依赖32位指针大小，必须编译为32位
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(th06 PRIVATE
-        -m32                     # 强制32位编译 (文件格式和结构体布局依赖sizeof(void*)==4)
-        -fpermissive             # 允许GCC不支持的MSVC兼容语法 (额外限定名, 取右值地址等)
-        -Wno-changes-meaning     # union成员名与类型名相同 (EclManager.hpp)
-        -Wno-unknown-pragmas     # 忽略MSVC的 #pragma function / #pragma var_order
+        -m32                     
+        -fpermissive             
+        -Wno-changes-meaning     
+        -Wno-unknown-pragmas     
     )
     target_link_options(th06 PRIVATE -m32)
 endif()
 
-# 包含目录
 target_include_directories(th06 PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/build/autogenerated
@@ -175,7 +160,7 @@ if(MSVC)
 endif()
 
 set(I18N_TPL "${CMAKE_SOURCE_DIR}/src/i18n.tpl")
-set(I18N_HPP "${CMAKE_SOURCE_DIR}/build/autogenerated/i18n.hpp")
+set(I18N_HPP "${CMAKE_SOURCE_DIR}/src/i18n.hpp")
 
 if(WIN32)
     set(TH06_PYTHON "python")
@@ -207,11 +192,11 @@ else()
 endif()
 
 target_link_libraries(th06 PRIVATE
-    SDL2::SDL2main
-    SDL2::SDL2
-    SDL2_image::SDL2_image
-    SDL2_mixer::SDL2_mixer
-    SDL2_ttf::SDL2_ttf
+    SDL::SDLmain
+    SDL::SDL
+    SDL_image::SDL_image
+    SDL_mixer::SDL_mixer
+    SDL_ttf::SDL_ttf
 )
 if(OPENGL_gl_LIBRARY)
     target_link_libraries(th06 PRIVATE ${OPENGL_gl_LIBRARY})
@@ -226,22 +211,61 @@ endif()
 if(WIN32)
     add_custom_command(TARGET th06 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2.dll"
+            "${SDL_DIR}/lib/${SDL_ARCH}/SDL.dll"
+            $<TARGET_FILE_DIR:th06>
+
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.dll"
+            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libjpeg-8.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_MIXER_DIR}/lib/${SDL2_ARCH}/SDL2_mixer.dll"
+            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libpng15-15.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.dll"
+            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libtiff-5.dll"
             $<TARGET_FILE_DIR:th06>
-        COMMENT "复制 SDL2 DLL 到游戏输出目录"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libwebp-2.dll"
+            $<TARGET_FILE_DIR:th06>
+
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libFLAC-8.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libmikmod-2.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libogg-0.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libvorbis-0.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libvorbisfile-3.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/smpeg.dll"
+            $<TARGET_FILE_DIR:th06>
+
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/libfreetype-6.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/zlib1.dll"
+            $<TARGET_FILE_DIR:th06>
+        COMMENT "SDL DLL COPIED"
     )
 endif()
 
-set(FONT_SRC "${CMAKE_SOURCE_DIR}/src/font/Noto Sans SC.ttf")
+set(FONT_SRC "${CMAKE_SOURCE_DIR}/th06.ttf")
 if(EXISTS "${FONT_SRC}")
     add_custom_command(TARGET th06 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

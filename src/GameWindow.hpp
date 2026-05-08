@@ -61,8 +61,9 @@ struct GameWindow
     static i32 InitD3dRendering();
     static void InitD3dDevice();
 
-    SDL_Window *window;
-    SDL_GLContext glContext;
+    // SDL1.2 uses SDL_Surface instead of SDL_Window
+    SDL_Surface *screen;
+
     i32 isAppClosing;
     i32 lastActiveAppValue;
     i32 isAppActive;
@@ -72,26 +73,36 @@ struct GameWindow
     i32 powerOffActive;
     u32 renderBackendIndex;
 
-    i32 GAME_WINDOW_WIDTH_REAL = GAME_WINDOW_WIDTH;
-    i32 GAME_WINDOW_HEIGHT_REAL = GAME_WINDOW_HEIGHT;
-    i32 VIEWPORT_WIDTH = GAME_WINDOW_WIDTH;
-    i32 VIEWPORT_OFF_X = 0;
-    i32 VIEWPORT_HEIGHT = GAME_WINDOW_HEIGHT;
-    i32 VIEWPORT_OFF_Y = 0;
+    i32 GAME_WINDOW_WIDTH_REAL;
+    i32 GAME_WINDOW_HEIGHT_REAL;
+    i32 VIEWPORT_WIDTH;
+    i32 VIEWPORT_OFF_X;
+    i32 VIEWPORT_HEIGHT;
+    i32 VIEWPORT_OFF_Y;
+
     f32 WIDTH_RESOLUTION_SCALE;
     f32 HEIGHT_RESOLUTION_SCALE;
-    void CONFIGURE_VIEW(){
-        this->VIEWPORT_WIDTH = GAME_WINDOW_WIDTH_REAL;
-        this->VIEWPORT_HEIGHT = GAME_WINDOW_HEIGHT_REAL;
-        if ((this->GAME_WINDOW_WIDTH_REAL * 3) > (this->GAME_WINDOW_HEIGHT_REAL * 4)){
-            this->VIEWPORT_WIDTH=(u32)((this->GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f);
-            this->VIEWPORT_OFF_X=((this->GAME_WINDOW_WIDTH_REAL - this->VIEWPORT_WIDTH) / 2);
-        }else if((this->GAME_WINDOW_WIDTH_REAL * 3) < (this->GAME_WINDOW_HEIGHT_REAL * 4)){
-            this->VIEWPORT_HEIGHT=(u32)((this->GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f);
-            this->VIEWPORT_OFF_Y=((this->GAME_WINDOW_HEIGHT_REAL - this->VIEWPORT_HEIGHT) / 2);
+
+    void CONFIGURE_VIEW()
+    {
+        this->GAME_WINDOW_WIDTH_REAL = GAME_WINDOW_WIDTH;
+        this->GAME_WINDOW_HEIGHT_REAL = GAME_WINDOW_HEIGHT;
+        this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
+        this->VIEWPORT_HEIGHT = this->GAME_WINDOW_HEIGHT_REAL;
+
+        if ((this->GAME_WINDOW_WIDTH_REAL * 3) > (this->GAME_WINDOW_HEIGHT_REAL * 4))
+        {
+            this->VIEWPORT_WIDTH = (u32)((this->GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f);
+            this->VIEWPORT_OFF_X = ((this->GAME_WINDOW_WIDTH_REAL - this->VIEWPORT_WIDTH) / 2);
         }
-        this->WIDTH_RESOLUTION_SCALE=((f32)this->VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH;
-        this->HEIGHT_RESOLUTION_SCALE=((f32)this->VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT;
+        else if ((this->GAME_WINDOW_WIDTH_REAL * 3) < (this->GAME_WINDOW_HEIGHT_REAL * 4))
+        {
+            this->VIEWPORT_HEIGHT = (u32)((this->GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f);
+            this->VIEWPORT_OFF_Y = ((this->GAME_WINDOW_HEIGHT_REAL - this->VIEWPORT_HEIGHT) / 2);
+        }
+
+        this->WIDTH_RESOLUTION_SCALE = ((f32)this->VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH;
+        this->HEIGHT_RESOLUTION_SCALE = ((f32)this->VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT;
     }
 };
 

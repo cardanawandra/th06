@@ -80,7 +80,7 @@ static inline i32 calculatePointScore(const Item *curItem, i32 scoreAcquiredItem
                : (scoreAcquiredItemBottom - (((i32)curItem->currentPosition.y - 128) * posMultiplier));
 }
 
-static const ZunVec3 g_ItemSize(16.0f, 16.0f, 16.0f);
+static const ZunVec3 g_ItemSize = {16.0f, 16.0f, 16.0f};
 
 void ItemManager::OnUpdate()
 {
@@ -115,7 +115,9 @@ void ItemManager::OnUpdate()
             }
             else if ((i32)(curItem->timer.current == 60))
             {
-                curItem->startPosition = ZunVec3(0.0f, 0.0f, 0.0f);
+                curItem->startPosition.x = 0.0f;
+                curItem->startPosition.y = 0.0f;
+                curItem->startPosition.z = 0.0f;
             }
         }
         else

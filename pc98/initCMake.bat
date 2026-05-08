@@ -1,0 +1,1 @@
+"C:\Program Files (x86)\CMake 2.4\bin\cmake.exe" -G "Visual Studio 6" -DCMAKE_MAKE_PROGRAM="E:\library\msvc6\MSVC600-master\Common\MSDev98\Bin\MSDEV.EXE"

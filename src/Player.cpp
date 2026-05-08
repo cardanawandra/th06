@@ -1,6 +1,6 @@
 #include "Player.hpp"
 
-#include <cmath>
+#include <math.h>
 #include <cstring>
 
 #include "AnmManager.hpp"
@@ -38,7 +38,7 @@ Player::Player()
 ZunResult Player::RegisterChain(u8 unk)
 {
     Player *p = &g_Player;
-    std::memset(p, 0, sizeof(Player));
+    memset(p, 0, sizeof(Player));
 
     p->invulnerabilityTimer.InitializeForPopup();
     p->unk_9e1 = unk;
@@ -111,7 +111,7 @@ ZunResult Player::AddedCallback(Player *p)
     p->grabItemSize.y = 12.0;
     p->grabItemSize.z = 5.0;
     p->playerDirection = MOVEMENT_NONE;
-    std::memcpy(&p->characterData, &g_CharData[g_GameManager.CharacterShotType()], sizeof(CharacterData));
+    memcpy(&p->characterData, &g_CharData[g_GameManager.CharacterShotType()], sizeof(CharacterData));
     p->characterData.diagonalMovementSpeed = p->characterData.orthogonalMovementSpeed / ZUN_SQRTF(2.0);
     p->characterData.diagonalMovementSpeedFocus = p->characterData.orthogonalMovementSpeedFocus / ZUN_SQRTF(2.0);
     p->fireBulletCallback = p->characterData.fireBulletCallback;
@@ -1347,9 +1347,9 @@ i32 Player::CalcItemBoxCollision(const ZunVec3 *itemCenter, const ZunVec3 *itemS
         return 0;
     }
     ZunVec3 itemTopLeft = *itemCenter - *itemSize / 2.0f;
-    //    std::memcpy(&itemTopLeft, &(*itemCenter - *itemSize / 2.0f), sizeof(ZunVec3));
+    //    memcpy(&itemTopLeft, &(*itemCenter - *itemSize / 2.0f), sizeof(ZunVec3));
     ZunVec3 itemBottomRight = *itemCenter + *itemSize / 2.0f;
-    //    std::memcpy(&itemBottomRight, &(*itemCenter + *itemSize / 2.0f), sizeof(ZunVec3));
+    //    memcpy(&itemBottomRight, &(*itemCenter + *itemSize / 2.0f), sizeof(ZunVec3));
 
     if (this->grabItemTopLeft.x > itemBottomRight.x || this->grabItemBottomRight.x < itemTopLeft.x ||
         this->grabItemTopLeft.y > itemBottomRight.y || this->grabItemBottomRight.y < itemTopLeft.y)

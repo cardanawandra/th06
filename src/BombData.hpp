@@ -6,7 +6,7 @@ struct BombData
 {
     void (*calc)(Player *p);
     void (*draw)(Player *p);
-
+    
     static void BombReimuACalc(Player *);
     static void BombReimuBCalc(Player *);
     static void BombMarisaACalc(Player *);
@@ -17,4 +17,4 @@ struct BombData
     static void BombMarisaBDraw(Player *);
     static void DarkenViewport(Player *player);
 };
-extern const BombData g_BombData[4];
+extern BombData g_BombData[4];

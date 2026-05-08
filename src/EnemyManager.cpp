@@ -44,8 +44,12 @@ void EnemyManager::Initialize()
     enemy->flags.unk6 = 1;
     enemy->flags.unk7 = 1;
     enemy->flags.unk8 = 0;
-    enemy->hitboxDimensions = ZunVec3(12.0f, 12.0f, 12.0f);
-    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
+    enemy->hitboxDimensions.x = 12.0f;
+    enemy->hitboxDimensions.y = 12.0f;
+    enemy->hitboxDimensions.z = 12.0f;
+    enemy->axisSpeed.x = 0.0f;
+    enemy->axisSpeed.y = 0.0f;
+    enemy->axisSpeed.z = 0.0f;
     enemy->angularVelocity = 0.0f;
     enemy->angle = 0.0f;
     enemy->acceleration = 0.0f;
@@ -62,7 +66,9 @@ void EnemyManager::Initialize()
     enemy->deathAnm3 = 0;
     enemy->shootInterval = 0;
     enemy->shootIntervalTimer.InitializeForPopup();
-    enemy->shootOffset = ZunVec3(0.0f, 0.0f, 0.0f);
+    enemy->shootOffset.x = 0.0f;
+    enemy->shootOffset.y = 0.0f;
+    enemy->shootOffset.z = 0.0f;
     enemy->anmExLeft = -1;
     enemy->anmExRight = -1;
     enemy->anmExDefaults = -1;
@@ -172,7 +178,7 @@ void EnemyManager::RunEclTimeline()
     {
         if (this->timelineTime.current == this->timelineInstr->time)
         {
-            // SDL_Log("OP CODE %d", this->timelineInstr->opCode);
+            // //SDL_LOG("OP CODE %d", this->timelineInstr->opCode);
             switch (this->timelineInstr->opCode)
             {
             case 0:

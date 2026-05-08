@@ -1,26 +1,25 @@
 #include "GameErrorContext.hpp"
 #include "FileSystem.hpp"
-#include <SDL_messagebox.h>
 #include <cstdarg>
-#include <cstdio>
+#include <stdio.h>
 #include <cstring>
 
 GameErrorContext g_GameErrorContext;
 
 const char *GameErrorContext::Log(GameErrorContext *ctx, const char *fmt, ...)
-{
+{ 
     char tmpBuffer[512];
     size_t tmpBufferSize;
     va_list args;
 
     va_start(args, fmt);
-    std::vsprintf(tmpBuffer, fmt, args);
+    vsprintf(tmpBuffer, fmt, args);
 
-    tmpBufferSize = std::strlen(tmpBuffer);
+    tmpBufferSize = strlen(tmpBuffer);
 
     if (ctx->m_BufferEnd + tmpBufferSize < &ctx->m_Buffer[sizeof(ctx->m_Buffer) - 1])
     {
-        std::strcpy(ctx->m_BufferEnd, tmpBuffer);
+        strcpy(ctx->m_BufferEnd, tmpBuffer);
 
         ctx->m_BufferEnd += tmpBufferSize;
         *ctx->m_BufferEnd = '\0';
@@ -38,13 +37,13 @@ const char *GameErrorContext::Fatal(GameErrorContext *ctx, const char *fmt, ...)
     va_list args;
 
     va_start(args, fmt);
-    std::vsprintf(tmpBuffer, fmt, args);
+    vsprintf(tmpBuffer, fmt, args);
 
-    tmpBufferSize = std::strlen(tmpBuffer);
+    tmpBufferSize = strlen(tmpBuffer);
 
     if (ctx->m_BufferEnd + tmpBufferSize < &ctx->m_Buffer[sizeof(ctx->m_Buffer) - 1])
     {
-        std::strcpy(ctx->m_BufferEnd, tmpBuffer);
+        strcpy(ctx->m_BufferEnd, tmpBuffer);
 
         ctx->m_BufferEnd += tmpBufferSize;
         *ctx->m_BufferEnd = '\0';
@@ -67,12 +66,12 @@ void GameErrorContext::Flush()
 
         if (m_ShowMessageBox)
         {
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", m_Buffer, NULL);
+            // SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", m_Buffer, NULL);
         }
 
         logFile = FileSystem::FopenUTF8("./log.txt", "w");
 
-        std::fprintf(logFile, "%s", m_Buffer);
-        std::fclose(logFile);
+        fprintf(logFile, "%s", m_Buffer);
+        fclose(logFile);
     }
 }

@@ -53,7 +53,7 @@ void FileAbstraction::Close()
 {
     if (this->handle != NULL)
     {
-        std::fclose(this->handle);
+        fclose(this->handle);
         this->handle = NULL;
         this->access = ACCESS_INVALID;
     }
@@ -66,7 +66,7 @@ i32 FileAbstraction::Read(u8 *data, u32 dataLen, u32 *numBytesRead)
         return false;
     }
 
-    *numBytesRead = std::fread(data, 1, dataLen, this->handle);
+    *numBytesRead = fread(data, 1, dataLen, this->handle);
 
     return !(dataLen != 0 && *numBytesRead < dataLen);
 }
@@ -78,7 +78,7 @@ i32 FileAbstraction::Write(const u8 *data, u32 dataLen, u32 *outWritten)
         return false;
     }
 
-    *outWritten = std::fwrite(data, 1, dataLen, this->handle);
+    *outWritten = fwrite(data, 1, dataLen, this->handle);
 
     return !(dataLen != 0 && *outWritten < dataLen);
 }
@@ -129,7 +129,7 @@ i32 FileAbstraction::Seek(u32 amount, u32 seekFrom)
         return 0;
     }
 
-    std::fseek(this->handle, amount, seekFrom);
+    fseek(this->handle, amount, seekFrom);
     return 1;
 }
 
@@ -140,7 +140,7 @@ u32 FileAbstraction::Tell()
         return 0;
     }
 
-    return std::ftell(this->handle);
+    return ftell(this->handle);
 }
 
 u32 FileAbstraction::GetSize()
@@ -150,10 +150,10 @@ u32 FileAbstraction::GetSize()
         return 0;
     }
 
-    long curPos = std::ftell(this->handle);
-    std::fseek(this->handle, 0, SEEK_END);
-    u32 fileLen = (u32)std::ftell(this->handle);
-    std::fseek(this->handle, curPos, SEEK_SET);
+    long curPos = ftell(this->handle);
+    fseek(this->handle, 0, SEEK_END);
+    u32 fileLen = (u32)ftell(this->handle);
+    fseek(this->handle, curPos, SEEK_SET);
 
     return fileLen;
 }

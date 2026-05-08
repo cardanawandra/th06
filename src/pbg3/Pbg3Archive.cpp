@@ -91,7 +91,7 @@ i32 Pbg3Archive::Release()
         delete[] this->entries;
         this->entries = NULL;
     }
-    std::free(this->unk);
+    free(this->unk);
     return true;
 }
 
@@ -100,7 +100,7 @@ i32 Pbg3Archive::FindEntry(const char *path)
     for (u32 entryIdx = 0; entryIdx < this->numOfEntries; entryIdx += 1)
     {
         char *entryFilename = this->entries[entryIdx].filename;
-        i32 res = std::strcmp(path, entryFilename);
+        i32 res = strcmp(path, entryFilename);
         if (res == 0)
         {
             return entryIdx;

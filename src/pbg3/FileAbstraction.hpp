@@ -1,7 +1,7 @@
 #pragma once
 
 #include "inttypes.hpp"
-#include <cstdio>
+#include <stdio.h>
 
 enum AccessMode
 {
@@ -48,7 +48,7 @@ class FileAbstraction : public IFileAbstraction
     }
 
   protected:
-    std::FILE *handle;
+    FILE *handle;
 
   private:
     AccessMode access;
