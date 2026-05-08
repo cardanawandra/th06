@@ -27,7 +27,7 @@ extern "C" FILE* __cdecl __iob_func(void)
 
 int main(int argc, char *argv[])
 {
-    printf("Starting");
+    //printf("Starting");
     i32 renderResult = 0;
 
 #ifdef __ANDROID__
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    printf("Init Gamepath");
+    //printf("Init Gamepath");
     GamePaths::Init();
 
     // if (utils::CheckForRunningGameInstance())
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
-    printf("Load CONF File");
+    //printf("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
 #ifdef __ANDROID__
@@ -68,30 +68,30 @@ int main(int argc, char *argv[])
     //     g_GameErrorContext.Flush();
     //     return 1;
     // }
-    printf("Start the game");
+    //printf("Start the game");
 
 restart:
-    printf("Create game window");
+    //printf("Create game window");
     GameWindow::CreateGameWindow();
 
-    printf("new AnmManager");
+    //printf("new AnmManager");
     g_AnmManager = new AnmManager();
 
-    printf("InitD3dRendering");
+    //printf("InitD3dRendering");
     if (GameWindow::InitD3dRendering())
     {
         g_GameErrorContext.Flush();
         return 1;
     }
 
-    printf("InitializeDSound");
+    //printf("InitializeDSound");
     g_SoundPlayer.InitializeDSound();
-    printf("GetJoystickCaps");
+    //printf("GetJoystickCaps");
     Controller::GetJoystickCaps();
-    printf("ResetKeyboard");
+    //printf("ResetKeyboard");
     Controller::ResetKeyboard();
 
-    printf("Supervisor::RegisterChain");
+    //printf("Supervisor::RegisterChain");
     if (Supervisor::RegisterChain() != ZUN_SUCCESS)
     {
         goto stop;
@@ -103,12 +103,12 @@ restart:
 
     g_GameWindow.curFrame = 0;
 
-    printf("Into loop game event");
+    //printf("Into loop game event");
     while (true)
     {
         SDL_Event e;
 
-        printf("Into poolevent loop");
+        //printf("Into poolevent loop");
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
@@ -117,7 +117,7 @@ restart:
             }
         }
 
-        printf("g_GameWindow.Render");
+        //printf("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {
@@ -158,7 +158,7 @@ restart:
 
 
 stop:
-    printf("stop the game");
+    //printf("stop the game");
     g_Chain.Release();
     g_SoundPlayer.Release();
 

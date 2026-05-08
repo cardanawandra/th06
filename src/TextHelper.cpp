@@ -54,7 +54,7 @@ ZunResult TextHelper::CreateTextBuffer()
     {
         if (g_Font = TTF_OpenFont(path2, 30), g_Font == NULL)
         {
-            printf("%s\n", TTF_GetError());
+            //printf("%s\n", TTF_GetError());
             // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
             textNotExist = true;
             return ZUN_SUCCESS;
@@ -233,7 +233,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 {
     if(textNotExist) return;
     
-    char convertedText[1024];
+    char convertedText[1024] = {0};
     SDL_Rect finalCopyDst;
     SDL_Rect finalCopySrc;
     SDL_Rect shadowRect;
@@ -241,13 +241,13 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     if (!isUTF8Encoded(string))
     {
-        char outputUtf[1024];
+        char outputUtf[1024] = {0};
     	sjis_to_utf8(string, strlen(string), outputUtf);
-        strcpy(convertedText, outputUtf);
+        strncpy(convertedText, outputUtf, sizeof(convertedText));
     }
     else
     {
-        strcpy(convertedText, string);
+        strncpy(convertedText, string, sizeof(convertedText));
     }
 
     // TTF_SetFontSize(g_Font, fontHeight * 2);

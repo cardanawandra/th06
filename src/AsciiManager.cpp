@@ -82,66 +82,66 @@ ChainCallbackResult AsciiManager::OnDrawPopups(AsciiManager *mgr)
 
 ZunResult AsciiManager::RegisterChain()
 {
-    printf("RegisterChain 1");
+    //printf("RegisterChain 1");
     AsciiManager *mgr = &g_AsciiManager;
 
-    printf("RegisterChain 2");
+    //printf("RegisterChain 2");
     g_AsciiManagerCalcChain.callback = (ChainCallback)AsciiManager::OnUpdate;
     g_AsciiManagerCalcChain.addedCallback = NULL;
     g_AsciiManagerCalcChain.deletedCallback = NULL;
-    printf("RegisterChain 3");
+    //printf("RegisterChain 3");
     g_AsciiManagerCalcChain.addedCallback = (ChainAddedCallback)AsciiManager::AddedCallback;
-    printf("RegisterChain 4");
+    //printf("RegisterChain 4");
     g_AsciiManagerCalcChain.deletedCallback = (ChainDeletedCallback)AsciiManager::DeletedCallback;
     g_AsciiManagerCalcChain.arg = mgr;
-    printf("RegisterChain 5");
+    //printf("RegisterChain 5");
     if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, TH_CHAIN_PRIO_CALC_ASCIIMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    printf("RegisterChain 6");
+    //printf("RegisterChain 6");
     g_AsciiManagerOnDrawMenusChain.callback = (ChainCallback)OnDrawMenus;
     g_AsciiManagerOnDrawMenusChain.addedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.arg = mgr;
-    printf("RegisterChain 7");
+    //printf("RegisterChain 7");
     g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_MENUS);
 
     g_AsciiManagerOnDrawPopupsChain.callback = (ChainCallback)OnDrawPopups;
     g_AsciiManagerOnDrawPopupsChain.addedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.arg = mgr;
-    printf("RegisterChain 8");
+    //printf("RegisterChain 8");
     g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_POPUPS);
 
-    printf("RegisterChain finish");
+    //printf("RegisterChain finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult AsciiManager::AddedCallback(AsciiManager *s)
 {
-    printf("AddedCallback 1");
+    //printf("AddedCallback 1");
     int x, y, z;
 
-    printf("AddedCallback 2");
+    //printf("AddedCallback 2");
     if (g_AnmManager->LoadAnm(ANM_FILE_ASCII, "data/ascii.anm", ANM_OFFSET_ASCII) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    printf("AddedCallback 3");
+    //printf("AddedCallback 3");
     if (g_AnmManager->LoadAnm(ANM_FILE_ASCIIS, "data/asciis.anm", ANM_OFFSET_ASCIIS) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    printf("AddedCallback 4");
+    //printf("AddedCallback 4");
     if (g_AnmManager->LoadAnm(ANM_FILE_CAPTURE, "data/capture.anm", ANM_OFFSET_CAPTURE) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    printf("AddedCallback 5");
+    //printf("AddedCallback 5");
     s->InitializeVms();
-    printf("AddedCallback finish");
+    //printf("AddedCallback finish");
     return ZUN_SUCCESS;
 }
 

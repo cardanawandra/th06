@@ -51,13 +51,13 @@ void AnmManager::CreateTextureObject()
 
 SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelFormatSDL1 format, u8 **fileData)
 {
-    printf("LoadToSurfaceWithFormat 1");
+    //printf("LoadToSurfaceWithFormat 1");
     u8 *data;
     SDL_Surface *imageSrcSurface;
     SDL_Surface *imageTargetSurface;
     SDL_RWops *rwData;
 
-    printf("LoadToSurfaceWithFormat 2");
+    //printf("LoadToSurfaceWithFormat 2");
     data = FileSystem::OpenPath(filename, 0);
 
     if (data == NULL)
@@ -65,7 +65,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelForm
         return NULL;
     }
 
-    printf("LoadToSurfaceWithFormat 3");
+    //printf("LoadToSurfaceWithFormat 3");
     rwData = SDL_RWFromConstMem(data, g_LastFileSize);
 
     if (rwData == NULL)
@@ -74,21 +74,21 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelForm
         return NULL;
     }
 
-    printf("LoadToSurfaceWithFormat 4");
+    //printf("LoadToSurfaceWithFormat 4");
     imageSrcSurface = IMG_Load_RW(rwData, 1);
 
-    printf("LoadToSurfaceWithFormat 4.5");
+    //printf("LoadToSurfaceWithFormat 4.5");
     if (imageSrcSurface == NULL)
     {
-        printf(IMG_GetError());
+        //printf(IMG_GetError());
         free(data);
         return NULL;
     }
 
-    printf("LoadToSurfaceWithFormat 5");
+    //printf("LoadToSurfaceWithFormat 5");
     imageTargetSurface = SDL_ConvertSurfaceFormat(imageSrcSurface, format, 0);
 
-    printf("LoadToSurfaceWithFormat 6");
+    //printf("LoadToSurfaceWithFormat 6");
     SDL_FreeSurface(imageSrcSurface);
 
     if (imageTargetSurface != NULL && fileData != NULL)
@@ -99,7 +99,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelForm
     {
         free(data);
     }
-    printf("LoadToSurfaceWithFormat finish");
+    //printf("LoadToSurfaceWithFormat finish");
     return imageTargetSurface;
 }
 
@@ -404,11 +404,11 @@ void AnmManager::SetupVertexBuffer()
 
 ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
-    printf("LoadTexture 1");
+    //printf("LoadTexture 1");
     u8 *rawTextureData;
     SDL_Surface *textureSurface;
 
-    printf("LoadTexture 2");
+    //printf("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
     if (((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) != 0)
@@ -421,7 +421,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         }
     }
 
-    printf("LoadTexture 3");
+    //printf("LoadTexture 3");
     textureSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat],
                                              (u8 **)&this->textures[textureIdx].fileData);
 
@@ -431,7 +431,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     {
         const PixelFormatSDL1* fmt = &g_TextureFormatSDLMapping[textureFormat];
 
-        printf("LoadTexture 4");
+        //printf("LoadTexture 4");
         SDL_Surface *textureSurface2 = SDL_CreateRGBSurface(
             SDL_SWSURFACE,
             entry->width,
@@ -444,10 +444,10 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         );
         SDL_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
         SDL_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
-        printf("LoadTexture 5");
+        //printf("LoadTexture 5");
         SDL_BlitScaled(textureSurface, &srcRect, textureSurface2, &dstRect);
-        printf("LoadTexture 6");
-        printf("Blits %s",textureName);
+        //printf("LoadTexture 6");
+        //printf("Blits %s",textureName);
         SDL_FreeSurface(textureSurface);
         textureSurface = textureSurface2;
     }
@@ -457,7 +457,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         return ZUN_ERROR;
     }
 
-    printf("LoadTexture 7");
+    //printf("LoadTexture 7");
     CreateTextureObject();
 
     // Clear any errors that might be pending
@@ -465,7 +465,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     {
     }
 
-    printf("LoadTexture 8");
+    //printf("LoadTexture 8");
     rawTextureData = ExtractSurfacePixels(textureSurface, textureFormat,colorKey);
 
     this->textures[textureIdx].handle = this->currentTextureHandle;
@@ -479,12 +479,12 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     // of those should be globally disabled for the texture unit anyway This also drops colorKey (an equivalent doesn't
     // exist in OpenGL). I'm not sure its use ever matters anyway
 
-    printf("LoadTexture 9");
+    //printf("LoadTexture 9");
     g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[textureFormat], textureSurface->w,
                                textureSurface->h, 0, g_TextureFormatGLFormatMapping[textureFormat],
                                g_TextureFormatGLTypeMapping[textureFormat], rawTextureData);
 
-    printf("LoadTexture 10");
+    //printf("LoadTexture 10");
     SDL_FreeSurface(textureSurface);
 
     if (g_glFuncTable.glGetError() != GL_NO_ERROR)
@@ -494,7 +494,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         return ZUN_ERROR;
     }
 
-    printf("LoadTexture finish");
+    //printf("LoadTexture finish");
     return ZUN_SUCCESS;
 }
 
@@ -610,15 +610,15 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, 
 
 ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 {
-    printf("LoadAnm 1");
+    //printf("LoadAnm 1");
     this->ReleaseAnm(anmIdx);
-    printf("LoadAnm 2");
+    //printf("LoadAnm 2");
     this->anmFiles[anmIdx] = (AnmRawEntry *)FileSystem::OpenPath(path, 0);
 
-    printf("LoadAnm 3");
+    //printf("LoadAnm 3");
     AnmRawEntry *anm = this->anmFiles[anmIdx];
 
-    printf("LoadAnm 4");
+    //printf("LoadAnm 4");
     if (anm == NULL)
     {
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, path);
@@ -627,7 +627,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     anm->textureIdx = anmIdx;
 
-    printf("LoadAnm 5");
+    //printf("LoadAnm 5");
     const char *anmName = (char *)((u8 *)anm + anm->nameOffset);
 
     // D3D seems to treat unknown texture format as a wildcard, but SDL treats it as an error
@@ -637,7 +637,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         anm->format = TEX_FMT_A8R8G8B8;
     }
 
-    printf("LoadAnm 6");
+    //printf("LoadAnm 6");
     if (*anmName == '@')
     {
         this->CreateEmptyTexture(anm->textureIdx, anm->width, anm->height, anm->format);
@@ -647,9 +647,9 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_TEXTURE_CORRUPTED, anmName);
         return ZUN_ERROR;
     }
-    printf("LoadAnm 7");
+    //printf("LoadAnm 7");
 
-    printf("LoadAnm 8");
+    //printf("LoadAnm 8");
     if (anm->alphaNameOffset != 0)
     {
         anmName = (char *)((u8 *)anm + anm->alphaNameOffset);
@@ -667,7 +667,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 index;
     const AnmRawSprite *rawSprite;
 
-    printf("LoadAnm 9");
+    //printf("LoadAnm 9");
     for (index = 0; index < this->anmFiles[anmIdx]->numSprites; index++, curSpriteOffset++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)anm + *curSpriteOffset);
@@ -683,7 +683,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         this->LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
     }
 
-    printf("LoadAnm 10");
+    //printf("LoadAnm 10");
     for (index = 0; index < anm->numScripts; index++, curSpriteOffset += 2)
     {
         this->scripts[curSpriteOffset[0] + spriteIdxOffset] = (AnmRawInstr *)((u8 *)anm + curSpriteOffset[1]);
@@ -692,7 +692,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     this->anmFilesSpriteIndexOffsets[anmIdx] = spriteIdxOffset;
 
-    printf("LoadAnm finish");
+    //printf("LoadAnm finish");
     return ZUN_SUCCESS;
 }
 

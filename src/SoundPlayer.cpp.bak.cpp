@@ -24,7 +24,7 @@
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
 void soundplayerdlog(char* msg){
-    printf("soundplayer : %s",msg);
+    //printf("soundplayer : %s",msg);
 }
 
 // DirectSound deals with volume by subtracting a number measured in hundredths of decibels from the source sound.

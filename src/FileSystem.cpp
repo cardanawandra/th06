@@ -27,16 +27,48 @@ u32 g_LastFileSize = 0;
 FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
 #ifdef __ANDROID__
-    string resolvedPath = string(GamePaths::GetUserPath()) + string(filepath);
-    return fopen(resolvedPath.c_str(), mode);
-#else
-#ifndef _WIN32
-    return fopen(filepath, mode);
-#else
-    u32 filepathWLen = MultiByteToWideChar(CP_UTF8, 0, filepath, -1, NULL, 0) * 2;
-    u32 modeWLen = MultiByteToWideChar(CP_UTF8, 0, mode, -1, NULL, 0) * 2;
 
-    if (filepathWLen == 0 || modeWLen == 0)
+    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + filepath;
+    return fopen(resolvedPath.c_str(), mode);
+
+#else
+
+#ifndef _WIN32
+    //printf("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
+    return fopen(filepath, mode);
+
+#else
+
+    //printf("FileSystem::FopenUTF8 ConvertToWide\n");
+     // First try native fopen().
+    // On Japanese systems this handles Shift-JIS / CP932 correctly.
+    FILE *f = fopen(filepath, mode);
+
+    if (f)
+    {
+        return f;
+    }
+
+    // Fallback: interpret filepath as UTF-8
+    int filepathWLen =
+        MultiByteToWideChar(
+            CP_UTF8,
+            MB_ERR_INVALID_CHARS,
+            filepath,
+            -1,
+            NULL,
+            0);
+
+    int modeWLen =
+        MultiByteToWideChar(
+            CP_UTF8,
+            0,
+            mode,
+            -1,
+            NULL,
+            0);
+
+    if (filepathWLen <= 0 || modeWLen <= 0)
     {
         return NULL;
     }
@@ -44,15 +76,34 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     wchar_t *filepathW = new wchar_t[filepathWLen];
     wchar_t *modeW = new wchar_t[modeWLen];
 
-    MultiByteToWideChar(CP_UTF8, 0, filepath, -1, filepathW, filepathWLen / 2);
-    MultiByteToWideChar(CP_UTF8, 0, mode, -1, modeW, modeWLen / 2);
+    if (!MultiByteToWideChar(
+            CP_UTF8,
+            MB_ERR_INVALID_CHARS,
+            filepath,
+            -1,
+            filepathW,
+            filepathWLen))
+    {
+        delete[] filepathW;
+        delete[] modeW;
+        return NULL;
+    }
 
-    FILE *f = _wfopen(filepathW, modeW);
+    MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        mode,
+        -1,
+        modeW,
+        modeWLen);
+
+    f = _wfopen(filepathW, modeW);
 
     delete[] filepathW;
     delete[] modeW;
 
     return f;
+
 #endif
 #endif
 }
@@ -82,7 +133,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     i32 entryIdx;
     const char *entryname;
     i32 pbg3Idx;
-    printf("FileSystem::OpenPath 1\n");
+    //printf("FileSystem::OpenPath 1\n");
 
     #ifdef __ANDROID__
     string resolvedPath = string(GamePaths::GetUserPath()) + string(filepath);
@@ -90,12 +141,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     char resolvedPath[512];
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
     #endif
-    printf("FileSystem::OpenPath src %s\n",resolvedPath);
+    //printf("FileSystem::OpenPath src %s\n",resolvedPath);
 
     entryIdx = -1;
     if (isExternalResource == 0)
     {
-        printf("FileSystem::OpenPath isExternalResource == 0\n");
+        //printf("FileSystem::OpenPath isExternalResource == 0\n");
         entryname = strrchr(filepath, '\\');
         if (entryname == (char *)0x0)
         {
@@ -105,8 +156,9 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
-        printf("FileSystem::OpenPath entryname = %s\n",entryname);
+        //printf("FileSystem::OpenPath entryname = %s\n",entryname);
         entryname = strrchr(entryname, '/');
+        //printf("FileSystem::OpenPath entryname changed into = %s\n",entryname);
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -117,11 +169,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (g_Pbg3Archives != NULL)
         {
+            //printf("FileSystem::OpenPath g_Pbg3Archives exists\n");
             for (pbg3Idx = 0; pbg3Idx < 0x10; pbg3Idx += 1)
             {
                 if (g_Pbg3Archives[pbg3Idx] != NULL)
                 {
-                    printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
+                    //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
                     entryIdx = g_Pbg3Archives[pbg3Idx]->FindEntry(entryname);
                     if (entryIdx >= 0)
                     {
@@ -132,15 +185,15 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (entryIdx < 0)
         {
-            printf("FileSystem::OpenPath entry not found\n",entryname);
+            //printf("FileSystem::OpenPath entry not found\n");
             return NULL;
         }
     }
     if (entryIdx >= 0)
     {
-        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
+        //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
         data = g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
-        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
+        //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
         g_LastFileSize = g_Pbg3Archives[pbg3Idx]->GetEntrySize(entryIdx);
     }
     else
@@ -148,12 +201,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         #ifdef __ANDROID__
         file = fopen(resolvedPath.c_str(), "rb");
         #else
-        printf("FileSystem::OpenPath fopen %s\n",resolvedPath);
+        //printf("FileSystem::OpenPath fopen %s\n",resolvedPath);
         file = fopen(resolvedPath, "rb");
         #endif
         if (file == NULL)
         {
-            printf("FileSystem::OpenPath file not found %s\n",resolvedPath);
+            //printf("FileSystem::OpenPath file not found %s\n",resolvedPath);
             return NULL;
         }
         else
@@ -167,7 +220,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             fclose(file);
         }
     }
-    printf("FileSystem::OpenPath success\n");
+    //printf("FileSystem::OpenPath success\n");
     return data;
 }
 

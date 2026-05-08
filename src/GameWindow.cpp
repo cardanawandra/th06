@@ -36,14 +36,14 @@ static const struct
 
 RenderResult GameWindow::Render()
 {
-    printf("Render 1");
+    //printf("Render 1");
     i32 res;
     f64 slowdown;
     ZunViewport viewport;
     f64 delta;
     Uint32 curtime;
 
-    printf("Render 2");
+    //printf("Render 2");
     if (this->lastActiveAppValue == 0)
     {
         return RENDER_RESULT_KEEP_RUNNING;
@@ -64,7 +64,7 @@ RUN_CHAINS:
                 viewport.maxZ = 1.0;
                 viewport.Set();
 
-                printf("Render 3");
+                //printf("Render 3");
                 g_glFuncTable.glClearColor(
                     ((g_Stage.skyFog.color >> 16) & 0xFF) / 255.0f,
                     ((g_Stage.skyFog.color >> 8) & 0xFF) / 255.0f,
@@ -72,16 +72,16 @@ RUN_CHAINS:
                     ((g_Stage.skyFog.color >> 24) & 0xFF) / 255.0f
                 );
 
-                printf("Render 4");
+                //printf("Render 4");
                 g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                printf("Render 5");
+                //printf("Render 5");
                 g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
-                printf("Render 6");
+                //printf("Render 6");
                 g_Supervisor.viewport.Set();
             }
 
-            printf("Render 7");
+            //printf("Render 7");
             g_Chain.RunDrawChain();
             g_AnmManager->SetCurrentTexture(0);
         }
@@ -91,13 +91,13 @@ RUN_CHAINS:
         g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
         g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
 
-        printf("Render 8");
+        //printf("Render 8");
         g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
         g_Supervisor.viewport.Set();
 
-        printf("Render 9");
+        //printf("Render 9");
         res = g_Chain.RunCalcChain();
-        printf("Render 10");
+        //printf("Render 10");
         g_SoundPlayer.PlaySounds();
 
         if (res == 0)
@@ -187,7 +187,7 @@ SKIP_PRESENT:
         g_TickCountToEffectiveFramerate++;
     }
 
-    printf("Render Finish");
+    //printf("Render Finish");
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
@@ -195,17 +195,17 @@ void GameWindow::Present()
 {
     // In D3D, this was done after the present call, but SDL makes no guarantees
     // about the color buffer state immediately after a swap, so it has to be moved to be before it
-    printf("present TakeScreenshotIfRequested");
+    //printf("present TakeScreenshotIfRequested");
     g_AnmManager->TakeScreenshotIfRequested();
     if (g_Supervisor.unk198 != 0)
     {
         g_Supervisor.unk198--;
     }
 
-    printf("present SDL_GL_SwapWindow");
+    //printf("present SDL_GL_SwapWindow");
     SDL_GL_SwapBuffers();
 
-    printf("present finish");
+    //printf("present finish");
     return;
 }
 
@@ -292,7 +292,7 @@ void GameWindow::CreateGameWindow()
 
 i32 GameWindow::InitD3dRendering(void)
 {
-    printf("InitD3dRendering 1");
+    //printf("InitD3dRendering 1");
     ZunVec3 eye;
     ZunVec3 at;
     ZunVec3 up;
@@ -302,7 +302,7 @@ i32 GameWindow::InitD3dRendering(void)
     f32 field_of_view_y;
     f32 camera_distance;
 
-    printf("InitD3dRendering 2");
+    //printf("InitD3dRendering 2");
     g_AnmManager->gfxBackend = s_RenderBackends[0].init();
     // g_AnmManager->gfxBackend = s_RenderBackends[g_GameWindow.renderBackendIndex].init();
 
@@ -323,7 +323,7 @@ i32 GameWindow::InitD3dRendering(void)
             //            {
             //                present_params.BackBufferFormat = D3DFMT_X8R8G8B8;
             g_Supervisor.cfg.colorMode16bit = 0;
-            printf("InitD3dRendering 3");
+            //printf("InitD3dRendering 3");
             GameErrorContext::Log(&g_GameErrorContext, TH_ERR_SCREEN_INIT_32BITS);
             //            }
             //            else
@@ -353,7 +353,7 @@ i32 GameWindow::InitD3dRendering(void)
             //            GameErrorContext::Log(&g_GameErrorContext, TH_ERR_SET_REFRESH_RATE_60HZ);
         }
 
-        printf("InitD3dRendering 4");
+        //printf("InitD3dRendering 4");
         SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
 
         //        if (g_Supervisor.cfg.frameskipConfig == 0)
@@ -459,7 +459,7 @@ i32 GameWindow::InitD3dRendering(void)
 
     // Camera set up so that at z = 0.0, world coordinates map exactly to (quadrant 4) window coordinates
 
-    printf("InitD3dRendering 5");
+    //printf("InitD3dRendering 5");
     half_width = (float)GAME_WINDOW_WIDTH / 2.0;
     half_height = (float)GAME_WINDOW_HEIGHT / 2.0;
     aspect_ratio = (float)GAME_WINDOW_WIDTH / (float)GAME_WINDOW_HEIGHT;
@@ -476,7 +476,7 @@ i32 GameWindow::InitD3dRendering(void)
     eye.z = -camera_distance;
     //    D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix, &eye, &at, &up);
 
-    printf("InitD3dRendering 6");
+    //printf("InitD3dRendering 6");
     ZunMatrix viewMatrix = createViewMatrix(eye, at, up);
     g_AnmManager->SetTransformMatrix(MATRIX_VIEW, viewMatrix);
     g_Supervisor.viewMatrix = viewMatrix;
@@ -517,13 +517,13 @@ i32 GameWindow::InitD3dRendering(void)
     //            GameErrorContext::Log(&g_GameErrorContext, TH_ERR_D3DFMT_A8R8G8B8_UNSUPPORTED);
     //        }
     //    }
-    printf("InitD3dRendering 7");
+    //printf("InitD3dRendering 7");
     InitD3dDevice();
     ScreenEffect::SetViewport(0);
     g_GameWindow.isAppClosing = 0;
     g_Supervisor.lastFrameTime = 0;
     g_Supervisor.framerateMultiplier = 0.0;
-    printf("InitD3dRendering success");
+    //printf("InitD3dRendering success");
     return 0;
 }
 
