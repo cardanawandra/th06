@@ -168,6 +168,24 @@ struct AnmManager
     ~AnmManager();
 
     //    void ReleaseVertexBuffer();
+    u32 spritesToDraw;
+    VertexTex1Xyzrhw* vertexBufferStartPtr;
+    VertexTex1Xyzrhw* vertexBufferEndPtr;
+    VertexTex1Xyzrhw  vertexBuffer[0x18000];
+
+    // ZunResult AddSpriteToDrawBuffer(VertexTex1Xyzrhw *vertices);
+    u32 objectsToDraw;
+    VertexTex1DiffuseXyz* vertexBuffer3dStartPtr;
+    VertexTex1DiffuseXyz* vertexBuffer3dEndPtr;
+    VertexTex1DiffuseXyz  vertexBuffer3d[0x18000];
+
+    ZunResult Add3dObjectToDrawBuffer(VertexTex1DiffuseXyz *vertices);
+    u32 renderStateChangesThisFrame;
+    u32 flushesThisFrame;
+    ZunResult AddSpriteToDrawBuffer(VertexTex1Xyzrhw *vertices);
+
+    void FlushVertexBuffer();
+    void ClearVertexBuffer();
     void SetupVertexBuffer();
 
     ZunResult CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, i32 textureFormat);
@@ -239,7 +257,6 @@ struct AnmManager
     void SetDepthMask(bool depthEnable)
     {
         this->dirtyDepthMask = depthEnable;
-
         if ((g_Supervisor.cfg.opts >> GCOS_TURN_OFF_DEPTH_TEST) & 1 || this->dirtyDepthMask == this->depthMask)
         {
             return;
@@ -307,6 +324,7 @@ struct AnmManager
 
     void SetFogRange(f32 nearPlane, f32 farPlane)
     {
+        this->FlushVertexBuffer();
         this->dirtyFogNear = nearPlane;
         this->dirtyFogFar = farPlane;
         this->dirtyFlags |= (1 << DIRTY_FOG);
@@ -412,9 +430,9 @@ struct AnmManager
     }
 
     static SDL_Surface *LoadToSurfaceWithFormat(const char *filename, PixelFormatSDL1 format, u8 **fileData);
-    static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth, ZunColor colorKey);
+    static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth);
     static void FlipSurface(SDL_Surface *surface);
-    void ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &srcRect, const SDL_Rect &dstRect);
+    void ApplySurfaceToColorBuffer(i32 src, const SDL_Rect &srcRect, const SDL_Rect &dstRect);
     // Creates, binds, and set parameters for a new texture
     void CreateTextureObject();
     void UpdateDirtyStates();
@@ -430,6 +448,7 @@ struct AnmManager
     AnmRawEntry *anmFiles[128];
     u32 anmFilesSpriteIndexOffsets[128];
     SDL_Surface *surfaces[32];
+    GLuint surfacesTextureCache[32];
     //    SDL_Surface *surfacesBis[32];
     //    D3DXIMAGE_INFO surfaceSourceInfo[32];
     GLuint currentTextureHandle;

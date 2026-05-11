@@ -39,15 +39,17 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 
 #else
 
-    //printf("FileSystem::FopenUTF8 ConvertToWide\n");
+    //printf("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
      // First try native fopen().
     // On Japanese systems this handles Shift-JIS / CP932 correctly.
     FILE *f = fopen(filepath, mode);
 
     if (f)
     {
+        //printf("FileSystem::FopenUTF8 open success\n");
         return f;
     }
+    //printf("FileSystem::FopenUTF8 open failed, fallback\n");
 
     // Fallback: interpret filepath as UTF-8
     int filepathWLen =
@@ -102,6 +104,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     delete[] filepathW;
     delete[] modeW;
 
+    //printf("FileSystem::FopenUTF8 fallback success\n");
     return f;
 
 #endif

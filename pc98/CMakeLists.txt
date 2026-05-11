@@ -17,16 +17,14 @@ set(SDL_ARCH "x86")
 include_directories(
     ${SDL_DIR}/include
     ${SDL_IMAGE_DIR}/include
-    ${SDL_MIXER_DIR}/include
     ${SDL_TTF_DIR}/include
     ${CMAKE_SOURCE_DIR}/../src
 )
 
 link_directories(
     ${SDL_DIR}/lib/${SDL_ARCH}
-    ${SDL_IMAGE_DIR}/lib/${SDL_ARCH}
-    ${SDL_MIXER_DIR}/lib/${SDL_ARCH}
-    ${SDL_TTF_DIR}/lib/${SDL_ARCH}
+    ${SDL_IMAGE_DIR}/lib
+    ${SDL_TTF_DIR}/lib
 )
 
 # ---- Sources ----
@@ -83,7 +81,6 @@ target_link_libraries(th06
     SDLmain
     SDL
     SDL_image
-    SDL_mixer
     SDL_ttf
     opengl32
     winmm

@@ -20,9 +20,8 @@ Builds for OS X, the BSDs, and other Unices are also almost certainly possible, 
 EoSD-crossplatform has the following dependencies:
 
 - `SDL-1.2.15`
-- `SDL_image-1.2.12`
-- `SDL_mixer-1.2.12`
-- `SDL_ttf-2.0.11`
+- `SDL_image-1.2.5`
+- `SDL_ttf-2.0.4`
 
 #### Building Windows
 building uses CMAKE 3.20 and a compiler that supports C++20 like msvc17.<br>
@@ -49,8 +48,7 @@ cleanup? <br>
 run "removeCache.bat"<br>
 <br>
 #### Building Android (TODO with SDL1.2)
--download source SDL.32.8 and place it in android/SDL_SRC<br>
--download source SDL-mixer and place it in android/SDL_mixer_SRC<br>
+-download source SDL and place it in android/SDL_SRC<br>
 -download source SDL-image and place it in android/SDL_image_SRC<br>
 -download source SDL-ttf and place it in android/SDL_ttf_SRC<br>
 -set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")<br>

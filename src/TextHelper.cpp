@@ -335,7 +335,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     finalCopyDst.w = spriteWidth;
     finalCopyDst.h = 16;
 
-    if (SDL_SoftStretchLinear(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
+    if (SDL_SoftStretch(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
     {
         // SDL_Log("SDL_BlitScaled failed! Error: %s", SDL_GetError());
     }

@@ -10,7 +10,11 @@ struct GLFuncTable
 {
     void ResolveFunctions()
     {
-        #define LOAD(name) *(void**)&this->name = SDL_GL_GetProcAddress(#name)
+        #ifdef _WIN32
+            #define LOAD(name) this->name = ::name
+        #else
+            #define LOAD(name) *(void**)&this->name = SDL_GL_GetProcAddress(#name)
+        #endif
         
         LOAD(glAlphaFunc);
         LOAD(glBindTexture);

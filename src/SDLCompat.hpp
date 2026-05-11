@@ -39,13 +39,6 @@ const PixelFormatSDL1 SDL1_PIXELFORMAT_UNKNOWN = {0, 0, 0, 0, 0};
         0x0000FF,
         0
     };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA4444 = {
-        16,
-        0xF000, // R (15-12)
-        0x0F00, // G (11-8)
-        0x00F0, // B (7-4)
-        0x000F  // A (3-0)
-    };
 #else
     const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA32 = {
         32,
@@ -75,14 +68,17 @@ const PixelFormatSDL1 SDL1_PIXELFORMAT_UNKNOWN = {0, 0, 0, 0, 0};
         0xFF0000,
         0
     };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA4444 = {
-        16,
-        0x000F, // R
-        0x00F0, // G
-        0x0F00, // B
-        0xF000  // A
-    };
 #endif
+
+//this thing doesn't care about endian at all
+const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA4444 = {
+    16,
+    0xF000, // R (15-12)
+    0x0F00, // G (11-8)
+    0x00F0, // B (7-4)
+    0x000F  // A (3-0)
+};
+
 
 static inline Sint64 GetRWSize(SDL_RWops* ctx)
 {

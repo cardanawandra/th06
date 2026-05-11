@@ -18,7 +18,7 @@
 #include "utils.hpp"
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #include <iostream>
-FILE _iob[] = { *stdin, *stdout, *stderr }; 
+FILE _iob[3] = { *stdin, *stdout, *stderr }; 
 extern "C" FILE* __cdecl __iob_func(void)
 {
     return _iob;

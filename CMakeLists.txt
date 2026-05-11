@@ -15,12 +15,11 @@ if(TH06_USE_SDL)
 
     set(SDL_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL")
     set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_image")
-    set(SDL_MIXER_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_mixer")
     set(SDL_TTF_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL_ttf")
 
     add_library(SDL::SDLmain STATIC IMPORTED)
     set_target_properties(SDL::SDLmain PROPERTIES
-        IMPORTED_LOCATION "${SDL_DIR}/lib/${SDL_ARCH}/SDLmain.lib"
+        IMPORTED_LOCATION "${SDL_DIR}/lib/${SDL_ARCH}modern/SDLmain.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${SDL_DIR}/include"
     )
 
@@ -33,35 +32,26 @@ if(TH06_USE_SDL)
 
     add_library(SDL_image::SDL_image SHARED IMPORTED)
     set_target_properties(SDL_image::SDL_image PROPERTIES
-        IMPORTED_LOCATION "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.dll"
-        IMPORTED_IMPLIB   "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.lib"
+        IMPORTED_LOCATION "${SDL_IMAGE_DIR}/lib/SDL_image.dll"
+        IMPORTED_IMPLIB   "${SDL_IMAGE_DIR}/lib/SDL_image.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${SDL_IMAGE_DIR}/include"
-    )
-
-    add_library(SDL_mixer::SDL_mixer SHARED IMPORTED)
-    set_target_properties(SDL_mixer::SDL_mixer PROPERTIES
-        IMPORTED_LOCATION "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.dll"
-        IMPORTED_IMPLIB   "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL_MIXER_DIR}/include"
     )
 
     add_library(SDL_ttf::SDL_ttf SHARED IMPORTED)
     set_target_properties(SDL_ttf::SDL_ttf PROPERTIES
-        IMPORTED_LOCATION "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.dll"
-        IMPORTED_IMPLIB   "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.lib"
+        IMPORTED_LOCATION "${SDL_TTF_DIR}/lib/SDL_ttf.dll"
+        IMPORTED_IMPLIB   "${SDL_TTF_DIR}/lib/SDL_ttf.lib"
         INTERFACE_INCLUDE_DIRECTORIES "${SDL_TTF_DIR}/include"
     )
 
     message(STATUS "SDL DIR: ${SDL_DIR}")
     message(STATUS "SDL_image DIR: ${SDL_IMAGE_DIR}")
-    message(STATUS "SDL_mixer DIR: ${SDL_MIXER_DIR}")
     message(STATUS "SDL_ttf DIR: ${SDL_TTF_DIR}")
     message(STATUS "ARCH DIR: ${SDL_ARCH}")
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL REQUIRED IMPORTED_TARGET sdl)
     pkg_check_modules(SDL_IMAGE REQUIRED IMPORTED_TARGET SDL_image)
-    pkg_check_modules(SDL_MIXER REQUIRED IMPORTED_TARGET SDL_mixer)
 
     if(NOT TARGET SDL::SDL)
         add_library(SDL::SDL ALIAS PkgConfig::SDL)
@@ -69,17 +59,13 @@ if(TH06_USE_SDL)
     if(NOT TARGET SDL_image::SDL_image)
         add_library(SDL_image::SDL_image ALIAS PkgConfig::SDL_IMAGE)
     endif()
-    if(NOT TARGET SDL_mixer::SDL_mixer)
-        add_library(SDL_mixer::SDL_mixer ALIAS PkgConfig::SDL_MIXER)
-    endif()
     if(NOT TARGET SDL_ttf::SDL_ttf)
-        add_library(SDL_ttf::SDL_ttf ALIAS PkgConfig::SDL_MIXER)
+        add_library(SDL_ttf::SDL_ttf ALIAS PkgConfig::SDL_TTF)
     endif()
 
     add_library(SDL::SDLmain INTERFACE IMPORTED)
     message(STATUS "SDL VERSION: ${SDL_VERSION}")
     message(STATUS "SDL_image VERSION: ${SDL_IMAGE_VERSION}")
-    message(STATUS "SDL_mixer VERSION: ${SDL_MIXER_VERSION}")
     message(STATUS "SDL_ttf VERSION: ${SDL_TTF_VERSION}")
   endif()
 endif()
@@ -195,7 +181,6 @@ target_link_libraries(th06 PRIVATE
     SDL::SDLmain
     SDL::SDL
     SDL_image::SDL_image
-    SDL_mixer::SDL_mixer
     SDL_ttf::SDL_ttf
 )
 if(OPENGL_gl_LIBRARY)
@@ -215,51 +200,20 @@ if(WIN32)
             $<TARGET_FILE_DIR:th06>
 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/SDL_image.dll"
+            "${SDL_IMAGE_DIR}/lib/SDL_image.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libjpeg-8.dll"
+            "${SDL_IMAGE_DIR}/lib/zlib1.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libpng15-15.dll"
+            "${SDL_IMAGE_DIR}/lib/jpeg.dll"
             $<TARGET_FILE_DIR:th06>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libtiff-5.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/${SDL_ARCH}/libwebp-2.dll"
+            "${SDL_IMAGE_DIR}/lib/libpng12.dll"
             $<TARGET_FILE_DIR:th06>
 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/SDL_mixer.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libFLAC-8.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libmikmod-2.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libogg-0.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libvorbis-0.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/libvorbisfile-3.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_MIXER_DIR}/lib/${SDL_ARCH}/smpeg.dll"
-            $<TARGET_FILE_DIR:th06>
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/SDL_ttf.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/libfreetype-6.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_TTF_DIR}/lib/${SDL_ARCH}/zlib1.dll"
+            "${SDL_TTF_DIR}/lib/SDL_ttf.dll"
             $<TARGET_FILE_DIR:th06>
         COMMENT "SDL DLL COPIED"
     )

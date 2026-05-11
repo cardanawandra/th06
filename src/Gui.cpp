@@ -787,6 +787,8 @@ ZunResult GuiImpl::DrawDialogue() const
         g_AnmManager->SetCurrentTexture(g_AnmManager->dummyTextureHandle);
     }
 
+    g_AnmManager->FlushVertexBuffer();
+
     g_AnmManager->SetProjectionMode(PROJECTION_MODE_ORTHOGRAPHIC);
 
     g_AnmManager->SetVertexAttributes(VERTEX_ATTR_DIFFUSE);
@@ -1174,8 +1176,11 @@ void Gui::DrawGameScene()
     if (this->flags.flag2 || ((g_Supervisor.cfg.opts >> GCOS_DISPLAY_MINIMUM_GRAPHICS & 1) != 0))
     {
         VertexDiffuseXyzrhw vertices[4];
+        //TODO windows 98 capability
+        // if (g_GameManager.currentPower > 0&&false)
         if (g_GameManager.currentPower > 0)
         {
+            g_AnmManager->FlushVertexBuffer();
             //            memcpy(&vertices[0].position, &ZunProcVec3(496.0f, 186.0f, 0.1f), sizeof(ZunVec3));
             //            memcpy(&vertices[1].position, &ZunProcVec3(g_GameManager.currentPower + 496 + 0.0f, 186.0f,
             //            0.1f),
@@ -1368,6 +1373,7 @@ void Gui::DrawStageElements() const
         //        g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
         g_AnmManager->DrawNoRotation(&this->impl->loadingScreenSprite);
     }
+    g_AnmManager->FlushVertexBuffer();
 }
 
 ZunResult Gui::AddedCallback(Gui *gui)

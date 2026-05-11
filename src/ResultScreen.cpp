@@ -1738,7 +1738,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
     char name[9];
 
     ZunVec3 strPos;
-
+    
     sprite = &resultScreen->unk_40[0];
     g_Supervisor.viewport.x = 0;
     g_Supervisor.viewport.y = 0;

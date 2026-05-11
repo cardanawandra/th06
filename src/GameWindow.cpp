@@ -81,11 +81,15 @@ RUN_CHAINS:
                 g_Supervisor.viewport.Set();
             }
 
-            //printf("Render 7");
+            //printf("Render 7\n");
+            g_AnmManager->ClearVertexBuffer();
             g_Chain.RunDrawChain();
+            //printf("Render 7a\n");
             g_AnmManager->SetCurrentTexture(0);
+            //printf("Render 7b\n");
         }
 
+        g_AnmManager->FlushVertexBuffer();
         g_Supervisor.viewport.x = 0;
         g_Supervisor.viewport.y = 0;
         g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;

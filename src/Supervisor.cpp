@@ -251,6 +251,10 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
 
 ChainCallbackResult Supervisor::OnDraw(Supervisor *s)
 {
+    ZunVec3 pos = {0,0,0};
+    g_AsciiManager.AddFormatText(&pos,"FlushVertexBuffer %d",g_AnmManager->flushesThisFrame);
+    g_AnmManager->flushesThisFrame = 0;
+
     AnmManager *anmm1 = g_AnmManager;
     anmm1->currentSprite = NULL;
 
@@ -777,6 +781,9 @@ ZunResult Supervisor::LoadConfig(const char *path)
         g_ControllerMapping = g_Supervisor.cfg.controllerMapping;
         free((void*)data);
     }
+    //todo dynamic frameskip
+    // g_Supervisor.cfg.frameskipConfig = 0;
+
     if (((this->cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) != 0)
     {
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_NO_VERTEX_BUFFER);

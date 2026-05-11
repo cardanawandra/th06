@@ -321,7 +321,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
                 {
                     if (((g_Supervisor.cfg.opts >> GCOS_USE_D3D_HW_TEXTURE_BLENDING) & 1) == 0)
                     {
-                        vmList->color = 0x60000000;
+                        vmList->color = 0xffffffff;//vmList->color = 0x60000000;
                     }
                     else
                     {
@@ -337,7 +337,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
                 {
                     if (((g_Supervisor.cfg.opts >> GCOS_USE_D3D_HW_TEXTURE_BLENDING) & 1) == 0)
                     {
-                        vmList->color = COLOR_BLACK;
+                        vmList->color = 0xffffffff;//vmList->color = COLOR_BLACK;
                     }
                     else
                     {
@@ -361,7 +361,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
             {
                 if (((g_Supervisor.cfg.opts >> GCOS_USE_D3D_HW_TEXTURE_BLENDING) & 1) == 0)
                 {
-                    vmList->color = COLOR_BLACK;
+                    vmList->color = 0xffffffff;//vmList->color = COLOR_BLACK;
                 }
                 else
                 {
@@ -611,7 +611,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
             {
                 if (((g_Supervisor.cfg.opts >> GCOS_USE_D3D_HW_TEXTURE_BLENDING) & 1) == 0)
                 {
-                    vmList->color = 0xa0000000;
+                    vmList->color = 0xffffffff;//vmList->color = 0xa0000000;
                 }
                 else
                 {
@@ -626,7 +626,7 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
             {
                 if (((g_Supervisor.cfg.opts >> GCOS_USE_D3D_HW_TEXTURE_BLENDING) & 1) == 0)
                 {
-                    vmList->color = 0xff202020;
+                    vmList->color = 0xffffffff;//vmList->color = 0xff202020;
                 }
                 else
                 {
