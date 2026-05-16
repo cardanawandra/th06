@@ -280,6 +280,13 @@ struct ZunVec4
         this->z = z;
         this->w = w;
     }
+    ZunVec4(ZunVec3 vec, f32 w)
+    {
+        this->x = vec.x;
+        this->y = vec.y;
+        this->z = vec.z;
+        this->w = w;
+    }
 };
 //static_assert(sizeof(ZunVec4) == 0x10, "ZunVec4 has additional padding between struct members!");
 

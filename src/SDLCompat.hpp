@@ -25,13 +25,6 @@ const PixelFormatSDL1 SDL1_PIXELFORMAT_UNKNOWN = {0, 0, 0, 0, 0};
         0x003E, // B (5-1)
         0x0001  // A (0)
     };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB565 = {
-        16,
-        0xF800, // R (15-11)
-        0x07E0, // G (10-5)
-        0x001F, // B (4-0)
-        0
-    };
     const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB24 = {
         24,
         0xFF0000,
@@ -54,13 +47,6 @@ const PixelFormatSDL1 SDL1_PIXELFORMAT_UNKNOWN = {0, 0, 0, 0, 0};
         0x7C00, // B
         0x8000  // A
     };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB565 = {
-        16,
-        0x001F, // R
-        0x07E0, // G
-        0xF800, // B
-        0
-    };
     const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB24 = {
         24,
         0x0000FF,
@@ -77,6 +63,13 @@ const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA4444 = {
     0x0F00, // G (11-8)
     0x00F0, // B (7-4)
     0x000F  // A (3-0)
+};
+const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB565 = {
+    16,
+    0xF800, // R (15-11)
+    0x07E0, // G (10-5)
+    0x001F, // B (4-0)
+    0
 };
 
 

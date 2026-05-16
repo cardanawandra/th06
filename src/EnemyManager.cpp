@@ -805,6 +805,7 @@ ChainCallbackResult EnemyManager::OnDraw(EnemyManager *mgr)
                 curEnemyVm->pos = curEnemy->position + curEnemyVm->posOffset;
                 curEnemyVm->pos.z = 0.495f;
                 g_AnmManager->Draw2(curEnemyVm);
+                g_AnmManager->FlushVertexBuffer();
             }
         }
         if (curEnemy->flags.unk13 != 0)

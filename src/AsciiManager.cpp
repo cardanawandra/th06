@@ -9,7 +9,7 @@
 #include "Supervisor.hpp"
 #include "utils.hpp"
 #include <cstdarg>
-#include <stdio.h>
+#include <cstdio>
 #include <cstring>
 
 AsciiManager g_AsciiManager;
@@ -82,66 +82,51 @@ ChainCallbackResult AsciiManager::OnDrawPopups(AsciiManager *mgr)
 
 ZunResult AsciiManager::RegisterChain()
 {
-    //printf("RegisterChain 1");
     AsciiManager *mgr = &g_AsciiManager;
 
-    //printf("RegisterChain 2");
     g_AsciiManagerCalcChain.callback = (ChainCallback)AsciiManager::OnUpdate;
     g_AsciiManagerCalcChain.addedCallback = NULL;
     g_AsciiManagerCalcChain.deletedCallback = NULL;
-    //printf("RegisterChain 3");
     g_AsciiManagerCalcChain.addedCallback = (ChainAddedCallback)AsciiManager::AddedCallback;
-    //printf("RegisterChain 4");
     g_AsciiManagerCalcChain.deletedCallback = (ChainDeletedCallback)AsciiManager::DeletedCallback;
     g_AsciiManagerCalcChain.arg = mgr;
-    //printf("RegisterChain 5");
     if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, TH_CHAIN_PRIO_CALC_ASCIIMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    //printf("RegisterChain 6");
     g_AsciiManagerOnDrawMenusChain.callback = (ChainCallback)OnDrawMenus;
     g_AsciiManagerOnDrawMenusChain.addedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawMenusChain.arg = mgr;
-    //printf("RegisterChain 7");
     g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_MENUS);
 
     g_AsciiManagerOnDrawPopupsChain.callback = (ChainCallback)OnDrawPopups;
     g_AsciiManagerOnDrawPopupsChain.addedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.deletedCallback = NULL;
     g_AsciiManagerOnDrawPopupsChain.arg = mgr;
-    //printf("RegisterChain 8");
     g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_POPUPS);
 
-    //printf("RegisterChain finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult AsciiManager::AddedCallback(AsciiManager *s)
 {
-    //printf("AddedCallback 1");
     int x, y, z;
 
-    //printf("AddedCallback 2");
     if (g_AnmManager->LoadAnm(ANM_FILE_ASCII, "data/ascii.anm", ANM_OFFSET_ASCII) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    //printf("AddedCallback 3");
     if (g_AnmManager->LoadAnm(ANM_FILE_ASCIIS, "data/asciis.anm", ANM_OFFSET_ASCIIS) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    //printf("AddedCallback 4");
     if (g_AnmManager->LoadAnm(ANM_FILE_CAPTURE, "data/capture.anm", ANM_OFFSET_CAPTURE) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    //printf("AddedCallback 5");
     s->InitializeVms();
-    //printf("AddedCallback finish");
     return ZUN_SUCCESS;
 }
 
@@ -261,7 +246,6 @@ void AsciiManager::DrawStrings(void)
                 g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
             }
 
-            g_AnmManager->FlushVertexBuffer();
             g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
             g_Supervisor.viewport.Set();
         }
@@ -403,6 +387,8 @@ enum UpdateGameMenuState
 #define GAME_MENU_SPRITES_COUNT_QUIT 3
 #define GAME_MENU_SPRITES_END_QUIT (GAME_MENU_SPRITES_START_QUIT + GAME_MENU_SPRITES_COUNT_QUIT)
 
+ZunVec3 m4m40 = {-4.0f, -4.0f, 0.0f};
+ZunVec3 zvZero = {0.0f, 0.0f, 0.0f};
 i32 StageMenu::OnUpdateGameMenu()
 {
     i32 vmIdx;
@@ -460,8 +446,8 @@ i32 StageMenu::OnUpdateGameMenu()
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].scaleX = 1.7f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].scaleY = 1.5f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].scaleX = 1.5f;
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].posOffset = m4m40;
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].posOffset = zvZero;
         if (4 <= this->numFrames)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -487,8 +473,8 @@ i32 StageMenu::OnUpdateGameMenu()
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].scaleX = 1.5f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].scaleY = 1.7f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].scaleX = 1.7f;
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_UNPAUSE].posOffset = zvZero;
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_QUIT].posOffset = m4m40;
         if (4 <= this->numFrames)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -529,8 +515,8 @@ i32 StageMenu::OnUpdateGameMenu()
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].scaleX = 1.7f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].scaleY = 1.5f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].scaleX = 1.5f;
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].posOffset = m4m40;
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].posOffset = zvZero;
         if (4 <= this->numFrames)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -555,8 +541,8 @@ i32 StageMenu::OnUpdateGameMenu()
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].scaleX = 1.5f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].scaleY = 1.7f;
         this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].scaleX = 1.7f;
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
-        this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_YES].posOffset = zvZero;
+        this->menuSprites[GAME_MENU_SPRITE_CURSOR_NO].posOffset = m4m40;
         if (GAME_MENU_SPRITE_CURSOR_YES <= this->numFrames)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -608,7 +594,6 @@ void StageMenu::OnDrawGameMenu()
 
     if (g_GameManager.isInGameMenu)
     {
-        g_AnmManager->FlushVertexBuffer();
         g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;
         g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
         g_Supervisor.viewport.width = g_GameManager.arcadeRegionSize.x;
@@ -714,8 +699,8 @@ i32 StageMenu::OnUpdateRetryMenu()
         this->menuSprites[RETRY_MENU_SPRITE_YES].scaleX = 1.7f;
         this->menuSprites[RETRY_MENU_SPRITE_NO].scaleY = 1.5f;
         this->menuSprites[RETRY_MENU_SPRITE_NO].scaleX = 1.5f;
-        this->menuSprites[RETRY_MENU_SPRITE_YES].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
-        this->menuSprites[RETRY_MENU_SPRITE_NO].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+        this->menuSprites[RETRY_MENU_SPRITE_YES].posOffset = m4m40;
+        this->menuSprites[RETRY_MENU_SPRITE_NO].posOffset = zvZero;
         if (4 <= this->numFrames)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -741,8 +726,8 @@ i32 StageMenu::OnUpdateRetryMenu()
         this->menuSprites[RETRY_MENU_SPRITE_YES].scaleX = 1.5f;
         this->menuSprites[RETRY_MENU_SPRITE_NO].scaleY = 1.7f;
         this->menuSprites[RETRY_MENU_SPRITE_NO].scaleX = 1.7f;
-        this->menuSprites[RETRY_MENU_SPRITE_NO].posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
-        this->menuSprites[RETRY_MENU_SPRITE_YES].posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+        this->menuSprites[RETRY_MENU_SPRITE_NO].posOffset = m4m40;
+        this->menuSprites[RETRY_MENU_SPRITE_YES].posOffset = zvZero;
         if (this->numFrames >= 30)
         {
             if (WAS_PRESSED(TH_BUTTON_UP) || WAS_PRESSED(TH_BUTTON_DOWN))
@@ -822,7 +807,6 @@ void StageMenu::OnDrawRetryMenu()
 
     if (g_GameManager.isInRetryMenu)
     {
-        g_AnmManager->FlushVertexBuffer();
         g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;
         g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
         g_Supervisor.viewport.width = g_GameManager.arcadeRegionSize.x;
@@ -862,7 +846,6 @@ void AsciiManager::DrawPopupsWithHwVertexProcessing()
     i32 i;
     i32 j;
 
-    g_AnmManager->FlushVertexBuffer();
     currentPopup = this->popups;
     g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;
     g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;
@@ -914,7 +897,6 @@ void AsciiManager::DrawPopupsWithoutHwVertexProcessing()
     i32 i;
     i32 j;
 
-    g_AnmManager->FlushVertexBuffer();
     currentPopup = this->popups;
     g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;
     g_Supervisor.viewport.y = g_GameManager.arcadeRegionTopLeftPos.y;

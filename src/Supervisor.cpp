@@ -251,10 +251,6 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
 
 ChainCallbackResult Supervisor::OnDraw(Supervisor *s)
 {
-    ZunVec3 pos = {0,0,0};
-    g_AsciiManager.AddFormatText(&pos,"FlushVertexBuffer %d",g_AnmManager->flushesThisFrame);
-    g_AnmManager->flushesThisFrame = 0;
-
     AnmManager *anmm1 = g_AnmManager;
     anmm1->currentSprite = NULL;
 

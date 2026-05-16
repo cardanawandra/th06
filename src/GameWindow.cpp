@@ -83,6 +83,7 @@ RUN_CHAINS:
 
             //printf("Render 7\n");
             g_AnmManager->ClearVertexBuffer();
+            g_AnmManager->flushesThisFrame = 0;
             g_Chain.RunDrawChain();
             //printf("Render 7a\n");
             g_AnmManager->SetCurrentTexture(0);
@@ -314,7 +315,7 @@ i32 GameWindow::InitD3dRendering(void)
     //    memset(&present_params, 0, sizeof(D3DPRESENT_PARAMETERS));
     //    g_Supervisor.d3dIface->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &display_mode);
     //TODO check windowed 2
-    if (!g_Supervisor.cfg.windowed && false)
+    if (!g_Supervisor.cfg.windowed)
     {
         if ((((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) == 1))
         {
