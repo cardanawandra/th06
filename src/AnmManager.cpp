@@ -22,7 +22,7 @@ static VertexTex1DiffuseXyzrhw g_PrimitivesToDrawNoVertexBuf[4];
 static VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
 AnmManager *g_AnmManager;
  
-static PixelFormatSDL1 g_TextureFormatSDLMapping[6];
+static SDL_PIXEL_FORMAT_COMPAT g_TextureFormatSDLMapping[6];
  
 static const GLenum g_TextureFormatGLFormatMapping[6] = {0, GL_RGBA, GL_RGBA, GL_RGB, GL_RGB, GL_RGBA};
  
@@ -33,7 +33,7 @@ static const GLenum g_TextureFormatGLTypeMapping[6] = {0,
                                         GL_UNSIGNED_BYTE,
                                         GL_UNSIGNED_SHORT_4_4_4_4};
  
-static const u8 g_TextureFormatBytesPerPixel[6] = {0, 4, 2, 2, 3, 2};
+static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
 
 void AnmManager::CreateTextureObject()
 {
@@ -47,7 +47,7 @@ void AnmManager::CreateTextureObject()
     SDL_LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
 }
 
-SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelFormatSDL1 format, u8 **fileData)
+SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL_FORMAT_COMPAT format, u8 **fileData)
 {
     SDL_LOG_COMPAT("LoadToSurfaceWithFormat 1\n");
     u8 *data;
@@ -206,17 +206,18 @@ AnmManager::AnmManager()
     // IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
     // UNKNOWN <= index 0
     SDL_LOG_COMPAT("AnmManager::AnmManager 1\n");
-    g_TextureFormatSDLMapping[0] = SDL1_PIXELFORMAT_UNKNOWN; 
+    SDL_PIXEL_FORMAT_COMPAT_LOAD();
+    g_TextureFormatSDLMapping[0] = SDL_PIXELFORMAT_UNKNOWN; 
     // RGBA32 (RGBA8888) <= index 1
-    g_TextureFormatSDLMapping[1] = SDL1_PIXELFORMAT_RGBA32;
+    g_TextureFormatSDLMapping[1] = SDL_PIXELFORMAT_RGBA32;
     // RGBA5551 <= index 2
-    g_TextureFormatSDLMapping[2] = SDL1_PIXELFORMAT_RGBA5551;
+    g_TextureFormatSDLMapping[2] = SDL_PIXELFORMAT_RGBA5551;
     // RGB565 <= index 3
-    g_TextureFormatSDLMapping[3] = SDL1_PIXELFORMAT_RGB565;
+    g_TextureFormatSDLMapping[3] = SDL_PIXELFORMAT_RGB565;
     // RGB24 <= index 4
-    g_TextureFormatSDLMapping[4] = SDL1_PIXELFORMAT_RGB24;
+    g_TextureFormatSDLMapping[4] = SDL_PIXELFORMAT_RGB24;
     // RGBA4444 <= index 5
-    g_TextureFormatSDLMapping[5] = SDL1_PIXELFORMAT_RGBA4444;
+    g_TextureFormatSDLMapping[5] = SDL_PIXELFORMAT_RGBA4444;
 
     this->maybeLoadedSpriteCount = 0;
 
@@ -346,6 +347,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     SDL_LOG_COMPAT("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
+    #ifndef WIN98
     if (((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) != 0)
     {
         //use indexing instead
@@ -355,6 +357,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
             textureFormat = TEX_FMT_R5G6B5;
         }
     }
+    #endif
 
     SDL_LOG_COMPAT("LoadTexture 3");
     textureSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat],
@@ -364,18 +367,11 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     const AnmRawEntry *entry = this->anmFiles[textureIdx];
     if (textureSurface->w != entry->width || textureSurface->h != entry->height)
     {
-        const PixelFormatSDL1* fmt = &g_TextureFormatSDLMapping[textureFormat];
-
         SDL_LOG_COMPAT("LoadTexture 4");
-        SDL_Surface *textureSurface2 = SDL_CreateRGBSurface(
-            SDL_SWSURFACE,
+        SDL_Surface *textureSurface2 = SDL_CREATE_RGB_SURFACE_COMPAT(
             entry->width,
             entry->height,
-            fmt->bpp,
-            fmt->rmask,
-            fmt->gmask,
-            fmt->bmask,
-            fmt->amask
+            g_TextureFormatSDLMapping[textureFormat]
         );
         SDL_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
         SDL_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
@@ -401,7 +397,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     }
 
     SDL_LOG_COMPAT("LoadTexture 8");
-    rawTextureData = ExtractSurfacePixels(textureSurface, g_TextureFormatBytesPerPixel[textureFormat]);
+    rawTextureData = ExtractSurfacePixels(textureSurface, g_TextureFormatBPP[textureFormat]);
 
     this->textures[textureIdx].handle = this->currentTextureHandle;
     this->textures[textureIdx].textureData = rawTextureData;
@@ -616,10 +612,20 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     // D3D seems to treat unknown texture format as a wildcard, but SDL treats it as an error
     //   This is a hack to avoid that for now
+    #ifdef WIN98
+    if (anm->format == TEX_FMT_UNKNOWN || anm->format == 5)
+    {
+        anm->format = TEX_FMT_A8R8G8B8;
+    }
+    if(anm->format==3){    
+        anm->format = 4;
+    }
+    #else
     if (anm->format == TEX_FMT_UNKNOWN)
     {
         anm->format = TEX_FMT_A8R8G8B8;
     }
+    #endif
 
     SDL_LOG_COMPAT("LoadAnm 6");
     if (*anmName == '@')
@@ -1993,7 +1999,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
         this->ReleaseSurface(surfaceIdx);
     }
 
-    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, SDL1_PIXELFORMAT_RGB24, NULL);
+    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, SDL_PIXELFORMAT_RGB24, NULL);
 
     if (this->surfaces[surfaceIdx] == NULL)
     {
@@ -2227,28 +2233,18 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
                                width * g_GameWindow.WIDTH_RESOLUTION_SCALE, height * g_GameWindow.HEIGHT_RESOLUTION_SCALE, GL_RGBA,
                                GL_UNSIGNED_BYTE, backBufferPixels);
 
-    const PixelFormatSDL1* fmt = &g_TextureFormatSDLMapping[1];
-
-    unstretchedSurface = SDL_CreateRGBSurfaceFrom(
+    unstretchedSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
         backBufferPixels,
         width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
         height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
-        fmt->bpp,
+        32,
         width * g_GameWindow.WIDTH_RESOLUTION_SCALE * 4,
-        fmt->rmask,
-        fmt->gmask,
-        fmt->bmask,
-        fmt->amask
+        g_TextureFormatSDLMapping[1]
     );
-    stretchedSurface = SDL_CreateRGBSurface(
-        SDL_SWSURFACE,
+    stretchedSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
         this->textures[textureId].width,
         this->textures[textureId].height,
-        fmt->bpp,
-        fmt->rmask,
-        fmt->gmask,
-        fmt->bmask,
-        fmt->amask
+        g_TextureFormatSDLMapping[1]
     );
     if (unstretchedSurface == NULL || stretchedSurface == NULL)
     {
@@ -2283,7 +2279,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     }
 
     dstFormatPixels =
-        ExtractSurfacePixels(dstFormatSurface, g_TextureFormatBytesPerPixel[this->textures[textureId].format]);
+        ExtractSurfacePixels(dstFormatSurface, g_TextureFormatBPP[this->textures[textureId].format]);
 
     g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[this->textures[textureId].format],
                                this->textures[textureId].width, this->textures[textureId].height, 0,

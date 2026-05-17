@@ -74,16 +74,9 @@ ZunResult TextHelper::CreateTextBuffer()
             // SDL_LOG_COMPAT("%s\n", TTF_GetError());
         }
     }
-    const PixelFormatSDL1* fmt = &SDL1_PIXELFORMAT_RGBA32;
-
-    g_TextBufferSurface = SDL_CreateRGBSurface(
-        0,
+    g_TextBufferSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
         GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT,
-        fmt->bpp,
-        fmt->rmask,
-        fmt->gmask,
-        fmt->bmask,
-        fmt->amask
+        SDL_PIXELFORMAT_RGBA32
     );
 
     // SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
@@ -319,18 +312,14 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     }
 
     outTexture->format = TEX_FMT_A8R8G8B8;
-    const PixelFormatSDL1* fmt = &SDL1_PIXELFORMAT_RGBA32;
 
-    SDL_Surface *textureSurface = SDL_CreateRGBSurfaceFrom(
+    SDL_Surface *textureSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
         outTexture->textureData,
         outTexture->width,
         outTexture->height,
-        fmt->bpp,
+        32,
         outTexture->width * 4,
-        fmt->rmask,
-        fmt->gmask,
-        fmt->bmask,
-        fmt->amask
+        SDL_PIXELFORMAT_RGBA32
     );
     
     InvertAlpha(0, 0, spriteWidth * 2, fontHeight * 2 + 6);

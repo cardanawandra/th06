@@ -778,7 +778,9 @@ ZunResult Supervisor::LoadConfig(const char *path)
         free((void*)data);
     }
     //todo dynamic frameskip
-    // g_Supervisor.cfg.frameskipConfig = 0;
+    #ifdef WIN98
+    g_Supervisor.cfg.frameskipConfig = 2;
+    #endif
 
     if (((this->cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) != 0)
     {

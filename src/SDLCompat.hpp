@@ -79,7 +79,13 @@
     #define SDL_START_TEXT_INPUT_COMPAT(a) SDL_StartTextInput(a)
     #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput(a)
 
+    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
+    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateSurfaceFrom(b,c,f,a,e)
+    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateSurface(a,b,c)
+
     //COMPAT REPLACEMENT
+    #define SDL_ConvertSurfaceFormat(a,b,c) SDL_ConvertSurface(a,b)
+
     #define SDL_CONTROLLER_AXIS_LEFTX   SDL_GAMEPAD_AXIS_LEFTX
     #define SDL_CONTROLLER_AXIS_LEFTY   SDL_GAMEPAD_AXIS_LEFTY
     #define SDL_CONTROLLER_AXIS_RIGHTX  SDL_GAMEPAD_AXIS_RIGHTX
@@ -158,50 +164,6 @@
         return cvt;
     }
 
-    inline SDL_Surface* SDL_CreateRGBSurfaceFrom(
-        void* pixels,
-        int width,
-        int height,
-        int depth,
-        int pitch,
-        Uint32 rmask,
-        Uint32 gmask,
-        Uint32 bmask,
-        Uint32 amask)
-    {
-        return SDL_CreateSurfaceFrom(
-            width,
-            height,
-            SDL_PIXELFORMAT_RGBA32,
-            pixels,
-            pitch
-        );
-    }
-
-    inline SDL_Surface* SDL_CreateRGBSurface(
-        Uint32 flags,
-        int width,
-        int height,
-        int depth,
-        Uint32 Rmask,
-        Uint32 Gmask,
-        Uint32 Bmask,
-        Uint32 Amask)
-    {
-        SDL_PixelFormat format = SDL_GetPixelFormatForMasks(
-            depth,
-            Rmask,
-            Gmask,
-            Bmask,
-            Amask
-        );
-
-        return SDL_CreateSurface(
-            width,
-            height,
-            format
-        );
-    }
 #else
     #include <SDL_rwops.h>
     #define NOSDL3
@@ -236,6 +198,9 @@
 
     #define SDL_START_TEXT_INPUT_COMPAT(a) SDL_StartTextInput()
     #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput()
+    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormatEnum
+    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurfaceWithFormat(0,a,b,32,c)
+    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
 
     inline void GetWindowSize(int *w, int *h){
         SDL_DisplayMode mode;
@@ -305,7 +270,9 @@
     #define SDL_FULLSCREEN_COMPAT SDL_WINDOW_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,b,c)
 
-    #define SDL_WM_SetCaptionCompat(title);
+    #define SDL_WM_SetCaptionCompat(title)
+
+    #define SDL_PIXEL_FORMAT_COMPAT_LOAD()
 #endif
 
 #if SDL_MAJOR_VERSION == 1
@@ -388,6 +355,9 @@
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,c)
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags)
     #define SDL_WM_SetCaptionCompat(title) SDL_WM_SetCaption(title, "hello_icon");
+    #define SDL_ConvertSurfaceFormat(a,b,c) SDL_ConvertSurface(a,&b,c)
+    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_SWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
+    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)
 
     inline void GetWindowSize(int *w, int *h){
         const SDL_VideoInfo* info = SDL_GetVideoInfo();
@@ -397,81 +367,137 @@
             *h = info->current_h;
         }
     }
+
+    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
+    #define WIN98
+    #if defined(_MSC_VER) && (_MSC_VER >= 1600)
+    #undef WIN98
+    #endif
+
+    typedef struct {
+        int BPP;
+        Uint32 Rmask, Gmask, Bmask, Amask;
+    } SDL_PIXEL_FORMAT_COMPAT_CACHED;
+
+
+    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_UNKNOWN_CACHED = {0, 0, 0, 0, 0};
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA32_CACHED = {
+            32,
+            0xFF000000, // R
+            0x00FF0000, // G
+            0x0000FF00, // B
+            0x000000FF  // A
+        };
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA5551_CACHED = {
+            16,
+            0xF800, // R (bits 15-11)
+            0x07C0, // G (10-6)
+            0x003E, // B (5-1)
+            0x0001  // A (0)
+        };
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB24_CACHED = {
+            24,
+            0xFF0000,
+            0x00FF00,
+            0x0000FF,
+            0
+        };
+    #else
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA32_CACHED = {
+            32,
+            0x000000FF, // R
+            0x0000FF00, // G
+            0x00FF0000, // B
+            0xFF000000  // A
+        };
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA5551_CACHED = {
+            16,
+            0x001F, // R
+            0x03E0, // G
+            0x7C00, // B
+            0x8000  // A
+        };
+        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB24_CACHED = {
+            24,
+            0x0000FF,
+            0x00FF00,
+            0xFF0000,
+            0
+        };
+    #endif
+
+    //this thing doesn't care about endian at all
+    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA4444_CACHED = {
+        16,
+        0xF000, // R (15-12)
+        0x0F00, // G (11-8)
+        0x00F0, // B (7-4)
+        0x000F  // A (3-0)
+    };
+    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB565_CACHED = {
+        16,
+        0xF800, // R (15-11)
+        0x07E0, // G (10-5)
+        0x001F, // B (4-0)
+        0
+    };
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_UNKNOWN;
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA32;
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA5551;
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB24;
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA4444;
+    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB565;
+
+    inline void InitPixelFormat(
+        SDL_PixelFormat* dst,
+        SDL_PIXEL_FORMAT_COMPAT_CACHED fmt)
+    {
+        SDL_Surface *tmp =
+        SDL_CreateRGBSurface(
+            SDL_SWSURFACE,
+            0,0,
+            // src->w,
+            // src->h,
+            fmt.BPP,
+            fmt.Rmask,
+            fmt.Gmask,
+            fmt.Bmask,
+            fmt.Amask
+        );
+        *dst = *tmp->format;
+
+        // SDL_FreeSurface(tmp);
+    }
+
+    inline void SDL_PIXEL_FORMAT_COMPAT_LOAD(){
+        InitPixelFormat(
+            &SDL_PIXELFORMAT_RGBA32,
+            SDL_PIXELFORMAT_RGBA32_CACHED);
+
+        InitPixelFormat(
+            &SDL_PIXELFORMAT_RGBA5551,
+            SDL_PIXELFORMAT_RGBA5551_CACHED);
+
+        InitPixelFormat(
+            &SDL_PIXELFORMAT_RGB24,
+            SDL_PIXELFORMAT_RGB24_CACHED);
+
+        InitPixelFormat(
+            &SDL_PIXELFORMAT_RGBA4444,
+            SDL_PIXELFORMAT_RGBA4444_CACHED);
+
+        InitPixelFormat(
+            &SDL_PIXELFORMAT_RGB565,
+            SDL_PIXELFORMAT_RGB565_CACHED);
+    }
 #endif
 
-//DISABLE SDL LOG DEBUGGER
-#if 0
+//DISABLE SDL LOG DEBUGGER (SET 1 for disable)
+#if 1
 #undef SDL_LOG_COMPAT
 #define SDL_LOG_COMPAT
 #endif
-typedef struct {
-    int bpp;
-    Uint32 rmask, gmask, bmask, amask;
-} PixelFormatSDL1;
-
-const PixelFormatSDL1 SDL1_PIXELFORMAT_UNKNOWN = {0, 0, 0, 0, 0};
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA32 = {
-        32,
-        0xFF000000, // R
-        0x00FF0000, // G
-        0x0000FF00, // B
-        0x000000FF  // A
-    };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA5551 = {
-        16,
-        0xF800, // R (bits 15-11)
-        0x07C0, // G (10-6)
-        0x003E, // B (5-1)
-        0x0001  // A (0)
-    };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB24 = {
-        24,
-        0xFF0000,
-        0x00FF00,
-        0x0000FF,
-        0
-    };
-#else
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA32 = {
-        32,
-        0x000000FF, // R
-        0x0000FF00, // G
-        0x00FF0000, // B
-        0xFF000000  // A
-    };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA5551 = {
-        16,
-        0x001F, // R
-        0x03E0, // G
-        0x7C00, // B
-        0x8000  // A
-    };
-    const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB24 = {
-        24,
-        0x0000FF,
-        0x00FF00,
-        0xFF0000,
-        0
-    };
-#endif
-
-//this thing doesn't care about endian at all
-const PixelFormatSDL1 SDL1_PIXELFORMAT_RGBA4444 = {
-    16,
-    0xF000, // R (15-12)
-    0x0F00, // G (11-8)
-    0x00F0, // B (7-4)
-    0x000F  // A (3-0)
-};
-const PixelFormatSDL1 SDL1_PIXELFORMAT_RGB565 = {
-    16,
-    0xF800, // R (15-11)
-    0x07E0, // G (10-5)
-    0x001F, // B (4-0)
-    0
-};
-
 
 static inline Sint64 GetRWSize(SDL_RWOPS_COMPAT* ctx)
 {
@@ -479,33 +505,4 @@ static inline Sint64 GetRWSize(SDL_RWOPS_COMPAT* ctx)
     Sint64 size = SDL_RWSEEK_COMPAT(ctx, 0, RW_SEEK_END);
     SDL_RWSEEK_COMPAT(ctx, pos, RW_SEEK_SET);
     return size;
-}
-
-static inline SDL_Surface* SDL_ConvertSurfaceFormat(SDL_Surface* src, const PixelFormatSDL1& fmt, int idk)
-{
-    if (!src) return NULL;
-
-    SDL_Surface* temp = SDL_CreateRGBSurface(
-        SDL_SWSURFACE,
-        0,0,
-        // src->w,
-        // src->h,
-        fmt.bpp,
-        fmt.rmask,
-        fmt.gmask,
-        fmt.bmask,
-        fmt.amask
-    );
-
-    if (!temp) return NULL;
-
-    #if SDL_MAJOR_VERSION >= 3
-    SDL_Surface* converted = SDL_ConvertSurface(src, temp->format);
-    #else
-    SDL_Surface* converted = SDL_ConvertSurface(src, temp->format, SDL_SWSURFACE);
-    #endif
-    SDL_FreeSurface(temp);
-
-
-    return converted;
 }

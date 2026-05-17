@@ -64,7 +64,9 @@ ChainCallbackResult ScreenEffect::CalcFadeIn(ScreenEffect *effect)
 
 void ScreenEffect::DrawSquare(const ZunRect *rect, ZunColor rectColor)
 {
-    // return;
+    #ifdef WIN98
+    return;
+    #endif
     //TODO ScreenEffect::DrawSquare fadeout compat windows 98
     VertexDiffuseXyzrhw vertices[4];
 

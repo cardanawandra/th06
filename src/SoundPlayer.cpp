@@ -10,9 +10,16 @@
 #include <SDL.h>
 #include <SDL_timer.h>
 #include "SDLCompat.hpp"
+
+#ifdef WIN98
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
 #define DISABLE_SOUNDPLAYER_BGM return 0
 #define DISABLE_SOUNDPLAYER return
+#else
+#define DISABLE_SOUNDPLAYER_ZUN
+#define DISABLE_SOUNDPLAYER_BGM
+#define DISABLE_SOUNDPLAYER
+#endif
 
 #include <math.h>
 #include <cstring>
@@ -71,7 +78,7 @@ void SoundPlayer::AudioCallback(void* userdata, Uint8* stream, int len)
 
 ZunResult SoundPlayer::InitializeDSound()
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     SDL_AudioSpec desired;
     memset(&desired, 0, sizeof(desired));
     SDL_AudioSpec obtained;
@@ -101,7 +108,7 @@ ZunResult SoundPlayer::InitializeDSound()
 
 ZunResult SoundPlayer::Release()
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     terminateFlag = true;
 
     // if (backgroundMusicThreadHandle.joinable())
@@ -123,7 +130,7 @@ ZunResult SoundPlayer::Release()
 
 void SoundPlayer::StopBGM()
 {
-    //DISABLE_SOUNDPLAYER;
+    DISABLE_SOUNDPLAYER;
     if (backgroundMusic.srcWav.fileStream)
     {
         SDL_RWCLOSE_COMPAT(backgroundMusic.srcWav.fileStream);
@@ -133,7 +140,7 @@ void SoundPlayer::StopBGM()
 
 void SoundPlayer::FadeOut(f32 seconds)
 {
-    //DISABLE_SOUNDPLAYER;
+    DISABLE_SOUNDPLAYER;
     if (backgroundMusic.srcWav.fileStream)
     {
         backgroundMusic.fadeoutLen = seconds * 44100;
@@ -143,7 +150,7 @@ void SoundPlayer::FadeOut(f32 seconds)
 
 ZunResult SoundPlayer::LoadWav(const char *path)
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     SDL_RWOPS_COMPAT *fileStream;
     char idBuf[4];
     u32 riffSize;
@@ -281,7 +288,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
 
 ZunResult SoundPlayer::LoadPos(const char *path)
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     u8 *fileData;
 
     if (g_Supervisor.cfg.playSounds == 0 || backgroundMusic.srcWav.fileStream == NULL)
@@ -315,7 +322,7 @@ ZunResult SoundPlayer::LoadPos(const char *path)
 
 ZunResult SoundPlayer::InitSoundBuffers()
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     SDL_LOG_COMPAT("init sound buffer\n");
 
     SDL_LOG_COMPAT("fill_n\n");
@@ -344,7 +351,7 @@ ZunResult SoundPlayer::InitSoundBuffers()
 
 ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier)
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     SDL_LOG_COMPAT("load sound 1\n");
     SDL_AudioCVT sampleConversionDesc;
     SDL_AudioSpec wavFormat;
@@ -424,7 +431,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
 
 ZunResult SoundPlayer::PlayBGM(bool isLooping)
 {
-    //DISABLE_SOUNDPLAYER_ZUN;
+    DISABLE_SOUNDPLAYER_ZUN;
     SDL_LOG_COMPAT("play BGM\n");
 
     if (this->backgroundMusic.srcWav.fileStream == NULL)
@@ -439,7 +446,7 @@ ZunResult SoundPlayer::PlayBGM(bool isLooping)
 
 void SoundPlayer::PlaySounds()
 {
-    //DISABLE_SOUNDPLAYER;
+    DISABLE_SOUNDPLAYER;
     for (int i = 0; i < 3; i++)
     {
         int idx = soundBuffersToPlay[i];
@@ -454,7 +461,7 @@ void SoundPlayer::PlaySounds()
 
 void SoundPlayer::PlaySoundByIdx(SoundIdx idx)
 {
-    //DISABLE_SOUNDPLAYER;
+    DISABLE_SOUNDPLAYER;
     SDL_LOG_COMPAT("play Sound by index\n");
     for (int i = 0; i < 3; i++)
     {
@@ -468,7 +475,7 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx)
 
 void SoundPlayer::MixAudio(u32 samples)
 {
-    //DISABLE_SOUNDPLAYER;
+    DISABLE_SOUNDPLAYER;
     // Allocate raw buffers (PC-98 safer than std::vector in many toolchains)
     i32* mixBuffer   = new i32[samples];
 
@@ -629,7 +636,7 @@ void SoundPlayer::MixAudio(u32 samples)
 
 int SoundPlayer::BackgroundMusicPlayerThread(void* data)
 {
-    //DISABLE_SOUNDPLAYER_BGM;
+    DISABLE_SOUNDPLAYER_BGM;
     SoundPlayer* self = (SoundPlayer*)data;
 
     u32 latencyLimit = 14700; // ~5 frames

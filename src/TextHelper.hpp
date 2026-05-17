@@ -11,7 +11,7 @@
 //{
 //     D3DFORMAT format;
 //     i32 bitCount;
-//     u32 alphaMask;
+//     u32 alphAmask;
 //     u32 redMask;
 //     u32 greenMask;
 //     u32 blueMask;
