@@ -92,7 +92,7 @@ void Resolve(char *outBuf, size_t outBufSize, const char *path)
     if (IsAssetPath(path))
     {
         // Asset: keep the relative path as-is.
-        // SDL_RWFromFile on Android reads from APK assets/ automatically.
+        // SDL_RWFROMFILE_COMPAT on Android reads from APK assets/ automatically.
         safe_sprintf(outBuf, outBufSize, "%s", path);
     }
     else

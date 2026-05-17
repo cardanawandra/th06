@@ -4,7 +4,7 @@
 //
 // On most platforms, all files live in the working directory next to the exe.
 // On Android:
-//   - Read-only assets (.dat, font/, bgm/, data/) → SDL_RWFromFile reads from
+//   - Read-only assets (.dat, font/, bgm/, data/) → SDL_RWFROMFILE_COMPAT reads from
 //     APK assets/ automatically when given a relative path.
 //   - User data (.cfg, score.dat, replay/) → SDL_AndroidGetInternalStoragePath()
 //     provides a writable directory per-app.
@@ -42,7 +42,7 @@ const char *GetUserPath();
 bool IsAssetPath(const char *path);
 
 // Resolve `path` into `outBuf`.
-// If IsAssetPath(path), copies the path unchanged (SDL_RWFromFile reads assets).
+// If IsAssetPath(path), copies the path unchanged (SDL_RWFROMFILE_COMPAT reads assets).
 // Otherwise, prepends GetUserPath().
 void Resolve(char *outBuf, size_t outBufSize, const char *path);
 

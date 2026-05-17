@@ -4,6 +4,7 @@
 
 #include "GLFunc.hpp"
 #include "inttypes.hpp"
+#include "SDLCompat.hpp"
 
 // The internal resolution EoSD uses. 640x480. I can't think of any reason anyone sane
 //   would want to change this
@@ -61,8 +62,8 @@ struct GameWindow
     static i32 InitD3dRendering();
     static void InitD3dDevice();
 
-    // SDL1.2 uses SDL_Surface instead of SDL_Window
-    SDL_Surface *screen;
+    SDL_SURFACE_COMPAT *screen;
+    SDL_GL_CONTEXT_COMPAT glContext;
 
     i32 isAppClosing;
     i32 lastActiveAppValue;

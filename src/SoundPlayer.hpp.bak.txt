@@ -61,7 +61,7 @@ struct SoundData
 
 struct WavData
 {
-    SDL_RWops *fileStream;
+    SDL_RWOPS_COMPAT *fileStream;
     u32 dataStartOffset;
     u32 samples;
 };

@@ -19,25 +19,36 @@ Builds for OS X, the BSDs, and other Unices are also almost certainly possible, 
 
 EoSD-crossplatform has the following dependencies:
 
+<h3>SDL 1.2</h3>
 - `SDL-1.2.15`
 - `SDL_image-1.2.5`
 - `SDL_ttf-2.0.4`
+<h3>SDL 2</h3>
+- `SDL-2.32.10`
+- `SDL_image-2.8.8`
+- `SDL_ttf-2.8.8`
+<h3>SDL 3</h3>
+- `SDL-3.4.8`
+- `SDL_image-3.4.4`
+- `SDL_ttf-3.2.2`
 
 #### Building Windows
-building uses CMAKE 3.20 and a compiler that supports C++20 like msvc17.<br>
+building uses CMAKE 3.20 and a compiler that supports C++98.<br>
+selected SDL are either sdl1.2, sdl2, or sdl3<br>
 
-run "cmake -B build_sdl -A Win32"<br>
+run "cd {selected SDL}"<br>
+run "cmake -B build -A Win32"<br>
 if success then<br>
-run "cmake --build build_sdl --config Release"<br>
+run "cmake --build build --config Release"<br>
 <br>
-result will be on "build_sdl\Release"
+result will be on "{selected SDL}\build\Release"
 
-#### Building Windows
+#### Building Windows 95/98
 building uses CMAKE 2.4 and a compiler that supports C++98 like msvc6.<br>
 download msvc6 on https://github.com/itsmattkc/MSVC600<br>
 change the bat file from E:\library\msvc6\MSVC600-master\Common\MSDev98\Bin\MSDEV.EXE into your own path
 
-run "cd pc98"<br>
+run "cd window98"<br>
 run "initCMake.bat"<br>
 if success then<br>
 run "buildRelease.bat"<br>

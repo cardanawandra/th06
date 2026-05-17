@@ -22,9 +22,9 @@ void ScreenEffect::Clear(ZunColor color)
     // For now let's copy that behaviour
 
     g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SDL_GL_SwapBuffers();
+    SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
     g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SDL_GL_SwapBuffers();
+    SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
 
     return;
 }

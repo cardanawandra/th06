@@ -55,7 +55,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelForm
     u8 *data;
     SDL_Surface *imageSrcSurface;
     SDL_Surface *imageTargetSurface;
-    SDL_RWops *rwData;
+    SDL_RWOPS_COMPAT *rwData;
 
     printf("LoadToSurfaceWithFormat 2");
     data = FileSystem::OpenPath(filename, 0);
@@ -66,7 +66,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, PixelForm
     }
 
     printf("LoadToSurfaceWithFormat 3");
-    rwData = SDL_RWFromConstMem(data, g_LastFileSize);
+    rwData = SDL_RWFROMCONSTMEM_COMPAT(data, g_LastFileSize);
 
     if (rwData == NULL)
     {

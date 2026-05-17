@@ -21,7 +21,7 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include <SDL_joystick.h>
+#include "SDLCompat.hpp"
 #include <SDL_timer.h>
 #include <cstring>
 
@@ -189,12 +189,12 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
         if (32 <= menu->stateTimer)
         {
             controllerData = Controller::GetControllerState();
-            for (sVar1 = 0; sVar1 < SDL_CONTROLLER_BUTTON_MAX; sVar1++)
+            for (sVar1 = 0; sVar1 < SDL_CONTROLLER_BUTTON_MAX_COMPAT; sVar1++)
             {
                 if ((controllerData[sVar1] & 0x80) != 0)
                     break;
             }
-            if (sVar1 < SDL_CONTROLLER_BUTTON_MAX && g_LastJoystickInput != sVar1)
+            if (sVar1 < SDL_CONTROLLER_BUTTON_MAX_COMPAT && g_LastJoystickInput != sVar1)
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT);
                 switch (menu->cursor)

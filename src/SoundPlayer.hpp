@@ -4,7 +4,7 @@
 #include "inttypes.hpp"
 #include <SDL.h>
 #include <SDL_audio.h>
-#include <SDL_rwops.h>
+#include "SDLCompat.hpp"
 
 enum SoundIdx
 {
@@ -59,7 +59,7 @@ struct SoundData
 
 struct WavData
 {
-    SDL_RWops *fileStream;
+    SDL_RWOPS_COMPAT *fileStream;
     u32 dataStartOffset;
     u32 samples;
 };

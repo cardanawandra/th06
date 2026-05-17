@@ -34,22 +34,22 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 #else
 
 #ifndef _WIN32
-    //printf("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
+    printf("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
     return fopen(filepath, mode);
 
 #else
 
-    //printf("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
+    printf("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
      // First try native fopen().
     // On Japanese systems this handles Shift-JIS / CP932 correctly.
     FILE *f = fopen(filepath, mode);
 
     if (f)
     {
-        //printf("FileSystem::FopenUTF8 open success\n");
+        printf("FileSystem::FopenUTF8 open success\n");
         return f;
     }
-    //printf("FileSystem::FopenUTF8 open failed, fallback\n");
+    printf("FileSystem::FopenUTF8 open failed, fallback\n");
 
     // Fallback: interpret filepath as UTF-8
     int filepathWLen =
@@ -104,7 +104,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     delete[] filepathW;
     delete[] modeW;
 
-    //printf("FileSystem::FopenUTF8 fallback success\n");
+    printf("FileSystem::FopenUTF8 fallback success\n");
     return f;
 
 #endif
@@ -136,7 +136,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     i32 entryIdx;
     const char *entryname;
     i32 pbg3Idx;
-    //printf("FileSystem::OpenPath 1\n");
+    printf("FileSystem::OpenPath 1\n");
 
     #ifdef __ANDROID__
     string resolvedPath = string(GamePaths::GetUserPath()) + string(filepath);
@@ -144,12 +144,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     char resolvedPath[512];
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
     #endif
-    //printf("FileSystem::OpenPath src %s\n",resolvedPath);
+    printf("FileSystem::OpenPath src %s\n",resolvedPath);
 
     entryIdx = -1;
     if (isExternalResource == 0)
     {
-        //printf("FileSystem::OpenPath isExternalResource == 0\n");
+        printf("FileSystem::OpenPath isExternalResource == 0\n");
         entryname = strrchr(filepath, '\\');
         if (entryname == (char *)0x0)
         {
@@ -159,9 +159,9 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
-        //printf("FileSystem::OpenPath entryname = %s\n",entryname);
+        printf("FileSystem::OpenPath entryname = %s\n",entryname);
         entryname = strrchr(entryname, '/');
-        //printf("FileSystem::OpenPath entryname changed into = %s\n",entryname);
+        printf("FileSystem::OpenPath entryname changed into = %s\n",entryname);
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -172,12 +172,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (g_Pbg3Archives != NULL)
         {
-            //printf("FileSystem::OpenPath g_Pbg3Archives exists\n");
+            printf("FileSystem::OpenPath g_Pbg3Archives exists\n");
             for (pbg3Idx = 0; pbg3Idx < 0x10; pbg3Idx += 1)
             {
                 if (g_Pbg3Archives[pbg3Idx] != NULL)
                 {
-                    //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
+                    printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
                     entryIdx = g_Pbg3Archives[pbg3Idx]->FindEntry(entryname);
                     if (entryIdx >= 0)
                     {
@@ -188,15 +188,15 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (entryIdx < 0)
         {
-            //printf("FileSystem::OpenPath entry not found\n");
+            printf("FileSystem::OpenPath entry not found\n");
             return NULL;
         }
     }
     if (entryIdx >= 0)
     {
-        //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
+        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
         data = g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
-        //printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
+        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
         g_LastFileSize = g_Pbg3Archives[pbg3Idx]->GetEntrySize(entryIdx);
     }
     else
@@ -204,12 +204,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         #ifdef __ANDROID__
         file = fopen(resolvedPath.c_str(), "rb");
         #else
-        //printf("FileSystem::OpenPath fopen %s\n",resolvedPath);
+        printf("FileSystem::OpenPath fopen %s\n",resolvedPath);
         file = fopen(resolvedPath, "rb");
         #endif
         if (file == NULL)
         {
-            //printf("FileSystem::OpenPath file not found %s\n",resolvedPath);
+            printf("FileSystem::OpenPath file not found %s\n",resolvedPath);
             return NULL;
         }
         else
@@ -223,7 +223,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             fclose(file);
         }
     }
-    //printf("FileSystem::OpenPath success\n");
+    printf("FileSystem::OpenPath success\n");
     return data;
 }
 

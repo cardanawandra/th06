@@ -54,7 +54,7 @@ ZunResult TextHelper::CreateTextBuffer()
     {
         if (g_Font = TTF_OpenFont(path2, 30), g_Font == NULL)
         {
-            //printf("%s\n", TTF_GetError());
+            // printf("%s\n", TTF_GetError());
             // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
             textNotExist = true;
             return ZUN_SUCCESS;
@@ -67,6 +67,9 @@ ZunResult TextHelper::CreateTextBuffer()
             g_Font2 = TTF_OpenFont(path2, 30);
         }else{
             g_Font2 = TTF_OpenFont(path, 32);
+        }
+        if(g_Font == NULL){
+            // printf("%s\n", TTF_GetError());
         }
     }
     const PixelFormatSDL1* fmt = &SDL1_PIXELFORMAT_RGBA32;

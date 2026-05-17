@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL_joystick.h>
 #include <SDL_video.h>
 
 #include "Chain.hpp"
@@ -9,6 +8,7 @@
 #include "ZunMath.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
+#include "SDLCompat.hpp"
 #include "pbg3/Pbg3Archive.hpp"
 
 #define GAME_VERSION 0x102
@@ -139,10 +139,10 @@ struct Supervisor
     }
 
     // SDL1.2 joystick (no GameController API)
-    SDL_Joystick *joystick;
+    SDL_JOYSTICK_COMPAT *joystick;
 
     // SDL1.2 uses SDL_Surface instead of SDL_Window
-    SDL_Surface *gameWindow;
+    SDL_SURFACE_COMPAT *gameWindow;
 
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;

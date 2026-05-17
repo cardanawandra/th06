@@ -24,7 +24,7 @@
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
 void soundplayerdlog(char* msg){
-    //printf("soundplayer : %s",msg);
+    printf("soundplayer : %s",msg);
 }
 
 // DirectSound deals with volume by subtracting a number measured in hundredths of decibels from the source sound.
@@ -120,7 +120,7 @@ void SoundPlayer::StopBGM()
     if (this->backgroundMusic.srcWav.fileStream != NULL)
     {
         // this->soundBufMutex.lock();
-        SDL_RWclose(this->backgroundMusic.srcWav.fileStream);
+        SDL_RWCLOSE_COMPAT(this->backgroundMusic.srcWav.fileStream);
         this->backgroundMusic.srcWav.fileStream = NULL;
         // this->soundBufMutex.unlock();
 
@@ -139,7 +139,7 @@ void SoundPlayer::FadeOut(f32 seconds)
 
 ZunResult SoundPlayer::LoadWav(const char *path)
 {
-    SDL_RWops *fileStream;
+    SDL_RWOPS_COMPAT *fileStream;
     char idBuf[4];
     u32 riffSize;
     u32 wavDataSize;
@@ -160,9 +160,9 @@ ZunResult SoundPlayer::LoadWav(const char *path)
 
 #ifdef __ANDROID__
     string resolvedPath = string(GamePaths::GetUserPath()) + string(path);
-    fileStream = SDL_RWFromFile(resolvedPath.c_str(), "r");
+    fileStream = SDL_RWFROMFILE_COMPAT(resolvedPath.c_str(), "r");
 #else
-    fileStream = SDL_RWFromFile(path, "r");
+    fileStream = SDL_RWFROMFILE_COMPAT(path, "r");
 #endif
     if (fileStream == NULL)
     {
@@ -176,7 +176,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
         goto fail;
     }
 
-    if (SDL_RWread(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "RIFF", 4) != 0)
+    if (SDL_RWREAD_COMPAT(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "RIFF", 4) != 0)
     {
         goto fail;
     }
@@ -189,7 +189,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
         goto fail;
     }
 
-    if (SDL_RWread(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "WAVE", 4) != 0)
+    if (SDL_RWREAD_COMPAT(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "WAVE", 4) != 0)
     {
         goto fail;
     }
@@ -198,7 +198,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
     //   so that's what we handle. We also assume that fmt and data are the only subchunks, which is definitely not
     //   a general guarantee, but it'll work fine with EoSD's WAV files.
 
-    if (SDL_RWread(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "fmt ", 4) != 0)
+    if (SDL_RWREAD_COMPAT(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "fmt ", 4) != 0)
     {
         goto fail;
     }
@@ -245,7 +245,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
         goto fail;
     }
 
-    if (SDL_RWread(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "data", 4) != 0)
+    if (SDL_RWREAD_COMPAT(fileStream, idBuf, 4, 1) != 1 || strncmp(idBuf, "data", 4) != 0)
     {
         goto fail;
     }
@@ -265,7 +265,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
     }
 
     this->backgroundMusic.srcWav.fileStream = fileStream;
-    this->backgroundMusic.srcWav.dataStartOffset = SDL_RWtell(fileStream);
+    this->backgroundMusic.srcWav.dataStartOffset = SDL_RWTELL_COMPAT(fileStream);
     this->backgroundMusic.loopStart = 0;
     this->backgroundMusic.loopEnd = this->backgroundMusic.srcWav.samples;
     this->backgroundMusic.fadeoutLen = 0;
@@ -275,7 +275,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
     return ZUN_SUCCESS;
 
 fail:
-    SDL_RWclose(fileStream);
+    SDL_RWCLOSE_COMPAT(fileStream);
     return ZUN_ERROR;
 }
 
@@ -368,7 +368,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     }
 
     //soundplayerdlog("load sound 4");
-    if (SDL_LoadWAV_RW(SDL_RWFromConstMem(wavRawData, g_LastFileSize), 1, &wavFormat, &wavRawSamples,
+    if (SDL_LoadWAV_RW(SDL_RWFROMCONSTMEM_COMPAT(wavRawData, g_LastFileSize), 1, &wavFormat, &wavRawSamples,
                        &wavRawSampleByteCount) == NULL)
     {
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_NOT_A_WAV_FILE, path);
@@ -583,12 +583,12 @@ void SoundPlayer::MixAudio(u32 samples)
                 if (this->isLooping)
                 {
                     this->backgroundMusic.pos = this->backgroundMusic.loopStart;
-                    SDL_RWseek(this->backgroundMusic.srcWav.fileStream,
+                    SDL_RWSEEK_COMPAT(this->backgroundMusic.srcWav.fileStream,
                                this->backgroundMusic.srcWav.dataStartOffset + this->backgroundMusic.pos * 4, SEEK_SET);
                 }
                 else
                 {
-                    SDL_RWclose(this->backgroundMusic.srcWav.fileStream);
+                    SDL_RWCLOSE_COMPAT(this->backgroundMusic.srcWav.fileStream);
                     this->backgroundMusic.srcWav.fileStream = NULL;
 
                     break;
@@ -602,7 +602,7 @@ void SoundPlayer::MixAudio(u32 samples)
 
             if (this->backgroundMusic.fadeoutProgress >= this->backgroundMusic.fadeoutLen)
             {
-                SDL_RWclose(this->backgroundMusic.srcWav.fileStream);
+                SDL_RWCLOSE_COMPAT(this->backgroundMusic.srcWav.fileStream);
                 this->backgroundMusic.srcWav.fileStream = NULL;
             }
         }
