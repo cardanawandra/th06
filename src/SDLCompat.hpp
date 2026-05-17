@@ -182,7 +182,7 @@
 #else
     #include <SDL_rwops.h>
     #define NOSDL3
-    #define SDL_RWOPS_COMPAT SDL_Rwops
+    #define SDL_RWOPS_COMPAT SDL_RWops
     #define SDL_RWFROMFILE_COMPAT SDL_RWFromFile
     #define SDL_RWFROMCONSTMEM_COMPAT SDL_RWFromConstMem
     #define SDL_RWCLOSE_COMPAT SDL_RWclose

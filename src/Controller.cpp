@@ -392,7 +392,7 @@ u16 Controller::GetInput(void)
 
 void Controller::ResetKeyboard(void)
 {
-    keyboardState = (u8 *)SDL_GET_KEYSTATE_COMPAT(NULL);
+    keyboardState = (u8 *)SDL_GET_KEYSTATE_COMPAT();
 
     // Ensure IMEs are disabled so they don't interfer with EoSD input
     //   Doesn't work on Wine :( but hopefully works on Windows?
