@@ -28,16 +28,24 @@
     #define SDL_HIDECURSOR_COMPAT() SDL_HideCursor()
 
     inline void BeforeCreate(){
-        // Request OpenGL ES 2.0
+        // Request OpenGL compatibility profile
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-                            SDL_GL_CONTEXT_PROFILE_ES);
+                            SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        // Ask for an older GL version if desired
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
-        // Optional
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        // // Request OpenGL ES 2.0
+        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+        //                     SDL_GL_CONTEXT_PROFILE_ES);
+
+        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+        // // Optional
+        // SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     }
 
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_CreateWindow(title, width, height, flags)

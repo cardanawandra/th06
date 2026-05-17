@@ -32,7 +32,7 @@ static const struct
     void (*setContextFlags)();
     GfxInterface *(*init)();
 } s_RenderBackends[] = {
-    #if SDL_MAJOR_VERSION >= 2
+    #ifdef __ANDROID__
     {"GL(ES) 2.0 / WebGL", true, WebGL::SetContextFlags, WebGL::Create},
     #endif
     {"Fixed function GL(ES)", false, FixedFunctionGL::SetContextFlags, FixedFunctionGL::Init}};
