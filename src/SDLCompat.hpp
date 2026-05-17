@@ -2,6 +2,13 @@
 #include <math.h>
 #include <algorithm>
 #include <SDL.h>
+#include "inttypes.hpp"
+
+#ifdef _MSC_VER
+    #define SNPRINTF _snprintf
+#else
+    #define SNPRINTF snprintf
+#endif
 
 #if SDL_MAJOR_VERSION >= 3
     // SDL 3.x specific code
@@ -20,15 +27,23 @@
     #define SDL_SHOWCURSOR_COMPAT() SDL_ShowCursor()
     #define SDL_HIDECURSOR_COMPAT() SDL_HideCursor()
 
-    inline SDL_Window * SDL_CreateWindowCompat(const char title[100], i32 x, i32 y,i32 width,i32 height,u32 flags){
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    inline void BeforeCreate(){
+        // Request OpenGL ES 2.0
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                            SDL_GL_CONTEXT_PROFILE_ES);
 
-        return SDL_CreateWindow(title, width, height, flags);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+        // Optional
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     }
 
-    inline void GetWindowSize(int* w, int* h)
+    #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_CreateWindow(title, width, height, flags)
+    #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS true
+
+    inline void GetWindowSize(int *w, int *h)
     {
         const SDL_DisplayMode* mode =
             SDL_GetCurrentDisplayMode(0);
@@ -182,6 +197,7 @@
 #else
     #include <SDL_rwops.h>
     #define NOSDL3
+    #define BeforeCreate()
     #define SDL_RWOPS_COMPAT SDL_RWops
     #define SDL_RWFROMFILE_COMPAT SDL_RWFromFile
     #define SDL_RWFROMCONSTMEM_COMPAT SDL_RWFromConstMem
@@ -189,6 +205,7 @@
     #define SDL_RWREAD_COMPAT SDL_RWread
     #define SDL_RWSEEK_COMPAT SDL_RWseek
     #define SDL_RWTELL_COMPAT SDL_RWtell
+    #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS 0
 
     #define SDL_SHOWCURSOR_COMPAT() SDL_ShowCursor(SDL_ENABLE)
     #define SDL_HIDECURSOR_COMPAT() SDL_ShowCursor(SDL_DISABLE)
@@ -223,6 +240,11 @@
 
 #if SDL_MAJOR_VERSION >= 2
     // SDL 2.x specific code
+    #define SDL_LOG_COMPAT SDL_Log
+    #define TRY_RESOLVE_FUNCTION(func) this->func = (decltype(this->func))SDL_GL_GetProcAddress(#func);
+    #define TRY_RESOLVE_FUNCTION_GLES(func) this->func##_ptr = (decltype(this->func##_ptr))SDL_GL_GetProcAddress(#func);
+
+
     #define SDL_SURFACE_COMPAT SDL_Window
     #define SDL_GL_CONTEXT_COMPAT SDL_GLContext
     #define SDL_WINDOWPOS_UNDEFINED_COMPAT SDL_WINDOWPOS_UNDEFINED
@@ -274,11 +296,21 @@
     #define SDL_GL_DELETE_CONTEXT_COMPAT(a) SDL_GL_DeleteContext(a)
     #define SDL_FULLSCREEN_COMPAT SDL_WINDOW_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,b,c)
+
+    #define SDL_WM_SetCaptionCompat(title);
 #endif
 
 #if SDL_MAJOR_VERSION == 1
-    #include <SDL_joystick.h>
     // SDL 1.x specific code
+    #include <SDL_joystick.h>
+    #define SDL_LOG_COMPAT printf
+    #ifdef _WIN32
+        #define TRY_RESOLVE_FUNCTION(name) this->name = ::name;
+    #else
+        #define TRY_RESOLVE_FUNCTION(name) *(void**)&this->name = SDL_GL_GetProcAddress(#name);
+    #endif
+    #define TRY_RESOLVE_FUNCTION_GLES(bla)
+
     #define SDL_SURFACE_COMPAT SDL_Surface
     #define SDL_GL_CONTEXT_COMPAT SDL_Surface*
     #define SDL_WINDOWPOS_UNDEFINED_COMPAT 0
@@ -302,8 +334,8 @@
     #define SDL_GET_KEYSTATE_COMPAT() SDL_GetKeyState(NULL)
     #define SDL_PUMP_EVENTS_COMPAT() SDL_PumpEvents()
 
-    #define SDL_START_TEXT_INPUT_COMPAT()
-    #define SDL_STOP_TEXT_INPUT_COMPAT()
+    #define SDL_START_TEXT_INPUT_COMPAT(a)
+    #define SDL_STOP_TEXT_INPUT_COMPAT(a)
 
     #define INT16_MAX_COMPAT 32767
 
@@ -346,18 +378,8 @@
     #define SDL_GL_DELETE_CONTEXT_COMPAT(a) 1
     #define SDL_FULLSCREEN_COMPAT SDL_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,c)
-
-    inline SDL_Surface * SDL_CreateWindowCompat(const char title[100], i32 x, i32 y,i32 width,i32 height,u32 flags){
-        SDL_Surface *s = SDL_SetVideoMode(
-            width,
-            height,
-            32,
-            flags
-        );
-        SDL_WM_SetCaption(title, "hello_icon");
-
-        return s;
-    }
+    #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags)
+    #define SDL_WM_SetCaptionCompat(title) SDL_WM_SetCaption(title, "hello_icon");
 
     inline void GetWindowSize(int *w, int *h){
         const SDL_VideoInfo* info = SDL_GetVideoInfo();
@@ -367,6 +389,12 @@
             *h = info->current_h;
         }
     }
+#endif
+
+//DISABLE SDL LOG DEBUGGER
+#if 0
+#undef SDL_LOG_COMPAT
+#define SDL_LOG_COMPAT
 #endif
 typedef struct {
     int bpp;

@@ -26,12 +26,12 @@ u16 Controller::GetJoystickCaps(void)
 #if SDL_MAJOR_VERSION == 1
 u16 Controller::GetControllerInput(u16 buttons)
 {
-    printf("Controller::GetControllerInput 1\n");
+    SDL_LOG_COMPAT("Controller::GetControllerInput 1\n");
     i16 stickX = 0;
     i16 stickY = 0;
     u32 shootPressed = 0;
 
-    printf("Controller::GetControllerInput 2\n");
+    SDL_LOG_COMPAT("Controller::GetControllerInput 2\n");
     if (g_Supervisor.joystick != NULL)
     {
         // -------------------------
@@ -73,7 +73,7 @@ u16 Controller::GetControllerInput(u16 buttons)
             }
         }
 
-        printf("Controller::GetControllerInput 3\n");
+        SDL_LOG_COMPAT("Controller::GetControllerInput 3\n");
         SetButtonFromControllerInputs(&buttons, g_Supervisor.cfg.controllerMapping.bombButton, TH_BUTTON_BOMB, g_Supervisor.joystick);
         SetButtonFromControllerInputs(&buttons, g_Supervisor.cfg.controllerMapping.menuButton, TH_BUTTON_MENU, g_Supervisor.joystick);
         SetButtonFromControllerInputs(&buttons, g_Supervisor.cfg.controllerMapping.upButton, TH_BUTTON_UP, g_Supervisor.joystick);
@@ -85,7 +85,7 @@ u16 Controller::GetControllerInput(u16 buttons)
         // -------------------------
         // SDL 1.2 axes (ONLY 0 and 1)
         // -------------------------
-        printf("Controller::GetControllerInput 4\n");
+        SDL_LOG_COMPAT("Controller::GetControllerInput 4\n");
         stickX = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, 0);
         stickY = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, 1);
 
@@ -102,7 +102,7 @@ u16 Controller::GetControllerInput(u16 buttons)
             buttons |= TH_BUTTON_UP;
     }
 
-    printf("Controller::GetControllerInput finish\n");
+    SDL_LOG_COMPAT("Controller::GetControllerInput finish\n");
     return buttons;
 }
 #else

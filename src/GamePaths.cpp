@@ -10,6 +10,7 @@
 #else
 #include <sys/stat.h>
 #endif
+#include "SDLCompat.hpp"
 
 namespace GamePaths
 {
@@ -22,13 +23,12 @@ void Init()
     const char *internalPath = SDL_AndroidGetExternalStoragePath();
     if (internalPath)
     {
-        safe_sprintf(s_userPath, sizeof(s_userPath), "%s/", internalPath);
-        //SDL_LOG("GamePaths: user data path = %s", s_userPath);
+        SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
+        SDL_LOG_COMPAT("GamePaths: user data path = %s", s_userPath);
     }
     else
     {
-        //SDL_LOGWarn(//SDL_LOG_CATEGORY_APPLICATION,
-                    "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
+        // SDL_LOG_COMPATWarn(SDL_LOG_COMPAT_CATEGORY_APPLICATION, "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
         s_userPath[0] = '\0';
     }
 #else

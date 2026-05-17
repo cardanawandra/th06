@@ -27,7 +27,7 @@ extern "C" FILE* __cdecl __iob_func(void)
 
 int main(int argc, char *argv[])
 {
-    printf("Starting");
+    SDL_LOG_COMPAT("Starting");
     i32 renderResult = 0;
 
 #ifdef __ANDROID__
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    printf("Init Gamepath");
+    SDL_LOG_COMPAT("Init Gamepath");
     GamePaths::Init();
 
     // if (utils::CheckForRunningGameInstance())
@@ -49,14 +49,14 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
-    printf("Load CONF File");
+    SDL_LOG_COMPAT("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
 #ifdef __ANDROID__
         // On Android, config file may not exist on first run.
         // LoadConfig sets defaults and tries to write — if write fails,
         // continue anyway with defaults.
-        //SDL_LOG("LoadConfig failed (first run?), continuing with defaults");
+        SDL_LOG_COMPAT("LoadConfig failed (first run?), continuing with defaults");
 #else
         g_GameErrorContext.Flush();
         return -1;
@@ -68,30 +68,30 @@ int main(int argc, char *argv[])
     //     g_GameErrorContext.Flush();
     //     return 1;
     // }
-    printf("Start the game");
+    SDL_LOG_COMPAT("Start the game");
 
 restart:
-    printf("Create game window");
+    SDL_LOG_COMPAT("Create game window");
     GameWindow::CreateGameWindow();
 
-    printf("new AnmManager");
+    SDL_LOG_COMPAT("new AnmManager");
     g_AnmManager = new AnmManager();
 
-    printf("InitD3dRendering");
+    SDL_LOG_COMPAT("InitD3dRendering");
     if (GameWindow::InitD3dRendering())
     {
         g_GameErrorContext.Flush();
         return 1;
     }
 
-    printf("InitializeDSound");
+    SDL_LOG_COMPAT("InitializeDSound");
     g_SoundPlayer.InitializeDSound();
-    printf("GetJoystickCaps");
+    SDL_LOG_COMPAT("GetJoystickCaps");
     Controller::GetJoystickCaps();
-    printf("ResetKeyboard");
+    SDL_LOG_COMPAT("ResetKeyboard");
     Controller::ResetKeyboard();
 
-    printf("Supervisor::RegisterChain");
+    SDL_LOG_COMPAT("Supervisor::RegisterChain");
     if (Supervisor::RegisterChain() != ZUN_SUCCESS)
     {
         goto stop;
@@ -103,12 +103,12 @@ restart:
 
     g_GameWindow.curFrame = 0;
 
-    printf("Into loop game event");
+    SDL_LOG_COMPAT("Into loop game event");
     while (true)
     {
         SDL_Event e;
 
-        printf("Into poolevent loop");
+        SDL_LOG_COMPAT("Into poolevent loop");
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
@@ -117,7 +117,7 @@ restart:
             }
         }
 
-        printf("g_GameWindow.Render");
+        SDL_LOG_COMPAT("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {
@@ -158,7 +158,7 @@ restart:
 
 
 stop:
-    printf("stop the game");
+    SDL_LOG_COMPAT("stop the game");
     g_Chain.Release();
     g_SoundPlayer.Release();
 

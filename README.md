@@ -9,9 +9,12 @@ EoSD-crossplatform is a port of Touhou 6 using SDL and OpenGL (with a more gener
 This enables theoretical portability to any system supported by SDL, with Linux and Windows in particular being known to work.
 Builds for OS X, the BSDs, and other Unices are also almost certainly possible, but may require some slight modifications to the build system.
 
+<br>
+note : look at //DISABLE SDL LOG DEBUGGER, and set to 1 if you want to disable SDL debugger
+
 ### Platform Requirements
 
-- SDL, SDL-image, and SDL-mixer support<br>
+- SDL and SDL-image support<br>
 - C++98 standard library support<br>
 - OpenGL ES 1.1, OpenGL 1.3, or GL ES 2.0 / WebGL support
 

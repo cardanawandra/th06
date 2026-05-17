@@ -31,19 +31,22 @@ static const struct
     bool isEsContext;
     void (*setContextFlags)();
     GfxInterface *(*init)();
-} s_RenderBackends[] = {//{"GL(ES) 2.0 / WebGL", true, WebGL::SetContextFlags, WebGL::Create},
-                        {"Fixed function GL(ES)", false, FixedFunctionGL::SetContextFlags, FixedFunctionGL::Init}};
+} s_RenderBackends[] = {
+    #if SDL_MAJOR_VERSION >= 2
+    {"GL(ES) 2.0 / WebGL", true, WebGL::SetContextFlags, WebGL::Create},
+    #endif
+    {"Fixed function GL(ES)", false, FixedFunctionGL::SetContextFlags, FixedFunctionGL::Init}};
 
 RenderResult GameWindow::Render()
 {
-    printf("Render 1");
+    SDL_LOG_COMPAT("Render 1");
     i32 res;
     f64 slowdown;
     ZunViewport viewport;
     f64 delta;
     Uint32 curtime;
 
-    printf("Render 2");
+    SDL_LOG_COMPAT("Render 2");
     if (this->lastActiveAppValue == 0)
     {
         return RENDER_RESULT_KEEP_RUNNING;
@@ -64,7 +67,7 @@ RUN_CHAINS:
                 viewport.maxZ = 1.0;
                 viewport.Set();
 
-                printf("Render 3");
+                SDL_LOG_COMPAT("Render 3");
                 g_glFuncTable.glClearColor(
                     ((g_Stage.skyFog.color >> 16) & 0xFF) / 255.0f,
                     ((g_Stage.skyFog.color >> 8) & 0xFF) / 255.0f,
@@ -72,22 +75,22 @@ RUN_CHAINS:
                     ((g_Stage.skyFog.color >> 24) & 0xFF) / 255.0f
                 );
 
-                printf("Render 4");
+                SDL_LOG_COMPAT("Render 4");
                 g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-                printf("Render 5");
+                SDL_LOG_COMPAT("Render 5");
                 g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
-                printf("Render 6");
+                SDL_LOG_COMPAT("Render 6");
                 g_Supervisor.viewport.Set();
             }
 
-            printf("Render 7\n");
+            SDL_LOG_COMPAT("Render 7\n");
             g_AnmManager->ClearVertexBuffer();
             g_AnmManager->flushesThisFrame = 0;
             g_Chain.RunDrawChain();
-            printf("Render 7a\n");
+            SDL_LOG_COMPAT("Render 7a\n");
             g_AnmManager->SetCurrentTexture(0);
-            printf("Render 7b\n");
+            SDL_LOG_COMPAT("Render 7b\n");
         }
 
         g_AnmManager->FlushVertexBuffer();
@@ -96,13 +99,13 @@ RUN_CHAINS:
         g_Supervisor.viewport.width = GAME_WINDOW_WIDTH;
         g_Supervisor.viewport.height = GAME_WINDOW_HEIGHT;
 
-        printf("Render 8");
+        SDL_LOG_COMPAT("Render 8");
         g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
         g_Supervisor.viewport.Set();
 
-        printf("Render 9");
+        SDL_LOG_COMPAT("Render 9");
         res = g_Chain.RunCalcChain();
-        printf("Render 10");
+        SDL_LOG_COMPAT("Render 10");
         g_SoundPlayer.PlaySounds();
 
         if (res == 0)
@@ -192,7 +195,7 @@ SKIP_PRESENT:
         g_TickCountToEffectiveFramerate++;
     }
 
-    printf("Render Finish");
+    SDL_LOG_COMPAT("Render Finish");
     return RENDER_RESULT_KEEP_RUNNING;
 }
 
@@ -200,17 +203,17 @@ void GameWindow::Present()
 {
     // In D3D, this was done after the present call, but SDL makes no guarantees
     // about the color buffer state immediately after a swap, so it has to be moved to be before it
-    printf("present TakeScreenshotIfRequested");
+    SDL_LOG_COMPAT("present TakeScreenshotIfRequested");
     g_AnmManager->TakeScreenshotIfRequested();
     if (g_Supervisor.unk198 != 0)
     {
         g_Supervisor.unk198--;
     }
 
-    printf("present SDL_GL_SwapWindow");
+    SDL_LOG_COMPAT("present SDL_GL_SwapWindow");
     SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
 
-    printf("present finish");
+    SDL_LOG_COMPAT("present finish");
     return;
 }
 
@@ -230,14 +233,17 @@ void GameWindow::CreateGameWindow()
         flags |= SDL_FULLSCREEN_COMPAT;
     }
 
+    g_GameWindow.CONFIGURE_INIT();
     #ifdef __ANDROID__
     GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
     #endif
     g_GameWindow.CONFIGURE_VIEW();
-    i32 width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    i32 height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
+    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+
+    BeforeCreate();
 
     // SDL1.2: try render backends (mostly just GL variants)
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
@@ -245,27 +251,25 @@ void GameWindow::CreateGameWindow()
         s_RenderBackends[i].setContextFlags();
 
         g_GameWindow.screen = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
+        SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
 
         if (g_GameWindow.screen == NULL)
         {
-            utils::DebugPrint2(
-                "Renderer creation for backend %s failed",
-                s_RenderBackends[i].name
-            );
-            continue;
+            SDL_LOG_COMPAT("g_GameWindow.screen is null\n");
+            goto fail;
         }
 
         g_GameWindow.glContext = SDL_GL_CREATE_CONTEXT_COMPAT(g_GameWindow.screen);
 
         if (g_GameWindow.glContext == NULL)
         {
-            printf("g_GameWindow.glContext is null\n");
+            SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
             goto fail;
         }
 
-        if (SDL_GL_MAKE_CURRENT_COMPAT(g_GameWindow.screen, g_GameWindow.glContext) != 0)
+        if (SDL_GL_MAKE_CURRENT_COMPAT(g_GameWindow.screen, g_GameWindow.glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
         {
-            printf("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
+            SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
             goto fail;
         }
 
@@ -276,7 +280,7 @@ void GameWindow::CreateGameWindow()
 
         // No context creation needed in SDL1.2
         // g_glFuncTable.ResolveFunctions(s_RenderBackends[i].isEsContext);
-        g_glFuncTable.ResolveFunctions();
+        g_glFuncTable.ResolveFunctions(s_RenderBackends[i].isEsContext);
 
         g_GameWindow.renderBackendIndex = i;
         break;
@@ -301,7 +305,7 @@ void GameWindow::CreateGameWindow()
 
 i32 GameWindow::InitD3dRendering(void)
 {
-    printf("InitD3dRendering 1");
+    SDL_LOG_COMPAT("InitD3dRendering 1");
     ZunVec3 eye;
     ZunVec3 at;
     ZunVec3 up;
@@ -311,7 +315,7 @@ i32 GameWindow::InitD3dRendering(void)
     f32 field_of_view_y;
     f32 camera_distance;
 
-    printf("InitD3dRendering 2");
+    SDL_LOG_COMPAT("InitD3dRendering 2");
     g_AnmManager->gfxBackend = s_RenderBackends[0].init();
     // g_AnmManager->gfxBackend = s_RenderBackends[g_GameWindow.renderBackendIndex].init();
 
@@ -332,7 +336,7 @@ i32 GameWindow::InitD3dRendering(void)
             //            {
             //                present_params.BackBufferFormat = D3DFMT_X8R8G8B8;
             g_Supervisor.cfg.colorMode16bit = 0;
-            printf("InitD3dRendering 3");
+            SDL_LOG_COMPAT("InitD3dRendering 3");
             GameErrorContext::Log(&g_GameErrorContext, TH_ERR_SCREEN_INIT_32BITS);
             //            }
             //            else
@@ -362,7 +366,7 @@ i32 GameWindow::InitD3dRendering(void)
             //            GameErrorContext::Log(&g_GameErrorContext, TH_ERR_SET_REFRESH_RATE_60HZ);
         }
 
-        printf("InitD3dRendering 4");
+        SDL_LOG_COMPAT("InitD3dRendering 4");
         SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
         //        if (g_Supervisor.cfg.frameskipConfig == 0)
@@ -468,7 +472,7 @@ i32 GameWindow::InitD3dRendering(void)
 
     // Camera set up so that at z = 0.0, world coordinates map exactly to (quadrant 4) window coordinates
 
-    printf("InitD3dRendering 5");
+    SDL_LOG_COMPAT("InitD3dRendering 5");
     half_width = (float)GAME_WINDOW_WIDTH / 2.0;
     half_height = (float)GAME_WINDOW_HEIGHT / 2.0;
     aspect_ratio = (float)GAME_WINDOW_WIDTH / (float)GAME_WINDOW_HEIGHT;
@@ -485,7 +489,7 @@ i32 GameWindow::InitD3dRendering(void)
     eye.z = -camera_distance;
     //    D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix, &eye, &at, &up);
 
-    printf("InitD3dRendering 6");
+    SDL_LOG_COMPAT("InitD3dRendering 6");
     ZunMatrix viewMatrix = createViewMatrix(eye, at, up);
     g_AnmManager->SetTransformMatrix(MATRIX_VIEW, viewMatrix);
     g_Supervisor.viewMatrix = viewMatrix;
@@ -526,13 +530,13 @@ i32 GameWindow::InitD3dRendering(void)
     //            GameErrorContext::Log(&g_GameErrorContext, TH_ERR_D3DFMT_A8R8G8B8_UNSUPPORTED);
     //        }
     //    }
-    printf("InitD3dRendering 7");
+    SDL_LOG_COMPAT("InitD3dRendering 7");
     InitD3dDevice();
     ScreenEffect::SetViewport(0);
     g_GameWindow.isAppClosing = 0;
     g_Supervisor.lastFrameTime = 0;
     g_Supervisor.framerateMultiplier = 0.0;
-    printf("InitD3dRendering success");
+    SDL_LOG_COMPAT("InitD3dRendering success");
     return 0;
 }
 

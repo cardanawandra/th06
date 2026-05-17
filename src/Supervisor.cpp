@@ -66,11 +66,11 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
     //    {
     //        g_SoundPlayer.backgroundMusic->UpdateFadeOut();
     //    }
-    printf("Supervisor::OnUpdate 1\n");
+    SDL_LOG_COMPAT("Supervisor::OnUpdate 1\n");
     g_LastFrameInput = g_CurFrameInput;
-    printf("Supervisor::OnUpdate 2\n");
+    SDL_LOG_COMPAT("Supervisor::OnUpdate 2\n");
     g_CurFrameInput = (u16)Controller::GetInput();
-    printf("Supervisor::OnUpdate 3\n");
+    SDL_LOG_COMPAT("Supervisor::OnUpdate 3\n");
     g_IsEigthFrameOfHeldInput = 0;
     if (g_LastFrameInput == g_CurFrameInput)
     {
@@ -289,7 +289,7 @@ ChainCallbackResult Supervisor::OnDraw(Supervisor *s)
 
 ZunResult Supervisor::RegisterChain()
 {
-    printf("trying to register chain");
+    SDL_LOG_COMPAT("trying to register chain");
     ChainElem *chain;
     Supervisor *supervisor = &g_Supervisor;
 
@@ -297,43 +297,43 @@ ZunResult Supervisor::RegisterChain()
     supervisor->curState = -1;
     supervisor->calcCount = 0;
 
-    printf("Supervisor::OnUpdate");
+    SDL_LOG_COMPAT("Supervisor::OnUpdate");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnUpdate);
     chain->arg = supervisor;
-    printf("Supervisor::AddedCallback");
+    SDL_LOG_COMPAT("Supervisor::AddedCallback");
     chain->addedCallback = (ChainAddedCallback)Supervisor::AddedCallback;
-    printf("Supervisor::DeletedCallback");
+    SDL_LOG_COMPAT("Supervisor::DeletedCallback");
     chain->deletedCallback = (ChainDeletedCallback)Supervisor::DeletedCallback;
-    printf("g_Chain.AddToCalcChain");
+    SDL_LOG_COMPAT("g_Chain.AddToCalcChain");
     if (g_Chain.AddToCalcChain(chain, TH_CHAIN_PRIO_CALC_SUPERVISOR) != 0)
     {
-        printf("error");
+        SDL_LOG_COMPAT("error");
         return ZUN_ERROR;
     }
 
-    printf("g_Chain.CreateElem");
+    SDL_LOG_COMPAT("g_Chain.CreateElem");
     chain = g_Chain.CreateElem((ChainCallback)Supervisor::OnDraw);
     chain->arg = supervisor;
-    printf("g_Chain.AddToDrawChain");
+    SDL_LOG_COMPAT("g_Chain.AddToDrawChain");
     g_Chain.AddToDrawChain(chain, TH_CHAIN_PRIO_DRAW_SUPERVISOR);
-    printf("finish");
+    SDL_LOG_COMPAT("finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult Supervisor::AddedCallback(Supervisor *s)
 {
-    printf("callback init");
+    SDL_LOG_COMPAT("callback init");
     i32 i;
 
-    printf("for pbg3Archives");
+    SDL_LOG_COMPAT("for pbg3Archives");
     for (i = 0; i < (i32)(sizeof(s->pbg3Archives) / sizeof(s->pbg3Archives[0])); i++)
     {
         s->pbg3Archives[i] = NULL;
     }
 
-    printf("set g_Pbg3Archives");
+    SDL_LOG_COMPAT("set g_Pbg3Archives");
     g_Pbg3Archives = s->pbg3Archives;
-    printf("LoadPbg3");
+    SDL_LOG_COMPAT("LoadPbg3");
     if (s->LoadPbg3(IN_PBG3_INDEX, TH_IN_DAT_FILE))
     {
         return ZUN_ERROR;
@@ -341,50 +341,50 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
 
     // D3DX code swaps twice to copy to both buffers
 
-    printf("LoadSurface data/title/th06logo.jpg");
+    SDL_LOG_COMPAT("LoadSurface data/title/th06logo.jpg");
     g_AnmManager->LoadSurface(0, "data/title/th06logo.jpg");
-    printf("CopySurfaceToBackBuffer");
+    SDL_LOG_COMPAT("CopySurfaceToBackBuffer");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
 
-    printf("SDL_GL_SwapWindow");
+    SDL_LOG_COMPAT("SDL_GL_SwapWindow");
     SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
     
     //
-    printf("CopySurfaceToBackBuffer 2");
+    SDL_LOG_COMPAT("CopySurfaceToBackBuffer 2");
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     //
 
-    printf("SDL_GL_SwapWindow 2");
+    SDL_LOG_COMPAT("SDL_GL_SwapWindow 2");
     SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
 
-    printf("ReleaseSurface");
+    SDL_LOG_COMPAT("ReleaseSurface");
     g_AnmManager->ReleaseSurface(0);
 
-    printf("set startupTimeBeforeMenuMusic");
+    SDL_LOG_COMPAT("set startupTimeBeforeMenuMusic");
     s->startupTimeBeforeMenuMusic = SDL_GetTicks();
-    printf("Supervisor::SetupDInput");
+    SDL_LOG_COMPAT("Supervisor::SetupDInput");
     Supervisor::SetupDInput(s);
 
-    printf("new MidiOutput");
+    SDL_LOG_COMPAT("new MidiOutput");
     s->midiOutput = new MidiOutput();
 
     // Replacing a seeding method that used win32 timeGetTime
-    printf("g_Rng.Initialize");
+    SDL_LOG_COMPAT("g_Rng.Initialize");
     g_Rng.Initialize((u16)time(NULL));
 
-    printf("g_SoundPlayer.InitSoundBuffers");
+    SDL_LOG_COMPAT("g_SoundPlayer.InitSoundBuffers");
     g_SoundPlayer.InitSoundBuffers();
-    printf("g_AnmManager->LoadAnm");
+    SDL_LOG_COMPAT("g_AnmManager->LoadAnm");
     if (g_AnmManager->LoadAnm(ANM_FILE_TEXT, "data/text.anm", ANM_OFFSET_TEXT) != 0)
     {
         return ZUN_ERROR;
     }
 
-    printf("AsciiManager::RegisterChain");
+    SDL_LOG_COMPAT("AsciiManager::RegisterChain");
     if (AsciiManager::RegisterChain() != 0)
     {
         GameErrorContext::Log(&g_GameErrorContext, TH_ERR_ASCIIMANAGER_INIT_FAILED);
@@ -392,22 +392,22 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     }
 
     s->unk198 = 0;
-    printf("g_AnmManager->SetupVertexBuffer");
+    SDL_LOG_COMPAT("g_AnmManager->SetupVertexBuffer");
     g_AnmManager->SetupVertexBuffer();
 
-    printf("TextHelper::CreateTextBuffer");
+    SDL_LOG_COMPAT("TextHelper::CreateTextBuffer");
     if (TextHelper::CreateTextBuffer() != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    printf("ReleasePbg3");
+    SDL_LOG_COMPAT("ReleasePbg3");
     s->ReleasePbg3(IN_PBG3_INDEX);
-    printf("LoadPbg3 MD.DAT");
+    SDL_LOG_COMPAT("LoadPbg3 MD.DAT");
     if (g_Supervisor.LoadPbg3(MD_PBG3_INDEX, TH_MD_DAT_FILE) != 0)
         return ZUN_ERROR;
 
-    printf("callback finish");
+    SDL_LOG_COMPAT("callback finish");
     return ZUN_SUCCESS;
 }
 
@@ -656,7 +656,7 @@ void Supervisor::ReleasePbg3(i32 pbg3FileIdx)
 
 i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
 {
-    printf("Supervisor::LoadPbg3\n");
+    SDL_LOG_COMPAT("Supervisor::LoadPbg3\n");
     const char *previous = "紅魔郷";
     size_t len1 = strlen(previous);
     size_t len2 = strlen(filename);
@@ -668,15 +668,15 @@ i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
     strcat(merged, filename);
     if (this->pbg3Archives[pbg3FileIdx] == NULL || strcmp(filename, this->pbg3ArchiveNames[pbg3FileIdx]) != 0)
     {
-        printf("Supervisor::LoadPbg3 ReleasePbg3\n");
+        SDL_LOG_COMPAT("Supervisor::LoadPbg3 ReleasePbg3\n");
         this->ReleasePbg3(pbg3FileIdx);
         this->pbg3Archives[pbg3FileIdx] = new Pbg3Archive();
-        printf("Supervisor::LoadPbg3 load %s\n",filename);
+        SDL_LOG_COMPAT("Supervisor::LoadPbg3 load %s\n",filename);
         if (this->pbg3Archives[pbg3FileIdx]->Load(filename) == 0)
         {
             if (this->pbg3Archives[pbg3FileIdx]->Load(merged) == 0)
             {
-                printf("Supervisor::LoadPbg3 load %s failed\n",filename);
+                SDL_LOG_COMPAT("Supervisor::LoadPbg3 load %s failed\n",filename);
                 GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, filename);
                 delete this->pbg3Archives[pbg3FileIdx];
                 // Let's really make sure this is null by nulling twice. I assume
@@ -692,11 +692,11 @@ i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
 
         char verPath[128];
         sprintf(verPath, "ver%.4x.dat", GAME_VERSION);
-        printf("Supervisor::LoadPbg3 FindEntry %s\n",verPath);
+        SDL_LOG_COMPAT("Supervisor::LoadPbg3 FindEntry %s\n",verPath);
         i32 res = this->pbg3Archives[pbg3FileIdx]->FindEntry(verPath);
         if (res < 0)
         {
-            printf("Supervisor::LoadPbg3 error not found entry %s\n",verPath);
+            SDL_LOG_COMPAT("Supervisor::LoadPbg3 error not found entry %s\n",verPath);
             GameErrorContext::Fatal(&g_GameErrorContext, "error : データのバージョンが違います\n");
             return 1;
         }

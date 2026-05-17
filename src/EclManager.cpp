@@ -117,7 +117,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
-            //SDL_LOG("Ecl OPCODE : %d",instruction->opCode);
+            SDL_LOG_COMPAT("Ecl OPCODE : %d",instruction->opCode);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -737,7 +737,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 csum = 0;
                 if (!g_GameManager.isInReplay)
                 {
-                    _snprintf(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
+                    SNPRINTF(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
                     local_74 = strlen(local_70->name);
                     while (0 < local_74)
                     {

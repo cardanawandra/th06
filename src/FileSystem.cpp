@@ -28,28 +28,32 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
 #ifdef __ANDROID__
 
-    std::string resolvedPath = std::string(GamePaths::GetUserPath()) + filepath;
-    return fopen(resolvedPath.c_str(), mode);
+    char resolvedPath[1024];
+
+    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
+            GamePaths::GetUserPath(), filepath);
+
+    return fopen(resolvedPath, mode);
 
 #else
 
 #ifndef _WIN32
-    printf("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
+    SDL_LOG_COMPAT("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
     return fopen(filepath, mode);
 
 #else
 
-    printf("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
+    SDL_LOG_COMPAT("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
      // First try native fopen().
     // On Japanese systems this handles Shift-JIS / CP932 correctly.
     FILE *f = fopen(filepath, mode);
 
     if (f)
     {
-        printf("FileSystem::FopenUTF8 open success\n");
+        SDL_LOG_COMPAT("FileSystem::FopenUTF8 open success\n");
         return f;
     }
-    printf("FileSystem::FopenUTF8 open failed, fallback\n");
+    SDL_LOG_COMPAT("FileSystem::FopenUTF8 open failed, fallback\n");
 
     // Fallback: interpret filepath as UTF-8
     int filepathWLen =
@@ -104,7 +108,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     delete[] filepathW;
     delete[] modeW;
 
-    printf("FileSystem::FopenUTF8 fallback success\n");
+    SDL_LOG_COMPAT("FileSystem::FopenUTF8 fallback success\n");
     return f;
 
 #endif
@@ -114,8 +118,12 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 void FileSystem::CreateDir(const char *path)
 {
 #ifdef __ANDROID__
-    string resolvedPath = string(GamePaths::GetUserPath()) + string(path);
-    mkdir(resolvedPath.c_str(),0755);
+    char resolvedPath[1024];
+
+    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
+            GamePaths::GetUserPath(), path);
+
+    mkdir(resolvedPath,0755);
 #else
 #ifdef _WIN32
     _mkdir(path);
@@ -136,20 +144,21 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     i32 entryIdx;
     const char *entryname;
     i32 pbg3Idx;
-    printf("FileSystem::OpenPath 1\n");
+    SDL_LOG_COMPAT("FileSystem::OpenPath 1\n");
 
-    #ifdef __ANDROID__
-    string resolvedPath = string(GamePaths::GetUserPath()) + string(filepath);
-    #else
     char resolvedPath[512];
+    #ifdef __ANDROID__
+    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
+            GamePaths::GetUserPath(), filepath);
+    #else
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
     #endif
-    printf("FileSystem::OpenPath src %s\n",resolvedPath);
+    SDL_LOG_COMPAT("FileSystem::OpenPath src %s\n",resolvedPath);
 
     entryIdx = -1;
     if (isExternalResource == 0)
     {
-        printf("FileSystem::OpenPath isExternalResource == 0\n");
+        SDL_LOG_COMPAT("FileSystem::OpenPath isExternalResource == 0\n");
         entryname = strrchr(filepath, '\\');
         if (entryname == (char *)0x0)
         {
@@ -159,9 +168,9 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
-        printf("FileSystem::OpenPath entryname = %s\n",entryname);
+        SDL_LOG_COMPAT("FileSystem::OpenPath entryname = %s\n",entryname);
         entryname = strrchr(entryname, '/');
-        printf("FileSystem::OpenPath entryname changed into = %s\n",entryname);
+        SDL_LOG_COMPAT("FileSystem::OpenPath entryname changed into = %s\n",entryname);
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -172,12 +181,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (g_Pbg3Archives != NULL)
         {
-            printf("FileSystem::OpenPath g_Pbg3Archives exists\n");
+            SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives exists\n");
             for (pbg3Idx = 0; pbg3Idx < 0x10; pbg3Idx += 1)
             {
                 if (g_Pbg3Archives[pbg3Idx] != NULL)
                 {
-                    printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
+                    SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
                     entryIdx = g_Pbg3Archives[pbg3Idx]->FindEntry(entryname);
                     if (entryIdx >= 0)
                     {
@@ -188,28 +197,24 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (entryIdx < 0)
         {
-            printf("FileSystem::OpenPath entry not found\n");
+            SDL_LOG_COMPAT("FileSystem::OpenPath entry not found\n");
             return NULL;
         }
     }
     if (entryIdx >= 0)
     {
-        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
+        SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
         data = g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
-        printf("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
+        SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
         g_LastFileSize = g_Pbg3Archives[pbg3Idx]->GetEntrySize(entryIdx);
     }
     else
     {
-        #ifdef __ANDROID__
-        file = fopen(resolvedPath.c_str(), "rb");
-        #else
-        printf("FileSystem::OpenPath fopen %s\n",resolvedPath);
+        SDL_LOG_COMPAT("FileSystem::OpenPath fopen %s\n",resolvedPath);
         file = fopen(resolvedPath, "rb");
-        #endif
         if (file == NULL)
         {
-            printf("FileSystem::OpenPath file not found %s\n",resolvedPath);
+            SDL_LOG_COMPAT("FileSystem::OpenPath file not found %s\n",resolvedPath);
             return NULL;
         }
         else
@@ -223,7 +228,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             fclose(file);
         }
     }
-    printf("FileSystem::OpenPath success\n");
+    SDL_LOG_COMPAT("FileSystem::OpenPath success\n");
     return data;
 }
 
@@ -231,16 +236,16 @@ int FileSystem::WriteDataToFile(const char *path, const void *data, size_t size)
 {
     FILE *f;
 
+    char resolvedPath[512];
     #ifdef __ANDROID__
-    string resolvedPath = string(GamePaths::GetUserPath()) + string(path);
-    f = fopen(resolvedPath.c_str(), "wb");
+    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
+            GamePaths::GetUserPath(), path);
     #else
     // Resolve to writable user-data directory on Android.
-    char resolvedPath[512];
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
     GamePaths::EnsureParentDir(resolvedPath);
-    f = fopen(resolvedPath, "wb");
     #endif
+    f = fopen(resolvedPath, "wb");
 
     if (f == NULL)
     {

@@ -582,14 +582,14 @@ i32 ResultScreen::HandleResultKeyboard()
 
         this->hscr.base.unk_9 = 1;
         
-        //SDL_LOG("strcpy 1");
+        SDL_LOG_COMPAT("strcpy 1");
         strcpy(this->hscr.name, "        ");
 
         if (this->LinkScoreEx(&this->hscr, this->diffSelected, this->charUsed * 2 + g_GameManager.shotType) >= 10)
             goto RETURN_TO_STATS_SCREEN_WITHOUT_SOUND;
 
         this->cursor = 0;
-        //SDL_LOG("strcpy 2");
+        SDL_LOG_COMPAT("strcpy 2");
         strcpy(this->replayName, "");
     }
     if (this->frameTimer < 30)
@@ -730,8 +730,8 @@ i32 ResultScreen::HandleResultKeyboard()
         {
             sprite->pendingInterrupt = 2;
         }
-        //SDL_LOG("strcpy 3");
-        _snprintf(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
+        SDL_LOG_COMPAT("strcpy 3");
+        SNPRINTF(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
 //        strcpy(this->replayName, this->hscr.name);
     }
     return 0;
@@ -1786,7 +1786,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfff0f0ff;
 
-                            //SDL_LOG("strcpy 4");
+                            SDL_LOG_COMPAT("strcpy 4");
                             strcpy(name, "        ");
                             name[8] = 0;
 
@@ -1834,7 +1834,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfffff0f0;
 
-                            //SDL_LOG("strcpy 5");
+                            SDL_LOG_COMPAT("strcpy 5");
                             strcpy(name, "        ");
                             name[8] = 0;
 
@@ -2012,7 +2012,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                                              resultScreen->defaultReplay.score);
                 g_AsciiManager.color = 0xfff0f0ff;
 
-                //SDL_LOG("strcpy 6");
+                SDL_LOG_COMPAT("strcpy 6");
                 strcpy(name, "        ");
 
                 name[8] = 0;
@@ -2118,7 +2118,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
 
                 resultScreen->LinkScoreEx(resultScreen->defaultScore[i][characterShot] + slot, i, characterShot);
 
-                //SDL_LOG("strcpy 7");
+                SDL_LOG_COMPAT("strcpy 7");
                 strcpy(resultScreen->defaultScore[i][characterShot][slot].name, DEFAULT_HIGH_SCORE_NAME);
             }
         }

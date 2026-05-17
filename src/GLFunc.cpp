@@ -1,6 +1,7 @@
 #include "GLFunc.hpp"
 
 #include <SDL_video.h>
+#include "inttypes.hpp"
 
 GLFuncTable g_glFuncTable;
 
@@ -81,3 +82,21 @@ void GLFuncTable::ResolveFunctions()
     TRY_RESOLVE_FUNCTION(glVertexAttribPointer)
 }
 */
+
+void GLFuncTable::GLClearDepthCompat(f32 a){
+    if(this->isGles){
+        this->glClearDepthf((GLclampf) a);
+    }
+    else{
+        this->glClearDepth((GLclampd) a);
+    }
+}
+
+void GLFuncTable::GLDepthRangeCompat(f32 a,f32 b){
+    if(this->isGles){
+        this->glDepthRangef((GLclampf) a,(GLclampf) b);
+    }
+    else{
+        this->glDepthRange((GLclampd) a,(GLclampd) b);
+    }
+}

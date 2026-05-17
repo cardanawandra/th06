@@ -432,9 +432,9 @@ struct ZunViewport
                                  (g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE)) -
                                      g_GameWindow.VIEWPORT_OFF_Y,
                                  this->width * g_GameWindow.WIDTH_RESOLUTION_SCALE, this->height * g_GameWindow.HEIGHT_RESOLUTION_SCALE);
-        g_glFuncTable.glDepthRange(
-            (GLclampd)this->minZ,
-            (GLclampd)this->maxZ
+        g_glFuncTable.GLDepthRangeCompat(
+            this->minZ,
+            this->maxZ
         );
     }
 
@@ -595,9 +595,9 @@ inline ZunMatrix inverseViewportMatrix()
     inverseMatrix.Scale(1.0f / (viewport.width / 2.0f), -1.0f / (viewport.height / 2.0f), 2.0f);
     inverseMatrix.Translate(-viewport.x, -viewport.y, 0.0f);
 
-    g_glFuncTable.glDepthRange(
-        (GLclampd)0.0f,
-        (GLclampd)1.0f
+    g_glFuncTable.GLDepthRangeCompat(
+        0.0f,
+        1.0f
     );
 
     return inverseMatrix;

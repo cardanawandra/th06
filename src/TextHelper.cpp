@@ -42,10 +42,12 @@ ZunResult TextHelper::CreateTextBuffer()
     // Fallback is Noto Sans Regular (JP) which is redistributable
     bool usePath2;
     #ifdef __ANDROID__
-    string resolvedPath = string(GamePaths::GetUserPath()) + string("th06.ttc");
-    string resolvedPath2 = string(GamePaths::GetUserPath()) + string("th06.ttf");
-    const char* path=resolvedPath.c_str();
-    const char* path2=resolvedPath2.c_str();
+    char path[512];
+    char path2[512];
+    snprintf(path, sizeof(path), "%s%s",
+        GamePaths::GetUserPath(), "th06.ttc");
+    snprintf(path2, sizeof(path2), "%s%s",
+        GamePaths::GetUserPath(), "th06.ttf");
     #else
     const char* path="th06.ttc";
     const char* path2="th06.ttf";
@@ -54,7 +56,7 @@ ZunResult TextHelper::CreateTextBuffer()
     {
         if (g_Font = TTF_OpenFont(path2, 30), g_Font == NULL)
         {
-            // printf("%s\n", TTF_GetError());
+            // SDL_LOG_COMPAT("%s\n", TTF_GetError());
             // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
             textNotExist = true;
             return ZUN_SUCCESS;
@@ -69,7 +71,7 @@ ZunResult TextHelper::CreateTextBuffer()
             g_Font2 = TTF_OpenFont(path, 32);
         }
         if(g_Font == NULL){
-            // printf("%s\n", TTF_GetError());
+            // SDL_LOG_COMPAT("%s\n", TTF_GetError());
         }
     }
     const PixelFormatSDL1* fmt = &SDL1_PIXELFORMAT_RGBA32;
@@ -340,7 +342,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     if (SDL_SoftStretch(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
     {
-        // SDL_Log("SDL_BlitScaled failed! Error: %s", SDL_GetError());
+        // SDL_LOG_COMPAT("SDL_BlitScaled failed! Error: %s", SDL_GetError());
     }
 
     g_AnmManager->SetCurrentTexture(outTexture->handle);

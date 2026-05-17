@@ -178,7 +178,7 @@ void EnemyManager::RunEclTimeline()
     {
         if (this->timelineTime.current == this->timelineInstr->time)
         {
-            // //SDL_LOG("OP CODE %d", this->timelineInstr->opCode);
+            // SDL_LOG_COMPAT("OP CODE %d", this->timelineInstr->opCode);
             switch (this->timelineInstr->opCode)
             {
             case 0:
