@@ -25,22 +25,6 @@
 #include <cstring>
 #include <ctime>
 
-#define SDL_CONTROLLER_BUTTON_A                0
-#define SDL_CONTROLLER_BUTTON_B                1
-#define SDL_CONTROLLER_BUTTON_X                2
-#define SDL_CONTROLLER_BUTTON_Y                3
-#define SDL_CONTROLLER_BUTTON_LEFTSHOULDER     4
-#define SDL_CONTROLLER_BUTTON_RIGHTSHOULDER    5
-#define SDL_CONTROLLER_BUTTON_BACK             6
-#define SDL_CONTROLLER_BUTTON_START            7
-#define SDL_CONTROLLER_BUTTON_LEFTSTICK        8
-#define SDL_CONTROLLER_BUTTON_RIGHTSTICK       9
-
-#define SDL_CONTROLLER_BUTTON_DPAD_UP          10
-#define SDL_CONTROLLER_BUTTON_DPAD_DOWN        11
-#define SDL_CONTROLLER_BUTTON_DPAD_LEFT        12
-#define SDL_CONTROLLER_BUTTON_DPAD_RIGHT       13
-
 Supervisor g_Supervisor;
 ControllerMapping g_ControllerMapping = {
     (i16)SDL_CONTROLLER_BUTTON_A,

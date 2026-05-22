@@ -16,6 +16,7 @@
 #include "ZunResult.hpp"
 #include "i18n.hpp"
 #include "utils.hpp"
+
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
 #include <iostream>
 FILE _iob[3] = { *stdin, *stdout, *stderr }; 

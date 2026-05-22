@@ -84,7 +84,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL
     }
 
     SDL_LOG_COMPAT("LoadToSurfaceWithFormat 5\n");
-    imageTargetSurface = SDL_ConvertSurfaceFormat(imageSrcSurface, format, 0);
+    imageTargetSurface = SDL_CONVERT_SURFACE_FORMAT_COMPAT(imageSrcSurface, format, 0);
 
     SDL_LOG_COMPAT("LoadToSurfaceWithFormat 6\n");
     SDL_FreeSurface(imageSrcSurface);
@@ -2271,7 +2271,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     }
 
     dstFormatSurface =
-        SDL_ConvertSurfaceFormat(stretchedSurface, g_TextureFormatSDLMapping[this->textures[textureId].format], 0);
+        SDL_CONVERT_SURFACE_FORMAT_COMPAT(stretchedSurface, g_TextureFormatSDLMapping[this->textures[textureId].format], 0);
 
     if (dstFormatSurface == NULL)
     {

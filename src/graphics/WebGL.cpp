@@ -40,7 +40,7 @@ GLuint createShader(const char *source, GLenum type, const char *descString,
 
     if (SDL_GL_ExtensionSupported("GL_EXT_frag_depth"))
     {
-        fullShaderSource[shaderSourceIndex++] = "#extension GL_EXT_frag_depth : require\n";
+        fullShaderSource[shaderSourceIndex++] = "#extension GL_EXT_frag_depth\n";
         fullShaderSource[shaderSourceIndex++] = "#define USE_FRAG_DEPTH\n";
     }
 
@@ -62,8 +62,6 @@ GLuint createShader(const char *source, GLenum type, const char *descString,
     }
 
     fullShaderSource[shaderSourceIndex] = source;
-
-    printf("%s", source);
 
     g_glFuncTable.glShaderSource(shaderHandle, shaderSourceIndex + 1, fullShaderSource, NULL);
     g_glFuncTable.glCompileShader(shaderHandle);

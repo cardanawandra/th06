@@ -131,6 +131,7 @@ add_executable(th06 ${TH06_GAME_SOURCES})
 target_compile_definitions(th06 PRIVATE
     TH06_USE_GLES=1
 )
+target_compile_definitions(th06 PRIVATE SDL_ENABLE_OLD_NAMES)
 
 # =========================================================
 # Includes

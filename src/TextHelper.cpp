@@ -10,8 +10,7 @@
 #include "ShittyIconv.hpp"
 #include "GamePaths.hpp"
 
-
-static TTF_Font *g_Font, *g_Font2;
+static TTF_Font *g_Font;
 
 bool textNotExist;
 
@@ -37,10 +36,9 @@ TextHelper::~TextHelper()
 ZunResult TextHelper::CreateTextBuffer()
 {
     TTF_Init();
-
+    SDL_PIXEL_FORMAT_COMPAT_LOAD();
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
     // Fallback is Noto Sans Regular (JP) which is redistributable
-    bool usePath2;
     #ifdef __ANDROID__
     char path[512];
     char path2[512];
@@ -60,18 +58,6 @@ ZunResult TextHelper::CreateTextBuffer()
             // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
             textNotExist = true;
             return ZUN_SUCCESS;
-        }else{
-            usePath2 = true;
-        }
-    }
-    if(!textNotExist){
-        if(usePath2){
-            g_Font2 = TTF_OpenFont(path2, 30);
-        }else{
-            g_Font2 = TTF_OpenFont(path, 32);
-        }
-        if(g_Font == NULL){
-            // SDL_LOG_COMPAT("%s\n", TTF_GetError());
         }
     }
     g_TextBufferSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
@@ -79,7 +65,7 @@ ZunResult TextHelper::CreateTextBuffer()
         SDL_PIXELFORMAT_RGBA32
     );
 
-    // SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
 
     return ZUN_SUCCESS;
 }
@@ -241,11 +227,11 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     {
         char outputUtf[1024] = {0};
     	sjis_to_utf8(string, strlen(string), outputUtf);
-        strncpy(convertedText, outputUtf, sizeof(convertedText));
+        strncpy(convertedText, outputUtf,sizeof(convertedText));
     }
     else
     {
-        strncpy(convertedText, string, sizeof(convertedText));
+        strncpy(convertedText, string,sizeof(convertedText));
     }
 
     // TTF_SetFontSize(g_Font, fontHeight * 2);
@@ -262,12 +248,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         SDL_Surface *shadowText;
 
         // Render shadow.
-        SDL_Color sdlShadowColor;
-        sdlShadowColor.b = (shadowColor >> 16) & 0xFF;
-        sdlShadowColor.g = (shadowColor >> 8) & 0xFF;
-        sdlShadowColor.r = shadowColor & 0xFF;
-
-        shadowText = TTF_RenderUTF8_Blended(fontHeight==15?g_Font:g_Font2, convertedText, sdlShadowColor);
+        shadowText = TTF_RenderUTF8_Blended(g_Font, convertedText, SDL_TEXT_COLOR_COMPAT(shadowColor));
 
         if (shadowText != NULL)
         {
@@ -276,19 +257,13 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
             shadowRect.w = shadowText->w;
             shadowRect.h = shadowText->h;
 
-            // SDL_SetSurfaceBlendMode(shadowText, SDL_BLENDMODE_NONE);
             SDL_BlitSurface(shadowText, NULL, g_TextBufferSurface, &shadowRect);
 
             SDL_FreeSurface(shadowText);
         }
     }
 
-    SDL_Color sdlTextColor;
-    sdlTextColor.b = (textColor >> 16) & 0xFF;
-    sdlTextColor.g = (textColor >> 8) & 0xFF;
-    sdlTextColor.r = textColor & 0xFF;
-
-    SDL_Surface *regularText = TTF_RenderUTF8_Blended(fontHeight==15?g_Font:g_Font2, convertedText, sdlTextColor);
+    SDL_Surface *regularText = TTF_RenderUTF8_Blended(g_Font, convertedText, SDL_TEXT_COLOR_COMPAT(textColor));
 
     if (regularText != NULL)
     {
@@ -312,6 +287,9 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     }
 
     outTexture->format = TEX_FMT_A8R8G8B8;
+    // SDL_Surface *textureSurface = SDL_CreateRGBSurfaceWithFormatFrom(
+    //     outTexture->textureData, outTexture->width, outTexture->height, SDL_BITSPERPIXEL(SDL_PIXELFORMAT_RGBA32),
+    //     outTexture->width * SDL_BYTESPERPIXEL(SDL_PIXELFORMAT_RGBA32), SDL_PIXELFORMAT_RGBA32);
 
     SDL_Surface *textureSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
         outTexture->textureData,
@@ -321,7 +299,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         outTexture->width * 4,
         SDL_PIXELFORMAT_RGBA32
     );
-    
+
     InvertAlpha(0, 0, spriteWidth * 2, fontHeight * 2 + 6);
 
     finalCopyDst.x = 0;
@@ -331,7 +309,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     if (SDL_SoftStretch(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
     {
-        // SDL_LOG_COMPAT("SDL_BlitScaled failed! Error: %s", SDL_GetError());
+        // SDL_Log("SDL_BlitScaled failed! Error: %s", SDL_GetError());
     }
 
     g_AnmManager->SetCurrentTexture(outTexture->handle);
@@ -354,12 +332,6 @@ void TextHelper::ReleaseTextBuffer()
         TTF_CloseFont(g_Font);
         g_Font = NULL;
     }
-    if (g_Font2 != NULL)
-    {
-        TTF_CloseFont(g_Font2);
-        g_Font2 = NULL;
-    }
-
     if (g_TextBufferSurface != NULL)
     {
         SDL_FreeSurface(g_TextBufferSurface);

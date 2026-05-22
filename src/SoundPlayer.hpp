@@ -93,6 +93,10 @@ struct SoundPlayer
 
     // SDL1.2 audio system
     static void AudioCallback(void *userdata, Uint8 *stream, int len);
+
+    // SDL3 audio system
+    SDL_AUDIO_STREAM_COMPAT stream;
+
     void MixAudio(u32 samples);
 
     SoundData soundBuffers[128];
@@ -105,6 +109,7 @@ struct SoundPlayer
     SDL_Thread* backgroundMusicThreadHandle;
     
     static int BackgroundMusicPlayerThread(void* data);
+    SDL_AUDIO_DEVICE_ID_COMPAT audioDev;
     int terminateFlag;
 
     i32 soundBuffersToPlay[3];

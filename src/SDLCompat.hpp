@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <SDL.h>
 #include "inttypes.hpp"
+#include "ZunColor.hpp"
 
 #ifdef _MSC_VER
     #define SNPRINTF _snprintf
@@ -70,8 +71,18 @@
 
     #define SDL_RWCLOSE_COMPAT             SDL_CloseIO
 
-    #define SDL_RWREAD_COMPAT(ctx, ptr, size, maxnum) \
-        SDL_ReadIO((ctx), (ptr), (size) * (maxnum))
+    static inline size_t SDL_RWREAD_COMPAT(
+        SDL_IOStream *context,
+        void *ptr,
+        size_t size,
+        size_t maxnum)
+    {
+        size_t bytesRequested = size * maxnum;
+        size_t bytesRead =
+            SDL_ReadIO(context, ptr, bytesRequested);
+
+        return bytesRead / size;
+    }
 
     #define SDL_RWSEEK_COMPAT              SDL_SeekIO
     #define SDL_RWTELL_COMPAT              SDL_TellIO
@@ -82,91 +93,53 @@
     #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateSurfaceFrom(b,c,f,a,e)
     #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateSurface(a,b,c)
+    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,b)
 
-    //COMPAT REPLACEMENT
-    #define SDL_ConvertSurfaceFormat(a,b,c) SDL_ConvertSurface(a,b)
-
-    #define SDL_CONTROLLER_AXIS_LEFTX   SDL_GAMEPAD_AXIS_LEFTX
-    #define SDL_CONTROLLER_AXIS_LEFTY   SDL_GAMEPAD_AXIS_LEFTY
-    #define SDL_CONTROLLER_AXIS_RIGHTX  SDL_GAMEPAD_AXIS_RIGHTX
-    #define SDL_CONTROLLER_AXIS_RIGHTY  SDL_GAMEPAD_AXIS_RIGHTY
     inline int SDL_NumJoysticks() {
         int count;
         SDL_GetJoysticks(&count);
         return count;
     }
-    #define RW_SEEK_SET             SDL_IO_SEEK_SET
-    #define RW_SEEK_CUR             SDL_IO_SEEK_CUR
-    #define RW_SEEK_END             SDL_IO_SEEK_END
-
-    #define SDL_SWSURFACE 0
-    #define SDL_DISABLE 0
-    #define SDL_ENABLE 1
-
-    #define SDL_FreeSurface SDL_DestroySurface
-    #define SDL_SwapBE32 SDL_Swap32BE
-    #define SDL_SwapBE16 SDL_Swap16BE
-    #define SDL_GL_DeleteContext SDL_GL_DestroyContext
-    #define SDL_QUIT SDL_EVENT_QUIT
-
     #define IMG_Load_RW IMG_Load_IO
     #define SDL_SoftStretch(a,b,c,d) SDL_BlitSurfaceScaled(a,b,c,d,SDL_SCALEMODE_LINEAR)
 
-    #define SDL_FillRect SDL_FillSurfaceRect
     #define TTF_RenderUTF8_Blended(a,b,c) TTF_RenderText_Blended(a,b,strlen(b),c)
     
-    #define AUDIO_S16SYS SDL_AUDIO_S16
-    #define SDL_ReadLE32 SDL_ReadU32LE
-    #define SDL_ReadLE16 SDL_ReadU16LE
-    #define SDL_SwapLE32 SDL_Swap32LE
-
-    #define SDL_FreeWAV SDL_free
-    #define SDL_LoadWAV_RW SDL_LoadWAV_IO
-
-    typedef struct SDL_AudioCVT {
-        SDL_AudioStream *stream;
-
-        int len;       /* original input length */
-        int len_cvt;   /* converted length (what you want) */
-        int len_mult;
-
-        int buf_size;  /* total buffer size */
-        unsigned char *buf;
-
-        int samples;   /* your custom buffer hint (SDL2-style) */
-    };
-
-    static inline void* SDL_BuildAudioCVT(
-        SDL_AudioFormat src_format,
-        int src_channels,
-        int src_rate,
-        SDL_AudioFormat dst_format,
-        int dst_channels,
-        int dst_rate,
-        int samples)
-    {
-        SDL_AudioCVT *cvt;
-        if (!cvt) return NULL;
-
-        SDL_AudioSpec src = {0}, dst = {0};
-
-        src.format = src_format;
-        src.channels = src_channels;
-        src.freq = src_rate;
-
-        dst.format = dst_format;
-        dst.channels = dst_channels;
-        dst.freq = dst_rate;
-
-        cvt->stream = SDL_CreateAudioStream(&src, &dst);
-        cvt->samples = samples;
-
-        return cvt;
+    inline u16 SDL_READLE16_COMPAT(SDL_IOStream *src){
+        u16 value;
+        SDL_ReadU16LE(src, &value);
+        return value;
     }
+    inline u32 SDL_READLE32_COMPAT(SDL_IOStream *src){
+        u32 value;
+        SDL_ReadU32LE(src, &value);
+        return value;
+    }
+    #define SDL_AUDIO_STREAM_COMPAT SDL_AudioStream*
+    #define SDL_CREATE_AUDIO_STREAM_COMPAT SDL_CreateAudioStream
+    #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d) SDL_PutAudioStreamData(b,c,d)
+    #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,a)
+    #define SDL_BIND_AUDIO_STREAM_COMPAT SDL_BindAudioStream
 
+    //Replacement
+    typedef struct SDL_AudioCVT
+    {
+        int needed;
+        SDL_AudioFormat src_format;
+        SDL_AudioFormat dst_format;
+        double rate_incr;
+        Uint8 *buf;
+        int len;
+        int len_cvt;
+        int len_mult;
+        double len_ratio;
+        int filter_index;
+    } SDL_AudioCVT;
+    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_ResumeAudioDevice(a)
+    #define SDL_PAUSE_AUDIO_COMPAT(b) SDL_PauseAudioDevice(b)
+    #define SDL_DESTROY_AUDIO_STREAM SDL_DestroyAudioStream
 #else
     #include <SDL_rwops.h>
-    #define NOSDL3
     #define BeforeCreate()
     #define SDL_RWOPS_COMPAT SDL_RWops
     #define SDL_RWFROMFILE_COMPAT SDL_RWFromFile
@@ -177,8 +150,32 @@
     #define SDL_RWTELL_COMPAT SDL_RWtell
     #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS 0
 
+    #define SDL_READLE32_COMPAT SDL_ReadLE32
+    #define SDL_READLE16_COMPAT SDL_ReadLE16
+
     #define SDL_SHOWCURSOR_COMPAT() SDL_ShowCursor(SDL_ENABLE)
     #define SDL_HIDECURSOR_COMPAT() SDL_ShowCursor(SDL_DISABLE)
+
+    #define SDL_CONTROLLER_BUTTON_A                0
+    #define SDL_CONTROLLER_BUTTON_B                1
+    #define SDL_CONTROLLER_BUTTON_X                2
+    #define SDL_CONTROLLER_BUTTON_Y                3
+    #define SDL_CONTROLLER_BUTTON_LEFTSHOULDER     4
+    #define SDL_CONTROLLER_BUTTON_RIGHTSHOULDER    5
+    #define SDL_CONTROLLER_BUTTON_BACK             6
+    #define SDL_CONTROLLER_BUTTON_START            7
+    #define SDL_CONTROLLER_BUTTON_LEFTSTICK        8
+    #define SDL_CONTROLLER_BUTTON_RIGHTSTICK       9
+
+    #define SDL_CONTROLLER_BUTTON_DPAD_UP          10
+    #define SDL_CONTROLLER_BUTTON_DPAD_DOWN        11
+    #define SDL_CONTROLLER_BUTTON_DPAD_LEFT        12
+    #define SDL_CONTROLLER_BUTTON_DPAD_RIGHT       13
+
+    #define SDL_AUDIO_STREAM_COMPAT bool
+    #define SDL_CREATE_AUDIO_STREAM_COMPAT(a,b) true
+    #define SDL_BIND_AUDIO_STREAM_COMPAT(a,b) true
+    #define SDL_DESTROY_AUDIO_STREAM(a)
 #endif
 
 #if SDL_MAJOR_VERSION == 2
@@ -201,6 +198,7 @@
     #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormatEnum
     #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurfaceWithFormat(0,a,b,32,c)
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
+    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT SDL_ConvertSurfaceFormat
 
     inline void GetWindowSize(int *w, int *h){
         SDL_DisplayMode mode;
@@ -209,6 +207,10 @@
             *h = mode.h;
         }
     }
+    #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudioDevice(NULL, 0,a,b,0)
+    #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d) SDL_QueueAudio(a,c,d)
+    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_PauseAudioDevice(a,0)
+    #define SDL_PAUSE_AUDIO_COMPAT(b) SDL_PauseAudioDevice(b,1)
 #endif
 
 #if SDL_MAJOR_VERSION >= 2
@@ -273,6 +275,20 @@
     #define SDL_WM_SetCaptionCompat(title)
 
     #define SDL_PIXEL_FORMAT_COMPAT_LOAD()
+
+    #define SDL_RW_SIZE_COMPAT SDL_RWsize
+
+    inline SDL_Color SDL_TEXT_COLOR_COMPAT(ZunColor shadowColor){
+        SDL_Color sdlShadowColor;
+        sdlShadowColor.a = 0xFF;
+        sdlShadowColor.b = (shadowColor >> 16) & 0xFF;
+        sdlShadowColor.g = (shadowColor >> 8) & 0xFF;
+        sdlShadowColor.r = shadowColor & 0xFF;
+        return sdlShadowColor;
+    }
+    #define SDL_AUDIO_DEVICE_ID_COMPAT SDL_AudioDeviceID
+    #define SDL_CLOSE_AUDIO_COMPAT(c) SDL_CloseAudioDevice(c)
+
 #endif
 
 #if SDL_MAJOR_VERSION == 1
@@ -355,8 +371,8 @@
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,c)
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags)
     #define SDL_WM_SetCaptionCompat(title) SDL_WM_SetCaption(title, "hello_icon");
-    #define SDL_ConvertSurfaceFormat(a,b,c) SDL_ConvertSurface(a,&b,c)
-    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_SWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
+    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,&b,c)
+    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_HWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)
 
     inline void GetWindowSize(int *w, int *h){
@@ -442,12 +458,12 @@
         0x001F, // B (4-0)
         0
     };
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_UNKNOWN;
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA32;
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA5551;
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB24;
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA4444;
-    inline SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB565;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_UNKNOWN;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA32;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA5551;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB24;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA4444;
+    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB565;
 
     inline void InitPixelFormat(
         SDL_PixelFormat* dst,
@@ -455,7 +471,7 @@
     {
         SDL_Surface *tmp =
         SDL_CreateRGBSurface(
-            SDL_SWSURFACE,
+            SDL_HWSURFACE,
             0,0,
             // src->w,
             // src->h,
@@ -491,6 +507,33 @@
             &SDL_PIXELFORMAT_RGB565,
             SDL_PIXELFORMAT_RGB565_CACHED);
     }
+
+    inline SDL_Color SDL_TEXT_COLOR_COMPAT(ZunColor shadowColor){
+        SDL_Color sdlShadowColor;
+        sdlShadowColor.b = (shadowColor >> 16) & 0xFF;
+        sdlShadowColor.g = (shadowColor >> 8) & 0xFF;
+        sdlShadowColor.r = shadowColor & 0xFF;
+        return sdlShadowColor;
+    }
+
+    #define SDL_AUDIO_DEVICE_ID_COMPAT int
+    static inline Sint64 SDL_RW_SIZE_COMPAT(SDL_RWOPS_COMPAT* ctx)
+    {
+        Sint64 pos = SDL_RWTELL_COMPAT(ctx);
+        Sint64 size = SDL_RWSEEK_COMPAT(ctx, 0, RW_SEEK_END);
+        SDL_RWSEEK_COMPAT(ctx, pos, RW_SEEK_SET);
+        return size;
+    }
+    #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudio(a,b)
+    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_PauseAudio(0)
+    #define SDL_PAUSE_AUDIO_COMPAT(a) SDL_PauseAudio(1)
+    #define SDL_CLOSE_AUDIO_COMPAT(a) SDL_CloseAudio()
+    #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d)
+
+
+    //Replacement
+
+    #define SDL_SetSurfaceBlendMode(a,b)
 #endif
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)
@@ -498,11 +541,3 @@
 #undef SDL_LOG_COMPAT
 #define SDL_LOG_COMPAT
 #endif
-
-static inline Sint64 GetRWSize(SDL_RWOPS_COMPAT* ctx)
-{
-    Sint64 pos = SDL_RWTELL_COMPAT(ctx);
-    Sint64 size = SDL_RWSEEK_COMPAT(ctx, 0, RW_SEEK_END);
-    SDL_RWSEEK_COMPAT(ctx, pos, RW_SEEK_SET);
-    return size;
-}
