@@ -135,7 +135,7 @@
         double len_ratio;
         int filter_index;
     } SDL_AudioCVT;
-    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_ResumeAudioDevice(a)
+    #define SDL_RESUME_AUDIO_COMPAT(a,b) SDL_ResumeAudioDevice(a);SDL_ResumeAudioStreamDevice(b) 
     #define SDL_PAUSE_AUDIO_COMPAT(b) SDL_PauseAudioDevice(b)
     #define SDL_DESTROY_AUDIO_STREAM SDL_DestroyAudioStream
 #else
@@ -209,7 +209,7 @@
     }
     #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudioDevice(NULL, 0,a,b,0)
     #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d) SDL_QueueAudio(a,c,d)
-    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_PauseAudioDevice(a,0)
+    #define SDL_RESUME_AUDIO_COMPAT(a,b) SDL_PauseAudioDevice(a,0)
     #define SDL_PAUSE_AUDIO_COMPAT(b) SDL_PauseAudioDevice(b,1)
 #endif
 
@@ -287,6 +287,7 @@
         return sdlShadowColor;
     }
     #define SDL_AUDIO_DEVICE_ID_COMPAT SDL_AudioDeviceID
+    #define SDL_OPEN_AUDIO_COMPAT_ERROR 0
     #define SDL_CLOSE_AUDIO_COMPAT(c) SDL_CloseAudioDevice(c)
 
 #endif
@@ -525,7 +526,8 @@
         return size;
     }
     #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudio(a,b)
-    #define SDL_RESUME_AUDIO_COMPAT(a) SDL_PauseAudio(0)
+    #define SDL_OPEN_AUDIO_COMPAT_ERROR -1
+    #define SDL_RESUME_AUDIO_COMPAT(a,b) SDL_PauseAudio(0)
     #define SDL_PAUSE_AUDIO_COMPAT(a) SDL_PauseAudio(1)
     #define SDL_CLOSE_AUDIO_COMPAT(a) SDL_CloseAudio()
     #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d)

@@ -108,7 +108,7 @@ struct SoundPlayer
     //todo remove thread
     SDL_Thread* backgroundMusicThreadHandle;
     
-    static int BackgroundMusicPlayerThread(void* data);
+    static int SDLCALL BackgroundMusicPlayerThread(void* data);
     SDL_AUDIO_DEVICE_ID_COMPAT audioDev;
     int terminateFlag;
 

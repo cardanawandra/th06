@@ -20,6 +20,7 @@
 #define DISABLE_SOUNDPLAYER_BGM
 #define DISABLE_SOUNDPLAYER
 #endif
+#define SDL_LOG_COMPAT printf
 
 #include <math.h>
 #include <cstring>
@@ -28,7 +29,6 @@
 #define BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE 16
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
-#define SDL_LOG_COMPAT SDL_Log
 
 static i16 g_audioBuffer[44100 * 4];
 static volatile u32 g_audioWritePos = 0;
@@ -85,34 +85,37 @@ ZunResult SoundPlayer::InitializeDSound()
     SDL_AudioSpec obtained;
     memset(&obtained, 0, sizeof(obtained));
 
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
-        return ZUN_ERROR;
+    if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0){
+        // SDL_LOG_COMPAT("SDL_INIT_AUDIO failed: %s\n",SDL_GetError());
+        // return ZUN_ERROR;
+    }
 
     desired.freq = 44100;
     desired.format = AUDIO_S16SYS;
     desired.channels = 2;
-    // desired.samples = 2048;
-    // desired.callback = SoundPlayer::AudioCallback;
+    #if SDL_MAJOR_VERSION == 1
+    desired.samples = 2048;
+    desired.callback = SoundPlayer::AudioCallback;
+    #endif
     this->audioDev = SDL_OPEN_AUDIO_COMPAT(&desired, &obtained);
-    if (this->audioDev == 0){
+    if (this->audioDev == SDL_OPEN_AUDIO_COMPAT_ERROR){
         SDL_LOG_COMPAT("NO AUDIO DEVICE\n");
         return ZUN_ERROR;
     }
     this->stream = SDL_CREATE_AUDIO_STREAM_COMPAT(&desired, &desired);
     if (!stream){
-        SDL_LOG_COMPAT("CreateAudioStream failed: %s", SDL_GetError());
+        SDL_LOG_COMPAT("CreateAudioStream failed: %s\n", SDL_GetError());
         return ZUN_ERROR;
     }
     if (!SDL_BIND_AUDIO_STREAM_COMPAT(this->audioDev, this->stream)){
-        SDL_LOG_COMPAT("BindAudioStream failed: %s", SDL_GetError());
+        SDL_LOG_COMPAT("BindAudioStream failed: %s\n", SDL_GetError());
         return ZUN_ERROR;
     }
 
     terminateFlag = false;
     backgroundMusicThreadHandle = SDL_CREATE_THREAD_COMPAT(&SoundPlayer::BackgroundMusicPlayerThread, "bgm", this);
-
     // Start playback
-    SDL_RESUME_AUDIO_COMPAT(this->audioDev);
+    SDL_RESUME_AUDIO_COMPAT(this->audioDev, this->stream);
     return ZUN_SUCCESS;
 }
 
@@ -688,7 +691,7 @@ void SoundPlayer::MixAudio(u32 samples)
     delete[] mixBuffer;
 }
 
-int SoundPlayer::BackgroundMusicPlayerThread(void* data)
+int SDLCALL SoundPlayer::BackgroundMusicPlayerThread(void* data)
 {
     DISABLE_SOUNDPLAYER_BGM;
     SoundPlayer* self = (SoundPlayer*)data;
