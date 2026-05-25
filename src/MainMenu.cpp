@@ -1592,7 +1592,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
         }
         vm->scaleX = 1.0;
         vm->scaleY = 1.0;
-        vm->posOffset = ZunProcVec3(0.0, 0.0, 0.0);
+        ZunTargetVec3(vm->posOffset,0.0, 0.0, 0.0);
     }
     else
     {
@@ -1608,7 +1608,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
         {
             g_AnmManager->SetActiveSprite(vm, vm->baseSpriteIndex + (ANM_OFFSET_TITLE04S - ANM_OFFSET_TITLE04));
         }
-        vm->posOffset = ZunProcVec3(-2.0, -2.0, 0.0);
+        ZunTargetVec3(vm->posOffset,-2.0, -2.0, 0.0);
     }
 
     if (item != this->cursor)
@@ -1622,7 +1622,8 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
             vm->color = COLOR_SET_ALPHA2(vm->color, 128);
         }
 
-        vm->posOffset += ZunProcVec3(0.0, 0.0, 0.0);
+        // why
+        // vm->posOffset += ZunGenVec3(0.0, 0.0, 0.0);
     }
     else
     {
@@ -1635,7 +1636,7 @@ void MainMenu::ColorMenuItem(AnmVm *vm, i32 item, i32 subItem, i32 subItemSelect
             vm->color = COLOR_SET_ALPHA2(vm->color, 255);
         }
 
-        vm->posOffset += ZunProcVec3(-4.0, -4.0, 0.0);
+        vm->posOffset += ZunGenVec3(-4.0, -4.0, 0.0);
     }
 }
 
@@ -2120,7 +2121,7 @@ ZunResult MainMenu::LoadDiffCharSelect(MainMenu *menu)
         {
             vm->color = COLOR_WHITE;
         }
-        vm->posOffset = ZunProcVec3(0, 0, 0);
+        ZunTargetVec3(vm->posOffset,0, 0, 0);
         vm->baseSpriteIndex = vm->activeSpriteIndex;
         vm->flags.zWriteDisable = 1;
     }
@@ -2162,7 +2163,7 @@ ZunResult MainMenu::LoadReplayMenu(MainMenu *menu)
         {
             vm->color = COLOR_WHITE;
         }
-        vm->posOffset = ZunProcVec3(0, 0, 0);
+        ZunTargetVec3(vm->posOffset,0, 0, 0);
         vm->baseSpriteIndex = vm->activeSpriteIndex;
         vm->flags.zWriteDisable = 1;
     }

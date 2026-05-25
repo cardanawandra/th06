@@ -1416,7 +1416,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                         vm->color = COLOR_WHITE;
                     }
 
-                    vm->posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
+                    ZunTargetVec3(vm->posOffset,-4.0f, -4.0f, 0.0f);
                 }
                 else
                 {
@@ -1428,7 +1428,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                     {
                         vm->color = COLOR_SET_ALPHA(COLOR_WHITE, 176);
                     }
-                    vm->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+                    ZunTargetVec3(vm->posOffset,0.0f, 0.0f, 0.0f);
                 }
             }
         }
@@ -1458,7 +1458,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                 {
                     vm->color = COLOR_WHITE;
                 }
-                vm->posOffset = ZunProcVec3(-4.0f, -4.0f, 0.0f);
+                ZunTargetVec3(vm->posOffset,-4.0f, -4.0f, 0.0f);
             }
             else
             {
@@ -1470,7 +1470,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
                 {
                     vm->color = COLOR_SET_ALPHA(COLOR_WHITE, 176);
                 }
-                vm->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+                ZunTargetVec3(vm->posOffset,0.0f, 0.0f, 0.0f);
             }
         }
 
@@ -1544,6 +1544,20 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
 
         if (IS_PRESSED(TH_BUTTON_FOCUS) || IS_PRESSED(TH_BUTTON_SKIP))
         {
+
+            #ifdef __ANDROID__
+                for (characterShotType = 0; characterShotType < HSCR_NUM_CHARS_SHOTTYPES; characterShotType++)
+                {
+                    for (difficulty = 0; difficulty < HSCR_NUM_DIFFICULTIES; difficulty++)
+                    {
+                        g_GameManager.clrd[characterShotType].difficultyClearedWithRetries[difficulty] = 99;
+                        g_GameManager.clrd[characterShotType].difficultyClearedWithoutRetries[difficulty] = 99;
+                    }
+                }
+                resultScreen->cheatCodeStep = 0;
+                g_SoundPlayer.PlaySoundByIdx(SOUND_1UP);
+            #endif
+
 
             if (resultScreen->cheatCodeStep < 5)
             {
@@ -1922,7 +1936,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
     if (resultScreen->resultScreenState == RESULT_SCREEN_STATE_WRITING_HIGHSCORE_NAME ||
         resultScreen->resultScreenState == RESULT_SCREEN_STATE_WRITING_REPLAY_NAME)
     {
-        spritePos = ZunProcVec3(160.0f, 356.0f, 0.0f);
+        ZunTargetVec3(spritePos,160.0f, 356.0f, 0.0f);
 
         for (row = 0; row < RESULT_KEYBOARD_ROWS; row++)
         {
@@ -2080,8 +2094,8 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
         for (i = 0; i < ARRAY_SIZE_SIGNED(resultScreen->unk_40); i++, sprite++)
         {
 
-            sprite->pos = ZunProcVec3(0.0f, 0.0f, 0.0f);
-            sprite->posOffset = ZunProcVec3(0.0f, 0.0f, 0.0f);
+            ZunTargetVec3(sprite->pos,0.0f, 0.0f, 0.0f);
+            ZunTargetVec3(sprite->posOffset,0.0f, 0.0f, 0.0f);
 
             // Execute all the scripts from the start of result00 to the end of result02
             g_AnmManager->SetAndExecuteScriptIdx(sprite, ANM_SCRIPT_RESULT00_START + i);
@@ -2092,7 +2106,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
         {
             g_AnmManager->InitializeAndSetSprite(sprite, ANM_SCRIPT_TEXT_RESULTSCREEN_CHARACTER_NAME + i);
 
-            sprite->pos = ZunProcVec3(0.0f, 0.0f, 0.0f);
+            ZunTargetVec3(sprite->pos,0.0f, 0.0f, 0.0f);
 
             sprite->flags.anchor = AnmVmAnchor_TopLeft;
 

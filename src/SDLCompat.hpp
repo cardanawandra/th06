@@ -28,28 +28,10 @@
     #define SDL_SHOWCURSOR_COMPAT() SDL_ShowCursor()
     #define SDL_HIDECURSOR_COMPAT() SDL_HideCursor()
 
-    inline void BeforeCreate(){
-        // Request OpenGL compatibility profile
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-                            SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-
-        // Ask for an older GL version if desired
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
-        // // Request OpenGL ES 2.0
-        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-        //                     SDL_GL_CONTEXT_PROFILE_ES);
-
-        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-        // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-        // // Optional
-        // SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-        // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    }
-
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_CreateWindow(title, width, height, flags)
+    #define SDL_CreateRendererCompat(a,b,c,d) SDL_CreateRenderer(a,d)
+    #define SDL_SetHintCompat(a,b) SDL_SetHint(#a,b)
+
     #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS true
 
     inline void GetWindowSize(int *w, int *h)
@@ -87,8 +69,10 @@
     #define SDL_RWSEEK_COMPAT              SDL_SeekIO
     #define SDL_RWTELL_COMPAT              SDL_TellIO
 
-    #define SDL_START_TEXT_INPUT_COMPAT(a) SDL_StartTextInput(a)
-    #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput(a)
+    // #define SDL_START_TEXT_INPUT_COMPAT(a) SDL_StartTextInput(a)
+    // #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput(a)
+    #define SDL_START_TEXT_INPUT_COMPAT()
+    #define SDL_STOP_TEXT_INPUT_COMPAT()
 
     #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateSurfaceFrom(b,c,f,a,e)
@@ -140,7 +124,6 @@
     #define SDL_DESTROY_AUDIO_STREAM SDL_DestroyAudioStream
 #else
     #include <SDL_rwops.h>
-    #define BeforeCreate()
     #define SDL_RWOPS_COMPAT SDL_RWops
     #define SDL_RWFROMFILE_COMPAT SDL_RWFromFile
     #define SDL_RWFROMCONSTMEM_COMPAT SDL_RWFromConstMem
@@ -181,7 +164,6 @@
 #if SDL_MAJOR_VERSION == 2
     // SDL 2.x only specific code
     #include <SDL_gamecontroller.h>
-    #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_GAMECONTROLLER
     #define SDL_JOYSTICK_COMPAT SDL_GameController
     #define SDL_JOYSTICK_COMPATButton SDL_GameControllerButton
     #define SDL_JOYSTICK_COMPATGetJoystick(a) SDL_GameControllerGetJoystick(a)
@@ -193,9 +175,11 @@
 
     #define SDL_CONTROLLER_BUTTON_MAX_COMPAT SDL_CONTROLLER_BUTTON_MAX
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_CreateWindow(title, x, y, width, height, flags)
+    #define SDL_CreateRendererCompat(a,b,c,d) SDL_CreateRenderer(a,b,c)
+    #define SDL_SetHintCompat(a,b) SDL_SetHint(a,b)
 
-    #define SDL_START_TEXT_INPUT_COMPAT(a) SDL_StartTextInput()
-    #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput()
+    #define SDL_START_TEXT_INPUT_COMPAT() SDL_StartTextInput()
+    #define SDL_STOP_TEXT_INPUT_COMPAT() SDL_StopTextInput()
     #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormatEnum
     #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurfaceWithFormat(0,a,b,32,c)
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
@@ -227,6 +211,7 @@
     #define SDL_GL_SWAP_COMPAT(x) SDL_GL_SwapWindow(x)
     #define SDL_GL_SET_SWAP_INTERVAL_COMPAT(x) SDL_GL_SetSwapInterval(x)
 
+    #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_GAMECONTROLLER
     #define SDL_GET_KEYSTATE_COMPAT() SDL_GetKeyboardState(NULL)
     #define SDL_PUMP_EVENTS_COMPAT()
 
@@ -272,8 +257,6 @@
     #define SDL_GL_DELETE_CONTEXT_COMPAT(a) SDL_GL_DeleteContext(a)
     #define SDL_FULLSCREEN_COMPAT SDL_WINDOW_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,b,c)
-
-    #define SDL_WM_SetCaptionCompat(title)
 
     #define SDL_PIXEL_FORMAT_COMPAT_LOAD()
 
@@ -328,8 +311,8 @@
     #define SDL_GET_KEYSTATE_COMPAT() SDL_GetKeyState(NULL)
     #define SDL_PUMP_EVENTS_COMPAT() SDL_PumpEvents()
 
-    #define SDL_START_TEXT_INPUT_COMPAT(a)
-    #define SDL_STOP_TEXT_INPUT_COMPAT(a)
+    #define SDL_START_TEXT_INPUT_COMPAT()
+    #define SDL_STOP_TEXT_INPUT_COMPAT()
 
     #define INT16_MAX_COMPAT 32767
 
@@ -372,8 +355,7 @@
     #define SDL_GL_DELETE_CONTEXT_COMPAT(a) 1
     #define SDL_FULLSCREEN_COMPAT SDL_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,c)
-    #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags)
-    #define SDL_WM_SetCaptionCompat(title) SDL_WM_SetCaption(title, "hello_icon");
+    #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags); SDL_WM_SetCaption(title, "hello_icon")
     #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,&b,c)
     #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_HWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)

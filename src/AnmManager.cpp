@@ -383,7 +383,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
 
     // Clear any errors that might be pending
     while(g_GfxBackend->HasError()) {
-
+        SDL_LOG_COMPAT("gfx error\n");
     }
 
     SDL_LOG_COMPAT("LoadTexture 8");

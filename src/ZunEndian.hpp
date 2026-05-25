@@ -3,6 +3,25 @@
 // Header originally created by Zero318
 //   Any bad parts were tacked on by me
 
+#include "SDLCompat.hpp"
+#ifdef WIN98
+template<typename T>
+struct LE
+{
+    T value;
+
+    operator T() const
+    {
+        return value;
+    }
+
+    LE& operator=(T v)
+    {
+        value = v;
+        return *this;
+    }
+};
+#else
 #include <cstring>
 #include "inttypes.hpp"
 #include <SDL_endian.h>
@@ -13,6 +32,10 @@ static_assert(
     SDL_BYTEORDER == SDL_BIG_ENDIAN
     , "System endian must be either big or little!"
 );
+
+#ifndef SDL_FLOATWORDORDER
+#define SDL_FLOATWORDORDER SDL_BYTEORDER
+#endif
 
 static_assert(
     SDL_FLOATWORDORDER == SDL_LIL_ENDIAN ||
@@ -127,3 +150,4 @@ struct LE {
 };
 
 #undef DO_MANUAL_MEMCPY
+#endif

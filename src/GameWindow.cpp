@@ -6,6 +6,7 @@
 #include "Stage.hpp"
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
+// #include "graphics/FixedFunctionDX2.hpp"
 #include "graphics/FixedFunctionGL.hpp"
 #include "graphics/WebGL.hpp"
 #include "graphics/Software.hpp"
@@ -33,10 +34,20 @@ static const struct
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
     #ifdef __ANDROID__
+    {"Software fallback (VERY SLOW)", Software::Init},
     #endif
-    {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    #ifdef RENDER_WEBGL
     {"GL(ES) 2.0 / WebGL", WebGL::Create},
-    {"Software fallback (VERY SLOW)", Software::Init}
+    #endif
+    #ifdef RENDER_FIXED_FUNCTION_DX2
+    {"Fixed function DX2", FixedFunctionDX2::Init},
+    #endif
+    #ifdef RENDER_FIXED_FUNCTION_GL
+    {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    #endif
+    #ifdef RENDER_SOFTWARE
+    {"Software fallback (VERY SLOW)", Software::Init},
+    #endif
 };
 
 RenderResult GameWindow::Render()
@@ -222,15 +233,19 @@ void GameWindow::Present()
 
 void GameWindow::CreateGameWindow()
 {
+    SDL_LOG_COMPAT("GameWindow::CreateGameWindow 1\n");
     SDL_Init(SDL_INIT_GAMECONTROLLER_COMPAT);
 
     // SDL1.2: try render backends (mostly just GL variants)
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
+        SDL_LOG_COMPAT("Try Using renderer backend %s\n", s_RenderBackends[i].name);
         g_GfxBackend = s_RenderBackends[i].TryInit();
         if(g_GfxBackend) {
             SDL_LOG_COMPAT("Using renderer backend %s\n", s_RenderBackends[i].name);
             break;
+        }else{
+            SDL_LOG_COMPAT("Failed renderer backend %s\n", s_RenderBackends[i].name);
         }
     }
 

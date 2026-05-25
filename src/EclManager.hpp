@@ -15,7 +15,7 @@ struct Enemy;
 struct EnemyEclContext;
 struct EnemyManager;
 
-enum EclVarId : i32
+enum EclVarId
 {
     ECL_VAR_I32_0 = -10001,
     ECL_VAR_I32_1 = -10002,

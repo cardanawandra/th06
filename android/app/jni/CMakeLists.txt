@@ -65,7 +65,6 @@ endif()
 # ============================================================================
 set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/main.cpp
-    ${TH06_ROOT}/src/GLFunc.cpp
     ${TH06_ROOT}/src/AnmManager.cpp
     ${TH06_ROOT}/src/AsciiManager.cpp
     ${TH06_ROOT}/src/BombData.cpp
@@ -98,6 +97,7 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/Supervisor.cpp
     ${TH06_ROOT}/src/TextHelper.cpp
     ${TH06_ROOT}/src/utils.cpp
+    ${TH06_ROOT}/src/ZunMath.cpp
     ${TH06_ROOT}/src/ZunTimer.cpp
     # pbg3 archive
     ${TH06_ROOT}/src/pbg3/FileAbstraction.cpp
@@ -105,7 +105,10 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/pbg3/Pbg3Archive.cpp
     ${TH06_ROOT}/src/pbg3/Pbg3Parser.cpp
     # graphics
+    ${TH06_ROOT}/src/thirdparty/sjis_converter.cpp
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
+    ${TH06_ROOT}/src/graphics/Software.cpp
+    ${TH06_ROOT}/src/graphics/GLFunc.cpp
     ${TH06_ROOT}/src/graphics/FixedFunctionGL.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
 )

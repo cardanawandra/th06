@@ -82,15 +82,23 @@ enum PixelDataType {
 
 //this is probably unnecessary but it looks a bit nicer than just using u32s everywhere
 struct GfxTextureHandle {
-    u32 id = 0;
+    u32 id;
 
-    constexpr GfxTextureHandle() = default;
-    constexpr GfxTextureHandle(u32 id) : id(id) {}
+    GfxTextureHandle()
+        : id(0)
+    {
+    }
 
-    constexpr operator u32() const {return id;}
-    constexpr explicit operator bool() const {return id != 0;}
+    GfxTextureHandle(u32 value)
+        : id(value)
+    {
+    }
+
+    operator u32() const
+    {
+        return id;
+    }
 };
-
 
 // Abstraction layer for graphics API calls
 // It's supposed to be compatible with any state based graphics API
@@ -102,7 +110,9 @@ struct GfxInterface
     //an instance of your implementation of GfxInterface if it succeeds and
     //call the destructor of that instance and return nullptr if it fails
 
-    virtual ~GfxInterface() = default;
+    virtual ~GfxInterface(){
+        
+    }
     //the destructor is called when the backend fails to initialize or when the program exits,
     //so it should clean up any resources that were allocated by the init function
     //The GL backends delete the SDL window and GL context, for example
@@ -110,7 +120,7 @@ struct GfxInterface
     virtual void SetFogRange(f32 nearPlane, f32 farPlane) = 0;
     virtual void SetFogColor(ZunColor color) = 0;
     virtual void ToggleVertexAttribute(u8 attr, bool enable) = 0;
-    virtual void SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr) = 0;
+    virtual void SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr) = 0;
     virtual void SetColorOp(TextureOpComponent component, ColorOp op) = 0;
     virtual void SetTextureFactor(ZunColor factor) = 0;
     virtual void SetTransformMatrix(
@@ -123,7 +133,7 @@ struct GfxInterface
     virtual void GetViewport(u32* viewport) = 0;
     virtual void GetDepthRange(f32* depthRange) = 0;
     virtual void SetViewport(i32 x, i32 y, i32 width, i32 height) = 0;
-    virtual void SetDepthRange(f32 near, f32 far) = 0;
+    virtual void SetDepthRange(f32 nearPlane, f32 farPlane) = 0;
 
     virtual void Enable(Capabilities cap) = 0;
     virtual bool HasError() = 0;

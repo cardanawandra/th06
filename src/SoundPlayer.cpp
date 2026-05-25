@@ -92,8 +92,11 @@ ZunResult SoundPlayer::InitializeDSound()
     desired.freq = 44100;
     desired.format = AUDIO_S16SYS;
     desired.channels = 2;
+    #if SDL_MAJOR_VERSION == 2
+    desired.samples = 1024;
+    #endif
     #if SDL_MAJOR_VERSION == 1
-    desired.samples = 2048;
+    desired.samples = 1024;
     desired.callback = SoundPlayer::AudioCallback;
     #endif
     this->audioDev = SDL_OPEN_AUDIO_COMPAT(&desired, &obtained);

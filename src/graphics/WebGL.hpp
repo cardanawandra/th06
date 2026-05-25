@@ -1,7 +1,7 @@
-#include <SDL.h>
-#if SDL_MAJOR_VERSION >= 2
 #pragma once
-
+#include "SDLCompat.hpp"
+#if SDL_MAJOR_VERSION >= 2
+#define RENDER_WEBGL
 #include "GfxInterface.hpp"
 #include "GLFunc.hpp"
 #include <vector>

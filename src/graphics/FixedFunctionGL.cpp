@@ -1,23 +1,31 @@
+#include <SDL.h>
 #include "FixedFunctionGL.hpp"
 #include "Supervisor.hpp"
 #include "GameWindow.hpp"
 #include "i18n.hpp"
-#include <SDL.h>
+
 #include "SDLCompat.hpp"
 
 void FixedFunctionGL::SetContextFlags()
 {
+    #if SDL_MAJOR_VERSION >= 2
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    #endif
+    // SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 }
 
 GfxInterface *FixedFunctionGL::Init()
 {
-    FixedFunctionGL *interface = new FixedFunctionGL();
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 1\n");
+    FixedFunctionGL *gfx = new FixedFunctionGL();
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 2\n");
     SetContextFlags();
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 3\n");
     SDL_Init(SDL_INIT_VIDEO);
     u32 flags = WINDOW_FLAGS_COMPAT;
 
@@ -26,6 +34,7 @@ GfxInterface *FixedFunctionGL::Init()
         flags |= SDL_FULLSCREEN_COMPAT;
     }
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 4\n");
     g_GameWindow.CONFIGURE_INIT();
     #ifdef __ANDROID__
     GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
@@ -36,35 +45,39 @@ GfxInterface *FixedFunctionGL::Init()
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
 
-    BeforeCreate();
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 5\n");
+    gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
 
-    interface->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
-    SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
-
-    if (interface->window == NULL)
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 6\n");
+    if (gfx->window == NULL)
     {
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    interface->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(interface->window);
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 7\n");
+    gfx->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(gfx->window);
 
-    if (interface->glContext == NULL)
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 8\n");
+    if (gfx->glContext == NULL)
     {
         SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    if (SDL_GL_MAKE_CURRENT_COMPAT(interface->window, interface->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 9\n");
+    if (SDL_GL_MAKE_CURRENT_COMPAT(gfx->window, gfx->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
     {
         SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 10\n");
     SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 11\n");
     g_glFuncTable.ResolveFunctions(false);
 
     g_glFuncTable.glEnable(GL_TEXTURE_2D);
@@ -73,6 +86,7 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glEnable(GL_ALPHA_TEST);
     g_glFuncTable.glAlphaFunc(GL_GEQUAL, 4 / 255.0f);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 12\n");
     if (((g_Supervisor.cfg.opts >> GCOS_SUPPRESS_USE_OF_GOROUD_SHADING) & 1) == 1)
     {
         g_glFuncTable.glShadeModel(GL_FLAT);
@@ -83,11 +97,13 @@ GfxInterface *FixedFunctionGL::Init()
         g_glFuncTable.glEnable(GL_FOG);
     }
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 13\n");
     g_glFuncTable.glFogf(GL_FOG_DENSITY, 1.0f);
     g_glFuncTable.glFogf(GL_FOG_MODE, GL_LINEAR);
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 14\n");
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
@@ -99,6 +115,7 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 15\n");
     if (((g_Supervisor.cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_CONSTANT);
@@ -110,6 +127,7 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 16\n");
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -121,6 +139,7 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
 
+    SDL_LOG_COMPAT("FixedFunctionGL::Init 17\n");
     if (((g_Supervisor.cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, GL_CONSTANT);
@@ -132,7 +151,8 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
 
-    return interface;
+    SDL_LOG_COMPAT("FixedFunctionGL::Init finish\n");
+    return gfx;
 }
 
 
@@ -196,7 +216,7 @@ void FixedFunctionGL::ToggleVertexAttribute(u8 attr, bool enable)
     }
 }
 
-void FixedFunctionGL::SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr)
+void FixedFunctionGL::SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr)
 {
     switch (attr)
     {

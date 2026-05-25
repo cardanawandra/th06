@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include "SDLCompat.hpp"
 #if SDL_MAJOR_VERSION >= 2
 #include "WebGL.hpp"
 #include "Supervisor.hpp"
@@ -133,7 +133,7 @@ void WebGL::SetContextFlags()
 
 GfxInterface *WebGL::Create()
 {
-    WebGL *interface = new WebGL;
+    WebGL *gfx = new WebGL;
 
     SetContextFlags();
 
@@ -156,43 +156,40 @@ GfxInterface *WebGL::Create()
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
 
-    BeforeCreate();
+    gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
 
-    interface->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
-    SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
-
-    if (interface->window == NULL)
+    if (gfx->window == NULL)
     {
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    interface->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(interface->window);
+    gfx->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(gfx->window);
 
-    if (interface->glContext == NULL)
+    if (gfx->glContext == NULL)
     {
         SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    if (SDL_GL_MAKE_CURRENT_COMPAT(interface->window, interface->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
+    if (SDL_GL_MAKE_CURRENT_COMPAT(gfx->window, gfx->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
     {
         SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
     SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
     g_glFuncTable.ResolveFunctions(true);
 
-    if (!interface->Init())
+    if (!gfx->Init())
     {
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    return interface;
+    return gfx;
 }
 
 void WebGL::Exit()

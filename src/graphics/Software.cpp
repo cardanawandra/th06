@@ -1,8 +1,9 @@
+#include <SDL.h>
+#if SDL_MAJOR_VERSION >= 2
 #include "Software.hpp"
 #include "Supervisor.hpp"
 #include "GameWindow.hpp"
 #include "i18n.hpp"
-#include <SDL.h>
 #include <algorithm>
 #include <cmath>
 #include "utils.hpp"
@@ -12,7 +13,7 @@ constexpr u8 alphaThreshold = 4;
 
 GfxInterface *Software::Init()
 {
-    Software* interface = new Software;
+    Software* gfx = new Software;
 
     SDL_Init(SDL_INIT_VIDEO);
     u32 flags = WINDOW_FLAGS_COMPAT;
@@ -32,46 +33,64 @@ GfxInterface *Software::Init()
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
 
-    BeforeCreate();
+    gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
 
-    interface->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
-    SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
-
-    if (interface->window == NULL)
+    if (gfx->window == NULL)
     {
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    interface->renderer = SDL_CreateRenderer(interface->window, -1, SDL_RENDERER_ACCELERATED);
-    if (interface->renderer == NULL)
+    //SDL 2 are on 3th variable... i'm trying SDL_RENDERER_SOFTWARE
+    //SDL 3 are on 4th variable... i'm trying "direct3d12"
+    //set 4th var into NULL to get the fastest SDL rendering
+    gfx->renderer = SDL_CreateRendererCompat(
+        gfx->window, 
+        -1, 
+        SDL_RENDERER_SOFTWARE, 
+        NULL
+    );
+    if (gfx->renderer == NULL)
     {
-        delete interface;
+        delete gfx;
         return NULL;
     }
 
-    interface->model.Identity();
-    interface->view.Identity();
-    interface->projection.Identity();
-    interface->textureMatrix.Identity();
+    // only works on sdl3
+    // SDL_PropertiesID props =
+    //     SDL_GetRendererProperties(gfx->renderer);
 
-    SDL_Texture* framebufferTexture = SDL_CreateTexture(interface->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
-    interface->framebufferTexture = framebufferTexture;
+    // const char* name =
+    //     SDL_GetStringProperty(
+    //         props,
+    //         SDL_PROP_RENDERER_NAME_STRING,
+    //         ""
+    //     );
+
+    // printf("Renderer: %s\n", name);
+
+    gfx->model.Identity();
+    gfx->view.Identity();
+    gfx->projection.Identity();
+    gfx->textureMatrix.Identity();
+
+    SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_GameWindow.GAME_WINDOW_WIDTH_REAL, g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    gfx->framebufferTexture = framebufferTexture;
     if (framebufferTexture == NULL)    {
-        delete interface;
+        delete gfx;
         return NULL;
     }
-    u32* framebuffer = new u32[GAME_WINDOW_WIDTH * GAME_WINDOW_HEIGHT];
-    interface->framebuffer = framebuffer;
+    u32* framebuffer = new u32[g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL];
+    gfx->framebuffer = framebuffer;
 
-    f32* depthBuffer = new f32[GAME_WINDOW_WIDTH * GAME_WINDOW_HEIGHT];
-    interface->depthBuffer = depthBuffer;
-    interface->noVertexBuffer = g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_VERTEX_BUF);
-    interface->noFog = g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_FOG);
+    f32* depthBuffer = new f32[g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL];
+    gfx->depthBuffer = depthBuffer;
+    gfx->noVertexBuffer = g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_VERTEX_BUF);
+    gfx->noFog = g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_FOG);
 
     utils::DebugPrint2("WARNING: Using software rasterizer, which can be slow. If performance is bad, make sure you're compiling with optimizations (building as release), or go with another graphics backend if possible.");
 
-    return interface;
+    return gfx;
 }
 
 
@@ -221,7 +240,7 @@ void Software::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
 }
 
 void Software::SetTextureFilter() {
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    SDL_SetHintCompat(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 }
 
 void Software::SetClearDepth(f32 depth) {
@@ -230,10 +249,10 @@ void Software::SetClearDepth(f32 depth) {
 
 void Software::Clear(u32 clearBits) {
     if (clearBits & CLEAR_COLOR_BUFFER) {
-        std::fill(framebuffer, framebuffer + GAME_WINDOW_WIDTH * GAME_WINDOW_HEIGHT, clearColor);
+        std::fill(framebuffer, framebuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearColor);
     }
     if (clearBits & CLEAR_DEPTH_BUFFER) {
-        std::fill(depthBuffer, depthBuffer + GAME_WINDOW_WIDTH * GAME_WINDOW_HEIGHT, clearDepth);
+        std::fill(depthBuffer, depthBuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearDepth);
     }
 }
 
@@ -289,7 +308,7 @@ void Software::DeleteTexture(GfxTextureHandle handle)
     freeTextures.push_back(handle.id);
 }
 
-inline SDL_PixelFormatEnum GetSDLPixelFormat(PixelFormat fmt, PixelDataType type) {
+inline SDL_PIXEL_FORMAT_COMPAT GetSDLPixelFormat(PixelFormat fmt, PixelDataType type) {
     switch(type) {
         case PIXEL_UNSIGNED_BYTE:
             if(fmt == PIXEL_RGB) return SDL_PIXELFORMAT_RGB24;
@@ -330,7 +349,7 @@ void Software::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixel
     u8* dst = (u8*)pixels;
     i32 pitch = width * 4;
     for (i32 row = 0; row < height; row++) {
-        const u8* src = (u8*)framebuffer + ((GAME_WINDOW_HEIGHT - 1 - (y + row)) * GAME_WINDOW_WIDTH + x) * 4;
+        const u8* src = (u8*)framebuffer + ((g_GameWindow.GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x) * 4;
         memcpy(dst + row * pitch, src, pitch);
     }
 }
@@ -349,7 +368,7 @@ inline ZunVec3 Software::ProjectToNDC(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p,
 }
 
 inline ZunVec2 Software::ProjectTexCoordToNDC(ZunVec2 texCoord, ZunMatrix textureMatrix) {
-    ZunVec4 clip = textureMatrix * ZunVec4(ZunVec3(texCoord.x, texCoord.y, 1.0f), 1.0f);
+    ZunVec4 clip = textureMatrix * ZunVec4(ZunParseVec3(texCoord.x, texCoord.y, 1.0f), 1.0f);
     ZunVec2 ndc = {clip.x, clip.y};
     return ndc;
 }
@@ -415,7 +434,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         u32* texels;
         i32 texW, texH;
         if(useTexCoord) {
-            const ZunVec2 texDim = {boundTexture ? boundTexture->width : 0, boundTexture ? boundTexture->height : 0};
+            const ZunVec2 texDim = {(f32)(boundTexture ? boundTexture->width : 0), (f32)(boundTexture ? boundTexture->height : 0)};
             tc0 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * index), textureMatrix) * texDim;
             tc1 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * (index+1)), textureMatrix) * texDim;
             tc2 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * (index+2)), textureMatrix) * texDim;
@@ -460,7 +479,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         i32 ymin = std::max(viewport[1],(i32)std::floor(std::min({v0.y, v1.y, v2.y})));
         i32 ymax = std::min(viewport[1] + viewport[3] - 1,(i32)std::ceil(std::max({v0.y, v1.y, v2.y})));
 
-        const ZunVec3 vP = ZunVec3(xmin+0.5f, ymin+0.5f, 0);
+        const ZunVec3 vP = {xmin+0.5f, ymin+0.5f, 0};
         ZunVec3 edges = {EdgeFunction(v1, v2, vP), EdgeFunction(v2, v0, vP), EdgeFunction(v0, v1, vP)};
         f32 area = EdgeFunction(v0, v1, v2);
 
@@ -510,7 +529,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             Diffuse dif = dif0;
             for (int x = xmin; x <= xmax; x++, w += w_dx, uv1 += uv_dx, invw += invw_dx, ndcZ += ndcZ_dx, fogZ += fogZ_dx, dif += dif_dx) {
                 if (w.x >= 0 && w.y >= 0 && w.z >= 0) {
-                    const i32 pixelCoord = y * GAME_WINDOW_WIDTH + x;
+                    const i32 pixelCoord = y * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x;
                     const f32 clipW = 1.0f / invw; //bad
                     i32 u = uv1.x * clipW;
                     i32 v = uv1.y * clipW;
@@ -583,7 +602,8 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
 
 void Software::SwapBuffers()
 {
-    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, GAME_WINDOW_WIDTH * sizeof(u32));
+    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, g_GameWindow.GAME_WINDOW_WIDTH_REAL * sizeof(u32));
     SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
+#endif

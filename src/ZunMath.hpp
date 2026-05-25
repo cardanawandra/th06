@@ -114,7 +114,11 @@ struct ZunVec2
 
     ZunVec2 operator+(const ZunVec2 &b) const
     {
-        return ZunVec2(this->x + b.x, this->y + b.y);
+        ZunVec2 v = {
+            this->x + b.x,
+            this->y + b.y,
+        };
+        return v;
     }
 
     ZunVec2 &operator+=(const ZunVec2 &b)
@@ -127,12 +131,20 @@ struct ZunVec2
 
     ZunVec2 operator*(const f32 mult) const
     {
-        return ZunVec2(this->x * mult, this->y * mult);
+        ZunVec2 v = {
+            this->x * mult,
+            this->y * mult,
+        };
+        return v;
     }
 
     ZunVec2 operator*(const ZunVec2 &mult) const
     {
-        return ZunVec2(this->x * mult.x, this->y * mult.y);
+        ZunVec2 v = {
+            this->x * mult.x,
+            this->y * mult.y,
+        };
+        return v;
     }
 
     f32 VectorLength() const
@@ -160,7 +172,7 @@ struct ZunVec3
     f32 y;
     f32 z;
 
-    inline constexpr ZunVec3 &operator=(const ZunVec3Raw &a)
+    inline ZunVec3 &operator=(const ZunVec3Raw &a)
     {
         this->x = a.x;
         this->y = a.y;
@@ -299,7 +311,13 @@ struct ZunVec3
     }
 };
 // static_assert(sizeof(ZunVec3) == 0x0C && sizeof(ZunVec3Raw) == 0x0C, "ZunVec3 has additional padding between struct members!");
+#define ZunParseVec3(x,y,z) x,y,z
 #define ZunProcVec3(x,y,z) {x,y,z}
+#define ZunTargetVec3(target, xv,yv,zv) (target).x=xv; (target).y=yv; (target).z=zv
+inline ZunVec3 ZunGenVec3(f32 x, f32 y, f32 z){
+    ZunVec3 result = {x,y,z};
+    return result;
+}
 
 struct ZunVec4
 {

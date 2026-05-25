@@ -4,6 +4,19 @@ project(th06_sdl)
 
 option(TH06_USE_SDL "TH06 SDL" ON)
 
+add_definitions(
+
+    /DWIN32
+    /D_WINDOWS
+
+    /DTH06_USE_DX5=1
+
+    /DDIRECTDRAW_VERSION=0x0200
+    /DDIRECT3D_VERSION=0x0200
+
+    /D_CRT_SECURE_NO_DEPRECATE
+)
+
 # ---- Paths ----
 set(SDL_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL")
 set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_image")
@@ -30,7 +43,6 @@ link_directories(
 # ---- Sources ----
 set(TH06_GAME_SOURCES
     ../src/main.cpp
-    ../src/GLFunc.cpp
     ../src/AnmManager.cpp
     ../src/AsciiManager.cpp
     ../src/BombData.cpp
@@ -63,11 +75,15 @@ set(TH06_GAME_SOURCES
     ../src/Supervisor.cpp
     ../src/TextHelper.cpp
     ../src/utils.cpp
+    ../src/ZunMath.cpp
     ../src/ZunTimer.cpp
     ../src/thirdparty/sjis_converter.cpp
     ../src/midi/MidiDefault.cpp
+    ../src/graphics/FixedFunctionDX2.cpp
+    ../src/graphics/GLFunc.cpp
     ../src/graphics/FixedFunctionGL.cpp
     ../src/graphics/WebGL.cpp
+    ../src/graphics/Software.cpp
     ../src/pbg3/FileAbstraction.cpp
     ../src/pbg3/IPbg3Parser.cpp
     ../src/pbg3/Pbg3Archive.cpp
@@ -85,6 +101,13 @@ target_link_libraries(th06
     SDL_ttf
     opengl32
     winmm
+    
+    ddraw
+    dxguid
+        
+    gdi32
+    user32
+    kernel32
 )
 
 # ---- Custom command (simplified) ----

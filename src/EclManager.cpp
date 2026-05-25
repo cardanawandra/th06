@@ -116,6 +116,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
+            SDL_LOG_COMPAT("ECL CODE : %d",instruction->opCode+10000);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -719,6 +720,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 enemy->life = enemy->maxLife = instruction->args.setInt;
                 break;
             case ECL_OPCODE_SPELLCARDSTART:
+                SDL_LOG_COMPAT("ECL ShowSpellcard : %s",instruction->args.spellcardStart.spellcardName);
                 g_Gui.ShowSpellcard(instruction->args.spellcardStart.spellcardSprite,
                                     instruction->args.spellcardStart.spellcardName);
                 g_EnemyManager.spellcardInfo.isCapturing = 1;
@@ -738,7 +740,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 csum = 0;
                 if (!g_GameManager.isInReplay)
                 {
-                    strcpy(local_70->name, instruction->args.spellcardStart.spellcardName);
+                    SNPRINTF(local_70->name, sizeof(local_70->name), "%s", instruction->args.spellcardStart.spellcardName);
                     local_74 = strlen(local_70->name);
                     while (0 < local_74)
                     {
@@ -865,8 +867,12 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 g_GameManager.counat += 1800;
                 break;
             case ECL_OPCODE_ENEMYCREATE:
-                local_b0 = instruction->args.enemyCreate;
-                tmpVec3 = local_b0.pos;
+                local_b0.subId = instruction->args.enemyCreate.subId;
+                local_b0.life = instruction->args.enemyCreate.life;
+                local_b0.itemDrop = instruction->args.enemyCreate.itemDrop;
+                local_b0.score = instruction->args.enemyCreate.score;
+    
+                tmpVec3 = instruction->args.enemyCreate.pos;
                 tmpVec3.x = EnemyEclInstr::GetVarFloatValue(enemy, tmpVec3.x, NULL);
                 tmpVec3.y = EnemyEclInstr::GetVarFloatValue(enemy, tmpVec3.y, NULL);
                 tmpVec3.z = EnemyEclInstr::GetVarFloatValue(enemy, tmpVec3.z, NULL);
@@ -982,7 +988,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 {
                     enemy->flags.unk1 = 0;
                     enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
-                    enemy->axisSpeed = ZunVec3(0.0f, 0.0f, 0.0f);
+                    ZunTargetVec3(enemy->axisSpeed, 0.0f, 0.0f, 0.0f);
                 }
                 break;
             }

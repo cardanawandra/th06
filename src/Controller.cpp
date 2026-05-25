@@ -399,6 +399,6 @@ void Controller::ResetKeyboard(void)
     //   We both start and stop due to this bug https://github.com/libsdl-org/SDL/issues/13172
     //   Since I can't test on Windows, it's good to be on the safe side
     //only works on sdl2
-    SDL_START_TEXT_INPUT_COMPAT(g_GameWindow.screen);//SDL_StartTextInput
-    SDL_STOP_TEXT_INPUT_COMPAT(g_GameWindow.screen);//SDL_StopTextInput
+    SDL_START_TEXT_INPUT_COMPAT();//SDL_StartTextInput
+    SDL_STOP_TEXT_INPUT_COMPAT();//SDL_StopTextInput
 }

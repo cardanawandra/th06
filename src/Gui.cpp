@@ -43,7 +43,7 @@ bool Gui::IsDialogueSkippable() const
 
 void Gui::ShowBonusScore(u32 bonusScore) const
 {
-    this->impl->bonusScore.pos = ZunProcVec3(416.0f, 32.0f, 0.0f);
+    this->impl->bonusScore.pos = ZunGenVec3(416.0f, 32.0f, 0.0f);
     this->impl->bonusScore.isShown = 1;
     this->impl->bonusScore.timer.InitializeForPopup();
     this->impl->bonusScore.fmtArg = bonusScore;
@@ -52,7 +52,7 @@ void Gui::ShowBonusScore(u32 bonusScore) const
 
 void Gui::ShowFullPowerMode(i32 fmtArg) const
 {
-    this->impl->fullPowerMode.pos = ZunProcVec3(416.0f, 232.0f, 0.0f);
+    this->impl->fullPowerMode.pos = ZunGenVec3(416.0f, 232.0f, 0.0f);
     this->impl->fullPowerMode.isShown = 1;
     this->impl->fullPowerMode.timer.InitializeForPopup();
     this->impl->fullPowerMode.fmtArg = fmtArg;
@@ -61,7 +61,7 @@ void Gui::ShowFullPowerMode(i32 fmtArg) const
 
 void Gui::ShowSpellcardBonus(u32 spellcardScore) const
 {
-    this->impl->spellCardBonus.pos = ZunProcVec3(224.0f, 16.0f, 0.0f);
+    this->impl->spellCardBonus.pos = ZunGenVec3(224.0f, 16.0f, 0.0f);
     this->impl->spellCardBonus.isShown = 1;
     this->impl->spellCardBonus.timer.InitializeForPopup();
     this->impl->spellCardBonus.fmtArg = spellcardScore;
@@ -731,7 +731,7 @@ ZunResult GuiImpl::DrawDialogue() const
     // separate f32 for the w, and a D3DCOLOR for the diffuse. This kinda makes
     // no sense though - the position is a D3DXVECTOR4.
     //    memcpy(&vertices[0].position,
-    //           &ZunProcVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f -
+    //           &ZunGenVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f -
     //                            16.0f,
     //                        384.0f, 0.0f),
     //           sizeof(ZunVec3));
@@ -741,7 +741,7 @@ ZunResult GuiImpl::DrawDialogue() const
                 384.0f, 0.0f, 1.0f);
 
     //    memcpy(&vertices[1].position,
-    //           &ZunProcVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f +
+    //           &ZunGenVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f +
     //                            256.0f + 16.0f,
     //                        384.0f, 0.0f),
     //           sizeof(ZunVec3));
@@ -751,7 +751,7 @@ ZunResult GuiImpl::DrawDialogue() const
                                    384.0f, 0.0f, 1.0f),
 
     //    memcpy(&vertices[2].position,
-    //           &ZunProcVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f -
+    //           &ZunGenVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f -
     //                            16.0f,
     //                        384.0f + dialogueBoxHeight, 0.0f),
     //           sizeof(ZunVec3));
@@ -761,7 +761,7 @@ ZunResult GuiImpl::DrawDialogue() const
                     384.0f + dialogueBoxHeight, 0.0f, 1.0f),
 
     //    memcpy(&vertices[3].position,
-    //           &ZunProcVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f +
+    //           &ZunGenVec3(g_GameManager.arcadeRegionTopLeftPos.x + (g_GameManager.arcadeRegionSize.x - 256.0f) / 2.0f +
     //                            256.0f + 16.0f,
     //                        384.0f + dialogueBoxHeight, 0.0f),
     //           sizeof(ZunVec3));
@@ -1033,7 +1033,7 @@ void Gui::DrawGameScene()
         ZunVec3 textPos = {80.0f, 16.0f, 0.0};
         g_AsciiManager.SetColor(this->bossUIOpacity << 24 | 0xffff80);
         g_AsciiManager.AddFormatText(&textPos, "%d", this->eclSetLives);
-        textPos = ZunProcVec3(384.0f, 16.0f, 0.0f);
+        textPos = ZunGenVec3(384.0f, 16.0f, 0.0f);
         ZunColor bossLivesColor;
         if (this->spellcardSecondsRemaining >= 20)
         {
@@ -1078,27 +1078,27 @@ void Gui::DrawGameScene()
     {
         for (yPos = 0.0f; yPos < 464.0f; yPos += 32.0f)
         {
-            vm->pos = ZunProcVec3(0.0f, yPos, 0.49f);
+            vm->pos = ZunGenVec3(0.0f, yPos, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         for (xPos = 416.0f; xPos < 624.0f; xPos += 32.0f)
         {
             for (yPos = 0.0f; yPos < 464.0f; yPos += 32.0f)
             {
-                vm->pos = ZunProcVec3(xPos, yPos, 0.49f);
+                vm->pos = ZunGenVec3(xPos, yPos, 0.49f);
                 g_AnmManager->DrawNoRotation(vm);
             }
         }
         vm = &this->impl->vms[7];
         for (xPos = 32.0f; xPos < 416.0f; xPos += 32.0f)
         {
-            vm->pos = ZunProcVec3(xPos, 0.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 0.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         vm = &this->impl->vms[8];
         for (xPos = 32.0f; xPos < 416.0f; xPos += 32.0f)
         {
-            vm->pos = ZunProcVec3(xPos, 464.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 464.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         g_AnmManager->Draw(&this->impl->vms[5]);
@@ -1124,38 +1124,38 @@ void Gui::DrawGameScene()
     {
         vm = &this->impl->vms[22];
         xPos = 496.0f;
-        vm->pos = ZunProcVec3(xPos, 58.0f, 0.49f);
+        vm->pos = ZunGenVec3(xPos, 58.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
-        vm->pos = ZunProcVec3(xPos, 82.0f, 0.49f);
+        vm->pos = ZunGenVec3(xPos, 82.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
         if (this->flags.flag0)
         {
-            vm->pos = ZunProcVec3(xPos, 122.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 122.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->flags.flag1)
         {
-            vm->pos = ZunProcVec3(xPos, 146.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 146.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->flags.flag2)
         {
-            vm->pos = ZunProcVec3(xPos, 186.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 186.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->flags.flag3)
         {
-            vm->pos = ZunProcVec3(xPos, 206.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 206.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
         if (this->flags.flag4)
         {
-            vm->pos = ZunProcVec3(xPos, 226.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 226.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
-        vm->pos = ZunProcVec3(488.0f, 464.0f, 0.49f);
+        vm->pos = ZunGenVec3(488.0f, 464.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
-        vm->pos = ZunProcVec3(0.0, 464.0f, 0.49f);
+        vm->pos = ZunGenVec3(0.0, 464.0f, 0.49f);
         g_AnmManager->DrawNoRotation(vm);
     }
     if (this->flags.flag0 || ((g_Supervisor.cfg.opts >> GCOS_DISPLAY_MINIMUM_GRAPHICS & 1) != 0))
@@ -1163,7 +1163,7 @@ void Gui::DrawGameScene()
         vm = &this->impl->vms[16];
         for (idx = 0, xPos = 496.0f; idx < g_GameManager.livesRemaining; idx++, xPos += 16.0f)
         {
-            vm->pos = ZunProcVec3(xPos, 122.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 122.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
     }
@@ -1172,7 +1172,7 @@ void Gui::DrawGameScene()
         vm = &this->impl->vms[17];
         for (idx = 0, xPos = 496.0f; idx < g_GameManager.bombsRemaining; idx++, xPos += 16.0f)
         {
-            vm->pos = ZunProcVec3(xPos, 146.0f, 0.49f);
+            vm->pos = ZunGenVec3(xPos, 146.0f, 0.49f);
             g_AnmManager->DrawNoRotation(vm);
         }
     }
@@ -1187,12 +1187,12 @@ void Gui::DrawGameScene()
         #endif
         {
             g_AnmManager->FlushVertexBuffer();
-            //            memcpy(&vertices[0].position, &ZunProcVec3(496.0f, 186.0f, 0.1f), sizeof(ZunVec3));
-            //            memcpy(&vertices[1].position, &ZunProcVec3(g_GameManager.currentPower + 496 + 0.0f, 186.0f,
+            //            memcpy(&vertices[0].position, &ZunGenVec3(496.0f, 186.0f, 0.1f), sizeof(ZunVec3));
+            //            memcpy(&vertices[1].position, &ZunGenVec3(g_GameManager.currentPower + 496 + 0.0f, 186.0f,
             //            0.1f),
             //                   sizeof(ZunVec3));
-            //            memcpy(&vertices[2].position, &ZunProcVec3(496.0f, 202.0f, 0.1f), sizeof(ZunVec3));
-            //            memcpy(&vertices[3].position, &ZunProcVec3(g_GameManager.currentPower + 496 + 0.0f, 202.0f,
+            //            memcpy(&vertices[2].position, &ZunGenVec3(496.0f, 202.0f, 0.1f), sizeof(ZunVec3));
+            //            memcpy(&vertices[3].position, &ZunGenVec3(g_GameManager.currentPower + 496 + 0.0f, 202.0f,
             //            0.1f),
             //                   sizeof(ZunVec3));
 
@@ -1237,13 +1237,13 @@ void Gui::DrawGameScene()
             if (128 <= g_GameManager.currentPower)
             {
                 vm = &this->impl->vms[18];
-                vm->pos = ZunProcVec3(496.0f, 186.0f, 0.0f);
+                vm->pos = ZunGenVec3(496.0f, 186.0f, 0.0f);
                 g_AnmManager->DrawNoRotation(vm);
             }
         }
         if (g_GameManager.currentPower < 128)
         {
-            ZunVec3 formatTextPos = ZunProcVec3(496.0f, 186.0f, 0.0f);
+            ZunVec3 formatTextPos = ZunGenVec3(496.0f, 186.0f, 0.0f);
 
             g_AsciiManager.AddFormatText(&formatTextPos, "%d", g_GameManager.currentPower);
         }
@@ -1251,16 +1251,16 @@ void Gui::DrawGameScene()
     {
         ZunVec3 elemPos = {496.0f, 82.0f, 0.0f};
         g_AsciiManager.AddFormatText(&elemPos, "%.9d", g_GameManager.guiScore);
-        elemPos = ZunProcVec3(496.0f, 58.0f, 0.0f);
+        elemPos = ZunGenVec3(496.0f, 58.0f, 0.0f);
         g_AsciiManager.AddFormatText(&elemPos, "%.9d", g_GameManager.highScore);
         if (this->flags.flag3 || ((g_Supervisor.cfg.opts >> 4 & 1) != 0))
         {
-            elemPos = ZunProcVec3(496.0f, 206.0f, 0.0f);
+            elemPos = ZunGenVec3(496.0f, 206.0f, 0.0f);
             g_AsciiManager.AddFormatText(&elemPos, "%d", g_GameManager.grazeInStage);
         }
         if (this->flags.flag4 || ((g_Supervisor.cfg.opts >> 4 & 1) != 0))
         {
-            elemPos = ZunProcVec3(496.0f, 226.0f, 0.0f);
+            elemPos = ZunGenVec3(496.0f, 226.0f, 0.0f);
             g_AsciiManager.AddFormatText(&elemPos, "%d", g_GameManager.pointItemsCollectedInStage);
         }
     }
