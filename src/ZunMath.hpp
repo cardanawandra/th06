@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/GLFunc.hpp"
 #include "inttypes.hpp"
+#include "ZunEndian.hpp"
 #include <math.h>
 #include <string.h>
 
@@ -100,11 +100,40 @@ inline u16 RotateLeft16(u16 n, u8 s)
 
 // sizeof checks kept in because technically, the standard does allow compilers to add more padding than is required
 
+struct ZunVec2Raw
+{
+    LE<f32> x;
+    LE<f32> y;
+};
+
 // Replacing all former uses of D3DXVECTOR2
 struct ZunVec2
 {
     f32 x;
     f32 y;
+
+    ZunVec2 operator+(const ZunVec2 &b) const
+    {
+        return ZunVec2(this->x + b.x, this->y + b.y);
+    }
+
+    ZunVec2 &operator+=(const ZunVec2 &b)
+    {
+        this->x += b.x;
+        this->y += b.y;
+
+        return *this;
+    }
+
+    ZunVec2 operator*(const f32 mult) const
+    {
+        return ZunVec2(this->x * mult, this->y * mult);
+    }
+
+    ZunVec2 operator*(const ZunVec2 &mult) const
+    {
+        return ZunVec2(this->x * mult.x, this->y * mult.y);
+    }
 
     f32 VectorLength() const
     {
@@ -116,15 +145,29 @@ struct ZunVec2
         return (f64)this->VectorLength();
     }
 };
+// static_assert(sizeof(ZunVec2) == 0x08 && sizeof(ZunVec2Raw) == 0x08, "ZunVec2 has additional padding between struct members!");
 
-//static_assert(sizeof(ZunVec2) == 0x08, "ZunVec2 has additional padding between struct members!");
-
+struct ZunVec3Raw
+{
+    LE<f32> x;
+    LE<f32> y;
+    LE<f32> z;
+};
 // Replacing all former uses of D3DXVECTOR3
 struct ZunVec3
 {
     f32 x;
     f32 y;
     f32 z;
+
+    inline constexpr ZunVec3 &operator=(const ZunVec3Raw &a)
+    {
+        this->x = a.x;
+        this->y = a.y;
+        this->z = a.z;
+
+        return *this;
+    }
 
     ZunVec3 operator-() const
     {
@@ -255,11 +298,8 @@ struct ZunVec3
             size->y / 2.0f + centerPosition->y;
     }
 };
-inline ZunVec3 ZunProcVec3(f32 x, f32 y, f32 z){
-    ZunVec3 result = {x,y,z};
-    return result;
-}
-//static_assert(sizeof(ZunVec3) == 0x0C, "ZunVec3 has additional padding between struct members!");
+// static_assert(sizeof(ZunVec3) == 0x0C && sizeof(ZunVec3Raw) == 0x0C, "ZunVec3 has additional padding between struct members!");
+#define ZunProcVec3(x,y,z) {x,y,z}
 
 struct ZunVec4
 {
@@ -321,6 +361,18 @@ struct ZunMatrix
         result.x = this->m[0][0] * b.x + this->m[1][0] * b.y + this->m[2][0] * b.z + this->m[3][0];
         result.y = this->m[0][1] * b.x + this->m[1][1] * b.y + this->m[2][1] * b.z + this->m[3][1];
         result.z = this->m[0][2] * b.x + this->m[1][2] * b.y + this->m[2][2] * b.z + this->m[3][2];
+
+        return result;
+    }
+
+    ZunVec4 operator*(const ZunVec4 &b) const
+    {
+        ZunVec4 result(0.0f, 0.0f, 0.0f, 0.0f);
+
+        result.x = this->m[0][0] * b.x + this->m[1][0] * b.y + this->m[2][0] * b.z + this->m[3][0] * b.w;
+        result.y = this->m[0][1] * b.x + this->m[1][1] * b.y + this->m[2][1] * b.z + this->m[3][1] * b.w;
+        result.z = this->m[0][2] * b.x + this->m[1][2] * b.y + this->m[2][2] * b.z + this->m[3][2] * b.w;
+        result.w = this->m[0][3] * b.x + this->m[1][3] * b.y + this->m[2][3] * b.z + this->m[3][3] * b.w;
 
         return result;
     }

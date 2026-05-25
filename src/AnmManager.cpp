@@ -639,7 +639,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     anm->spriteIdxOffset = spriteIdxOffset;
 
-    const u32 *curSpriteOffset = anm->spriteOffsets;
+    const LE<u32> *curSpriteOffset = anm->spriteOffsets;
 
     i32 index;
     const AnmRawSprite *rawSprite;
@@ -677,13 +677,13 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
 {
     if (this->anmFiles[anmIdx] != NULL)
     {
-        const i32 *spriteIdx;
+        const LE<i32> *spriteIdx;
         i32 i;
         i32 spriteIdxOffset = this->anmFilesSpriteIndexOffsets[anmIdx];
-        const u32 *byteOffset = this->anmFiles[anmIdx]->spriteOffsets;
+        const LE<u32> *byteOffset = this->anmFiles[anmIdx]->spriteOffsets;
         for (i = 0; i < this->anmFiles[anmIdx]->numSprites; i++, byteOffset++)
         {
-            spriteIdx = (i32 *)((u8 *)this->anmFiles[anmIdx] + *byteOffset);
+            spriteIdx = (LE<i32> *)((u8 *)this->anmFiles[anmIdx] + *byteOffset);
             memset(&this->sprites[*spriteIdx + spriteIdxOffset], 0,
                    sizeof(this->sprites[*spriteIdx + spriteIdxOffset]));
             this->sprites[*spriteIdx + spriteIdxOffset].sourceFileIndex = -1;
@@ -1530,10 +1530,10 @@ ZunResult AnmManager::Draw2(const AnmVm *vm)
     return ZUN_SUCCESS;
 }
 
-#define AnmF32Arg(index) (*(f32 *)&curInstr->args[index])
-#define AnmI32Arg(index) (*(i32 *)&curInstr->args[index])
-#define AnmU32Arg(index) (*(u32 *)&curInstr->args[index])
-#define AnmI16Arg(index) (*(i16 *)&curInstr->args[index])
+#define AnmF32Arg(index) (*(LE<f32> *)&curInstr->args[index])
+#define AnmI32Arg(index) (*(LE<i32> *)&curInstr->args[index])
+#define AnmU32Arg(index) (*(LE<u32> *)&curInstr->args[index])
+#define AnmI16Arg(index) (*(LE<i16> *)&curInstr->args[index])
 
 i32 AnmManager::ExecuteScript(AnmVm *vm)
 {

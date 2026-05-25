@@ -20,7 +20,6 @@
 #define DISABLE_SOUNDPLAYER_BGM
 #define DISABLE_SOUNDPLAYER
 #endif
-#define SDL_LOG_COMPAT printf
 
 #include <math.h>
 #include <cstring>

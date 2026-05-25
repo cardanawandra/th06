@@ -8,6 +8,7 @@
 #include "ZunMath.hpp"
 #include "graphics/FixedFunctionGL.hpp"
 #include "graphics/WebGL.hpp"
+#include "graphics/Software.hpp"
 #include "i18n.hpp"
 #include "utils.hpp"
 
@@ -32,9 +33,11 @@ static const struct
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
     #ifdef __ANDROID__
-    {"GL(ES) 2.0 / WebGL", WebGL::Create},
     #endif
-    {"Fixed function GL(ES)", FixedFunctionGL::Init}};
+    {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    {"Software fallback (VERY SLOW)", Software::Init}
+};
 
 RenderResult GameWindow::Render()
 {
@@ -229,25 +232,7 @@ void GameWindow::CreateGameWindow()
             SDL_LOG_COMPAT("Using renderer backend %s\n", s_RenderBackends[i].name);
             break;
         }
-        /*
-        s_RenderBackends[i].setContextFlags();
-        break;
-    fail:
-        if (g_GameWindow.glContext != NULL)
-        {
-            SDL_GL_DELETE_CONTEXT_COMPAT(g_GameWindow.glContext);
-            g_GameWindow.glContext = NULL;
-        }
-
-        if (g_GameWindow.screen != NULL)
-        {
-            SDL_DESTROY_WINDOW_COMPAT(g_GameWindow.screen);
-            g_GameWindow.screen = NULL;
-        }
-        */
     }
-
-    // g_Supervisor.gameWindow = g_GameWindow.screen;
 
     g_GameWindow.lastActiveAppValue = 1;
 }

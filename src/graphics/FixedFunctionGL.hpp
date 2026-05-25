@@ -28,7 +28,7 @@ struct FixedFunctionGL : GfxInterface
     virtual void GetViewport(u32* viewport);
     virtual void GetDepthRange(f32* depthRange);
     virtual void SetViewport(i32 x, i32 y, i32 width, i32 height);
-    virtual void SetDepthRange(f32 near, f32 far);
+    virtual void SetDepthRange(f32 nearPlane, f32 farPlane);
 
     virtual void Enable(Capabilities cap);
     virtual bool HasError();
@@ -53,8 +53,6 @@ struct FixedFunctionGL : GfxInterface
 
 
   private:
-    std::vector<GLuint> textures;
-    std::vector<u32> freeTextures;
     SDL_SURFACE_COMPAT *window;
     SDL_GL_CONTEXT_COMPAT glContext;
 };

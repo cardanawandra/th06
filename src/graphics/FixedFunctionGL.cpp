@@ -303,8 +303,8 @@ void FixedFunctionGL::Clear(u32 clearBits) {
     g_glFuncTable.glClear(mask);
 }
 
-void FixedFunctionGL::SetDepthRange(f32 nearVar, f32 farVar) {
-    g_glFuncTable.GLDepthRangeCompat(nearVar, farVar);
+void FixedFunctionGL::SetDepthRange(f32 nearPlane, f32 farPlane) {
+    g_glFuncTable.GLDepthRangeCompat(nearPlane, farPlane);
 }
 
 void FixedFunctionGL::SetDepthMask(bool enable) {
@@ -326,17 +326,15 @@ void FixedFunctionGL::SetDepthFunc(DepthFunc func) {
 GfxTextureHandle FixedFunctionGL::CreateTexture() {
     GLuint texture;
     g_glFuncTable.glGenTextures(1, &texture);
-    textures.push_back(texture);
-    return {textures.size()-1};
+    return texture;
 }
 
 void FixedFunctionGL::BindTexture(GfxTextureHandle handle) {
-    g_glFuncTable.glBindTexture(GL_TEXTURE_2D, textures[handle.id]);
+    g_glFuncTable.glBindTexture(GL_TEXTURE_2D, handle);
 }
 
 void FixedFunctionGL::DeleteTexture(GfxTextureHandle handle) {
-    g_glFuncTable.glDeleteTextures(1, &textures[handle.id]);
-    textures[handle.id] = 0;
+    g_glFuncTable.glDeleteTextures(1, (GLuint*)&handle);
 }
 
 void FixedFunctionGL::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelDataType type, const void* data) {
