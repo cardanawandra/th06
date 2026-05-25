@@ -79,7 +79,6 @@ endif()
 
 set(TH06_GAME_SOURCES
     ../src/main.cpp
-    ../src/GLFunc.cpp
     ../src/AnmManager.cpp
     ../src/AsciiManager.cpp
     ../src/BombData.cpp
@@ -112,8 +111,11 @@ set(TH06_GAME_SOURCES
     ../src/Supervisor.cpp
     ../src/TextHelper.cpp
     ../src/utils.cpp
+    ../src/ZunMath.cpp
     ../src/ZunTimer.cpp
+    ../src/thirdparty/sjis_converter.cpp
     ../src/midi/MidiDefault.cpp
+    ../src/graphics/GLFunc.cpp
     ../src/graphics/FixedFunctionGL.cpp
     ../src/graphics/WebGL.cpp
     ../src/pbg3/FileAbstraction.cpp
