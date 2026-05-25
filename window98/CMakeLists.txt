@@ -64,6 +64,7 @@ set(TH06_GAME_SOURCES
     ../src/TextHelper.cpp
     ../src/utils.cpp
     ../src/ZunTimer.cpp
+    ../src/thirdparty/sjis_converter.cpp
     ../src/midi/MidiDefault.cpp
     ../src/graphics/FixedFunctionGL.cpp
     ../src/graphics/WebGL.cpp

@@ -2,7 +2,9 @@
 #if SDL_MAJOR_VERSION >= 2
 #include "WebGL.hpp"
 #include "Supervisor.hpp"
+#include "GameWindow.hpp"
 #include "utils.hpp"
+#include "SDLCompat.hpp"
 #include <new>
 #include <unordered_set>
 
@@ -40,11 +42,11 @@ GLuint createShader(const char *source, GLenum type, const char *descString,
 
     if (SDL_GL_ExtensionSupported("GL_EXT_frag_depth"))
     {
-        fullShaderSource[shaderSourceIndex++] = "#extension GL_EXT_frag_depth\n";
+        fullShaderSource[shaderSourceIndex++] = "#extension GL_EXT_frag_depth : require\n";
         fullShaderSource[shaderSourceIndex++] = "#define USE_FRAG_DEPTH\n";
     }
 
-    if (g_Supervisor.cfg.opts & (1 >> GCOS_DONT_USE_FOG))
+    if (g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_FOG))
     {
         fullShaderSource[shaderSourceIndex++] = "#define NO_FOG\n";
         omittedUniforms.insert(UNIFORM_FOG_NEAR);
@@ -52,7 +54,7 @@ GLuint createShader(const char *source, GLenum type, const char *descString,
         omittedUniforms.insert(UNIFORM_FOG_COLOR);
     }
 
-    if (g_Supervisor.cfg.opts & (1 >> GCOS_DONT_USE_VERTEX_BUF))
+    if (g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_VERTEX_BUF))
     {
         fullShaderSource[shaderSourceIndex++] = "#define NO_VERTEX_BUFFER\n";
     }
@@ -62,6 +64,8 @@ GLuint createShader(const char *source, GLenum type, const char *descString,
     }
 
     fullShaderSource[shaderSourceIndex] = source;
+
+    printf("%s", source);
 
     g_glFuncTable.glShaderSource(shaderHandle, shaderSourceIndex + 1, fullShaderSource, NULL);
     g_glFuncTable.glCompileShader(shaderHandle);
@@ -131,12 +135,78 @@ GfxInterface *WebGL::Create()
 {
     WebGL *interface = new WebGL;
 
+    SetContextFlags();
+
+    // SDL1.2 init (no GameController API)
+    SDL_Init(SDL_INIT_VIDEO);
+    u32 flags = WINDOW_FLAGS_COMPAT;
+
+    if (g_Supervisor.cfg.windowed == 0)
+    {
+        flags |= SDL_FULLSCREEN_COMPAT;
+    }
+
+    g_GameWindow.CONFIGURE_INIT();
+    #ifdef __ANDROID__
+    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    #endif
+    g_GameWindow.CONFIGURE_VIEW();
+    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
+    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+
+    BeforeCreate();
+
+    interface->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
+    SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
+
+    if (interface->window == NULL)
+    {
+        delete interface;
+        return NULL;
+    }
+
+    interface->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(interface->window);
+
+    if (interface->glContext == NULL)
+    {
+        SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
+        delete interface;
+        return NULL;
+    }
+
+    if (SDL_GL_MAKE_CURRENT_COMPAT(interface->window, interface->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
+    {
+        SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
+        delete interface;
+        return NULL;
+    }
+
+    SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
+    g_glFuncTable.ResolveFunctions(true);
+
     if (!interface->Init())
     {
+        delete interface;
         return NULL;
     }
 
     return interface;
+}
+
+void WebGL::Exit()
+{
+    if (this->glContext)
+    {
+        SDL_GL_DELETE_CONTEXT_COMPAT(this->glContext);
+        this->glContext = NULL;
+    }
+    if (this->window)
+    {
+        SDL_DESTROY_WINDOW_COMPAT(this->window);
+        this->window = NULL;
+    }
 }
 
 bool WebGL::Init()
@@ -296,13 +366,183 @@ void WebGL::SetTextureFactor(ZunColor factor)
 void WebGL::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
 {
     // I should probably just remove the model matrix from the range of possibilies
-    static const u32 matrixUniformEnum[4] = {UNIFORM_MODELVIEW, UNIFORM_MODELVIEW, UNIFORM_PROJECTION, UNIFORM_TEXTURE_MATRIX};
+    static const u32 matrixUniformEnum[4] = {UNIFORM_MODELVIEW, UNIFORM_MODELVIEW, UNIFORM_PROJECTION,
+                                             UNIFORM_TEXTURE_MATRIX};
 
     g_glFuncTable.glUniformMatrix4fv(this->uniforms[matrixUniformEnum[type]], 1, false, (const GLfloat *)&matrix.m);
 }
 
-void WebGL::Draw()
-{
+void WebGL::Enable(Capabilities cap) {
+    switch (cap) {
+        case CAPS_BLEND:
+            g_glFuncTable.glEnable(GL_BLEND);
+            break;
+        case CAPS_DEPTH_TEST:
+            g_glFuncTable.glEnable(GL_DEPTH_TEST);
+            break;
+    }
 }
 
+bool WebGL::HasError() {
+    return g_glFuncTable.glGetError() != GL_NO_ERROR;
+}
+
+void WebGL::SetTextureFilter() {
+    g_glFuncTable.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void WebGL::GetViewport(u32* viewport) {
+    g_glFuncTable.glGetIntegerv(GL_VIEWPORT, (GLint*)viewport);
+}
+
+void WebGL::GetDepthRange(f32* depthRange) {
+    g_glFuncTable.glGetFloatv(GL_DEPTH_RANGE, depthRange);
+}
+
+void WebGL::SetViewport(i32 x, i32 y, i32 width, i32 height) {
+    g_glFuncTable.glViewport(x, y, width, height);
+}
+
+void WebGL::SetDepthRange(f32 nearVar, f32 farVar) {
+    g_glFuncTable.GLDepthRangeCompat(nearVar, farVar);
+}
+
+void WebGL::SetBlendMode(BlendMode mode) {
+    if (mode == BLEND_INV_SRC_ALPHA)
+    {
+        g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+}
+
+void WebGL::SetClearDepth(f32 depth) {
+    g_glFuncTable.glClearDepthf(depth);
+}
+
+void WebGL::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
+    g_glFuncTable.glClearColor(r, g, b, a);
+}
+
+void WebGL::Clear(u32 clearBits) {
+    GLbitfield mask = 0;
+
+    if (clearBits & CLEAR_COLOR_BUFFER) mask |= GL_COLOR_BUFFER_BIT;
+    if (clearBits & CLEAR_DEPTH_BUFFER) mask |= GL_DEPTH_BUFFER_BIT;
+
+    g_glFuncTable.glClear(mask);
+}
+
+void WebGL::SetDepthMask(bool enable) {
+    g_glFuncTable.glDepthMask(enable);
+}
+
+void WebGL::SetDepthFunc(DepthFunc func) {
+    if (func == DEPTH_FUNC_ALWAYS)
+    {
+        g_glFuncTable.glDepthFunc(GL_ALWAYS);
+    }
+    else
+    {
+        g_glFuncTable.glDepthFunc(GL_LEQUAL);
+    }
+}
+
+GfxTextureHandle WebGL::CreateTexture() {
+    GLuint texture;
+    g_glFuncTable.glGenTextures(1, &texture);
+    u32 id;
+    if(!freeTextures.empty()) {
+        id = freeTextures.back();
+        freeTextures.pop_back();
+        textures[id] = texture;
+    } else {
+        id = textures.size();
+        textures.push_back(texture);
+    }
+
+    return {id};
+}
+
+void WebGL::BindTexture(GfxTextureHandle handle) {
+    if(handle > textures.size()) return;
+    GLuint tex = textures[handle.id];
+    if(tex != 0) g_glFuncTable.glBindTexture(GL_TEXTURE_2D, tex);
+}
+
+void WebGL::DeleteTexture(GfxTextureHandle handle) {
+    if(handle > textures.size()) return;
+    GLuint tex = textures[handle.id];
+    if(tex != 0) {
+        g_glFuncTable.glDeleteTextures(1, &textures[handle.id]);
+        textures[handle.id] = 0;
+        freeTextures.push_back(handle.id);
+    }
+}
+
+void WebGL::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelDataType type, const void* data) {
+    GLenum glFmt;
+    GLenum glType;
+
+    switch (fmt)
+    {
+    case PIXEL_RGBA:
+        glFmt = GL_RGBA;
+        break;
+    case PIXEL_RGB:
+        glFmt = GL_RGB;
+        break;
+    }
+
+    switch (type)
+    {
+    case PIXEL_UNSIGNED_BYTE:
+        glType = GL_UNSIGNED_BYTE;
+        break;
+    case PIXEL_UNSIGNED_SHORT_5_5_5_1:
+        glType = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case PIXEL_UNSIGNED_SHORT_5_6_5:
+        glType = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case PIXEL_UNSIGNED_SHORT_4_4_4_4:
+        glType = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
+    }
+
+    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, glFmt, width, height, 0, glFmt, glType, data);
+}
+
+
+void WebGL::SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 height, const void *data)
+{
+    g_glFuncTable.glTexSubImage2D(GL_TEXTURE_2D, 0, xoffset, yoffset, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+}
+
+void WebGL::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixels) {
+    g_glFuncTable.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels);
+}
+
+void WebGL::Draw(PrimitiveType type, i32 start, i32 count)
+{
+    GLenum glPrim;
+
+    switch (type) {
+        case PRIM_TRIANGLE_STRIP:
+            glPrim = GL_TRIANGLE_STRIP;
+            break;
+        case PRIM_TRIANGLES:
+            glPrim = GL_TRIANGLES;
+            break;
+    }
+
+    g_glFuncTable.glDrawArrays(glPrim, start, count);
+}
+
+void WebGL::SwapBuffers()
+{
+    SDL_GL_SWAP_COMPAT(window);
+}
 #endif

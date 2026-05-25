@@ -1,6 +1,5 @@
 #include "AnmManager.hpp"
 #include "FileSystem.hpp"
-#include "GLFunc.hpp"
 #include "GameErrorContext.hpp"
 #include "Rng.hpp"
 #include "Supervisor.hpp"
@@ -24,26 +23,28 @@ AnmManager *g_AnmManager;
  
 static SDL_PIXEL_FORMAT_COMPAT g_TextureFormatSDLMapping[6];
  
-static const GLenum g_TextureFormatGLFormatMapping[6] = {0, GL_RGBA, GL_RGBA, GL_RGB, GL_RGB, GL_RGBA};
- 
-static const GLenum g_TextureFormatGLTypeMapping[6] = {0,
-                                        GL_UNSIGNED_BYTE,
-                                        GL_UNSIGNED_SHORT_5_5_5_1,
-                                        GL_UNSIGNED_SHORT_5_6_5,
-                                        GL_UNSIGNED_BYTE,
-                                        GL_UNSIGNED_SHORT_4_4_4_4};
+static const PixelFormat g_TextureFormatTypeGfxMapping[6] = {static_cast<PixelFormat>(0), PIXEL_RGBA, PIXEL_RGBA, PIXEL_RGB, PIXEL_RGB, PIXEL_RGBA};
+
+static const PixelDataType g_TextureFormatTypeMapping[6] = {static_cast<PixelDataType>(0), //ugh
+                                          PIXEL_UNSIGNED_BYTE,
+                                            PIXEL_UNSIGNED_SHORT_5_5_5_1,
+                                            PIXEL_UNSIGNED_SHORT_5_6_5,
+                                            PIXEL_UNSIGNED_BYTE,
+                                            PIXEL_UNSIGNED_SHORT_4_4_4_4};
  
 static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
 
 void AnmManager::CreateTextureObject()
 {
     SDL_LOG_COMPAT("AnmManager::CreateTextureObject 1\n");
-    g_glFuncTable.glGenTextures(1, &this->currentTextureHandle);
+    this->currentTextureHandle = g_GfxBackend->CreateTexture();
+    
     SDL_LOG_COMPAT("AnmManager::CreateTextureObject 2\n");
-    g_glFuncTable.glBindTexture(GL_TEXTURE_2D, this->currentTextureHandle);
-
+    g_GfxBackend->BindTexture(this->currentTextureHandle);
+    
     SDL_LOG_COMPAT("AnmManager::CreateTextureObject 3\n");
-    g_glFuncTable.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    g_GfxBackend->SetTextureFilter();
+    
     SDL_LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
 }
 
@@ -185,7 +186,7 @@ AnmManager::~AnmManager()
 {
     if (this->dummyTextureHandle != 0)
     {
-        g_glFuncTable.glDeleteTextures(1, &this->dummyTextureHandle);
+        g_GfxBackend->DeleteTexture(this->dummyTextureHandle);
         this->dummyTextureHandle = 0;
     }
 
@@ -259,17 +260,6 @@ AnmManager::AnmManager()
     g_PrimitivesToDrawNoVertexBuf[2].textureUV.y = 1.0;
     g_PrimitivesToDrawNoVertexBuf[3].textureUV.x = 1.0;
     g_PrimitivesToDrawNoVertexBuf[3].textureUV.y = 1.0;
-
-    // OpenGL considers textures to be incomplete if the bound texture has no image defined
-    // Incomplete textures result in texturing being turned off, but EoSD has places where it
-    // uses the texturing engine to color fragments without using the texture itself. The dummy
-    // texture is necessary to ensure the texture can't be considered incomplete in these cases.
-    SDL_LOG_COMPAT("AnmManager::AnmManager 6\n");
-    this->CreateTextureObject();
-    SDL_LOG_COMPAT("AnmManager::AnmManager 6.5\n");
-    this->dummyTextureHandle = this->currentTextureHandle;
-    SDL_LOG_COMPAT("AnmManager::AnmManager 7\n");
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
     //    this->vertexBuffer = NULL;
     this->currentBlendMode = 0;
@@ -392,8 +382,8 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     CreateTextureObject();
 
     // Clear any errors that might be pending
-    while (g_glFuncTable.glGetError() != GL_NO_ERROR)
-    {
+    while(g_GfxBackend->HasError()) {
+
     }
 
     SDL_LOG_COMPAT("LoadTexture 8");
@@ -411,16 +401,14 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     // exist in OpenGL). I'm not sure its use ever matters anyway
 
     SDL_LOG_COMPAT("LoadTexture 9");
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[textureFormat], textureSurface->w,
-                               textureSurface->h, 0, g_TextureFormatGLFormatMapping[textureFormat],
-                               g_TextureFormatGLTypeMapping[textureFormat], rawTextureData);
+    g_GfxBackend->SetTextureImage(textureSurface->w, textureSurface->h, g_TextureFormatTypeGfxMapping[textureFormat],
+                                g_TextureFormatTypeMapping[textureFormat], rawTextureData);
 
     SDL_LOG_COMPAT("LoadTexture 10");
     SDL_FreeSurface(textureSurface);
 
     // SDL_LOG_COMPAT("GL Error (hex): 0x%X\n", g_glFuncTable.glGetError());
-    if (g_glFuncTable.glGetError() != GL_NO_ERROR)
-    {
+    if (g_GfxBackend->HasError()){
         ReleaseTexture(textureIdx);
         return ZUN_ERROR;
     }
@@ -564,8 +552,10 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     SDL_LOG_COMPAT("LoadTextureAlphaChannel 8\n");
     this->SetCurrentTexture(this->textures[textureIdx].handle);
     SDL_LOG_COMPAT("LoadTextureAlphaChannel 7\n");
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureDesc->width, textureDesc->height, 0, GL_RGBA,
-                               g_TextureFormatGLTypeMapping[textureFormat], textureDesc->textureData);
+    // g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureDesc->width, textureDesc->height, 0, GL_RGBA,
+    //                            g_TextureFormatGLTypeMapping[textureFormat], textureDesc->textureData);
+    g_GfxBackend->SetTextureImage(textureDesc->width, textureDesc->height, PIXEL_RGBA, g_TextureFormatTypeMapping[textureFormat],
+                                textureDesc->textureData);
 
     SDL_LOG_COMPAT("LoadTextureAlphaChannel finish\n");
     return ZUN_SUCCESS;
@@ -580,11 +570,8 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, 
     this->textures[textureIdx].height = BitCeil(height);
     this->textures[textureIdx].format = textureFormat;
 
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[textureFormat],
-                               textures[textureIdx].width, textures[textureIdx].height, 0,
-                               g_TextureFormatGLFormatMapping[textureFormat],
-                               g_TextureFormatGLTypeMapping[textureFormat], NULL);
-
+    g_GfxBackend->SetTextureImage(textures[textureIdx].width, textures[textureIdx].height, g_TextureFormatTypeGfxMapping[textureFormat],
+                                g_TextureFormatTypeMapping[textureFormat], NULL);
     return ZUN_SUCCESS;
 }
 
@@ -727,7 +714,7 @@ void AnmManager::ReleaseTexture(i32 textureIdx)
             this->currentTextureHandle = 0;
         }
 
-        g_glFuncTable.glDeleteTextures(1, &this->textures[textureIdx].handle);
+        g_GfxBackend->DeleteTexture(this->textures[textureIdx].handle);
 
         this->textures[textureIdx].handle = 0;
     }
@@ -811,12 +798,12 @@ void AnmManager::SetRenderStateForVm(const AnmVm *vm)
         this->currentBlendMode = vm->flags.blendMode;
         if (this->currentBlendMode == AnmVmBlendMode_InvSrcAlpha)
         {
-            g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            g_GfxBackend->SetBlendMode(BLEND_INV_SRC_ALPHA);
             //            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         }
         else
         {
-            g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            g_GfxBackend->SetBlendMode(BLEND_ONE);
             //            g_Supervisor.d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
         }
     }
@@ -864,13 +851,13 @@ void AnmManager::UpdateDirtyStates()
             {
                 this->fogNear = this->dirtyFogNear;
                 this->fogFar = this->dirtyFogFar;
-                gfxBackend->SetFogRange(this->fogNear, this->fogFar);
+                g_GfxBackend->SetFogRange(this->fogNear, this->fogFar);
             }
 
             if (this->dirtyFogColor != this->fogColor)
             {
                 this->fogColor = this->dirtyFogColor;
-                gfxBackend->SetFogColor(this->fogColor);
+                g_GfxBackend->SetFogColor(this->fogColor);
             }
 
             break;
@@ -878,22 +865,14 @@ void AnmManager::UpdateDirtyStates()
             if (this->dirtyDepthMask != this->depthMask)
             {
                 this->depthMask = this->dirtyDepthMask;
-                g_glFuncTable.glDepthMask(this->depthMask);
+                g_GfxBackend->SetDepthMask(this->depthMask);
             }
 
             if (this->dirtyDepthFunc != this->depthFunc)
             {
                 this->depthFunc = this->dirtyDepthFunc;
 
-                // This'll end up less awkward once there's a render backend abstraction layer I swear
-                if (this->depthFunc == DEPTH_FUNC_ALWAYS)
-                {
-                    g_glFuncTable.glDepthFunc(GL_ALWAYS);
-                }
-                else
-                {
-                    g_glFuncTable.glDepthFunc(GL_LEQUAL);
-                }
+                g_GfxBackend->SetDepthFunc(this->depthFunc);
             }
 
             break;
@@ -904,7 +883,7 @@ void AnmManager::UpdateDirtyStates()
             while (changedAttributes != 0)
             {
                 u8 currBit = CountrZero(changedAttributes);
-                gfxBackend->ToggleVertexAttribute(changedAttributes & (1 << currBit),
+                g_GfxBackend->ToggleVertexAttribute(changedAttributes & (1 << currBit),
                                                   this->enabledVertexAttributes & (1 << currBit));
                 changedAttributes &= ~(1 << currBit);
             }
@@ -921,7 +900,7 @@ void AnmManager::UpdateDirtyStates()
 
                 this->attribArrays[i] = this->dirtyAttribArrays[i];
 
-                gfxBackend->SetAttributePointer((VertexAttributeArrays)i, this->attribArrays[i].stride,
+                g_GfxBackend->SetAttributePointer((VertexAttributeArrays)i, this->attribArrays[i].stride,
                                                 this->attribArrays[i].ptr);
             }
 
@@ -936,13 +915,13 @@ void AnmManager::UpdateDirtyStates()
 
                 this->colorOps[i] = this->dirtyColorOps[i];
 
-                gfxBackend->SetColorOp((TextureOpComponent)i, this->colorOps[i]);
+                g_GfxBackend->SetColorOp((TextureOpComponent)i, this->colorOps[i]);
             }
 
             break;
         case DIRTY_TEXTURE_FACTOR:
             this->textureFactor = this->dirtytTextureFactor;
-            gfxBackend->SetTextureFactor(this->textureFactor);
+            g_GfxBackend->SetTextureFactor(this->textureFactor);
             break;
         case DIRTY_MODEL_MATRIX:
         case DIRTY_VIEW_MATRIX:
@@ -951,7 +930,7 @@ void AnmManager::UpdateDirtyStates()
             memcpy(&this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         &this->dirtyTransformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         sizeof(*this->transformMatrices));
-            gfxBackend->SetTransformMatrix((TransformMatrix)(currFlagIndex - DIRTY_MODEL_MATRIX),
+            g_GfxBackend->SetTransformMatrix((TransformMatrix)(currFlagIndex - DIRTY_MODEL_MATRIX),
                                            this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX]);
         }
     }
@@ -1105,7 +1084,7 @@ void AnmManager::FlushVertexBuffer()
                                 &vertexBufferStartPtr->textureUV);
     this->UpdateDirtyStates();
 
-    g_glFuncTable.glDrawArrays(GL_TRIANGLES, 0, spritesToDraw * 6);
+    g_GfxBackend->Draw(PRIM_TRIANGLES, 0, spritesToDraw * 6);
 
     this->ClearVertexBuffer();
     flushesThisFrame++;
@@ -2228,10 +2207,13 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     backBufferPixels =
         new u8[((u32)(width * g_GameWindow.WIDTH_RESOLUTION_SCALE + 1)) * ((u32)(height * g_GameWindow.HEIGHT_RESOLUTION_SCALE + 1)) * 4];
 
-    g_glFuncTable.glReadPixels(left * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
-                               g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((top + height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE) - g_GameWindow.VIEWPORT_OFF_Y,
-                               width * g_GameWindow.WIDTH_RESOLUTION_SCALE, height * g_GameWindow.HEIGHT_RESOLUTION_SCALE, GL_RGBA,
-                               GL_UNSIGNED_BYTE, backBufferPixels);
+    g_GfxBackend->ReadPixels(
+        left * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
+        g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((top + height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE) - g_GameWindow.VIEWPORT_OFF_Y,
+        width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
+        height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
+        backBufferPixels
+    );
 
     unstretchedSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
         backBufferPixels,
@@ -2281,10 +2263,9 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     dstFormatPixels =
         ExtractSurfacePixels(dstFormatSurface, g_TextureFormatBPP[this->textures[textureId].format]);
 
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[this->textures[textureId].format],
-                               this->textures[textureId].width, this->textures[textureId].height, 0,
-                               g_TextureFormatGLFormatMapping[this->textures[textureId].format],
-                               g_TextureFormatGLTypeMapping[this->textures[textureId].format], dstFormatPixels);
+    g_GfxBackend->SetTextureImage(this->textures[textureId].width, this->textures[textureId].height,
+                                g_TextureFormatTypeGfxMapping[this->textures[textureId].format],
+                                g_TextureFormatTypeMapping[this->textures[textureId].format], dstFormatPixels);
 
 cleanup:
     SDL_FreeSurface(unstretchedSurface);
@@ -2323,12 +2304,11 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
     u32 textureWidth = BitCeil((u32)src->w);
     u32 textureHeight = BitCeil((u32)src->h);
 
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                               NULL);
+    g_GfxBackend->SetTextureImage(textureWidth, textureHeight, PIXEL_RGB, PIXEL_UNSIGNED_BYTE, NULL);
 
     u8 *surfaceData = ExtractSurfacePixels(src, 3);
 
-    g_glFuncTable.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, src->w, src->h, GL_RGB, GL_UNSIGNED_BYTE, surfaceData);
+    g_GfxBackend->SetTextureSubImage(0, 0, src->w, src->h, surfaceData);
 
     delete[] surfaceData;
 
@@ -2375,7 +2355,7 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
     this->SetColorOp(COMPONENT_ALPHA, COLOR_OP_MODULATE);
     this->SetColorOp(COMPONENT_RGB, COLOR_OP_MODULATE);
 
-    g_glFuncTable.glDeleteTextures(1, &this->currentTextureHandle);
+    g_GfxBackend->DeleteTexture(this->currentTextureHandle);
 
     this->SetCurrentSprite(NULL);
     this->SetCurrentTexture(0);

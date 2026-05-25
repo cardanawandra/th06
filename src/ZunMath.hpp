@@ -1,7 +1,6 @@
 #pragma once
 
-#include "GLFunc.hpp"
-#include "GameWindow.hpp"
+#include "graphics/GLFunc.hpp"
 #include "inttypes.hpp"
 #include <math.h>
 #include <string.h>
@@ -426,36 +425,9 @@ struct ZunViewport
     f32 minZ;
     f32 maxZ;
 
-    void Set() const
-    {
-        g_glFuncTable.glViewport(this->x * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
-                                 (g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE)) -
-                                     g_GameWindow.VIEWPORT_OFF_Y,
-                                 this->width * g_GameWindow.WIDTH_RESOLUTION_SCALE, this->height * g_GameWindow.HEIGHT_RESOLUTION_SCALE);
-        g_glFuncTable.GLDepthRangeCompat(
-            this->minZ,
-            this->maxZ
-        );
-    }
+    void Set() const;
 
-    void Get()
-    {
-        GLint viewPortGet[4];
-        GLfloat depthRangeGet[2];
-
-        g_glFuncTable.glGetIntegerv(GL_VIEWPORT, viewPortGet);
-        g_glFuncTable.glGetFloatv(GL_DEPTH_RANGE, depthRangeGet);
-
-        this->x = (viewPortGet[0] - g_GameWindow.VIEWPORT_OFF_X) / g_GameWindow.WIDTH_RESOLUTION_SCALE;
-        this->y = (viewPortGet[1] - g_GameWindow.VIEWPORT_OFF_Y) / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
-        this->width = viewPortGet[2] / g_GameWindow.WIDTH_RESOLUTION_SCALE;
-        this->height = viewPortGet[3] / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
-        this->minZ = depthRangeGet[0];
-        this->maxZ = depthRangeGet[1];
-
-        // Convert from OpenGL to D3D conventions
-        this->y = GAME_WINDOW_HEIGHT - (this->y + this->height);
-    }
+    void Get();
 };
 
 #define ZUN_MIN(x, y) ((x) > (y) ? (y) : (x))
@@ -563,45 +535,7 @@ inline ZunMatrix perspectiveMatrixFromFOV(f32 verticalFOV, f32 aspectRatio, f32 
     return perspectiveMatrix;
 }
 
-// Returns a matrix that maps screen coordinates to NDCs. Used for drawing RHW positions,
-//   since D3D interprets them has having been already transformed, but OpenGL has no option
-//   to prevent transformation
-inline ZunMatrix inverseViewportMatrix()
-{
-    ZunMatrix inverseMatrix;
-    ZunViewport viewport;
-
-    viewport.Get();
-
-    inverseMatrix.Identity();
-
-    // Mappings:
-    //   X: [viewport x .. viewport width] -> [-1 .. 1]
-    //   Y: [viewport y .. viewport height] -> [1 .. -1] (Axis inverted since NDCs are cartesian)
-    //   Z: [0 .. 1] -> [-1 .. 1]. D3D does NOT interpolate this value using the viewport's depth range!
-    //                             Therefore we must change our depth range to [0.0 .. 1.0] as well
-
-    // One difference between OpenGL and D3D is that in D3D, pixels are centered on integers, whereas
-    //   in OpenGL, they're on half-integer coordinates. Originally, this function finished with a glTranslatef
-    //   call to account for this, but OpenGL seems to be very finicky with rasterizing edges on pixel centers,
-    //   and most positions in EoSD do use whole integer coordinates for edges (D3D seems to be less
-    //   finicky about rasterization). To prevent obvious off-by-one errors with edges in the UI, no accounting
-    //   is done for the pixel coordinate discrepancy aside from changing the rounding in DrawOrthographic, if
-    //   applied, to use whole integers (OpenGL pixel boundaries), rather than half integers (D3D pixel boundaries).
-    //   Graphical output should really be checked thoroughly to make sure nothing (especially in the 3D draw functions)
-    //   ends up a half pixel off.
-
-    inverseMatrix.Translate(-1.0f, 1.0f, -1.0f);
-    inverseMatrix.Scale(1.0f / (viewport.width / 2.0f), -1.0f / (viewport.height / 2.0f), 2.0f);
-    inverseMatrix.Translate(-viewport.x, -viewport.y, 0.0f);
-
-    g_glFuncTable.GLDepthRangeCompat(
-        0.0f,
-        1.0f
-    );
-
-    return inverseMatrix;
-}
+ZunMatrix inverseViewportMatrix();
 
 // Reimplementation of D3DXVec3Project. TODO: Replace if possible once port is working
 inline void projectVec3(ZunVec3 &out, const ZunVec3 &inVec, const ZunViewport &viewport, const ZunMatrix &projection, const ZunMatrix &view,

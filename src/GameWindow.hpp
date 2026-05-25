@@ -2,8 +2,8 @@
 
 #include <SDL_video.h>
 
-#include "GLFunc.hpp"
 #include "inttypes.hpp"
+#include "graphics/GfxInterface.hpp"
 #include "SDLCompat.hpp"
 
 // The internal resolution EoSD uses. 640x480. I can't think of any reason anyone sane
@@ -62,8 +62,8 @@ struct GameWindow
     static i32 InitD3dRendering();
     static void InitD3dDevice();
 
-    SDL_SURFACE_COMPAT *screen;
-    SDL_GL_CONTEXT_COMPAT glContext;
+    // SDL_SURFACE_COMPAT *screen;
+    // SDL_GL_CONTEXT_COMPAT glContext;
 
     i32 isAppClosing;
     i32 lastActiveAppValue;
@@ -112,3 +112,4 @@ struct GameWindow
 extern GameWindow g_GameWindow;
 extern i32 g_TickCountToEffectiveFramerate;
 extern double g_LastFrameTime;
+extern GfxInterface *g_GfxBackend;

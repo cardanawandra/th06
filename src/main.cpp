@@ -176,8 +176,9 @@ stop:
     //         SDL_GL_DeleteContext(ctx);
     // }
 
-    SDL_DESTROY_WINDOW_COMPAT(g_GameWindow.screen);
-    SDL_GL_DELETE_CONTEXT_COMPAT(g_GameWindow.glContext);
+    if(g_GfxBackend != NULL) delete g_GfxBackend;
+    // SDL_DESTROY_WINDOW_COMPAT(g_GameWindow.screen);
+    // SDL_GL_DELETE_CONTEXT_COMPAT(g_GameWindow.glContext);
 
     if (renderResult == 2)
     {

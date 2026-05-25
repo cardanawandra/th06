@@ -142,7 +142,7 @@ struct Supervisor
     SDL_JOYSTICK_COMPAT *joystick;
 
     // SDL1.2 uses SDL_Surface instead of SDL_Window
-    SDL_SURFACE_COMPAT *gameWindow;
+    // SDL_SURFACE_COMPAT *gameWindow;
 
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;

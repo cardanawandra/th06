@@ -181,6 +181,7 @@
 #if SDL_MAJOR_VERSION == 2
     // SDL 2.x only specific code
     #include <SDL_gamecontroller.h>
+    #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_GAMECONTROLLER
     #define SDL_JOYSTICK_COMPAT SDL_GameController
     #define SDL_JOYSTICK_COMPATButton SDL_GameControllerButton
     #define SDL_JOYSTICK_COMPATGetJoystick(a) SDL_GameControllerGetJoystick(a)
@@ -295,6 +296,7 @@
 #if SDL_MAJOR_VERSION == 1
     // SDL 1.x specific code
     #include <SDL_joystick.h>
+    #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_JOYSTICK
     #define SDL_LOG_COMPAT printf
     #ifdef _WIN32
         #define TRY_RESOLVE_FUNCTION(name) this->name = ::name;

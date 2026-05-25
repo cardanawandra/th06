@@ -1,29 +1,72 @@
 #include "FixedFunctionGL.hpp"
-#include "GLFunc.hpp"
 #include "Supervisor.hpp"
-
+#include "GameWindow.hpp"
+#include "i18n.hpp"
 #include <SDL.h>
-#include <SDL_opengl.h>
-// #include <iostream>
-// void fixedfunctiongllog(string msg){
-//     cout<<"fixedfunctiongllog : "<<msg<<endl;
-// }
+#include "SDLCompat.hpp"
 
-// --------------------------------------------
-// SDL1.2: no context flags like SDL2
-// --------------------------------------------
 void FixedFunctionGL::SetContextFlags()
 {
-    // Optional attributes only
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 }
 
-// --------------------------------------------
-// Init
-// --------------------------------------------
 GfxInterface *FixedFunctionGL::Init()
 {
+    FixedFunctionGL *interface = new FixedFunctionGL();
+
+    SetContextFlags();
+
+    SDL_Init(SDL_INIT_VIDEO);
+    u32 flags = WINDOW_FLAGS_COMPAT;
+
+    if (g_Supervisor.cfg.windowed == 0)
+    {
+        flags |= SDL_FULLSCREEN_COMPAT;
+    }
+
+    g_GameWindow.CONFIGURE_INIT();
+    #ifdef __ANDROID__
+    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    #endif
+    g_GameWindow.CONFIGURE_VIEW();
+    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
+    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+
+    BeforeCreate();
+
+    interface->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
+    SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
+
+    if (interface->window == NULL)
+    {
+        delete interface;
+        return NULL;
+    }
+
+    interface->glContext = SDL_GL_CREATE_CONTEXT_COMPAT(interface->window);
+
+    if (interface->glContext == NULL)
+    {
+        SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
+        delete interface;
+        return NULL;
+    }
+
+    if (SDL_GL_MAKE_CURRENT_COMPAT(interface->window, interface->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
+    {
+        SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
+        delete interface;
+        return NULL;
+    }
+
+    SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
+
+    g_glFuncTable.ResolveFunctions(false);
+
     g_glFuncTable.glEnable(GL_TEXTURE_2D);
     g_glFuncTable.glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -42,11 +85,9 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glFogf(GL_FOG_DENSITY, 1.0f);
     g_glFuncTable.glFogf(GL_FOG_MODE, GL_LINEAR);
-    // g_glFuncTable.glFogi(GL_FOG_MODE, GL_LINEAR); // 🔧 fixed type
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 
-    // -------- ALPHA --------
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
@@ -69,7 +110,6 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 
-    // -------- RGB --------
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -92,12 +132,24 @@ GfxInterface *FixedFunctionGL::Init()
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
 
-    return new FixedFunctionGL();
+    return interface;
 }
 
-// --------------------------------------------
-// Fog
-// --------------------------------------------
+
+void FixedFunctionGL::Exit()
+{
+    if (this->glContext)
+    {
+        SDL_GL_DELETE_CONTEXT_COMPAT(this->glContext);
+        this->glContext = NULL;
+    }
+    if (this->window)
+    {
+        SDL_DESTROY_WINDOW_COMPAT(this->window);
+        this->window = NULL;
+    }
+}
+
 void FixedFunctionGL::SetFogRange(f32 nearPlane, f32 farPlane)
 {
     g_glFuncTable.glFogf(GL_FOG_START, nearPlane);
@@ -106,23 +158,17 @@ void FixedFunctionGL::SetFogRange(f32 nearPlane, f32 farPlane)
 
 void FixedFunctionGL::SetFogColor(ZunColor color)
 {
-    GLfloat c[4] = {
-        ((color >> 16) & 0xFF) / 255.0f,
-        ((color >> 8) & 0xFF) / 255.0f,
-        (color & 0xFF) / 255.0f,
-        ((color >> 24) & 0xFF) / 255.0f
-    };
+    GLfloat normalizedFogColor[4] = {((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f,
+                                     (color & 0xFF) / 255.0f, ((color >> 24) & 0xFF) / 255.0f};
 
-    g_glFuncTable.glFogfv(GL_FOG_COLOR, c);
+    g_glFuncTable.glFogfv(GL_FOG_COLOR, normalizedFogColor);
 }
 
-// --------------------------------------------
-// Vertex attributes
-// --------------------------------------------
 void FixedFunctionGL::ToggleVertexAttribute(u8 attr, bool enable)
 {
     if (attr & VERTEX_ATTR_TEX_COORD)
     {
+        // Arg 0 will be the texture is it's used, and diffuse otherwise. Arg 1 will always be diffuse
         if (enable)
         {
             g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_TEXTURE);
@@ -140,69 +186,218 @@ void FixedFunctionGL::ToggleVertexAttribute(u8 attr, bool enable)
     if (attr & VERTEX_ATTR_DIFFUSE)
     {
         if (enable)
+        {
             g_glFuncTable.glEnableClientState(GL_COLOR_ARRAY);
+        }
         else
+        {
             g_glFuncTable.glDisableClientState(GL_COLOR_ARRAY);
+        }
     }
 }
 
-void FixedFunctionGL::SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr)
+void FixedFunctionGL::SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr)
 {
     switch (attr)
     {
     case VERTEX_ARRAY_POSITION:
         g_glFuncTable.glVertexPointer(3, GL_FLOAT, stride, ptr);
         break;
-
     case VERTEX_ARRAY_TEX_COORD:
         g_glFuncTable.glTexCoordPointer(2, GL_FLOAT, stride, ptr);
         break;
-
     case VERTEX_ARRAY_DIFFUSE:
         g_glFuncTable.glColorPointer(4, GL_UNSIGNED_BYTE, stride, ptr);
         break;
     }
 }
 
-// --------------------------------------------
-// Texture ops
-// --------------------------------------------
 void FixedFunctionGL::SetColorOp(TextureOpComponent component, ColorOp op)
 {
-    const GLenum ops[] = {GL_MODULATE, GL_ADD, GL_REPLACE};
+    const GLenum opEnums[3] = {GL_MODULATE, GL_ADD, GL_REPLACE};
 
     if (component > COMPONENT_ALPHA || op > COLOR_OP_REPLACE)
+    {
         return;
+    }
 
-    GLenum target = (component == COMPONENT_ALPHA) ? GL_COMBINE_ALPHA : GL_COMBINE_RGB;
+    GLenum componentEnum = component == COMPONENT_ALPHA ? GL_COMBINE_ALPHA : GL_COMBINE_RGB;
 
-    g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, target, ops[op]);
+    g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, componentEnum, opEnums[op]);
 }
 
 void FixedFunctionGL::SetTextureFactor(ZunColor factor)
 {
-    GLfloat c[4] = {
-        ((factor >> 16) & 0xFF) / 255.0f,
-        ((factor >> 8) & 0xFF) / 255.0f,
-        (factor & 0xFF) / 255.0f,
-        ((factor >> 24) & 0xFF) / 255.0f
-    };
+    GLfloat tfactorColor[4] = {((factor >> 16) & 0xFF) / 255.0f, ((factor >> 8) & 0xFF) / 255.0f,
+                               (factor & 0xFF) / 255.0f, ((factor >> 24) & 0xFF) / 255.0f};
 
-    g_glFuncTable.glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, c);
+    g_glFuncTable.glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, tfactorColor);
 }
 
-// --------------------------------------------
-// Matrices
-// --------------------------------------------
 void FixedFunctionGL::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
 {
-    GLenum modes[4] = {GL_MODELVIEW, GL_MODELVIEW, GL_PROJECTION, GL_TEXTURE};
+    // This is not going to work for modelview
+    GLenum matrixEnum[4] = {GL_MODELVIEW, GL_MODELVIEW, GL_PROJECTION, GL_TEXTURE};
 
-    g_glFuncTable.glMatrixMode(modes[type]);
-    g_glFuncTable.glLoadMatrixf((const GLfloat *)&matrix.m); // 🔧 fixed
+    g_glFuncTable.glMatrixMode(matrixEnum[type]);
+    g_glFuncTable.glLoadMatrixf((const GLfloat *)&matrix);
 }
 
-// --------------------------------------------
-void FixedFunctionGL::Draw()
+
+void FixedFunctionGL::Enable(Capabilities cap) {
+    switch (cap) {
+        case CAPS_BLEND:
+            g_glFuncTable.glEnable(GL_BLEND);
+            break;
+        case CAPS_DEPTH_TEST:
+            g_glFuncTable.glEnable(GL_DEPTH_TEST);
+            break;
+    }
+}
+
+bool FixedFunctionGL::HasError() {
+    return g_glFuncTable.glGetError() != GL_NO_ERROR;
+}
+
+void FixedFunctionGL::SetBlendMode(BlendMode mode) {
+    if (mode == BLEND_INV_SRC_ALPHA)
+    {
+        g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+}
+
+void FixedFunctionGL::SetViewport(i32 x, i32 y, i32 width, i32 height) {
+    g_glFuncTable.glViewport(x, y, width, height);
+}
+
+void FixedFunctionGL::GetViewport(u32* viewport) {
+    g_glFuncTable.glGetIntegerv(GL_VIEWPORT, (GLint*)viewport);
+}
+
+void FixedFunctionGL::GetDepthRange(f32* depthRange) {
+    g_glFuncTable.glGetFloatv(GL_DEPTH_RANGE, depthRange);
+}
+
+void FixedFunctionGL::SetClearColor(f32 r, f32 g, f32 b, f32 a) {
+    g_glFuncTable.glClearColor(r, g, b, a);
+}
+
+void FixedFunctionGL::SetTextureFilter() {
+    g_glFuncTable.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void FixedFunctionGL::SetClearDepth(f32 depth) {
+    g_glFuncTable.glClearDepthf(depth);
+}
+
+void FixedFunctionGL::Clear(u32 clearBits) {
+    GLbitfield mask = 0;
+
+    if (clearBits & CLEAR_COLOR_BUFFER) mask |= GL_COLOR_BUFFER_BIT;
+    if (clearBits & CLEAR_DEPTH_BUFFER) mask |= GL_DEPTH_BUFFER_BIT;
+
+    g_glFuncTable.glClear(mask);
+}
+
+void FixedFunctionGL::SetDepthRange(f32 nearVar, f32 farVar) {
+    g_glFuncTable.GLDepthRangeCompat(nearVar, farVar);
+}
+
+void FixedFunctionGL::SetDepthMask(bool enable) {
+    g_glFuncTable.glDepthMask(enable);
+}
+
+void FixedFunctionGL::SetDepthFunc(DepthFunc func) {
+    // This'll end up less awkward once there's a render backend abstraction layer I swear
+    if (func == DEPTH_FUNC_ALWAYS)
+    {
+        g_glFuncTable.glDepthFunc(GL_ALWAYS);
+    }
+    else
+    {
+        g_glFuncTable.glDepthFunc(GL_LEQUAL);
+    }
+}
+
+GfxTextureHandle FixedFunctionGL::CreateTexture() {
+    GLuint texture;
+    g_glFuncTable.glGenTextures(1, &texture);
+    textures.push_back(texture);
+    return {textures.size()-1};
+}
+
+void FixedFunctionGL::BindTexture(GfxTextureHandle handle) {
+    g_glFuncTable.glBindTexture(GL_TEXTURE_2D, textures[handle.id]);
+}
+
+void FixedFunctionGL::DeleteTexture(GfxTextureHandle handle) {
+    g_glFuncTable.glDeleteTextures(1, &textures[handle.id]);
+    textures[handle.id] = 0;
+}
+
+void FixedFunctionGL::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelDataType type, const void* data) {
+    GLenum glFmt;
+    GLenum glType;
+
+    switch (fmt)
+    {
+    case PIXEL_RGBA:
+        glFmt = GL_RGBA;
+        break;
+    case PIXEL_RGB:
+        glFmt = GL_RGB;
+        break;
+    }
+
+    switch (type)
+    {
+    case PIXEL_UNSIGNED_BYTE:
+        glType = GL_UNSIGNED_BYTE;
+        break;
+    case PIXEL_UNSIGNED_SHORT_5_5_5_1:
+        glType = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case PIXEL_UNSIGNED_SHORT_5_6_5:
+        glType = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case PIXEL_UNSIGNED_SHORT_4_4_4_4:
+        glType = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
+    }
+
+    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, glFmt, width, height, 0, glFmt, glType, data);
+}
+
+void FixedFunctionGL::SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 height, const void *data)
 {
+    g_glFuncTable.glTexSubImage2D(GL_TEXTURE_2D, 0, xoffset, yoffset, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+}
+
+void FixedFunctionGL::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixels) {
+    g_glFuncTable.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)pixels);
+}
+
+void FixedFunctionGL::Draw(PrimitiveType type, i32 start, i32 count)
+{
+    GLenum glPrim;
+
+    switch (type) {
+        case PRIM_TRIANGLE_STRIP:
+            glPrim = GL_TRIANGLE_STRIP;
+            break;
+        case PRIM_TRIANGLES:
+            glPrim = GL_TRIANGLES;
+            break;
+    }
+
+    g_glFuncTable.glDrawArrays(glPrim, start, count);
+}
+
+void FixedFunctionGL::SwapBuffers()
+{
+    SDL_GL_SWAP_COMPAT(window);
 }

@@ -3,7 +3,8 @@
 #pragma once
 
 #include "GfxInterface.hpp"
-#include <SDL_opengl.h>
+#include "GLFunc.hpp"
+#include <vector>
 
 enum GlShaderUniform
 {
@@ -27,6 +28,10 @@ struct WebGL : GfxInterface
     static GfxInterface *Create();
 
     bool Init();
+    virtual void Exit();
+    ~WebGL() override {
+        Exit();
+    };
 
     virtual void SetFogRange(f32 nearPlane, f32 farPlane);
     virtual void SetFogColor(ZunColor color);
@@ -35,13 +40,45 @@ struct WebGL : GfxInterface
     virtual void SetColorOp(TextureOpComponent component, ColorOp op);
     virtual void SetTextureFactor(ZunColor factor);
     virtual void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix);
-    virtual void Draw();
+
+    virtual void SetTextureFilter();
+
+    virtual void GetViewport(u32* viewport);
+    virtual void GetDepthRange(f32* depthRange);
+    virtual void SetViewport(i32 x, i32 y, i32 width, i32 height);
+    virtual void SetDepthRange(f32 near, f32 far);
+
+    virtual void Enable(Capabilities cap);
+    virtual bool HasError();
+    virtual void SetBlendMode(BlendMode mode);
+    virtual void SetDepthMask(bool enable);
+    virtual void SetDepthFunc(DepthFunc func);
+
+    virtual void SetClearDepth(f32 depth);
+    virtual void SetClearColor(f32 r, f32 g, f32 b, f32 a);
+    virtual void Clear(u32 clearBits);
+
+    virtual GfxTextureHandle CreateTexture();
+    virtual void BindTexture(GfxTextureHandle handle);
+    virtual void DeleteTexture(GfxTextureHandle handle);
+    virtual void SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelDataType type, const void* data);
+    virtual void SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 height, const void* data);
+
+    virtual void ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixels);
+
+    virtual void Draw(PrimitiveType type, i32 start, i32 count);
+    virtual void SwapBuffers();
 
   private:
+    SDL_SURFACE_COMPAT *window;
+    SDL_GL_CONTEXT_COMPAT glContext;
+
     GLuint fragmentShaderHandle;
     GLuint vertexShaderHandle;
     GLuint programHandle;
 
     GLint uniforms[UNIFORMS_COUNT];
+    std::vector<GLuint> textures;
+    std::vector<u32> freeTextures;
 };
 #endif

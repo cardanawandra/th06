@@ -4,10 +4,11 @@
 #include "Supervisor.hpp"
 #include "i18n.hpp"
 
+#include "thirdparty/sjis_converter.h"
+
 #include <SDL_ttf.h>
 #include <algorithm>
 #include <cstring>
-#include "ShittyIconv.hpp"
 #include "GamePaths.hpp"
 
 static TTF_Font *g_Font;
@@ -225,9 +226,9 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     if (!isUTF8Encoded(string))
     {
-        char outputUtf[1024] = {0};
-    	sjis_to_utf8(string, strlen(string), outputUtf);
-        strncpy(convertedText, outputUtf,sizeof(convertedText));
+        char *utf8 = sjis2utf8(string);
+        strncpy(convertedText, utf8,sizeof(convertedText));
+        free(utf8);
     }
     else
     {
@@ -314,8 +315,8 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     g_AnmManager->SetCurrentTexture(outTexture->handle);
 
-    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, outTexture->width, outTexture->height, 0, GL_RGBA,
-                               GL_UNSIGNED_BYTE, outTexture->textureData);
+    g_GfxBackend->SetTextureImage(outTexture->width, outTexture->height, PIXEL_RGBA, PIXEL_UNSIGNED_BYTE,
+                                        outTexture->textureData);
 
     SDL_FreeSurface(textureSurface);
     

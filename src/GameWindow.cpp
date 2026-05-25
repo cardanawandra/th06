@@ -20,6 +20,7 @@
 // }
 
 GameWindow g_GameWindow;
+GfxInterface *g_GfxBackend;
 i32 g_TickCountToEffectiveFramerate;
 f64 g_LastFrameTime;
 
@@ -28,14 +29,12 @@ f64 g_LastFrameTime;
 static const struct
 {
     const char *name;
-    bool isEsContext;
-    void (*setContextFlags)();
-    GfxInterface *(*init)();
+    GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
     #ifdef __ANDROID__
-    {"GL(ES) 2.0 / WebGL", true, WebGL::SetContextFlags, WebGL::Create},
+    {"GL(ES) 2.0 / WebGL", WebGL::Create},
     #endif
-    {"Fixed function GL(ES)", false, FixedFunctionGL::SetContextFlags, FixedFunctionGL::Init}};
+    {"Fixed function GL(ES)", FixedFunctionGL::Init}};
 
 RenderResult GameWindow::Render()
 {
@@ -68,7 +67,7 @@ RUN_CHAINS:
                 viewport.Set();
 
                 SDL_LOG_COMPAT("Render 3");
-                g_glFuncTable.glClearColor(
+                g_GfxBackend->SetClearColor(
                     ((g_Stage.skyFog.color >> 16) & 0xFF) / 255.0f,
                     ((g_Stage.skyFog.color >> 8) & 0xFF) / 255.0f,
                     (g_Stage.skyFog.color & 0xFF) / 255.0f,
@@ -76,7 +75,7 @@ RUN_CHAINS:
                 );
 
                 SDL_LOG_COMPAT("Render 4");
-                g_glFuncTable.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                g_GfxBackend->Clear(CLEAR_COLOR_BUFFER | CLEAR_DEPTH_BUFFER);
 
                 SDL_LOG_COMPAT("Render 5");
                 g_AnmManager->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
@@ -210,8 +209,9 @@ void GameWindow::Present()
         g_Supervisor.unk198--;
     }
 
-    SDL_LOG_COMPAT("present SDL_GL_SwapWindow");
-    SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
+    SDL_LOG_COMPAT("present g_GfxBackend->SwapBuffers");
+    // SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
+    g_GfxBackend->SwapBuffers();
 
     SDL_LOG_COMPAT("present finish");
     return;
@@ -219,70 +219,18 @@ void GameWindow::Present()
 
 void GameWindow::CreateGameWindow()
 {
-    // SDL1.2 init (no GameController API)
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
-    u32 flags = WINDOW_FLAGS_COMPAT;
-
-    g_GameWindow.screen = NULL;
-    g_GameWindow.glContext = NULL;
-    //todo
-    // g_Supervisor.cfg.windowed = 1;
-
-    if (g_Supervisor.cfg.windowed == 0)
-    {
-        flags |= SDL_FULLSCREEN_COMPAT;
-    }
-
-    g_GameWindow.CONFIGURE_INIT();
-    #ifdef __ANDROID__
-    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
-    #endif
-    g_GameWindow.CONFIGURE_VIEW();
-    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
-    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
-    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
-
-    BeforeCreate();
+    SDL_Init(SDL_INIT_GAMECONTROLLER_COMPAT);
 
     // SDL1.2: try render backends (mostly just GL variants)
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
+        g_GfxBackend = s_RenderBackends[i].TryInit();
+        if(g_GfxBackend) {
+            SDL_LOG_COMPAT("Using renderer backend %s\n", s_RenderBackends[i].name);
+            break;
+        }
+        /*
         s_RenderBackends[i].setContextFlags();
-
-        g_GameWindow.screen = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
-        SDL_WM_SetCaptionCompat(TH_WINDOW_TITLE);
-
-        if (g_GameWindow.screen == NULL)
-        {
-            SDL_LOG_COMPAT("g_GameWindow.screen is null\n");
-            goto fail;
-        }
-
-        g_GameWindow.glContext = SDL_GL_CREATE_CONTEXT_COMPAT(g_GameWindow.screen);
-
-        if (g_GameWindow.glContext == NULL)
-        {
-            SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
-            goto fail;
-        }
-
-        if (SDL_GL_MAKE_CURRENT_COMPAT(g_GameWindow.screen, g_GameWindow.glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
-        {
-            SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
-            goto fail;
-        }
-
-        utils::DebugPrint2(
-            "Using renderer backend %s",
-            s_RenderBackends[i].name
-        );
-
-        // No context creation needed in SDL1.2
-        // g_glFuncTable.ResolveFunctions(s_RenderBackends[i].isEsContext);
-        g_glFuncTable.ResolveFunctions(s_RenderBackends[i].isEsContext);
-
-        g_GameWindow.renderBackendIndex = i;
         break;
     fail:
         if (g_GameWindow.glContext != NULL)
@@ -296,9 +244,10 @@ void GameWindow::CreateGameWindow()
             SDL_DESTROY_WINDOW_COMPAT(g_GameWindow.screen);
             g_GameWindow.screen = NULL;
         }
+        */
     }
 
-    g_Supervisor.gameWindow = g_GameWindow.screen;
+    // g_Supervisor.gameWindow = g_GameWindow.screen;
 
     g_GameWindow.lastActiveAppValue = 1;
 }
@@ -316,7 +265,14 @@ i32 GameWindow::InitD3dRendering(void)
     f32 camera_distance;
 
     SDL_LOG_COMPAT("InitD3dRendering 2");
-    g_AnmManager->gfxBackend = s_RenderBackends[0].init();
+    // OpenGL considers textures to be incomplete if the bound texture has no image defined
+    // Incomplete textures result in texturing being turned off, but EoSD has places where it
+    // uses the texturing engine to color fragments without using the texture itself. The dummy
+    // texture is necessary to ensure the texture can't be considered incomplete in these cases.
+    g_AnmManager->CreateTextureObject();
+    g_AnmManager->dummyTextureHandle = g_AnmManager->currentTextureHandle;
+    g_GfxBackend->SetTextureImage(1, 1, PIXEL_RGBA, PIXEL_UNSIGNED_BYTE, NULL);
+
     // g_AnmManager->gfxBackend = s_RenderBackends[g_GameWindow.renderBackendIndex].init();
 
     //    using_d3d_hal = 1;
@@ -367,7 +323,7 @@ i32 GameWindow::InitD3dRendering(void)
         }
 
         SDL_LOG_COMPAT("InitD3dRendering 4");
-        SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
+        // SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
         //        if (g_Supervisor.cfg.frameskipConfig == 0)
         //        {
@@ -390,7 +346,7 @@ i32 GameWindow::InitD3dRendering(void)
     //    present_params.AutoDepthStencilFormat = D3DFMT_D16;
     //    present_params.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
 
-    SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
+    // SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
     g_Supervisor.vsyncEnabled = 1;
 
     g_Supervisor.lockableBackbuffer = 1;
@@ -547,13 +503,13 @@ void GameWindow::InitD3dDevice(void)
     AnmManager *anm3;
     AnmManager *anm4;
 
-    g_glFuncTable.glEnable(GL_BLEND);
+    g_GfxBackend->Enable(CAPS_BLEND);
 
-    g_glFuncTable.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    g_GfxBackend->SetBlendMode(BLEND_INV_SRC_ALPHA);
+    
     if (((g_Supervisor.cfg.opts >> GCOS_TURN_OFF_DEPTH_TEST) & 1) == 0)
     {
-        g_glFuncTable.glEnable(GL_DEPTH_TEST);
+        g_GfxBackend->Enable(CAPS_DEPTH_TEST);
         g_AnmManager->SetDepthMask(true);
         g_AnmManager->SetDepthFunc(DEPTH_FUNC_LEQUAL);
     }

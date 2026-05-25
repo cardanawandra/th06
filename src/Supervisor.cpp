@@ -332,8 +332,8 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
 
-    SDL_LOG_COMPAT("SDL_GL_SwapWindow");
-    SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
+    SDL_LOG_COMPAT("g_GfxBackend->SwapBuffers");
+    g_GfxBackend->SwapBuffers();    
     
     //
     SDL_LOG_COMPAT("CopySurfaceToBackBuffer 2");
@@ -342,8 +342,8 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     //
 
-    SDL_LOG_COMPAT("SDL_GL_SwapWindow 2");
-    SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
+    SDL_LOG_COMPAT("g_GfxBackend->SwapBuffers 2");
+    g_GfxBackend->SwapBuffers();
 
     SDL_LOG_COMPAT("ReleaseSurface");
     g_AnmManager->ReleaseSurface(0);

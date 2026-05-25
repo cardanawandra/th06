@@ -7,11 +7,10 @@
 
 #include "AnmIdx.hpp"
 #include "AnmVm.hpp"
-#include "GLFunc.hpp"
 #include "GameManager.hpp"
 #include "ZunResult.hpp"
 #include "ZunTimer.hpp"
-#include "graphics/GfxInterface.hpp"
+#include "GameWindow.hpp"
 #include "inttypes.hpp"
 #include "SDLCompat.hpp"
 
