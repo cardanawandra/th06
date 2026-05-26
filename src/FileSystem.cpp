@@ -38,22 +38,22 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 #else
 
 #ifndef _WIN32
-    SDL_LOG_COMPAT("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
+    LOG_COMPAT("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
     return fopen(filepath, mode);
 
 #else
 
-    SDL_LOG_COMPAT("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
+    LOG_COMPAT("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
      // First try native fopen().
     // On Japanese systems this handles Shift-JIS / CP932 correctly.
     FILE *f = fopen(filepath, mode);
 
     if (f)
     {
-        SDL_LOG_COMPAT("FileSystem::FopenUTF8 open success\n");
+        LOG_COMPAT("FileSystem::FopenUTF8 open success\n");
         return f;
     }
-    SDL_LOG_COMPAT("FileSystem::FopenUTF8 open failed, fallback\n");
+    LOG_COMPAT("FileSystem::FopenUTF8 open failed, fallback\n");
 
     // Fallback: interpret filepath as UTF-8
     int filepathWLen =
@@ -108,7 +108,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     delete[] filepathW;
     delete[] modeW;
 
-    SDL_LOG_COMPAT("FileSystem::FopenUTF8 fallback success\n");
+    LOG_COMPAT("FileSystem::FopenUTF8 fallback success\n");
     return f;
 
 #endif
@@ -144,7 +144,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     i32 entryIdx;
     const char *entryname;
     i32 pbg3Idx;
-    SDL_LOG_COMPAT("FileSystem::OpenPath 1\n");
+    LOG_COMPAT("FileSystem::OpenPath 1\n");
 
     char resolvedPath[512];
     #ifdef __ANDROID__
@@ -153,12 +153,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     #else
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
     #endif
-    SDL_LOG_COMPAT("FileSystem::OpenPath src %s\n",resolvedPath);
+    LOG_COMPAT("FileSystem::OpenPath src %s\n",resolvedPath);
 
     entryIdx = -1;
     if (isExternalResource == 0)
     {
-        SDL_LOG_COMPAT("FileSystem::OpenPath isExternalResource == 0\n");
+        LOG_COMPAT("FileSystem::OpenPath isExternalResource == 0\n");
         entryname = strrchr(filepath, '\\');
         if (entryname == (char *)0x0)
         {
@@ -168,9 +168,9 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
-        SDL_LOG_COMPAT("FileSystem::OpenPath entryname = %s\n",entryname);
+        LOG_COMPAT("FileSystem::OpenPath entryname = %s\n",entryname);
         entryname = strrchr(entryname, '/');
-        SDL_LOG_COMPAT("FileSystem::OpenPath entryname changed into = %s\n",entryname);
+        LOG_COMPAT("FileSystem::OpenPath entryname changed into = %s\n",entryname);
         if (entryname == (char *)0x0)
         {
             entryname = filepath;
@@ -181,12 +181,12 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (g_Pbg3Archives != NULL)
         {
-            SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives exists\n");
+            LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives exists\n");
             for (pbg3Idx = 0; pbg3Idx < 0x10; pbg3Idx += 1)
             {
                 if (g_Pbg3Archives[pbg3Idx] != NULL)
                 {
-                    SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
+                    LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->FindEntry(%s)\n",entryname);
                     entryIdx = g_Pbg3Archives[pbg3Idx]->FindEntry(entryname);
                     if (entryIdx >= 0)
                     {
@@ -197,24 +197,24 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         }
         if (entryIdx < 0)
         {
-            SDL_LOG_COMPAT("FileSystem::OpenPath entry not found\n");
+            LOG_COMPAT("FileSystem::OpenPath entry not found\n");
             return NULL;
         }
     }
     if (entryIdx >= 0)
     {
-        SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
+        LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry\n",entryname);
         data = g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
-        SDL_LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
+        LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives[pbg3Idx]->GetEntrySize\n",entryname);
         g_LastFileSize = g_Pbg3Archives[pbg3Idx]->GetEntrySize(entryIdx);
     }
     else
     {
-        SDL_LOG_COMPAT("FileSystem::OpenPath fopen %s\n",resolvedPath);
+        LOG_COMPAT("FileSystem::OpenPath fopen %s\n",resolvedPath);
         file = fopen(resolvedPath, "rb");
         if (file == NULL)
         {
-            SDL_LOG_COMPAT("FileSystem::OpenPath file not found %s\n",resolvedPath);
+            LOG_COMPAT("FileSystem::OpenPath file not found %s\n",resolvedPath);
             return NULL;
         }
         else
@@ -228,7 +228,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             fclose(file);
         }
     }
-    SDL_LOG_COMPAT("FileSystem::OpenPath success\n");
+    LOG_COMPAT("FileSystem::OpenPath success\n");
     return data;
 }
 

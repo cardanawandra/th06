@@ -4,7 +4,6 @@
 #include "GameWindow.hpp"
 #include "i18n.hpp"
 #include "SDLCompat.hpp"
-#define SDL_LOG_COMPAT printf
 
 // ---------------------------------------------------------------------------
 // Internal helpers (file-scope, not exposed in the header)
@@ -51,199 +50,247 @@ void FixedFunctionDX2::SetContextFlags()
 // ---------------------------------------------------------------------------
 GfxInterface *FixedFunctionDX2::Init()
 {
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 1\n");
+    LOG_COMPAT("FixedFunctionDX2::Init 1\n");
+
     FixedFunctionDX2 *gfx = new FixedFunctionDX2();
-    memset(gfx, 0, sizeof(*gfx));
+
     gfx->boundTexture = -1;
     gfx->clearDepth   = 1.0f;
     gfx->vpNear       = 0.0f;
     gfx->vpFar        = 1.0f;
     gfx->lastResult   = DD_OK;
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 2\n");
-    SetContextFlags();
+    // =========================================================
+    // WIN32 WINDOW (C++98 SAFE)
+    // =========================================================
+    WNDCLASS wc;
+    ZeroMemory(&wc, sizeof(wc));
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 3\n");
-    SDL_Init(SDL_INIT_VIDEO);
-    u32 flags = SDL_NOFRAME;
+    wc.style = CS_OWNDC;
+    wc.lpfnWndProc = DefWindowProc;
+    wc.hInstance = GetModuleHandle(NULL);
+    wc.lpszClassName = "DX2Window";
 
-    if (g_Supervisor.cfg.windowed == 0)
-    {
-        flags |= SDL_FULLSCREEN_COMPAT;
-    }
+    RegisterClass(&wc);
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 4\n");
+    // NO SDL PROCESSING
     g_GameWindow.CONFIGURE_INIT();
     g_GameWindow.CONFIGURE_VIEW();
-    i32 width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    i32 height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
+    int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 5\n");
-    if (SDL_SetVideoMode(width, height, 32, flags) == NULL)
+    HWND hwnd = CreateWindowEx(
+        0,
+        "DX2Window",
+        TH_WINDOW_TITLE,
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        width, height,
+        NULL,
+        NULL,
+        wc.hInstance,
+        NULL
+    );
+
+    if (!hwnd)
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init SDL_SetVideoMode failed\n");
+        LOG_COMPAT("CreateWindowEx failed\n");
         delete gfx;
         return NULL;
     }
-    SDL_WM_SetCaption(TH_WINDOW_TITLE, NULL);
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 6\n");
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
-    if (!SDL_GetWMInfo(&wmInfo))
+    ShowWindow(hwnd, SW_SHOW);
+    UpdateWindow(hwnd);
+
+    gfx->hwnd = hwnd;
+
+    if (!IsWindow(gfx->hwnd))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init SDL_GetWMInfo failed\n");
+        LOG_COMPAT("Invalid HWND\n");
         delete gfx;
         return NULL;
     }
-    gfx->hwnd = wmInfo.window;
 
-    // --- IDirectDraw2 -------------------------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 7\n");
+    Sleep(20); // DX2 stability delay
+
+    // =========================================================
+    // DIRECTDRAW2
+    // =========================================================
     IDirectDraw *dd1 = NULL;
-    if (FAILED(DirectDrawCreate(NULL, &dd1, NULL)))
-    {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init DirectDrawCreate failed\n");
-        delete gfx;
-        return NULL;
-    }
-    HRESULT hr = dd1->QueryInterface(IID_IDirectDraw2,
-                                     reinterpret_cast<void **>(&gfx->dd));
-    dd1->Release();
+    HRESULT hr;
+
+    hr = DirectDrawCreate(NULL, &dd1, NULL);
     if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init QueryInterface IDirectDraw2 failed\n");
+        LOG_COMPAT("DirectDrawCreate failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
-    gfx->dd->SetCooperativeLevel(gfx->hwnd, DDSCL_NORMAL);
 
-    // --- Primary surface + back buffer -------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 8\n");
+    hr = dd1->QueryInterface(IID_IDirectDraw2, (void**)&gfx->dd);
+    dd1->Release();
+
+    if (FAILED(hr))
+    {
+        LOG_COMPAT("QueryInterface IDirectDraw2 failed : 0x%08X\n", hr);
+        delete gfx;
+        return NULL;
+    }
+
+    hr = gfx->dd->SetCooperativeLevel(
+        gfx->hwnd,
+        DDSCL_EXCLUSIVE |
+        DDSCL_FULLSCREEN |
+        DDSCL_ALLOWREBOOT
+    );
+    if (FAILED(hr))
+    {
+        LOG_COMPAT("SetCooperativeLevel failed : 0x%08X\n", hr);
+        delete gfx;
+        return NULL;
+    }
+
+    // =========================================================
+    // PRIMARY SURFACE
+    // =========================================================
     DDSURFACEDESC ddsd;
-    memset(&ddsd, 0, sizeof(ddsd));
-    ddsd.dwSize  = sizeof(ddsd);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
-    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP |
-                          DDSCAPS_COMPLEX        | DDSCAPS_3DDEVICE;
+    ZeroMemory(&ddsd, sizeof(ddsd));
+
+    ddsd.dwSize = sizeof(ddsd);
+
+    ddsd.dwFlags =
+        DDSD_CAPS |
+        DDSD_BACKBUFFERCOUNT;
+
+    ddsd.ddsCaps.dwCaps =
+        DDSCAPS_PRIMARYSURFACE |
+        DDSCAPS_FLIP |
+        DDSCAPS_COMPLEX |
+        DDSCAPS_3DDEVICE;
+
     ddsd.dwBackBufferCount = 1;
-
-    if (FAILED(gfx->dd->CreateSurface(&ddsd, &gfx->primarySurf, NULL)))
+    
+    hr = gfx->dd->CreateSurface(&ddsd, &gfx->primarySurf, NULL);
+    if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init CreateSurface primary failed\n");
+        LOG_COMPAT("Primary surface failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
 
-    DDSCAPS caps;
-    memset(&caps, 0, sizeof(caps));
-    caps.dwCaps = DDSCAPS_BACKBUFFER;
-    if (FAILED(gfx->primarySurf->GetAttachedSurface(&caps, &gfx->backSurf)))
+    // =========================================================
+    // BACKBUFFER
+    // =========================================================
+    DDSURFACEDESC back;
+    ZeroMemory(&back, sizeof(back));
+
+    back.dwSize = sizeof(DDSURFACEDESC);
+    back.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+    back.dwWidth  = width;
+    back.dwHeight = height;
+
+    back.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+
+    hr = gfx->dd->CreateSurface(&back, &gfx->backSurf, NULL);
+    if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init GetAttachedSurface back failed\n");
+        LOG_COMPAT("Backbuffer failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
 
-    // --- Z-buffer ----------------------------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 9\n");
+    // =========================================================
+    // Z BUFFER
+    // =========================================================
     DDSURFACEDESC zsd;
-    memset(&zsd, 0, sizeof(zsd));
-    zsd.dwSize            = sizeof(zsd);
-    zsd.dwFlags           = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_ZBUFFERBITDEPTH;
-    zsd.ddsCaps.dwCaps    = DDSCAPS_ZBUFFER | DDSCAPS_SYSTEMMEMORY;
-    zsd.dwZBufferBitDepth = 16;
-    zsd.dwWidth           = static_cast<DWORD>(width);
-    zsd.dwHeight          = static_cast<DWORD>(height);
+    ZeroMemory(&zsd, sizeof(zsd));
 
-    if (FAILED(gfx->dd->CreateSurface(&zsd, &gfx->zbufSurf, NULL)))
+    zsd.dwSize = sizeof(DDSURFACEDESC);
+    zsd.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT | DDSD_ZBUFFERBITDEPTH;
+
+    zsd.dwWidth  = width;
+    zsd.dwHeight = height;
+    zsd.dwZBufferBitDepth = 16;
+
+    zsd.ddsCaps.dwCaps = DDSCAPS_ZBUFFER | DDSCAPS_SYSTEMMEMORY;
+
+    hr = gfx->dd->CreateSurface(&zsd, &gfx->zbufSurf, NULL);
+    if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init CreateSurface zbuf failed\n");
+        LOG_COMPAT("Zbuffer failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
+
     gfx->backSurf->AddAttachedSurface(gfx->zbufSurf);
 
-    // --- IDirect3D2 --------------------------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 10\n");
-    if (FAILED(gfx->dd->QueryInterface(IID_IDirect3D2,
-                                             reinterpret_cast<void **>(&gfx->d3d))))
+    // =========================================================
+    // DIRECT3D2
+    // =========================================================
+    hr = gfx->dd->QueryInterface(IID_IDirect3D2, (void**)&gfx->d3d);
+    if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init QueryInterface IDirect3D2 failed\n");
+        LOG_COMPAT("QueryInterface IDirect3D2 failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
 
-    // --- IDirect3DDevice2 (RGB SW rasteriser; swap GUID for HW device) -----
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 11\n");
-    if (FAILED(gfx->d3d->CreateDevice(IID_IDirect3DRGBDevice,
-                                            gfx->backSurf,
-                                            &gfx->device)))
+    hr = gfx->d3d->CreateDevice(IID_IDirect3DHALDevice,
+                                gfx->primarySurf,
+                                &gfx->device);
+
+    if (FAILED(hr))
     {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init CreateDevice failed\n");
+        LOG_COMPAT("HAL device failed : 0x%08X\n", hr);
+
+        hr = gfx->d3d->CreateDevice(IID_IDirect3DRGBDevice,
+                                    gfx->primarySurf,
+                                    &gfx->device);
+
+        if (FAILED(hr))
+        {
+            LOG_COMPAT("RGB fallback failed : 0x%08X\n", hr);
+            delete gfx;
+            return NULL;
+        }
+    }
+
+    // =========================================================
+    // VIEWPORT
+    // =========================================================
+    hr = gfx->d3d->CreateViewport(&gfx->vp, NULL);
+    if (FAILED(hr))
+    {
+        LOG_COMPAT("CreateViewport failed : 0x%08X\n", hr);
         delete gfx;
         return NULL;
     }
 
-    // --- Viewport ----------------------------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 12\n");
-    if (FAILED(gfx->d3d->CreateViewport(&gfx->vp, NULL)))
-    {
-        SDL_LOG_COMPAT("FixedFunctionDX2::Init CreateViewport failed\n");
-        delete gfx;
-        return NULL;
-    }
     gfx->device->AddViewport(gfx->vp);
-
-    D3DVIEWPORT2 d3dvp;
-    memset(&d3dvp, 0, sizeof(d3dvp));
-    d3dvp.dwSize      = sizeof(d3dvp);
-    d3dvp.dwX         = 0;
-    d3dvp.dwY         = 0;
-    d3dvp.dwWidth     = static_cast<DWORD>(width);
-    d3dvp.dwHeight    = static_cast<DWORD>(height);
-    d3dvp.dvClipX     = -1.0f;  d3dvp.dvClipWidth  = 2.0f;
-    d3dvp.dvClipY     =  1.0f;  d3dvp.dvClipHeight = 2.0f;
-    d3dvp.dvMinZ      = 0.0f;   d3dvp.dvMaxZ       = 1.0f;
-    gfx->vp->SetViewport2(&d3dvp);
     gfx->device->SetCurrentViewport(gfx->vp);
 
-    gfx->vpX      = 0;      gfx->vpY      = 0;
-    gfx->vpWidth  = width;  gfx->vpHeight = height;
+    D3DVIEWPORT2 vp;
+    ZeroMemory(&vp, sizeof(vp));
 
-    // --- Default render states ---------------------------------------------
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 13\n");
-    gfx->device->SetRenderState(D3DRENDERSTATE_ZENABLE,          TRUE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,     TRUE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_CULLMODE,         D3DCULL_NONE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_DITHERENABLE,     TRUE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_SPECULARENABLE,   FALSE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, FALSE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND,  D3DTBLEND_MODULATEALPHA);
+    vp.dwSize   = sizeof(D3DVIEWPORT2);
+    vp.dwX      = 0;
+    vp.dwY      = 0;
+    vp.dwWidth  = width;
+    vp.dwHeight = height;
+    vp.dvMinZ   = 0.0f;
+    vp.dvMaxZ   = 1.0f;
 
-    // Alpha test: skip fragments with alpha < 4/255 (mirrors GL init)
-    gfx->device->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE,  TRUE);
-    gfx->device->SetRenderState(D3DRENDERSTATE_ALPHAFUNC,        D3DCMP_GREATEREQUAL);
-    gfx->device->SetRenderState(D3DRENDERSTATE_ALPHAREF,         4);
+    gfx->vp->SetViewport2(&vp);
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 14\n");
-    if (((g_Supervisor.cfg.opts >> GCOS_DONT_USE_FOG) & 1) == 0)
-    {
-        gfx->device->SetRenderState(D3DRENDERSTATE_FOGENABLE, TRUE);
-    }
-    // gfx->device->SetRenderState(D3DRENDERSTATE_FOGVERTEXMODE, D3DFOG_LINEAR);
+    // =========================================================
+    // STATES
+    // =========================================================
+    gfx->device->SetRenderState(D3DRENDERSTATE_ZENABLE, TRUE);
+    gfx->device->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
+    gfx->device->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
+    gfx->device->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
 
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init 15\n");
-    if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
-    {
-        gfx->device->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_MODULATEALPHA);
-    }
-    else
-    {
-        gfx->device->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_DECAL);
-    }
-
-    SDL_LOG_COMPAT("FixedFunctionDX2::Init finish\n");
+    LOG_COMPAT("FixedFunctionDX2::Init OK\n");
     return gfx;
 }
 
@@ -597,10 +644,13 @@ void FixedFunctionDX2::SetTextureImage(u32 width, u32 height,
                                         PixelFormat fmt, PixelDataType type,
                                         const void *data)
 {
+    if(!data)return;
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 1\n");
     if (boundTexture < 0 ||
         boundTexture >= static_cast<i32>(textures.size())) return;
     TextureEntry &e = textures[boundTexture];
 
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 2\n");
     if (e.tex)  { e.tex->Release();  e.tex  = NULL; }
     if (e.surf) { e.surf->Release(); e.surf = NULL; }
 
@@ -616,52 +666,115 @@ void FixedFunctionDX2::SetTextureImage(u32 width, u32 height,
     ddsd.ddsCaps.dwCaps = DDSCAPS_TEXTURE | DDSCAPS_SYSTEMMEMORY;
     ddsd.dwWidth  = width;
     ddsd.dwHeight = height;
+
+
+    u32 bpp = 4;
+
+    switch (type)
+    {
+        case PIXEL_UNSIGNED_BYTE:
+            bpp = (fmt == PIXEL_RGBA) ? 4 : 3;
+            break;
+
+        case PIXEL_UNSIGNED_SHORT_5_5_5_1:
+        case PIXEL_UNSIGNED_SHORT_5_6_5:
+        case PIXEL_UNSIGNED_SHORT_4_4_4_4:
+            bpp = 2;
+            break;
+
+        default:
+            LOG_COMPAT("Unknown pixel format\n");
+            e.surf->Unlock(NULL);
+            return;
+    }
+
+    u32 rowBytes = width * bpp;
+
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 3\n");
     _FillPixelFormat(ddsd.ddpfPixelFormat, fmt, type);
 
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 4\n");
     DX2_CHECK(dd->CreateSurface(&ddsd, &e.surf, NULL));
     if (FAILED(lastResult)) return;
 
     DDSURFACEDESC lockDesc;
     memset(&lockDesc, 0, sizeof(lockDesc));
     lockDesc.dwSize = sizeof(lockDesc);
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5\n");
+
     if (SUCCEEDED(e.surf->Lock(NULL, &lockDesc, DDLOCK_WRITEONLY | DDLOCK_WAIT, NULL)))
     {
+        LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5.1\n");
         const BYTE *src  = static_cast<const BYTE *>(data);
+        LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5.2\n");
         BYTE       *dst  = static_cast<BYTE *>(lockDesc.lpSurface);
-        u32 bpp      = lockDesc.ddpfPixelFormat.dwRGBBitCount / 8;
-        u32 rowBytes = width * bpp;
-        for (u32 row = 0; row < height; ++row)
-            memcpy(dst + row * lockDesc.lPitch, src + row * rowBytes, rowBytes);
+        LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5.5\n");
+
+        if (!lockDesc.lpSurface)
+        {
+            LOG_COMPAT("lpSurface NULL\n");
+            e.surf->Unlock(NULL);
+            return;
+        }
+        
+        BYTE *dstRow = dst;
+        const BYTE *srcRow = src;
+
+        for (u32 row = 0; row < height; ++row){
+            memcpy(dstRow, srcRow, rowBytes);
+            dstRow += lockDesc.lPitch;
+            srcRow += rowBytes;
+        }
+        LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5.6\n");
         e.surf->Unlock(NULL);
+        LOG_COMPAT("FixedFunctionDX2::SetTextureImage 5.7\n");
     }
 
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage 6\n");
     DX2_CHECK(e.surf->QueryInterface(IID_IDirect3DTexture2,
                                      reinterpret_cast<void **>(&e.tex)));
+    LOG_COMPAT("FixedFunctionDX2::SetTextureImage fin\n");
 }
 
 void FixedFunctionDX2::SetTextureSubImage(i32 xoffset, i32 yoffset,
                                            i32 width, i32 height,
                                            const void *data)
 {
+    LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 1\n");
+    if(!data)return;
     if (boundTexture < 0 ||
         boundTexture >= static_cast<i32>(textures.size())) return;
     TextureEntry &e = textures[boundTexture];
+    LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 2\n");
     if (!e.surf) return;
 
     RECT r = { xoffset, yoffset, xoffset + width, yoffset + height };
     DDSURFACEDESC lockDesc;
+    LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 3\n");
     memset(&lockDesc, 0, sizeof(lockDesc));
     lockDesc.dwSize = sizeof(lockDesc);
+
+    LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 4\n");
     if (SUCCEEDED(e.surf->Lock(&r, &lockDesc, DDLOCK_WRITEONLY | DDLOCK_WAIT, NULL)))
     {
         const BYTE *src  = static_cast<const BYTE *>(data);
         BYTE       *dst  = static_cast<BYTE *>(lockDesc.lpSurface);
         u32 bpp      = lockDesc.ddpfPixelFormat.dwRGBBitCount / 8;
         u32 rowBytes = static_cast<u32>(width) * bpp;
+        LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 5\n");
+        if (!lockDesc.lpSurface)
+        {
+            LOG_COMPAT("lpSurface NULL\n");
+            e.surf->Unlock(NULL);
+            return;
+        }
+        LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 6\n");
         for (i32 row = 0; row < height; ++row)
             memcpy(dst + row * lockDesc.lPitch, src + row * rowBytes, rowBytes);
+        LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage 7\n");
         e.surf->Unlock(&r);
     }
+    LOG_COMPAT("FixedFunctionDX2::SetTextureSubImage fin\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -738,6 +851,7 @@ void FixedFunctionDX2::_PackVertices(DX2Vertex *dst, i32 start, i32 count)
 
 void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 count)
 {
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 1\n");
     DWORD vtxBytes  = static_cast<DWORD>(count) * sizeof(DX2Vertex);
     DWORD instrBase = vtxBytes;
 
@@ -760,6 +874,7 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
 
     DWORD totalSize = vtxBytes + instrBytes;
 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 2\n");
     if (!execBuf || execBufSize < totalSize)
     {
         if (execBuf) { execBuf->Release(); execBuf = NULL; }
@@ -769,14 +884,18 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
         ebd.dwFlags      = D3DDEB_BUFSIZE;
         ebd.dwBufferSize = totalSize;
         // DX2_CHECK(device->CreateExecuteBuffer(&ebd, &execBuf, NULL));
-        // if (FAILED(lastResult)) return;
+        if (FAILED(lastResult)) return;
         execBufSize = totalSize;
     }
+ 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 2+\n");
 
     D3DEXECUTEBUFFERDESC lockDesc;
     memset(&lockDesc, 0, sizeof(lockDesc));
     lockDesc.dwSize = sizeof(lockDesc);
-    DX2_CHECK(execBuf->Lock(&lockDesc));
+    // DX2_CHECK(execBuf->Lock(&lockDesc));
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 2++\n");
+    return;
     if (FAILED(lastResult)) return;
 
     BYTE *base = static_cast<BYTE *>(lockDesc.lpData);
@@ -785,6 +904,7 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
 
     BYTE *ip = base + instrBase;
 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 3\n");
     // PROCESSVERTICES
     {
         D3DINSTRUCTION *ins = reinterpret_cast<D3DINSTRUCTION *>(ip);
@@ -802,6 +922,7 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
         ip += sizeof(D3DPROCESSVERTICES);
     }
 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 4\n");
     // Geometry
     if (primType == D3DPT_TRIANGLELIST  ||
         primType == D3DPT_TRIANGLESTRIP ||
@@ -879,6 +1000,7 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
         }
     }
 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw 5\n");
     // EXIT
     {
         D3DINSTRUCTION *ins = reinterpret_cast<D3DINSTRUCTION *>(ip);
@@ -899,6 +1021,7 @@ void FixedFunctionDX2::_ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 co
     DX2_CHECK(execBuf->SetExecuteData(&ed));
     if (FAILED(lastResult)) return;
 
+    LOG_COMPAT("FixedFunctionDX2::_ExecuteDraw fin\n");
     // DX2_CHECK(device->Execute(execBuf, vp, D3DEXECUTE_UNCLIPPED));
 }
 
@@ -912,12 +1035,42 @@ void FixedFunctionDX2::Draw(PrimitiveType type, i32 start, i32 count)
 // ---------------------------------------------------------------------------
 void FixedFunctionDX2::SwapBuffers()
 {
-    RECT rcDst;
-    GetClientRect(hwnd, &rcDst);
-    ClientToScreen(hwnd, reinterpret_cast<POINT *>(&rcDst.left));
-    ClientToScreen(hwnd, reinterpret_cast<POINT *>(&rcDst.right));
+    if (!primarySurf || !backSurf)
+        return;
 
-    DX2_CHECK(primarySurf->Blt(&rcDst, backSurf, NULL, DDBLT_WAIT, NULL));
+    RECT rcClient;
+    GetClientRect(hwnd, &rcClient);
+
+    POINT pt1;
+    pt1.x = rcClient.left;
+    pt1.y = rcClient.top;
+
+    POINT pt2;
+    pt2.x = rcClient.right;
+    pt2.y = rcClient.bottom;
+
+    ClientToScreen(hwnd, &pt1);
+    ClientToScreen(hwnd, &pt2);
+
+    RECT rcDst;
+    rcDst.left   = pt1.x;
+    rcDst.top    = pt1.y;
+    rcDst.right  = pt2.x;
+    rcDst.bottom = pt2.y;
+
+    HRESULT hr = primarySurf->Blt(
+        &rcDst,
+        backSurf,
+        NULL,
+        DDBLT_WAIT,
+        NULL);
+
+    if (FAILED(hr))
+    {
+        LOG_COMPAT(
+            "Blt failed : 0x%08X\n",
+            hr);
+    }
 
     SDL_PumpEvents();
 }

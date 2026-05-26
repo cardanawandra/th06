@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL_video.h>
-
 #include "inttypes.hpp"
 #include "graphics/GfxInterface.hpp"
 #include "SDLCompat.hpp"

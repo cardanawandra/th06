@@ -21,8 +21,7 @@
 //     → on desktop: "bgm/th06_01.wav"
 //     → on Android: "bgm/th06_01.wav"   (unchanged — SDL reads from assets)
 // =============================================================================
-
-#include <SDL.h>
+#include "inttypes.hpp"
 
 namespace GamePaths
 {

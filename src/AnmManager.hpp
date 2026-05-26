@@ -3,8 +3,6 @@
 // #include <d3d8.h>
 // #include <d3dx8math.h>
 
-#include <SDL_video.h>
-
 #include "AnmIdx.hpp"
 #include "AnmVm.hpp"
 #include "GameManager.hpp"
@@ -15,7 +13,6 @@
 #include "GameWindow.hpp"
 #include "inttypes.hpp"
 #include "SDLCompat.hpp"
-
 
 #define TEX_FMT_UNKNOWN 0u
 #define TEX_FMT_A8R8G8B8 1u

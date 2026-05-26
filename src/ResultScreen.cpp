@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <SDL.h>
 
 static const f32 g_DifficultyWeightsList[5] = {-30.0f, -10.0f, 20.0f, 30.0f, 30.0f};
  
@@ -582,14 +581,14 @@ i32 ResultScreen::HandleResultKeyboard()
 
         this->hscr.base.unk_9 = 1;
         
-        SDL_LOG_COMPAT("strcpy 1");
+        LOG_COMPAT("strcpy 1");
         strcpy(this->hscr.name, "        ");
 
         if (this->LinkScoreEx(&this->hscr, this->diffSelected, this->charUsed * 2 + g_GameManager.shotType) >= 10)
             goto RETURN_TO_STATS_SCREEN_WITHOUT_SOUND;
 
         this->cursor = 0;
-        SDL_LOG_COMPAT("strcpy 2");
+        LOG_COMPAT("strcpy 2");
         strcpy(this->replayName, "");
     }
     if (this->frameTimer < 30)
@@ -730,7 +729,7 @@ i32 ResultScreen::HandleResultKeyboard()
         {
             sprite->pendingInterrupt = 2;
         }
-        SDL_LOG_COMPAT("strcpy 3");
+        LOG_COMPAT("strcpy 3");
         SNPRINTF(this->replayName, sizeof(this->replayName), "%s", this->hscr.name);
 //        strcpy(this->replayName, this->hscr.name);
     }
@@ -1800,7 +1799,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfff0f0ff;
 
-                            SDL_LOG_COMPAT("strcpy 4");
+                            LOG_COMPAT("strcpy 4");
                             strcpy(name, "        ");
                             name[8] = 0;
 
@@ -1848,7 +1847,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                         {
                             g_AsciiManager.color = 0xfffff0f0;
 
-                            SDL_LOG_COMPAT("strcpy 5");
+                            LOG_COMPAT("strcpy 5");
                             strcpy(name, "        ");
                             name[8] = 0;
 
@@ -2026,7 +2025,7 @@ ChainCallbackResult ResultScreen::OnDraw(ResultScreen *resultScreen)
                                              resultScreen->defaultReplay.score);
                 g_AsciiManager.color = 0xfff0f0ff;
 
-                SDL_LOG_COMPAT("strcpy 6");
+                LOG_COMPAT("strcpy 6");
                 strcpy(name, "        ");
 
                 name[8] = 0;
@@ -2132,7 +2131,7 @@ ZunResult ResultScreen::AddedCallback(ResultScreen *resultScreen)
 
                 resultScreen->LinkScoreEx(resultScreen->defaultScore[i][characterShot] + slot, i, characterShot);
 
-                SDL_LOG_COMPAT("strcpy 7");
+                LOG_COMPAT("strcpy 7");
                 strcpy(resultScreen->defaultScore[i][characterShot][slot].name, DEFAULT_HIGH_SCORE_NAME);
             }
         }

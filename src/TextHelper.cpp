@@ -55,7 +55,7 @@ ZunResult TextHelper::CreateTextBuffer()
     {
         if (g_Font = TTF_OpenFont(path2, 30), g_Font == NULL)
         {
-            // SDL_LOG_COMPAT("%s\n", TTF_GetError());
+            // LOG_COMPAT("%s\n", TTF_GetError());
             // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
             textNotExist = true;
             return ZUN_SUCCESS;

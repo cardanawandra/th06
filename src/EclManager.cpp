@@ -116,7 +116,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
             }
 
             args = &instruction->args;
-            SDL_LOG_COMPAT("ECL CODE : %d",instruction->opCode+10000);
+            LOG_COMPAT("ECL CODE : %d",instruction->opCode+10000);
             switch (instruction->opCode)
             {
             case ECL_OPCODE_UNIMP:
@@ -720,7 +720,7 @@ ZunResult EclManager::RunEcl(Enemy *enemy)
                 enemy->life = enemy->maxLife = instruction->args.setInt;
                 break;
             case ECL_OPCODE_SPELLCARDSTART:
-                SDL_LOG_COMPAT("ECL ShowSpellcard : %s",instruction->args.spellcardStart.spellcardName);
+                LOG_COMPAT("ECL ShowSpellcard : %s",instruction->args.spellcardStart.spellcardName);
                 g_Gui.ShowSpellcard(instruction->args.spellcardStart.spellcardSprite,
                                     instruction->args.spellcardStart.spellcardName);
                 g_EnemyManager.spellcardInfo.isCapturing = 1;

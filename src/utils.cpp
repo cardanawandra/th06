@@ -19,7 +19,7 @@ void DebugPrint(const char *fmt, ...)
     vsnprintf(tmpBuffer, 511, fmt, args);
     va_end(args);
 
-    SDL_LOG_COMPAT("DEBUG2: %s\n", tmpBuffer);
+    LOG_COMPAT("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
 
@@ -65,7 +65,7 @@ void DebugPrint2(const char *fmt, ...)
     vsnprintf(tmpBuffer, 511, fmt, args);
     va_end(args);
 
-    SDL_LOG_COMPAT("DEBUG2: %s\n", tmpBuffer);
+    LOG_COMPAT("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
 }; // namespace utils

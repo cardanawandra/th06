@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL_video.h>
-
 #include "Chain.hpp"
 #include "Controller.hpp"
 #include "MidiOutput.hpp"
@@ -140,9 +138,6 @@ struct Supervisor
 
     // SDL1.2 joystick (no GameController API)
     SDL_JOYSTICK_COMPAT *joystick;
-
-    // SDL1.2 uses SDL_Surface instead of SDL_Window
-    // SDL_SURFACE_COMPAT *gameWindow;
 
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;

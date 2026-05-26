@@ -168,14 +168,14 @@ GfxInterface *WebGL::Create()
 
     if (gfx->glContext == NULL)
     {
-        SDL_LOG_COMPAT("g_GameWindow.glContext is null\n");
+        LOG_COMPAT("g_GameWindow.glContext is null\n");
         delete gfx;
         return NULL;
     }
 
     if (SDL_GL_MAKE_CURRENT_COMPAT(gfx->window, gfx->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
     {
-        SDL_LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
+        LOG_COMPAT("SDL_GL_MAKE_CURRENT_COMPAT isn't 0\n");
         delete gfx;
         return NULL;
     }

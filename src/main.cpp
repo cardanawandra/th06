@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <SDL.h>
 
 #include "AnmManager.hpp"
 #include "Chain.hpp"
@@ -28,7 +27,7 @@ extern "C" FILE* __cdecl __iob_func(void)
 
 int main(int argc, char *argv[])
 {
-    SDL_LOG_COMPAT("Starting");
+    LOG_COMPAT("Starting");
     i32 renderResult = 0;
 
 #ifdef __ANDROID__
@@ -40,7 +39,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    SDL_LOG_COMPAT("Init Gamepath");
+    LOG_COMPAT("Init Gamepath");
     GamePaths::Init();
 
     // if (utils::CheckForRunningGameInstance())
@@ -50,14 +49,14 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
-    SDL_LOG_COMPAT("Load CONF File");
+    LOG_COMPAT("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
 #ifdef __ANDROID__
         // On Android, config file may not exist on first run.
         // LoadConfig sets defaults and tries to write — if write fails,
         // continue anyway with defaults.
-        SDL_LOG_COMPAT("LoadConfig failed (first run?), continuing with defaults");
+        LOG_COMPAT("LoadConfig failed (first run?), continuing with defaults");
 #else
         g_GameErrorContext.Flush();
         return -1;
@@ -69,30 +68,30 @@ int main(int argc, char *argv[])
     //     g_GameErrorContext.Flush();
     //     return 1;
     // }
-    SDL_LOG_COMPAT("Start the game");
+    LOG_COMPAT("Start the game");
 
 restart:
-    SDL_LOG_COMPAT("Create game window");
+    LOG_COMPAT("Create game window");
     GameWindow::CreateGameWindow();
 
-    SDL_LOG_COMPAT("new AnmManager");
+    LOG_COMPAT("new AnmManager");
     g_AnmManager = new AnmManager();
 
-    SDL_LOG_COMPAT("InitD3dRendering");
+    LOG_COMPAT("InitD3dRendering");
     if (GameWindow::InitD3dRendering() != ZUN_SUCCESS)
     {
         g_GameErrorContext.Flush();
         return 1;
     }
 
-    SDL_LOG_COMPAT("InitializeDSound");
+    LOG_COMPAT("InitializeDSound");
     g_SoundPlayer.InitializeDSound();
-    SDL_LOG_COMPAT("GetJoystickCaps");
+    LOG_COMPAT("GetJoystickCaps");
     Controller::GetJoystickCaps();
-    SDL_LOG_COMPAT("ResetKeyboard");
+    LOG_COMPAT("ResetKeyboard");
     Controller::ResetKeyboard();
 
-    SDL_LOG_COMPAT("Supervisor::RegisterChain");
+    LOG_COMPAT("Supervisor::RegisterChain");
     if (Supervisor::RegisterChain() != ZUN_SUCCESS)
     {
         goto stop;
@@ -104,12 +103,12 @@ restart:
 
     g_GameWindow.curFrame = 0;
 
-    SDL_LOG_COMPAT("Into loop game event");
+    LOG_COMPAT("Into loop game event");
     while (true)
     {
         SDL_Event e;
 
-        SDL_LOG_COMPAT("Into poolevent loop");
+        LOG_COMPAT("Into poolevent loop");
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT)
@@ -118,7 +117,7 @@ restart:
             }
         }
 
-        SDL_LOG_COMPAT("g_GameWindow.Render");
+        LOG_COMPAT("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {
@@ -159,7 +158,7 @@ restart:
 
 
 stop:
-    SDL_LOG_COMPAT("stop the game");
+    LOG_COMPAT("stop the game");
     g_Chain.Release();
     g_SoundPlayer.Release();
 

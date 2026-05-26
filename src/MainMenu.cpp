@@ -22,7 +22,6 @@
 #include "utils.hpp"
 
 #include "SDLCompat.hpp"
-#include <SDL_timer.h>
 #include <cstring>
 
 static const char *const g_ShortCharacterList[4] = {"ReimuA ", "ReimuB ", "MarisaA", "MarisaB"};

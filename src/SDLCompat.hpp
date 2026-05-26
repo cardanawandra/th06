@@ -200,7 +200,7 @@
 
 #if SDL_MAJOR_VERSION >= 2
     // SDL 2.x specific code
-    #define SDL_LOG_COMPAT SDL_Log
+    #define LOG_COMPAT SDL_Log
     #define TRY_RESOLVE_FUNCTION(func) this->func = (decltype(this->func))SDL_GL_GetProcAddress(#func);
     #define TRY_RESOLVE_FUNCTION_GLES(func) this->func##_ptr = (decltype(this->func##_ptr))SDL_GL_GetProcAddress(#func);
 
@@ -280,7 +280,7 @@
     // SDL 1.x specific code
     #include <SDL_joystick.h>
     #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_JOYSTICK
-    #define SDL_LOG_COMPAT printf
+    #define LOG_COMPAT printf
     #ifdef _WIN32
         #define TRY_RESOLVE_FUNCTION(name) this->name = ::name;
     #else
@@ -523,7 +523,7 @@
 #endif
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)
-#if 1
-#undef SDL_LOG_COMPAT
-#define SDL_LOG_COMPAT
+#if 0
+#undef LOG_COMPAT
+#define LOG_COMPAT
 #endif

@@ -1,6 +1,6 @@
 #include "GamePaths.hpp"
+#include "inttypes.hpp"
 
-#include <SDL.h>
 #include <stdio.h>
 #include <cstring>
 #include <cstddef>
@@ -24,11 +24,11 @@ void Init()
     if (internalPath)
     {
         SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
-        SDL_LOG_COMPAT("GamePaths: user data path = %s", s_userPath);
+        LOG_COMPAT("GamePaths: user data path = %s", s_userPath);
     }
     else
     {
-        // SDL_LOG_COMPATWarn(SDL_LOG_COMPAT_CATEGORY_APPLICATION, "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
+        // LOG_COMPATWarn(LOG_COMPAT_CATEGORY_APPLICATION, "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
         s_userPath[0] = '\0';
     }
 #else
@@ -70,13 +70,6 @@ bool IsAssetPath(const char *path)
 
     return false;
 }
-void safe_sprintf(char* out, size_t cap, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    vsprintf(out, fmt, args);
-    va_end(args);
-}
 void Resolve(char *outBuf, size_t outBufSize, const char *path)
 {
     if (!path || !*path)
@@ -93,12 +86,12 @@ void Resolve(char *outBuf, size_t outBufSize, const char *path)
     {
         // Asset: keep the relative path as-is.
         // SDL_RWFROMFILE_COMPAT on Android reads from APK assets/ automatically.
-        safe_sprintf(outBuf, outBufSize, "%s", path);
+        SNPRINTF(outBuf, outBufSize, "%s", path);
     }
     else
     {
         // User data: prepend the writable user-data directory.
-        safe_sprintf(outBuf, outBufSize, "%s%s", s_userPath, path);
+        SNPRINTF(outBuf, outBufSize, "%s%s", s_userPath, path);
     }
 }
 
@@ -106,7 +99,7 @@ void EnsureParentDir(const char *resolvedPath)
 {
     // Find the last directory separator and create the directory.
     char dirBuf[512];
-    safe_sprintf(dirBuf, sizeof(dirBuf), "%s", resolvedPath);
+    SNPRINTF(dirBuf, sizeof(dirBuf), "%s", resolvedPath);
 
     char *lastSep = strrchr(dirBuf, '/');
 #ifdef _WIN32

@@ -36,27 +36,27 @@ static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
 
 void AnmManager::CreateTextureObject()
 {
-    SDL_LOG_COMPAT("AnmManager::CreateTextureObject 1\n");
+    LOG_COMPAT("AnmManager::CreateTextureObject 1\n");
     this->currentTextureHandle = g_GfxBackend->CreateTexture();
     
-    SDL_LOG_COMPAT("AnmManager::CreateTextureObject 2\n");
+    LOG_COMPAT("AnmManager::CreateTextureObject 2\n");
     g_GfxBackend->BindTexture(this->currentTextureHandle);
     
-    SDL_LOG_COMPAT("AnmManager::CreateTextureObject 3\n");
+    LOG_COMPAT("AnmManager::CreateTextureObject 3\n");
     g_GfxBackend->SetTextureFilter();
     
-    SDL_LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
+    LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
 }
 
 SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL_FORMAT_COMPAT format, u8 **fileData)
 {
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 1\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 1\n");
     u8 *data;
     SDL_Surface *imageSrcSurface;
     SDL_Surface *imageTargetSurface;
     SDL_RWOPS_COMPAT *rwData;
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 2\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 2\n");
     data = FileSystem::OpenPath(filename, 0);
 
     if (data == NULL)
@@ -64,7 +64,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL
         return NULL;
     }
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 3\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 3\n");
     rwData = SDL_RWFROMCONSTMEM_COMPAT(data, g_LastFileSize);
 
     if (rwData == NULL)
@@ -73,21 +73,21 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL
         return NULL;
     }
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 4\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 4\n");
     imageSrcSurface = IMG_Load_RW(rwData, 1);
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 4.5\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 4.5\n");
     if (imageSrcSurface == NULL)
     {
-        // SDL_LOG_COMPAT(IMG_GetError());
+        // LOG_COMPAT(IMG_GetError());
         free(data);
         return NULL;
     }
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 5\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 5\n");
     imageTargetSurface = SDL_CONVERT_SURFACE_FORMAT_COMPAT(imageSrcSurface, format, 0);
 
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat 6\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat 6\n");
     SDL_FreeSurface(imageSrcSurface);
 
     if (imageTargetSurface != NULL && fileData != NULL)
@@ -98,7 +98,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL
     {
         free(data);
     }
-    SDL_LOG_COMPAT("LoadToSurfaceWithFormat finish\n");
+    LOG_COMPAT("LoadToSurfaceWithFormat finish\n");
     return imageTargetSurface;
 }
 
@@ -206,7 +206,7 @@ AnmManager::AnmManager()
 {
     // IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
     // UNKNOWN <= index 0
-    SDL_LOG_COMPAT("AnmManager::AnmManager 1\n");
+    LOG_COMPAT("AnmManager::AnmManager 1\n");
     SDL_PIXEL_FORMAT_COMPAT_LOAD();
     g_TextureFormatSDLMapping[0] = SDL_PIXELFORMAT_UNKNOWN; 
     // RGBA32 (RGBA8888) <= index 1
@@ -222,10 +222,10 @@ AnmManager::AnmManager()
 
     this->maybeLoadedSpriteCount = 0;
 
-    SDL_LOG_COMPAT("AnmManager::AnmManager 2\n");
+    LOG_COMPAT("AnmManager::AnmManager 2\n");
     memset(this, 0, sizeof(AnmManager));
 
-    SDL_LOG_COMPAT("AnmManager::AnmManager 3\n");
+    LOG_COMPAT("AnmManager::AnmManager 3\n");
     ClearVertexBuffer();
 
     for (i32 spriteIndex = 0; spriteIndex < ARRAY_SIZE_SIGNED(this->sprites); spriteIndex++)
@@ -233,7 +233,7 @@ AnmManager::AnmManager()
         this->sprites[spriteIndex].sourceFileIndex = -1;
     }
 
-    SDL_LOG_COMPAT("AnmManager::AnmManager 4\n");
+    LOG_COMPAT("AnmManager::AnmManager 4\n");
     g_PrimitivesToDrawVertexBuf[3].position.w = 1.0;
     g_PrimitivesToDrawVertexBuf[2].position.w = g_PrimitivesToDrawVertexBuf[3].position.w;
     g_PrimitivesToDrawVertexBuf[1].position.w = g_PrimitivesToDrawVertexBuf[2].position.w;
@@ -247,7 +247,7 @@ AnmManager::AnmManager()
     g_PrimitivesToDrawVertexBuf[3].textureUV.x = 1.0;
     g_PrimitivesToDrawVertexBuf[3].textureUV.y = 1.0;
 
-    SDL_LOG_COMPAT("AnmManager::AnmManager 5\n");
+    LOG_COMPAT("AnmManager::AnmManager 5\n");
     g_PrimitivesToDrawNoVertexBuf[3].position.w = 1.0;
     g_PrimitivesToDrawNoVertexBuf[2].position.w = g_PrimitivesToDrawNoVertexBuf[3].position.w;
     g_PrimitivesToDrawNoVertexBuf[1].position.w = g_PrimitivesToDrawNoVertexBuf[2].position.w;
@@ -268,13 +268,13 @@ AnmManager::AnmManager()
 
     this->dirtyFlags = 0;
 
-    SDL_LOG_COMPAT("AnmManager::AnmManager 8\n");
+    LOG_COMPAT("AnmManager::AnmManager 8\n");
     for (u32 i = 0; i < ARRAY_SIZE_SIGNED(this->transformMatrices); i++)
     {
         transformMatrices[i].Identity();
         dirtyTransformMatrices[i].Identity();
     }
-    SDL_LOG_COMPAT("AnmManager::AnmManager finish\n");
+    LOG_COMPAT("AnmManager::AnmManager finish\n");
 }
 
 void AnmManager::SetupVertexBuffer()
@@ -330,11 +330,11 @@ void AnmManager::SetupVertexBuffer()
 
 ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
-    SDL_LOG_COMPAT("LoadTexture 1");
+    LOG_COMPAT("LoadTexture 1");
     u8 *rawTextureData;
     SDL_Surface *textureSurface;
 
-    SDL_LOG_COMPAT("LoadTexture 2");
+    LOG_COMPAT("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
     #ifndef WIN98
@@ -349,7 +349,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     }
     #endif
 
-    SDL_LOG_COMPAT("LoadTexture 3");
+    LOG_COMPAT("LoadTexture 3");
     textureSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat],
                                              (u8 **)&this->textures[textureIdx].fileData);
 
@@ -357,7 +357,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     const AnmRawEntry *entry = this->anmFiles[textureIdx];
     if (textureSurface->w != entry->width || textureSurface->h != entry->height)
     {
-        SDL_LOG_COMPAT("LoadTexture 4");
+        LOG_COMPAT("LoadTexture 4");
         SDL_Surface *textureSurface2 = SDL_CREATE_RGB_SURFACE_COMPAT(
             entry->width,
             entry->height,
@@ -365,10 +365,10 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         );
         SDL_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
         SDL_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
-        SDL_LOG_COMPAT("LoadTexture 5");
+        LOG_COMPAT("LoadTexture 5");
         SDL_SoftStretch(textureSurface, &srcRect, textureSurface2, &dstRect);
-        SDL_LOG_COMPAT("LoadTexture 6");
-        SDL_LOG_COMPAT("Blits %s",textureName);
+        LOG_COMPAT("LoadTexture 6");
+        LOG_COMPAT("Blits %s",textureName);
         SDL_FreeSurface(textureSurface);
         textureSurface = textureSurface2;
     }
@@ -378,15 +378,15 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         return ZUN_ERROR;
     }
 
-    SDL_LOG_COMPAT("LoadTexture 7");
+    LOG_COMPAT("LoadTexture 7");
     CreateTextureObject();
 
     // Clear any errors that might be pending
     while(g_GfxBackend->HasError()) {
-        SDL_LOG_COMPAT("gfx error\n");
+        LOG_COMPAT("gfx error\n");
     }
 
-    SDL_LOG_COMPAT("LoadTexture 8");
+    LOG_COMPAT("LoadTexture 8");
     rawTextureData = ExtractSurfacePixels(textureSurface, g_TextureFormatBPP[textureFormat]);
 
     this->textures[textureIdx].handle = this->currentTextureHandle;
@@ -400,26 +400,26 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     // of those should be globally disabled for the texture unit anyway This also drops colorKey (an equivalent doesn't
     // exist in OpenGL). I'm not sure its use ever matters anyway
 
-    SDL_LOG_COMPAT("LoadTexture 9");
+    LOG_COMPAT("LoadTexture 9");
     g_GfxBackend->SetTextureImage(textureSurface->w, textureSurface->h, g_TextureFormatTypeGfxMapping[textureFormat],
                                 g_TextureFormatTypeMapping[textureFormat], rawTextureData);
 
-    SDL_LOG_COMPAT("LoadTexture 10");
+    LOG_COMPAT("LoadTexture 10");
     SDL_FreeSurface(textureSurface);
 
-    // SDL_LOG_COMPAT("GL Error (hex): 0x%X\n", g_glFuncTable.glGetError());
+    // LOG_COMPAT("GL Error (hex): 0x%X\n", g_glFuncTable.glGetError());
     if (g_GfxBackend->HasError()){
         ReleaseTexture(textureIdx);
         return ZUN_ERROR;
     }
 
-    SDL_LOG_COMPAT("LoadTexture finish");
+    LOG_COMPAT("LoadTexture finish");
     return ZUN_SUCCESS;
 }
 
 ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 1\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 1\n");
     SDL_Surface *alphaSurface;
     TextureData *textureDesc;
 
@@ -446,22 +446,22 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     }
     */
 
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 2 format=%i\n",textureFormat);
+    LOG_COMPAT("LoadTextureAlphaChannel 2 format=%i\n",textureFormat);
     alphaSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat], NULL);
 
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 3\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 3\n");
     if (alphaSurface == NULL)
     {
         return ZUN_ERROR;
     }
 
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 4\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 4\n");
     SDL_LockSurface(alphaSurface);
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 5\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 5\n");
 
     dstData = (u8 *)textureDesc->textureData;
     srcData = (u8 *)alphaSurface->pixels;
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 6\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 6\n");
 
     // Copy over the alpha channel from the source to the destination, taking
     // into account the texture format.
@@ -511,17 +511,17 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     case TEX_FMT_A4R4G4B4:
         if (!textureDesc->textureData)
         {
-            SDL_LOG_COMPAT("textureDesc->textureData failed\n");
+            LOG_COMPAT("textureDesc->textureData failed\n");
             break;
         }
 
         if (!alphaSurface || !alphaSurface->pixels)
         {
             if(!alphaSurface){
-                SDL_LOG_COMPAT("alphaSurface failed\n");
+                LOG_COMPAT("alphaSurface failed\n");
             }
             if(!alphaSurface->pixels){
-                SDL_LOG_COMPAT("alphaSurface->pixels failed\n");
+                LOG_COMPAT("alphaSurface->pixels failed\n");
             }
             break;
         }
@@ -545,19 +545,19 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
         }
         break;
     }
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 7\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 7\n");
     SDL_UnlockSurface(alphaSurface);
     SDL_FreeSurface(alphaSurface);
 
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 8\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 8\n");
     this->SetCurrentTexture(this->textures[textureIdx].handle);
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel 7\n");
+    LOG_COMPAT("LoadTextureAlphaChannel 7\n");
     // g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureDesc->width, textureDesc->height, 0, GL_RGBA,
     //                            g_TextureFormatGLTypeMapping[textureFormat], textureDesc->textureData);
     g_GfxBackend->SetTextureImage(textureDesc->width, textureDesc->height, PIXEL_RGBA, g_TextureFormatTypeMapping[textureFormat],
                                 textureDesc->textureData);
 
-    SDL_LOG_COMPAT("LoadTextureAlphaChannel finish\n");
+    LOG_COMPAT("LoadTextureAlphaChannel finish\n");
     return ZUN_SUCCESS;
 }
 
@@ -577,15 +577,15 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height, 
 
 ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 {
-    SDL_LOG_COMPAT("LoadAnm 1");
+    LOG_COMPAT("LoadAnm 1");
     this->ReleaseAnm(anmIdx);
-    SDL_LOG_COMPAT("LoadAnm 2");
+    LOG_COMPAT("LoadAnm 2");
     this->anmFiles[anmIdx] = (AnmRawEntry *)FileSystem::OpenPath(path, 0);
 
-    SDL_LOG_COMPAT("LoadAnm 3");
+    LOG_COMPAT("LoadAnm 3");
     AnmRawEntry *anm = this->anmFiles[anmIdx];
 
-    SDL_LOG_COMPAT("LoadAnm 4");
+    LOG_COMPAT("LoadAnm 4");
     if (anm == NULL)
     {
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, path);
@@ -594,7 +594,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     anm->textureIdx = anmIdx;
 
-    SDL_LOG_COMPAT("LoadAnm 5");
+    LOG_COMPAT("LoadAnm 5");
     const char *anmName = (char *)((u8 *)anm + anm->nameOffset);
 
     // D3D seems to treat unknown texture format as a wildcard, but SDL treats it as an error
@@ -614,7 +614,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     }
     #endif
 
-    SDL_LOG_COMPAT("LoadAnm 6");
+    LOG_COMPAT("LoadAnm 6");
     if (*anmName == '@')
     {
         this->CreateEmptyTexture(anm->textureIdx, anm->width, anm->height, anm->format);
@@ -624,9 +624,9 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_TEXTURE_CORRUPTED, anmName);
         return ZUN_ERROR;
     }
-    SDL_LOG_COMPAT("LoadAnm 7");
+    LOG_COMPAT("LoadAnm 7");
 
-    SDL_LOG_COMPAT("LoadAnm 8");
+    LOG_COMPAT("LoadAnm 8");
     if (anm->alphaNameOffset != 0)
     {
         anmName = (char *)((u8 *)anm + anm->alphaNameOffset);
@@ -644,7 +644,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     i32 index;
     const AnmRawSprite *rawSprite;
 
-    SDL_LOG_COMPAT("LoadAnm 9");
+    LOG_COMPAT("LoadAnm 9");
     for (index = 0; index < this->anmFiles[anmIdx]->numSprites; index++, curSpriteOffset++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)anm + *curSpriteOffset);
@@ -660,7 +660,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
         this->LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
     }
 
-    SDL_LOG_COMPAT("LoadAnm 10");
+    LOG_COMPAT("LoadAnm 10");
     for (index = 0; index < anm->numScripts; index++, curSpriteOffset += 2)
     {
         this->scripts[curSpriteOffset[0] + spriteIdxOffset] = (AnmRawInstr *)((u8 *)anm + curSpriteOffset[1]);
@@ -669,7 +669,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
 
     this->anmFilesSpriteIndexOffsets[anmIdx] = spriteIdxOffset;
 
-    SDL_LOG_COMPAT("LoadAnm finish");
+    LOG_COMPAT("LoadAnm finish");
     return ZUN_SUCCESS;
 }
 
@@ -836,6 +836,7 @@ void AnmManager::SetRenderStateForVm(const AnmVm *vm)
 
 void AnmManager::UpdateDirtyStates()
 {
+    LOG_COMPAT("AnmManager::UpdateDirtyStates\n");
     u32 i = 0;
     while (this->dirtyFlags != 0)
     {
@@ -844,6 +845,7 @@ void AnmManager::UpdateDirtyStates()
 
         // This would all be nicer if the enum was flag values rather than indices,
         //   but compilers just aren't able to deal with that in the switch statement :/
+        LOG_COMPAT("AnmManager::UpdateDirtyStates currFlagIndex %d\n",currFlagIndex);
         switch (currFlagIndex)
         {
         case DIRTY_FOG:
@@ -934,6 +936,7 @@ void AnmManager::UpdateDirtyStates()
                                            this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX]);
         }
     }
+    LOG_COMPAT("AnmManager::UpdateDirtyStates fin\n");
 }
 
 ZunResult AnmManager::DrawOrthographic(const AnmVm *vm, bool roundToPixel)
@@ -2304,10 +2307,12 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
     u32 textureWidth = BitCeil((u32)src->w);
     u32 textureHeight = BitCeil((u32)src->h);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer g_GfxBackend->SetTextureImage\n");
     g_GfxBackend->SetTextureImage(textureWidth, textureHeight, PIXEL_RGB, PIXEL_UNSIGNED_BYTE, NULL);
 
     u8 *surfaceData = ExtractSurfacePixels(src, 3);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer g_GfxBackend->SetTextureSubImage\n");
     g_GfxBackend->SetTextureSubImage(0, 0, src->w, src->h, surfaceData);
 
     delete[] surfaceData;
@@ -2339,27 +2344,35 @@ void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &src
     verts[3].textureUV.x = ((f32)src->w) / textureWidth;
     verts[3].textureUV.y = ((f32)src->h) / textureHeight;
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer this->SetVertexAttributes\n");
     this->SetVertexAttributes(VERTEX_ATTR_TEX_COORD);
 
     this->SetAttributePointer(VERTEX_ARRAY_POSITION, sizeof(*verts), &verts[0].position);
     this->SetAttributePointer(VERTEX_ARRAY_TEX_COORD, sizeof(*verts), &verts[0].textureUV);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer this->SetColorOp\n");
     this->SetColorOp(COMPONENT_ALPHA, COLOR_OP_REPLACE);
     this->SetColorOp(COMPONENT_RGB, COLOR_OP_REPLACE);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer this->SetDepthMask\n");
     this->SetDepthMask(false);
     this->SetDepthFunc(DEPTH_FUNC_ALWAYS);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer this->BackendDrawCall\n");
     this->BackendDrawCall();
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer this->SetColorOp\n");
     this->SetColorOp(COMPONENT_ALPHA, COLOR_OP_MODULATE);
     this->SetColorOp(COMPONENT_RGB, COLOR_OP_MODULATE);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer g_GfxBackend->DeleteTexture\n");
     g_GfxBackend->DeleteTexture(this->currentTextureHandle);
 
     this->SetCurrentSprite(NULL);
     this->SetCurrentTexture(0);
     this->SetCurrentBlendMode(0xff);
 
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer originalViewport.Set\n");
     originalViewport.Set();
+    LOG_COMPAT("AnmManager::ApplySurfaceToColorBuffer fin\n");
 }
