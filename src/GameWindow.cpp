@@ -37,9 +37,6 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
-    #ifdef RENDER_WEBGL
-    {"GL(ES) 2.0 / WebGL", WebGL::Create},
-    #endif
     #ifdef RENDER_FIXED_FUNCTION_DX2
     {"Fixed function DX2", FixedFunctionDX2::Init},
     #endif
@@ -48,6 +45,9 @@ static const struct
     #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
     {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    #endif
+    #ifdef RENDER_WEBGL
+    {"GL(ES) 2.0 / WebGL", WebGL::Create},
     #endif
     #ifdef RENDER_SOFTWARE
     {"Software fallback (VERY SLOW)", Software::Init},
