@@ -13,7 +13,10 @@
 #include <cstring>
 #include <new>
 
-#include <SDL_image.h>
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_SIMD
+#include "thirdparty/stb_image.h"
+
 #include "SDLCompat.hpp"
 
 static VertexTex1Xyzrhw g_PrimitivesToDrawVertexBuf[4];
@@ -48,58 +51,85 @@ void AnmManager::CreateTextureObject()
     LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
 }
 
-SDL_Surface *AnmManager::LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL_FORMAT_COMPAT format, u8 **fileData)
+SDL_Surface *AnmManager::LoadToSurfaceWithFormat(
+    const char *filename,
+    SDL_PIXEL_FORMAT_COMPAT format,
+    u8 **fileData)
 {
-    LOG_COMPAT("LoadToSurfaceWithFormat 1\n");
     u8 *data;
-    SDL_Surface *imageSrcSurface;
-    SDL_Surface *imageTargetSurface;
-    SDL_RWOPS_COMPAT *rwData;
 
-    LOG_COMPAT("LoadToSurfaceWithFormat 2\n");
+    int width;
+    int height;
+    int channels;
+
     data = FileSystem::OpenPath(filename, 0);
 
     if (data == NULL)
     {
+        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO DATA\n");
         return NULL;
     }
 
-    LOG_COMPAT("LoadToSurfaceWithFormat 3\n");
-    rwData = SDL_RWFROMCONSTMEM_COMPAT(data, g_LastFileSize);
+    unsigned char *pixels = stbi_load_from_memory(
+        (const stbi_uc*)data,
+        g_LastFileSize,
+        &width,
+        &height,
+        &channels,
+        4 // RGBA
+    );
 
-    if (rwData == NULL)
+    if (pixels == NULL)
     {
+        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO PIXEL\n");
         free(data);
         return NULL;
     }
 
-    LOG_COMPAT("LoadToSurfaceWithFormat 4\n");
-    imageSrcSurface = IMG_Load_RW(rwData, 1);
+    SDL_Surface *surface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
+        pixels,
+        width,
+        height,
+        32,
+        width * 4,
+        SDL_PIXELFORMAT_RGBA32
+    );
 
-    LOG_COMPAT("LoadToSurfaceWithFormat 4.5\n");
-    if (imageSrcSurface == NULL)
+    if (surface == NULL)
     {
-        // LOG_COMPAT(IMG_GetError());
+        stbi_image_free(pixels);
         free(data);
+        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO SURFACE\n");
         return NULL;
     }
 
-    LOG_COMPAT("LoadToSurfaceWithFormat 5\n");
-    imageTargetSurface = SDL_CONVERT_SURFACE_FORMAT_COMPAT(imageSrcSurface, format, 0);
-
-    LOG_COMPAT("LoadToSurfaceWithFormat 6\n");
-    SDL_FreeSurface(imageSrcSurface);
-
-    if (imageTargetSurface != NULL && fileData != NULL)
-    {
-        *fileData = data;
-    }
-    else
+    SDL_Surface *converted = SDL_CONVERT_SURFACE_FORMAT_COMPAT(surface, format, 0);
+    stbi_image_free(pixels);
+    SDL_FreeSurface(surface);
+    
+    if (converted == NULL)
     {
         free(data);
+        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO SURFACE\n");
+        return NULL;
     }
-    LOG_COMPAT("LoadToSurfaceWithFormat finish\n");
-    return imageTargetSurface;
+
+    // IMPORTANT:
+    // SDL surface does NOT own stb_image memory.
+    // You must free pixels later AFTER SDL_FreeSurface(surface)
+
+    // if (fileData != NULL)
+    // {
+    //     *fileData = data;
+    // }
+    // else
+    // {
+    //     free(data);
+    // }
+    free(data);
+
+    LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat OK\n");
+    return converted;
 }
 
 u8 *AnmManager::ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth)
@@ -189,8 +219,6 @@ AnmManager::~AnmManager()
         g_GfxBackend->DeleteTexture(this->dummyTextureHandle);
         this->dummyTextureHandle = 0;
     }
-
-    // IMG_Quit();
 }
 
 // void AnmManager::ReleaseVertexBuffer()
@@ -204,7 +232,6 @@ AnmManager::~AnmManager()
 
 AnmManager::AnmManager()
 {
-    // IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
     // UNKNOWN <= index 0
     LOG_COMPAT("AnmManager::AnmManager 1\n");
     SDL_PIXEL_FORMAT_COMPAT_LOAD();

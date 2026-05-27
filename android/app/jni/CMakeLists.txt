@@ -2,7 +2,7 @@
 # th06 Android Build - CMakeLists.txt
 #
 # This file is used by the Android Gradle build (app/jni/CMakeLists.txt).
-# It builds SDL2, SDL2_image from source and links the game
+# It builds SDL2 from source and links the game
 # as a shared library named "main" (required by SDLActivity).
 #
 # This does NOT modify the top-level CMakeLists.txt used for Windows/Linux.
@@ -21,25 +21,9 @@ get_filename_component(TH06_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE
 # SDL2 libraries (build from source)
 # ============================================================================
 set(SDL2_SRC_DIR    "${TH06_ROOT}/android/SDL2_src")
-set(SDL2_IMAGE_DIR  "${TH06_ROOT}/android/SDL2_image_src")
-set(SDL2_TTF_DIR  "${TH06_ROOT}/android/SDL2_ttf_src")
 
 # SDL2 core
 add_subdirectory(${SDL2_SRC_DIR} SDL2)
-
-# SDL2_image (needs SDL2 headers)
-set(SDL2IMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
-set(SDL2IMAGE_INSTALL OFF CACHE BOOL "" FORCE)
-set(SDL2IMAGE_VENDORED OFF CACHE BOOL "" FORCE)
-set(SDL2IMAGE_AVIF OFF CACHE BOOL "" FORCE)
-set(SDL2IMAGE_WEBP OFF CACHE BOOL "" FORCE)
-add_subdirectory(${SDL2_IMAGE_DIR} SDL2_image)
-
-# SDL2_ttf — disable all optional codec libraries for Android
-set(SDL2TTF_SAMPLES OFF CACHE BOOL "" FORCE)
-set(SDL2TTF_INSTALL OFF CACHE BOOL "" FORCE)
-set(SDL2TTF_VENDORED ON CACHE BOOL "" FORCE)
-add_subdirectory(${SDL2_TTF_DIR} SDL2_ttf)
 
 # ============================================================================
 # i18n.hpp generation (same as main build)
@@ -150,8 +134,6 @@ find_library(android-lib android)
 
 target_link_libraries(main PRIVATE
     SDL2::SDL2
-    SDL2_image::SDL2_image
-    SDL2_ttf::SDL2_ttf
     ${log-lib}
     ${android-lib}
 )

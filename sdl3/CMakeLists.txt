@@ -19,8 +19,6 @@ if(WIN32)
     endif()
 
     set(SDL3_DIR       "${CMAKE_SOURCE_DIR}/../3rdparty/SDL3")
-    set(SDL3_IMAGE_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL3_image")
-    set(SDL3_TTF_DIR   "${CMAKE_SOURCE_DIR}/../3rdparty/SDL3_ttf")
 
     # SDL3
     add_library(SDL3::SDL3 SHARED IMPORTED)
@@ -31,24 +29,6 @@ if(WIN32)
         INTERFACE_INCLUDE_DIRECTORIES "${SDL3_DIR}/include;${SDL3_DIR}/include/SDL3"
     )
 
-    # SDL3_image
-    add_library(SDL3_image::SDL3_image SHARED IMPORTED)
-
-    set_target_properties(SDL3_image::SDL3_image PROPERTIES
-        IMPORTED_LOCATION "${SDL3_IMAGE_DIR}/lib/${SDL_ARCH}/SDL3_image.dll"
-        IMPORTED_IMPLIB   "${SDL3_IMAGE_DIR}/lib/${SDL_ARCH}/SDL3_image.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL3_IMAGE_DIR}/include;${SDL3_IMAGE_DIR}/include/SDL3_image"
-    )
-
-    # SDL3_ttf
-    add_library(SDL3_ttf::SDL3_ttf SHARED IMPORTED)
-
-    set_target_properties(SDL3_ttf::SDL3_ttf PROPERTIES
-        IMPORTED_LOCATION "${SDL3_TTF_DIR}/lib/${SDL_ARCH}/SDL3_ttf.dll"
-        IMPORTED_IMPLIB   "${SDL3_TTF_DIR}/lib/${SDL_ARCH}/SDL3_ttf.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL3_TTF_DIR}/include;${SDL3_TTF_DIR}/include/SDL3_ttf"
-    )
-
     message(STATUS "SDL3 ARCH: ${SDL_ARCH}")
 
 else()
@@ -56,19 +36,9 @@ else()
     find_package(PkgConfig REQUIRED)
 
     pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
-    pkg_check_modules(SDL3_IMAGE REQUIRED IMPORTED_TARGET SDL3_image)
-    pkg_check_modules(SDL3_TTF REQUIRED IMPORTED_TARGET SDL3_ttf)
 
     if(NOT TARGET SDL3::SDL3)
         add_library(SDL3::SDL3 ALIAS PkgConfig::SDL3)
-    endif()
-
-    if(NOT TARGET SDL3_image::SDL3_image)
-        add_library(SDL3_image::SDL3_image ALIAS PkgConfig::SDL3_IMAGE)
-    endif()
-
-    if(NOT TARGET SDL3_ttf::SDL3_ttf)
-        add_library(SDL3_ttf::SDL3_ttf ALIAS PkgConfig::SDL3_TTF)
     endif()
 
 endif()
@@ -223,8 +193,6 @@ endif()
 
 target_link_libraries(th06 PRIVATE
     SDL3::SDL3
-    SDL3_image::SDL3_image
-    SDL3_ttf::SDL3_ttf
 )
 
 if(WIN32)
@@ -241,14 +209,6 @@ if(WIN32)
 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SDL3_DIR}/lib/${SDL_ARCH}/SDL3.dll"
-            "$<TARGET_FILE_DIR:th06>"
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL3_IMAGE_DIR}/lib/${SDL_ARCH}/SDL3_image.dll"
-            "$<TARGET_FILE_DIR:th06>"
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL3_TTF_DIR}/lib/${SDL_ARCH}/SDL3_ttf.dll"
             "$<TARGET_FILE_DIR:th06>"
 
         COMMENT "Copying SDL3 DLLs"

@@ -19,8 +19,6 @@ if(TH06_USE_SDL2)
     endif()
 
     set(SDL2_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL2")
-    set(SDL2_IMAGE_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL2_image")
-    set(SDL2_TTF_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL2_ttf")
 
     add_library(SDL2::SDL2 SHARED IMPORTED)
     set_target_properties(SDL2::SDL2 PROPERTIES
@@ -35,45 +33,20 @@ if(TH06_USE_SDL2)
         INTERFACE_INCLUDE_DIRECTORIES "${SDL2_DIR}/include"
     )
 
-    add_library(SDL2_image::SDL2_image SHARED IMPORTED)
-    set_target_properties(SDL2_image::SDL2_image PROPERTIES
-        IMPORTED_LOCATION "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.dll"
-        IMPORTED_IMPLIB   "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_IMAGE_DIR}/include"
-    )
-
-    add_library(SDL2_ttf::SDL2_ttf SHARED IMPORTED)
-    set_target_properties(SDL2_ttf::SDL2_ttf PROPERTIES
-        IMPORTED_LOCATION "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.dll"
-        IMPORTED_IMPLIB   "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL2_TTF_DIR}/include"
-    )
-
     message(STATUS "SDL2 DIR: ${SDL2_DIR}")
-    message(STATUS "SDL2_image DIR: ${SDL2_IMAGE_DIR}")
-    message(STATUS "SDL2_ttf DIR: ${SDL2_TTF_DIR}")
     message(STATUS "ARCH: ${SDL2_ARCH}")
   else()
     # Linux/macOS: pkg-config SDL2
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2)
-    pkg_check_modules(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
 
     if(NOT TARGET SDL2::SDL2)
         add_library(SDL2::SDL2 ALIAS PkgConfig::SDL2)
-    endif()
-    if(NOT TARGET SDL2_image::SDL2_image)
-        add_library(SDL2_image::SDL2_image ALIAS PkgConfig::SDL2_IMAGE)
-    endif()
-    if(NOT TARGET SDL2_ttf::SDL2_ttf)
-        add_library(SDL2_ttf::SDL2_ttf ALIAS PkgConfig::SDL2_MIXER)
     endif()
 
     add_library(SDL2::SDL2main INTERFACE IMPORTED)
 
     message(STATUS "SDL2 VERSION: ${SDL2_VERSION}")
-    message(STATUS "SDL2_image VERSION: ${SDL2_IMAGE_VERSION}")
-    message(STATUS "SDL2_ttf VERSION: ${SDL2_TTF_VERSION}")
   endif()
 endif()
 
@@ -192,8 +165,6 @@ endif()
 target_link_libraries(th06 PRIVATE
     SDL2::SDL2main
     SDL2::SDL2
-    SDL2_image::SDL2_image
-    SDL2_ttf::SDL2_ttf
 )
 if(OPENGL_gl_LIBRARY)
     target_link_libraries(th06 PRIVATE ${OPENGL_gl_LIBRARY})
@@ -209,12 +180,6 @@ if(WIN32)
     add_custom_command(TARGET th06 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SDL2_DIR}/lib/${SDL2_ARCH}/SDL2.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_IMAGE_DIR}/lib/${SDL2_ARCH}/SDL2_image.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_TTF_DIR}/lib/${SDL2_ARCH}/SDL2_ttf.dll"
             $<TARGET_FILE_DIR:th06>
         COMMENT "SDL2 DLL COPIED"
     )

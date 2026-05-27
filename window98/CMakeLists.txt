@@ -19,9 +19,6 @@ add_definitions(
 
 # ---- Paths ----
 set(SDL_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL")
-set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_image")
-set(SDL_MIXER_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_mixer")
-set(SDL_TTF_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_ttf")
 
 # No 64-bit support in VC6 realistically → force x86
 set(SDL_ARCH "x86")
@@ -98,8 +95,6 @@ add_executable(th06 ${TH06_GAME_SOURCES})
 target_link_libraries(th06
     SDLmain
     SDL
-    SDL_image
-    SDL_ttf
     opengl32
     winmm
     

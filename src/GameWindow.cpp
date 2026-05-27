@@ -8,10 +8,10 @@
 #include "ZunMath.hpp"
 
 #ifdef WIN98
-#include "graphics/FixedFunctionDX2.hpp"
+// #include "graphics/FixedFunctionDX2.hpp"
+#include "graphics/FixedFunctionGLWIN32.hpp"
 #endif
 
-#include "graphics/FixedFunctionGLWIN32.hpp"
 #include "graphics/FixedFunctionGL.hpp"
 #include "graphics/WebGL.hpp"
 #include "graphics/Software.hpp"
@@ -37,17 +37,17 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
+    #ifdef RENDER_WEBGL
+    {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    #endif
     #ifdef RENDER_FIXED_FUNCTION_DX2
     {"Fixed function DX2", FixedFunctionDX2::Init},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
-    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
     #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
     {"Fixed function GL(ES)", FixedFunctionGL::Init},
     #endif
-    #ifdef RENDER_WEBGL
-    {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
+    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
     #endif
     #ifdef RENDER_SOFTWARE
     {"Software fallback (VERY SLOW)", Software::Init},

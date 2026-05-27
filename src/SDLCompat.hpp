@@ -14,6 +14,7 @@
 #if SDL_MAJOR_VERSION >= 3
     // SDL 3.x specific code
     #include <SDL_gamepad.h>
+    #define SDL_MAP_RGBA_COMPAT(format, r, g, b, a) SDL_MapRGBA(SDL_GetPixelFormatDetails(format), NULL, r, g, b, a)
     #define SDL_JOYSTICK_COMPAT SDL_Gamepad
     #define SDL_JOYSTICK_COMPATButton SDL_GamepadButton
     #define SDL_JOYSTICK_COMPATGetJoystick(a) SDL_GetGamepadJoystick(a)
@@ -124,6 +125,7 @@
     #define SDL_DESTROY_AUDIO_STREAM SDL_DestroyAudioStream
 #else
     #include <SDL_rwops.h>
+    #define SDL_MAP_RGBA_COMPAT(format, r, g, b, a) SDL_MapRGBA(format, r, g, b, a)
     #define SDL_RWOPS_COMPAT SDL_RWops
     #define SDL_RWFROMFILE_COMPAT SDL_RWFromFile
     #define SDL_RWFROMCONSTMEM_COMPAT SDL_RWFromConstMem
@@ -259,6 +261,8 @@
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,b,c)
 
     #define SDL_PIXEL_FORMAT_COMPAT_LOAD()
+    #define SDL_BITSPERPIXEL_COMPAT(a) SDL_BITSPERPIXEL(a)
+    #define SDL_BYTESPERPIXEL_COMPAT(a) SDL_BYTESPERPIXEL(a)
 
     #define SDL_RW_SIZE_COMPAT SDL_RWsize
 
@@ -359,6 +363,8 @@
     #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,&b,c)
     #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_HWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)
+    #define SDL_BITSPERPIXEL_COMPAT(a) a.BitsPerPixel
+    #define SDL_BYTESPERPIXEL_COMPAT(a) a.BytesPerPixel
 
     inline void GetWindowSize(int *w, int *h){
         const SDL_VideoInfo* info = SDL_GetVideoInfo();

@@ -14,8 +14,6 @@ if(TH06_USE_SDL)
     endif()
 
     set(SDL_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL")
-    set(SDL_IMAGE_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_image")
-    set(SDL_TTF_DIR "${CMAKE_SOURCE_DIR}/../3rdparty/SDL_ttf")
 
     add_library(SDL::SDLmain STATIC IMPORTED)
     set_target_properties(SDL::SDLmain PROPERTIES
@@ -30,43 +28,18 @@ if(TH06_USE_SDL)
         INTERFACE_INCLUDE_DIRECTORIES "${SDL_DIR}/include"
     )
 
-    add_library(SDL_image::SDL_image SHARED IMPORTED)
-    set_target_properties(SDL_image::SDL_image PROPERTIES
-        IMPORTED_LOCATION "${SDL_IMAGE_DIR}/lib/SDL_image.dll"
-        IMPORTED_IMPLIB   "${SDL_IMAGE_DIR}/lib/SDL_image.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL_IMAGE_DIR}/include"
-    )
-
-    add_library(SDL_ttf::SDL_ttf SHARED IMPORTED)
-    set_target_properties(SDL_ttf::SDL_ttf PROPERTIES
-        IMPORTED_LOCATION "${SDL_TTF_DIR}/lib/SDL_ttf.dll"
-        IMPORTED_IMPLIB   "${SDL_TTF_DIR}/lib/SDL_ttf.lib"
-        INTERFACE_INCLUDE_DIRECTORIES "${SDL_TTF_DIR}/include"
-    )
-
     message(STATUS "SDL DIR: ${SDL_DIR}")
-    message(STATUS "SDL_image DIR: ${SDL_IMAGE_DIR}")
-    message(STATUS "SDL_ttf DIR: ${SDL_TTF_DIR}")
     message(STATUS "ARCH DIR: ${SDL_ARCH}")
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SDL REQUIRED IMPORTED_TARGET sdl)
-    pkg_check_modules(SDL_IMAGE REQUIRED IMPORTED_TARGET SDL_image)
 
     if(NOT TARGET SDL::SDL)
         add_library(SDL::SDL ALIAS PkgConfig::SDL)
     endif()
-    if(NOT TARGET SDL_image::SDL_image)
-        add_library(SDL_image::SDL_image ALIAS PkgConfig::SDL_IMAGE)
-    endif()
-    if(NOT TARGET SDL_ttf::SDL_ttf)
-        add_library(SDL_ttf::SDL_ttf ALIAS PkgConfig::SDL_TTF)
-    endif()
 
     add_library(SDL::SDLmain INTERFACE IMPORTED)
     message(STATUS "SDL VERSION: ${SDL_VERSION}")
-    message(STATUS "SDL_image VERSION: ${SDL_IMAGE_VERSION}")
-    message(STATUS "SDL_ttf VERSION: ${SDL_TTF_VERSION}")
   endif()
 endif()
 
@@ -181,8 +154,6 @@ endif()
 target_link_libraries(th06 PRIVATE
     SDL::SDLmain
     SDL::SDL
-    SDL_image::SDL_image
-    SDL_ttf::SDL_ttf
 )
 if(OPENGL_gl_LIBRARY)
     target_link_libraries(th06 PRIVATE ${OPENGL_gl_LIBRARY})
@@ -198,23 +169,6 @@ if(WIN32)
     add_custom_command(TARGET th06 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SDL_DIR}/lib/${SDL_ARCH}/SDL.dll"
-            $<TARGET_FILE_DIR:th06>
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/SDL_image.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/zlib1.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/jpeg.dll"
-            $<TARGET_FILE_DIR:th06>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_IMAGE_DIR}/lib/libpng12.dll"
-            $<TARGET_FILE_DIR:th06>
-
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL_TTF_DIR}/lib/SDL_ttf.dll"
             $<TARGET_FILE_DIR:th06>
         COMMENT "SDL DLL COPIED"
     )

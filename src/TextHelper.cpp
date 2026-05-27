@@ -6,12 +6,15 @@
 
 #include "thirdparty/sjis_converter.h"
 
-#include <SDL_ttf.h>
 #include <algorithm>
 #include <cstring>
 #include "GamePaths.hpp"
+#define STB_TRUETYPE_IMPLEMENTATION
+#include "thirdparty/stb_truetype.h"
 
-static TTF_Font *g_Font;
+static stbtt_fontinfo g_Font;
+static unsigned char *g_FontBuffer = NULL;
+static float g_FontScale = 1.0f;
 
 bool textNotExist;
 
@@ -28,7 +31,11 @@ TextHelper::TextHelper()
 
 TextHelper::~TextHelper()
 {
-    TTF_Quit();
+    if (g_FontBuffer != NULL)
+    {
+        free(g_FontBuffer);
+        g_FontBuffer = NULL;
+    }
 }
 
 #define TEXT_BUFFER_HEIGHT 64
@@ -36,7 +43,6 @@ TextHelper::~TextHelper()
 // Extended to initialize all globals for text helper
 ZunResult TextHelper::CreateTextBuffer()
 {
-    TTF_Init();
     SDL_PIXEL_FORMAT_COMPAT_LOAD();
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
     // Fallback is Noto Sans Regular (JP) which is redistributable
@@ -50,17 +56,72 @@ ZunResult TextHelper::CreateTextBuffer()
     #else
     const char* path="th06.ttc";
     const char* path2="th06.ttf";
-    #endif    
-    if (g_Font = TTF_OpenFont(path, 30), g_Font == NULL)
+    #endif
+
+    FILE* fp = fopen(path, "rb");
+
+    if (fp == NULL)
     {
-        if (g_Font = TTF_OpenFont(path2, 30), g_Font == NULL)
-        {
-            // LOG_COMPAT("%s\n", TTF_GetError());
-            // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
-            textNotExist = true;
-            return ZUN_SUCCESS;
-        }
+        fp = fopen(path2, "rb");
     }
+
+    if (fp == NULL)
+    {
+        // LOG_COMPAT("%s\n", TTF_GetError());
+        // GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_FONTS_NOT_FOUND);
+        textNotExist = true;
+        return ZUN_SUCCESS;
+    }
+
+    fseek(fp, 0, SEEK_END);
+
+    size_t fileSize = ftell(fp);
+
+    fseek(fp, 0, SEEK_SET);
+
+    g_FontBuffer = (unsigned char*)malloc(fileSize);
+
+    if (g_FontBuffer == NULL)
+    {
+        fclose(fp);
+
+        textNotExist = true;
+
+        return ZUN_SUCCESS;
+    }
+
+    fread(
+        g_FontBuffer,
+        1,
+        fileSize,
+        fp);
+
+    fclose(fp);
+
+    int fontOffset =
+        stbtt_GetFontOffsetForIndex(
+            g_FontBuffer,
+            0);
+
+    if (!stbtt_InitFont(
+            &g_Font,
+            g_FontBuffer,
+            fontOffset))
+    {
+        free(g_FontBuffer);
+
+        g_FontBuffer = NULL;
+
+        textNotExist = true;
+
+        return ZUN_SUCCESS;
+    }
+
+    g_FontScale =
+        stbtt_ScaleForPixelHeight(
+            &g_Font,
+            30.0f);
+
     g_TextBufferSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
         GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT,
         SDL_PIXELFORMAT_RGBA32
@@ -212,6 +273,54 @@ void SurfaceOverwriteBlend(SDL_Surface *srcSurface, SDL_Surface *dstSurface, u32
     SDL_UnlockSurface(srcSurface);
 }
 
+static const char* UTF8_Decode(
+    const char* s,
+    int* outCodepoint)
+{
+    unsigned char c =
+        (unsigned char)s[0];
+
+    if (c < 0x80)
+    {
+        *outCodepoint = c;
+        return s + 1;
+    }
+
+    if ((c >> 5) == 0x6)
+    {
+        *outCodepoint =
+            ((c & 0x1F) << 6) |
+            (s[1] & 0x3F);
+
+        return s + 2;
+    }
+
+    if ((c >> 4) == 0xE)
+    {
+        *outCodepoint =
+            ((c & 0x0F) << 12) |
+            ((s[1] & 0x3F) << 6) |
+            (s[2] & 0x3F);
+
+        return s + 3;
+    }
+
+    if ((c >> 3) == 0x1E)
+    {
+        *outCodepoint =
+            ((c & 0x07) << 18) |
+            ((s[1] & 0x3F) << 12) |
+            ((s[2] & 0x3F) << 6) |
+            (s[3] & 0x3F);
+
+        return s + 4;
+    }
+
+    *outCodepoint = '?';
+
+    return s + 1;
+}
+
 void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
                                      i32 fontWidth, ZunColor textColor, ZunColor shadowColor, const char *string,
                                      TextureData *outTexture)
@@ -249,10 +358,127 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         SDL_Surface *shadowText;
 
         // Render shadow.
-        shadowText = TTF_RenderUTF8_Blended(g_Font, convertedText, SDL_TEXT_COLOR_COMPAT(shadowColor));
+
+        int surfaceW = 1024;
+        int surfaceH = 128;
+
+        shadowText = SDL_CREATE_RGB_SURFACE_COMPAT(
+            surfaceW,
+            surfaceH,
+            SDL_PIXELFORMAT_RGBA32
+        );
 
         if (shadowText != NULL)
         {
+            SDL_FillRect(shadowText, NULL, 0);
+
+            SDL_LockSurface(shadowText);
+
+            Uint32 *pixels = (Uint32 *)shadowText->pixels;
+
+            int ascent;
+            int descent;
+            int lineGap;
+
+            stbtt_GetFontVMetrics(
+                &g_Font,
+                &ascent,
+                &descent,
+                &lineGap
+            );
+
+            int baseline =
+                (int)(ascent * g_FontScale);
+
+            int penX = 0;
+
+            const char *ptr = convertedText;
+
+            while (*ptr)
+            {
+                int codepoint;
+
+                ptr = UTF8_Decode(
+                    ptr,
+                    &codepoint);
+
+                int advanceWidth;
+                int leftBearing;
+
+                stbtt_GetCodepointHMetrics(
+                    &g_Font,
+                    codepoint,
+                    &advanceWidth,
+                    &leftBearing
+                );
+
+                int glyphW;
+                int glyphH;
+
+                int xoff;
+                int yoff;
+
+                unsigned char *bitmap =
+                    stbtt_GetCodepointBitmap(
+                        &g_Font,
+                        0,
+                        g_FontScale,
+                        codepoint,
+                        &glyphW,
+                        &glyphH,
+                        &xoff,
+                        &yoff
+                    );
+
+                if (bitmap != NULL)
+                {
+                    for (int y = 0; y < glyphH; y++)
+                    {
+                        for (int x = 0; x < glyphW; x++)
+                        {
+                            unsigned char a =
+                                bitmap[y * glyphW + x];
+
+                            if (a == 0)
+                                continue;
+
+                            int dstX =
+                                penX + x + xoff;
+
+                            int dstY =
+                                baseline + y + yoff;
+
+                            if (dstX < 0 || dstY < 0 ||
+                                dstX >= surfaceW ||
+                                dstY >= surfaceH)
+                            {
+                                continue;
+                            }
+
+                            SDL_Color sdlShadowColor =
+                                SDL_TEXT_COLOR_COMPAT(shadowColor);
+
+                            pixels[
+                                dstY * surfaceW + dstX
+                            ] = SDL_MAP_RGBA_COMPAT(
+                                shadowText->format,
+                                sdlShadowColor.r,
+                                sdlShadowColor.g,
+                                sdlShadowColor.b,
+                                a
+                            );
+                        }
+                    }
+
+                    stbtt_FreeBitmap(bitmap, NULL);
+                }
+
+                penX +=
+                    (int)(advanceWidth * g_FontScale);
+            }
+
+            SDL_UnlockSurface(shadowText);
+
             shadowRect.x = xPos * 2 + 3;
             shadowRect.y = 2;
             shadowRect.w = shadowText->w;
@@ -264,7 +490,125 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         }
     }
 
-    SDL_Surface *regularText = TTF_RenderUTF8_Blended(g_Font, convertedText, SDL_TEXT_COLOR_COMPAT(textColor));
+    SDL_Surface *regularText;
+
+    int surfaceW = 1024;
+    int surfaceH = 128;
+
+    regularText = SDL_CREATE_RGB_SURFACE_COMPAT(
+        surfaceW,
+        surfaceH,
+        SDL_PIXELFORMAT_RGBA32
+    );
+
+    if (regularText != NULL)
+    {
+        SDL_FillRect(regularText, NULL, 0);
+
+        SDL_LockSurface(regularText);
+
+        Uint32 *pixels = (Uint32 *)regularText->pixels;
+
+        int ascent;
+        int descent;
+        int lineGap;
+
+        stbtt_GetFontVMetrics(
+            &g_Font,
+            &ascent,
+            &descent,
+            &lineGap
+        );
+
+        int baseline =
+            (int)(ascent * g_FontScale);
+
+        int penX = 0;
+
+        const char *ptr = convertedText;
+
+        while (*ptr)
+        {
+            int codepoint;
+
+            ptr = UTF8_Decode(
+                ptr,
+                &codepoint);
+
+            int advanceWidth;
+            int leftBearing;
+
+            stbtt_GetCodepointHMetrics(
+                &g_Font,
+                codepoint,
+                &advanceWidth,
+                &leftBearing
+            );
+
+            int glyphW;
+            int glyphH;
+
+            int xoff;
+            int yoff;
+
+            unsigned char *bitmap =
+                stbtt_GetCodepointBitmap(
+                    &g_Font,
+                    0,
+                    g_FontScale,
+                    codepoint,
+                    &glyphW,
+                    &glyphH,
+                    &xoff,
+                    &yoff
+                );
+
+            if (bitmap != NULL)
+            {
+                for (int y = 0; y < glyphH; y++)
+                {
+                    for (int x = 0; x < glyphW; x++)
+                    {
+                        unsigned char a =
+                            bitmap[y * glyphW + x];
+
+                        if (a == 0)
+                            continue;
+
+                        int dstX =
+                            penX + x + xoff;
+
+                        int dstY =
+                            baseline + y + yoff;
+
+                        if (dstX < 0 || dstY < 0 ||
+                            dstX >= surfaceW ||
+                            dstY >= surfaceH)
+                        {
+                            continue;
+                        }
+
+                        pixels[
+                            dstY * surfaceW + dstX
+                        ] = SDL_MAP_RGBA_COMPAT(
+                            regularText->format,
+                            (textColor >> 16) & 0xFF,
+                            (textColor >> 8) & 0xFF,
+                            textColor & 0xFF,
+                            a
+                        );
+                    }
+                }
+
+                stbtt_FreeBitmap(bitmap, NULL);
+            }
+
+            penX +=
+                (int)(advanceWidth * g_FontScale);
+        }
+
+        SDL_UnlockSurface(regularText);
+    }
 
     if (regularText != NULL)
     {
@@ -328,16 +672,18 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 void TextHelper::ReleaseTextBuffer()
 {
     if(textNotExist) return;
-    if (g_Font != NULL)
+
+    if (g_FontBuffer != NULL)
     {
-        TTF_CloseFont(g_Font);
-        g_Font = NULL;
+        free(g_FontBuffer);
+        g_FontBuffer = NULL;
     }
+
     if (g_TextBufferSurface != NULL)
     {
         SDL_FreeSurface(g_TextBufferSurface);
         g_TextBufferSurface = NULL;
     }
-    
+
     return;
 }
