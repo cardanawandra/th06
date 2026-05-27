@@ -72,6 +72,7 @@ struct FixedFunctionDX2 : GfxInterface
                             const void *pixels);
     virtual void Draw(PrimitiveType type, i32 start, i32 count);
     virtual void SwapBuffers();
+    virtual bool GameLoop(){return true;}
 
 private:
     void _ExecuteDraw(D3DPRIMITIVETYPE primType, i32 start, i32 count);

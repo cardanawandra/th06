@@ -106,18 +106,9 @@ restart:
     LOG_COMPAT("Into loop game event");
     while (true)
     {
-        SDL_Event e;
-
-        LOG_COMPAT("Into poolevent loop");
-        while (SDL_PollEvent(&e))
-        {
-            if (e.type == SDL_QUIT)
-            {
-                goto stop;
-            }
+        if(!g_GfxBackend->GameLoop()){
+            goto stop;
         }
-
-        LOG_COMPAT("g_GameWindow.Render");
         renderResult = g_GameWindow.Render();
         if (renderResult != 0)
         {

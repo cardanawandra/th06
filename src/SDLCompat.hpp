@@ -523,7 +523,7 @@
 #endif
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)
-#if 0
+#if 1
 #undef LOG_COMPAT
 #define LOG_COMPAT
 #endif

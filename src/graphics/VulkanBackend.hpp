@@ -54,6 +54,7 @@ struct VulkanBackend : GfxInterface
 
     void Draw(PrimitiveType type, i32 start, i32 count) override;
     void SwapBuffers() override;
+    virtual bool GameLoop(){return true;}
 
 private:
     SDL_Window* window = nullptr;

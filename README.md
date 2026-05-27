@@ -47,7 +47,7 @@ run "cmake --build build --config Release"<br>
 result will be on "{selected SDL}\build\Release"
 
 #### Building Windows 95/98
-building uses CMAKE 2.4 and a compiler that supports C++98 like msvc6.<br>
+building uses CMAKE 2.4 and a compiler that supports C++98 like msvc6. it has WIN32 support<br>
 download msvc6 on https://github.com/itsmattkc/MSVC600<br>
 change the bat file from E:\library\msvc6\MSVC600-master\Common\MSDev98\Bin\MSDEV.EXE into your own path
 

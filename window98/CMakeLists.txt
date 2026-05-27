@@ -82,6 +82,7 @@ set(TH06_GAME_SOURCES
     ../src/graphics/FixedFunctionDX2.cpp
     ../src/graphics/GLFunc.cpp
     ../src/graphics/FixedFunctionGL.cpp
+    ../src/graphics/FixedFunctionGLWIN32.cpp
     ../src/graphics/WebGL.cpp
     ../src/graphics/Software.cpp
     ../src/pbg3/FileAbstraction.cpp

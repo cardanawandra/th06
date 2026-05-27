@@ -158,4 +158,7 @@ struct GfxInterface
 
     virtual void Draw(PrimitiveType type, i32 start, i32 count) = 0;
     virtual void SwapBuffers() = 0;
+
+    //game loop are now abstract
+    virtual bool GameLoop() = 0;
 };

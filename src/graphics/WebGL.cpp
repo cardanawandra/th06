@@ -284,6 +284,20 @@ fail:
     return false;
 }
 
+bool WebGL::GameLoop(){
+    SDL_Event e;
+
+    while (SDL_PollEvent(&e))
+    {
+        if (e.type == SDL_QUIT)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 void WebGL::SetFogRange(f32 nearPlane, f32 farPlane)
 {
     g_glFuncTable.glUniform1f(this->uniforms[UNIFORM_FOG_NEAR], nearPlane);

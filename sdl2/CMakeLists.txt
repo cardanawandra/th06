@@ -116,6 +116,7 @@ set(TH06_GAME_SOURCES
     ../src/thirdparty/sjis_converter.cpp
     ../src/midi/MidiDefault.cpp
     ../src/graphics/GLFunc.cpp
+    ../src/graphics/FixedFunctionGLWIN32.cpp
     ../src/graphics/FixedFunctionGL.cpp
     ../src/graphics/WebGL.cpp
     ../src/graphics/Software.cpp

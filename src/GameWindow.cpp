@@ -11,6 +11,7 @@
 #include "graphics/FixedFunctionDX2.hpp"
 #endif
 
+#include "graphics/FixedFunctionGLWIN32.hpp"
 #include "graphics/FixedFunctionGL.hpp"
 #include "graphics/WebGL.hpp"
 #include "graphics/Software.hpp"
@@ -41,6 +42,9 @@ static const struct
     #endif
     #ifdef RENDER_FIXED_FUNCTION_DX2
     {"Fixed function DX2", FixedFunctionDX2::Init},
+    #endif
+    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
+    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
     #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
     {"Fixed function GL(ES)", FixedFunctionGL::Init},

@@ -68,6 +68,7 @@ struct WebGL : GfxInterface
 
     virtual void Draw(PrimitiveType type, i32 start, i32 count);
     virtual void SwapBuffers();
+    virtual bool GameLoop();
 
   private:
     SDL_SURFACE_COMPAT *window;
