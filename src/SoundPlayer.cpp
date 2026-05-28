@@ -727,6 +727,7 @@ int SDLCALL SoundPlayer::BackgroundMusicPlayerThread(void* data)
         {
             return 0;
         }
+        SDL_Delay(5);
     }
     return 0;
 }
