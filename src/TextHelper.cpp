@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cstring>
 #include "GamePaths.hpp"
+#include "AnmManager.hpp"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "thirdparty/stb_truetype.h"
 
@@ -43,7 +44,6 @@ TextHelper::~TextHelper()
 // Extended to initialize all globals for text helper
 ZunResult TextHelper::CreateTextBuffer()
 {
-    SDL_PIXEL_FORMAT_COMPAT_LOAD();
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
     // Fallback is Noto Sans Regular (JP) which is redistributable
     #ifdef __ANDROID__
@@ -122,12 +122,11 @@ ZunResult TextHelper::CreateTextBuffer()
             &g_Font,
             30.0f);
 
-    g_TextBufferSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
-        GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT,
-        SDL_PIXELFORMAT_RGBA32
+    g_TextBufferSurface = g_AnmManager->STB_CreateSurface(
+        GAME_WINDOW_WIDTH, TEXT_BUFFER_HEIGHT, 4
     );
 
-    SDL_SetSurfaceBlendMode(g_TextBufferSurface, SDL_BLENDMODE_NONE);
+    // SDEL_SetSurfaceBlendMode(g_TextBufferSurface, SDEL_BLENDMODE_NONE);
 
     return ZUN_SUCCESS;
 }
@@ -141,12 +140,10 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight)
 
     gradientArea = spriteWidth * fontHeight;
 
-    SDL_LockSurface(g_TextBufferSurface);
-
     // In D3D EoSD this function mostly inverts the alpha, but on A1R5G5B5 surfaces specifically it also
     //   creates a gradient. D3D EoSD will always attempt to create an A1R5G5B5 surface for the text buffer,
     //   will only attempt use other formats as a fallback, and in those cases the text will be bugged anyway.
-    //   As part of the port from GDI to SDL_ttf, we've converted the text buffer surface to always be RGBA32
+    //   As part of the port from GDI to SDEL_ttf, we've converted the text buffer surface to always be RGBA32
     //   and no longer need the alpha inversion, but we still want that gradient to be applied
 
     for (bufferCursor = (u8 *)g_TextBufferSurface->pixels; i < gradientArea; i++, bufferCursor += 4)
@@ -158,8 +155,6 @@ bool TextHelper::InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight)
             bufferCursor[2] = bufferCursor[2] - bufferCursor[2] * i / gradientArea / 4; // B
         }
     }
-
-    SDL_UnlockSurface(g_TextBufferSurface);
 
     return true;
 }
@@ -240,15 +235,12 @@ bool isUTF8Encoded(const char *string)
 #undef UTF8_2NDBYTE_PREFIX
 }
 
-void SurfaceOverwriteBlend(SDL_Surface *srcSurface, SDL_Surface *dstSurface, u32 x)
+void SurfaceOverwriteBlend(STB_Surface *srcSurface, STB_Surface *dstSurface, u32 x)
 {
     if(textNotExist) return;
     // Source surface is A8R8G8B8
     // Dest surface is RGBA32
     // We want to overwrite dest unless source has alpha 0
-
-    SDL_LockSurface(srcSurface);
-    SDL_LockSurface(dstSurface);
 
     u32 *srcData = (u32 *)srcSurface->pixels;
     u8 *dstData = (u8 *)dstSurface->pixels;
@@ -268,9 +260,6 @@ void SurfaceOverwriteBlend(SDL_Surface *srcSurface, SDL_Surface *dstSurface, u32
 
         srcData += srcSurface->pitch / 4;
     }
-
-    SDL_UnlockSurface(dstSurface);
-    SDL_UnlockSurface(srcSurface);
 }
 
 static const char* UTF8_Decode(
@@ -328,10 +317,10 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     if(textNotExist) return;
     
     char convertedText[1024] = {0};
-    SDL_Rect finalCopyDst;
-    SDL_Rect finalCopySrc;
-    SDL_Rect shadowRect;
-    SDL_Rect textRect;
+    STB_Rect finalCopyDst;
+    STB_Rect finalCopySrc;
+    STB_Rect shadowRect;
+    STB_Rect textRect;
 
     if (!isUTF8Encoded(string))
     {
@@ -351,28 +340,26 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     finalCopySrc.w = spriteWidth * 2 - 2;
     finalCopySrc.h = fontHeight * 2 - 2;
 
-    SDL_FillRect(g_TextBufferSurface, &finalCopySrc, 0);
+    g_AnmManager->STB_FillRect(g_TextBufferSurface, &finalCopySrc, 0);
 
     if (shadowColor != COLOR_WHITE)
     {
-        SDL_Surface *shadowText;
+        STB_Surface *shadowText;
 
         // Render shadow.
 
         int surfaceW = 1024;
         int surfaceH = 128;
 
-        shadowText = SDL_CREATE_RGB_SURFACE_COMPAT(
+        shadowText = g_AnmManager->STB_CreateSurface(
             surfaceW,
             surfaceH,
-            SDL_PIXELFORMAT_RGBA32
+            4
         );
-
+    
         if (shadowText != NULL)
         {
-            SDL_FillRect(shadowText, NULL, 0);
-
-            SDL_LockSurface(shadowText);
+            g_AnmManager->STB_FillRect(shadowText, NULL, 0);
 
             Uint32 *pixels = (Uint32 *)shadowText->pixels;
 
@@ -455,13 +442,12 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                                 continue;
                             }
 
-                            SDL_Color sdlShadowColor =
-                                SDL_TEXT_COLOR_COMPAT(shadowColor);
+                            STB_Color sdlShadowColor =
+                                g_AnmManager->STB_TextColor(shadowColor);
 
                             pixels[
                                 dstY * surfaceW + dstX
-                            ] = SDL_MAP_RGBA_COMPAT(
-                                shadowText->format,
+                            ] = g_AnmManager->STB_MapRGBA(
                                 sdlShadowColor.r,
                                 sdlShadowColor.g,
                                 sdlShadowColor.b,
@@ -477,35 +463,31 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                     (int)(advanceWidth * g_FontScale);
             }
 
-            SDL_UnlockSurface(shadowText);
-
             shadowRect.x = xPos * 2 + 3;
             shadowRect.y = 2;
             shadowRect.w = shadowText->w;
             shadowRect.h = shadowText->h;
 
-            SDL_BlitSurface(shadowText, NULL, g_TextBufferSurface, &shadowRect);
+            g_AnmManager->STB_SoftStretch(shadowText, NULL, g_TextBufferSurface, &shadowRect);
 
-            SDL_FreeSurface(shadowText);
+            g_AnmManager->STB_FreeSurface(shadowText);
         }
     }
 
-    SDL_Surface *regularText;
+    STB_Surface *regularText;
 
     int surfaceW = 1024;
     int surfaceH = 128;
 
-    regularText = SDL_CREATE_RGB_SURFACE_COMPAT(
+    regularText = g_AnmManager->STB_CreateSurface(
         surfaceW,
         surfaceH,
-        SDL_PIXELFORMAT_RGBA32
+        4
     );
 
     if (regularText != NULL)
     {
-        SDL_FillRect(regularText, NULL, 0);
-
-        SDL_LockSurface(regularText);
+        g_AnmManager->STB_FillRect(regularText, NULL, 0);
 
         Uint32 *pixels = (Uint32 *)regularText->pixels;
 
@@ -590,8 +572,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
                         pixels[
                             dstY * surfaceW + dstX
-                        ] = SDL_MAP_RGBA_COMPAT(
-                            regularText->format,
+                        ] = g_AnmManager->STB_MapRGBA(
                             (textColor >> 16) & 0xFF,
                             (textColor >> 8) & 0xFF,
                             textColor & 0xFF,
@@ -606,8 +587,6 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
             penX +=
                 (int)(advanceWidth * g_FontScale);
         }
-
-        SDL_UnlockSurface(regularText);
     }
 
     if (regularText != NULL)
@@ -618,8 +597,6 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         textRect.h = regularText->h;
 
         SurfaceOverwriteBlend(regularText, g_TextBufferSurface, xPos * 2);
-
-        SDL_FreeSurface(regularText);
     }
 
     // Once we get an API abstraction layer for surface operations, this needs to change
@@ -632,17 +609,13 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     }
     
     outTexture->format = TEX_FMT_A8R8G8B8;
-    // SDL_Surface *textureSurface = SDL_CreateRGBSurfaceWithFormatFrom(
-    //     outTexture->textureData, outTexture->width, outTexture->height, SDL_BITSPERPIXEL(SDL_PIXELFORMAT_RGBA32),
-    //     outTexture->width * SDL_BYTESPERPIXEL(SDL_PIXELFORMAT_RGBA32), SDL_PIXELFORMAT_RGBA32);
 
-    SDL_Surface *textureSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
+    STB_Surface *textureSurface = g_AnmManager->STB_CreateSurfaceFrom(
         outTexture->textureData,
         outTexture->width,
         outTexture->height,
-        32,
         outTexture->width * 4,
-        SDL_PIXELFORMAT_RGBA32
+        4
     );
 
     InvertAlpha(0, 0, spriteWidth * 2, fontHeight * 2 + 6);
@@ -652,9 +625,8 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     finalCopyDst.w = spriteWidth;
     finalCopyDst.h = 16;
 
-    if (SDL_SoftStretch(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
+    if (g_AnmManager->STB_SoftStretch(g_TextBufferSurface, &finalCopySrc, textureSurface, &finalCopyDst) < 0)
     {
-        // SDL_Log("SDL_BlitScaled failed! Error: %s", SDL_GetError());
     }
 
     g_AnmManager->SetCurrentTexture(outTexture->handle);
@@ -662,8 +634,9 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     g_GfxBackend->SetTextureImage(outTexture->width, outTexture->height, PIXEL_RGBA, PIXEL_UNSIGNED_BYTE,
                                         outTexture->textureData);
 
-    SDL_FreeSurface(textureSurface);
+    g_AnmManager->STB_FreeSurface(textureSurface);
     
+    g_AnmManager->STB_FreeSurface(regularText);
 
     return;
 }
@@ -681,7 +654,6 @@ void TextHelper::ReleaseTextBuffer()
 
     if (g_TextBufferSurface != NULL)
     {
-        SDL_FreeSurface(g_TextBufferSurface);
         g_TextBufferSurface = NULL;
     }
 

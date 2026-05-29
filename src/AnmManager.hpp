@@ -13,6 +13,7 @@
 #include "GameWindow.hpp"
 #include "inttypes.hpp"
 #include "SDLCompat.hpp"
+#include "STBCompat.hpp"
 
 #define TEX_FMT_UNKNOWN 0u
 #define TEX_FMT_A8R8G8B8 1u
@@ -20,14 +21,6 @@
 #define TEX_FMT_R5G6B5 3u
 #define TEX_FMT_R8G8B8 4u
 #define TEX_FMT_A4R4G4B4 5u
-
-struct STB_Rect
-{
-    int x;
-    int y;
-    int w;
-    int h;
-};
 
 struct TextureData
 {
@@ -435,10 +428,20 @@ struct AnmManager
         this->screenshotHeight = GAME_REGION_HEIGHT;
     }
 
-    static SDL_Surface *LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL_FORMAT_COMPAT format, u8 **fileData);
-    static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth);
-    static void FlipSurface(SDL_Surface *surface);
-    void ApplySurfaceToColorBuffer(SDL_Surface *surface, const STB_Rect &srcRect, const STB_Rect &dstRect);
+    //STB USAGE PART
+    int STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface* dst, STB_Rect* dstrect);
+    STB_Surface *STB_CreateSurface(int width, int height, int channels);
+    STB_Surface *STB_CreateSurfaceFrom(void *pixels, int width, int height, int pitch, int channels);
+    void STB_FreeSurface(STB_Surface *surface);
+    STB_Surface *STB_ConvertSurfaceFormat(STB_Surface *src, int desired_channels);
+    void STB_FillRect(STB_Surface *surface, STB_Rect *rect, unsigned char value);
+    STB_Color STB_TextColor(ZunColor shadowColor);
+    u32 STB_MapRGBA(u8 r,u8 g,u8 b,u8 a);
+
+    static STB_Surface *LoadToSurfaceWithFormat(const char *filename, int desired_channels, u8 **fileData);
+    static u8 *ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth);
+    static void FlipSurface(STB_Surface *surface);
+    void ApplySurfaceToColorBuffer(STB_Surface *surface, const STB_Rect &srcRect, const STB_Rect &dstRect);
     // Creates, binds, and set parameters for a new texture
     void CreateTextureObject();
     void UpdateDirtyStates();
@@ -453,8 +456,8 @@ struct AnmManager
     i32 spriteIndices[2048];
     AnmRawEntry *anmFiles[128];
     u32 anmFilesSpriteIndexOffsets[128];
-    SDL_Surface *surfaces[32];
-    //    SDL_Surface *surfacesBis[32];
+    STB_Surface *surfaces[32];
+    //    STB_Surface *surfacesBis[32];
     //    D3DXIMAGE_INFO surfaceSourceInfo[32];
     GfxTextureHandle currentTextureHandle;
     GfxTextureHandle dummyTextureHandle;

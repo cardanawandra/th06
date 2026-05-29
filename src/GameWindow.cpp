@@ -228,7 +228,6 @@ void GameWindow::Present()
     }
 
     LOG_COMPAT("present g_GfxBackend->SwapBuffers");
-    // SDL_GL_SWAP_COMPAT(g_GameWindow.screen);
     g_GfxBackend->SwapBuffers();
 
     LOG_COMPAT("present finish");
@@ -327,7 +326,6 @@ i32 GameWindow::InitD3dRendering(void)
         }
 
         LOG_COMPAT("InitD3dRendering 4\n");
-        // SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
         //        if (g_Supervisor.cfg.frameskipConfig == 0)
         //        {
@@ -350,7 +348,6 @@ i32 GameWindow::InitD3dRendering(void)
     //    present_params.AutoDepthStencilFormat = D3DFMT_D16;
     //    present_params.Flags = D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
 
-    // SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
     g_Supervisor.vsyncEnabled = 1;
 
     g_Supervisor.lockableBackbuffer = 1;

@@ -36,7 +36,7 @@ ControllerMapping g_ControllerMapping = {
     (i16)SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
     (i16)SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
 };
-SDL_Surface *g_TextBufferSurface;
+STB_Surface *g_TextBufferSurface;
 u16 g_LastFrameInput;
 u16 g_CurFrameInput;
 u16 g_IsEigthFrameOfHeldInput;
@@ -761,7 +761,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
         free((void*)data);
     }
     //todo dynamic frameskip
-    #ifdef WIN98
+    #ifdef WIN98X
     g_Supervisor.cfg.frameskipConfig = 2;
     #endif
 

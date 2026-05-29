@@ -66,7 +66,7 @@ void GameErrorContext::Flush()
 
         if (m_ShowMessageBox)
         {
-            // SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "log", m_Buffer, NULL);
+            // SDEL_ShowSimpleMessageBox(SDEL_MESSAGEBOX_ERROR, "log", m_Buffer, NULL);
         }
 
         logFile = FileSystem::FopenUTF8("./log.txt", "w");

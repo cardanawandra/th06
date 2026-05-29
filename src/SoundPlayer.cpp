@@ -9,7 +9,7 @@
 
 #include "SDLCompat.hpp"
 
-#ifdef WIN98X
+#ifdef WIN98
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
 #define DISABLE_SOUNDPLAYER_BGM return 0
 #define DISABLE_SOUNDPLAYER return
@@ -55,6 +55,7 @@ SoundPlayer::SoundPlayer()
 
 void SoundPlayer::AudioCallback(void* userdata, Uint8* stream, int len)
 {
+    DISABLE_SOUNDPLAYER;
     i16* out = (i16*)stream;
     u32 samples = len / 2;
 

@@ -7,6 +7,7 @@
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 #include "SDLCompat.hpp"
+#include "STBCompat.hpp"
 #include "pbg3/Pbg3Archive.hpp"
 
 #define GAME_VERSION 0x102
@@ -182,5 +183,5 @@ extern Supervisor g_Supervisor;
 extern u16 g_LastFrameInput;
 extern u16 g_CurFrameInput;
 extern u16 g_IsEigthFrameOfHeldInput;
-extern SDL_Surface *g_TextBufferSurface;
+extern STB_Surface *g_TextBufferSurface;
 extern u16 g_NumOfFramesInputsWereHeld;

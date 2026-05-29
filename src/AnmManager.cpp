@@ -23,15 +23,11 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "thirdparty/stb_image_resize.h"
 
-#include "SDLCompat.hpp"
-
 static VertexTex1Xyzrhw g_PrimitivesToDrawVertexBuf[4];
 static VertexTex1DiffuseXyzrhw g_PrimitivesToDrawNoVertexBuf[4];
 static VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
 AnmManager *g_AnmManager;
- 
-static SDL_PIXEL_FORMAT_COMPAT g_TextureFormatSDLMapping[6];
- 
+  
 static const PixelFormat g_TextureFormatTypeGfxMapping[6] = {static_cast<PixelFormat>(0), PIXEL_RGBA, PIXEL_RGBA, PIXEL_RGB, PIXEL_RGB, PIXEL_RGBA};
 
 static const PixelDataType g_TextureFormatTypeMapping[6] = {static_cast<PixelDataType>(0), //ugh
@@ -40,14 +36,10 @@ static const PixelDataType g_TextureFormatTypeMapping[6] = {static_cast<PixelDat
                                             PIXEL_UNSIGNED_SHORT_5_6_5,
                                             PIXEL_UNSIGNED_BYTE,
                                             PIXEL_UNSIGNED_SHORT_4_4_4_4};
- 
+
 static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
 
-int STB_SoftStretch(
-    SDL_Surface* src,
-    STB_Rect* srcrect,
-    SDL_Surface* dst,
-    STB_Rect* dstrect)
+int AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface* dst, STB_Rect* dstrect)
 {
     if (!src || !dst)
         return -1;
@@ -55,9 +47,19 @@ int STB_SoftStretch(
     if (!src->pixels || !dst->pixels)
         return -1;
 
-    /* SDL_SoftStretch requires same format */
-    if (src->format->BytesPerPixel != dst->format->BytesPerPixel)
+    /* STB_SoftStretch requires same format */
+    if (src->channels != dst->channels)
         return -1;
+
+    if (dstrect->x + dstrect->w > dst->w)
+    {
+        dstrect->w = dst->w - dstrect->x;
+    }
+
+    if (dstrect->y + dstrect->h > dst->h)
+    {
+        dstrect->h = dst->h - dstrect->y;
+    }
 
     STB_Rect full_src;
     STB_Rect full_dst;
@@ -78,7 +80,7 @@ int STB_SoftStretch(
         dstrect = &full_dst;
     }
 
-    const int bpp = src->format->BytesPerPixel;
+    const int bpp = src->channels;
 
     const unsigned char* src_pixels =
         (const unsigned char*)src->pixels +
@@ -90,43 +92,245 @@ int STB_SoftStretch(
         dstrect->y * dst->pitch +
         dstrect->x * bpp;
 
-    if (SDL_MUSTLOCK(src))
-        SDL_LockSurface(src);
+    for (int y = 0; y < dstrect->h; y++)
+    {
+        int sy = y * srcrect->h / dstrect->h;
 
-    if (SDL_MUSTLOCK(dst))
-        SDL_LockSurface(dst);
+        unsigned char *dst_row =
+            dst->pixels +
+            (dstrect->y + y) * dst->pitch +
+            dstrect->x * bpp;
 
-    int ok = stbir_resize_uint8_generic(
-        src_pixels,
-        srcrect->w,
-        srcrect->h,
-        src->pitch,
+        unsigned char *src_row =
+            src->pixels +
+            (srcrect->y + sy) * src->pitch +
+            srcrect->x * bpp;
 
-        dst_pixels,
-        dstrect->w,
-        dstrect->h,
-        dst->pitch,
+        for (int x = 0; x < dstrect->w; x++)
+        {
+            int sx = x * srcrect->w / dstrect->w;
 
-        bpp,
-        -1,
-        0,
+            memcpy(
+                dst_row + x * bpp,
+                src_row + sx * bpp,
+                bpp
+            );
+        }
+    }
+    return 9;
+}
 
-        STBIR_EDGE_CLAMP,
+STB_Surface *AnmManager::STB_CreateSurface(int width, int height, int channels)
+{
+    STB_Surface *surface =
+        (STB_Surface*)calloc(1, sizeof(STB_Surface));
 
-        /* closest to SDL_SoftStretch */
-        STBIR_FILTER_BOX,
+    if (!surface)
+        return NULL;
 
-        STBIR_COLORSPACE_LINEAR,
-        NULL
-    );
+    surface->w    = width;
+    surface->h   = height;
+    surface->channels = channels;
+    surface->pitch    = width * channels;
+    surface->owns_pixels = true;
 
-    if (SDL_MUSTLOCK(src))
-        SDL_UnlockSurface(src);
+    size_t size =
+        surface->pitch * height;
 
-    if (SDL_MUSTLOCK(dst))
-        SDL_UnlockSurface(dst);
+    surface->pixels =
+        (unsigned char*)malloc(size);
 
-    return ok ? 0 : -1;
+    if (!surface->pixels)
+    {
+        free(surface);
+        return NULL;
+    }
+
+    memset(surface->pixels, 0, size);
+
+    return surface;
+}
+
+STB_Surface *AnmManager::STB_CreateSurfaceFrom(void *pixels, int width, int height, int pitch, int channels)
+{
+    STB_Surface *surface =
+        (STB_Surface*)calloc(1, sizeof(STB_Surface));
+
+    if (!surface)
+        return NULL;
+
+    surface->w    = width;
+    surface->h   = height;
+    surface->channels = channels;
+    surface->pitch    = pitch;
+
+    /* IMPORTANT: does NOT own memory */
+    surface->pixels =
+        (unsigned char*)pixels;
+
+    return surface;
+}
+
+void AnmManager::STB_FreeSurface(STB_Surface *surface)
+{
+    if (!surface)
+        return;
+
+    if (surface->owns_pixels && surface->pixels){
+        stbi_image_free(surface->pixels);
+        surface->pixels = NULL;
+    }
+
+    free(surface);
+}
+
+STB_Surface *AnmManager::STB_ConvertSurfaceFormat(STB_Surface *src, int desired_channels)
+{
+    if (!src)
+        return NULL;
+
+    if (src->channels == desired_channels)
+    {
+        STB_Surface *copy =
+            (STB_Surface*)malloc(sizeof(STB_Surface));
+
+        if (!copy)
+            return NULL;
+
+        *copy = *src;
+
+        size_t size = src->pitch * src->h;
+
+        copy->pixels = (unsigned char*)malloc(size);
+
+        if (!copy->pixels)
+        {
+            free(copy);
+            return NULL;
+        }
+
+        memcpy(copy->pixels, src->pixels, size);
+        return copy;
+    }
+
+    STB_Surface *dst =
+        (STB_Surface*)calloc(1, sizeof(STB_Surface));
+
+    if (!dst)
+        return NULL;
+
+    dst->w  = src->w;
+    dst->h = src->h;
+    dst->channels = desired_channels;
+    dst->pitch = dst->w * desired_channels;
+
+    size_t dst_size = dst->pitch * dst->h;
+
+    dst->pixels = (unsigned char*)malloc(dst_size);
+
+    if (!dst->pixels)
+    {
+        free(dst);
+        return NULL;
+    }
+
+    for (int y = 0; y < src->h; y++)
+    {
+        unsigned char *d =
+            dst->pixels + y * dst->pitch;
+
+        unsigned char *s =
+            src->pixels + y * src->pitch;
+
+        for (int x = 0; x < src->w; x++)
+        {
+            // unsigned char r = s[0];
+            // unsigned char g = s[1];
+            // unsigned char b = s[2];
+            // unsigned char a =
+            //     (src->channels >= 4) ? s[3] : 255;
+
+            if (desired_channels == 4)
+            {
+                d[0] = s[0];
+                d[1] = s[1];
+                d[2] = s[2];
+                d[3] = (src->channels >= 4) ? s[3] : 255;
+            }
+            else if (desired_channels == 3)
+            {
+                d[0] = s[0];
+                d[1] = s[1];
+                d[2] = s[2];
+            }
+            else if (desired_channels == 1)
+            {
+                d[0] =
+                    (unsigned char)(
+                        (s[0] * 30 +
+                         s[1] * 59 +
+                         s[2] * 11) / 100);
+            }
+
+            s += src->channels;
+            d += desired_channels;
+        }
+    }
+
+    return dst;
+}
+
+STB_Color AnmManager::STB_TextColor(ZunColor shadowColor)
+{
+    STB_Color color;
+
+    color.b = (shadowColor >> 16) & 0xFF;
+    color.g = (shadowColor >> 8) & 0xFF;
+    color.r = shadowColor & 0xFF;
+    color.a = (shadowColor >> 24) & 0xFF;
+
+    return color;
+}
+u32 AnmManager::STB_MapRGBA(u8 r,u8 g,u8 b,u8 a)
+{
+    return
+        ((u32)a << 24) |
+        ((u32)b << 16) |
+        ((u32)g << 8)  |
+        ((u32)r);
+}
+
+void AnmManager::STB_FillRect(STB_Surface *surface, STB_Rect *rect, unsigned char value)
+{
+    if (!surface || !surface->pixels)
+        return;
+
+    int bpp = surface->channels;
+
+    if (rect == NULL)
+    {
+        memset(
+            surface->pixels,
+            value,
+            surface->pitch * surface->h
+        );
+
+        return;
+    }
+
+    for (int y = 0; y < rect->h; y++)
+    {
+        unsigned char *row =
+            surface->pixels +
+            (rect->y + y) * surface->pitch +
+            rect->x * bpp;
+
+        memset(
+            row,
+            value,
+            rect->w * bpp
+        );
+    }
 }
 
 void AnmManager::CreateTextureObject()
@@ -143,9 +347,9 @@ void AnmManager::CreateTextureObject()
     LOG_COMPAT("AnmManager::CreateTextureObject finish\n");
 }
 
-SDL_Surface *AnmManager::LoadToSurfaceWithFormat(
+STB_Surface *AnmManager::LoadToSurfaceWithFormat(
     const char *filename,
-    SDL_PIXEL_FORMAT_COMPAT format,
+    int desired_channels,
     u8 **fileData)
 {
     u8 *data;
@@ -158,7 +362,7 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(
 
     if (data == NULL)
     {
-        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO DATA\n");
+        LOG_COMPAT("LoadToSurfaceWithFormat NO DATA\n");
         return NULL;
     }
 
@@ -168,66 +372,50 @@ SDL_Surface *AnmManager::LoadToSurfaceWithFormat(
         &width,
         &height,
         &channels,
-        4 // RGBA
+        desired_channels
     );
 
     if (pixels == NULL)
     {
-        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO PIXEL\n");
+        LOG_COMPAT("LoadToSurfaceWithFormat NO PIXEL\n");
         free(data);
         return NULL;
     }
 
-    SDL_Surface *surface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
-        pixels,
-        width,
-        height,
-        32,
-        width * 4,
-        SDL_PIXELFORMAT_RGBA32
-    );
+    STB_Surface *surface =
+        (STB_Surface*)malloc(sizeof(STB_Surface));
 
     if (surface == NULL)
     {
         stbi_image_free(pixels);
         free(data);
-        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO SURFACE\n");
         return NULL;
     }
 
-    SDL_Surface *converted = SDL_CONVERT_SURFACE_FORMAT_COMPAT(surface, format, 0);
-    stbi_image_free(pixels);
-    SDL_FreeSurface(surface);
-    
-    if (converted == NULL)
+    if (desired_channels != 0)
+        channels = desired_channels;
+
+    surface->w    = width;
+    surface->h   = height;
+    surface->channels = channels;
+    surface->pitch    = width * channels;
+    surface->pixels   = pixels;
+
+    if (fileData != NULL)
+    {
+        *fileData = data;
+    }
+    else
     {
         free(data);
-        LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat NO SURFACE\n");
-        return NULL;
     }
 
-    // IMPORTANT:
-    // SDL surface does NOT own stb_image memory.
-    // You must free pixels later AFTER SDL_FreeSurface(surface)
-
-    // if (fileData != NULL)
-    // {
-    //     *fileData = data;
-    // }
-    // else
-    // {
-    //     free(data);
-    // }
-    free(data);
-
-    LOG_COMPAT("AnmManager::LoadToSurfaceWithFormat OK\n");
-    return converted;
+    LOG_COMPAT("LoadToSurfaceWithFormat OK\n");
+    return surface;
 }
 
-u8 *AnmManager::ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth)
+u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
 {
-    SDL_LockSurface(src);
-
     const i32 dstPitch = src->w * pixelDepth;
     const i32 srcPitch = src->pitch;
 
@@ -242,12 +430,10 @@ u8 *AnmManager::ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth)
         srcPtr += srcPitch;
     }
 
-    SDL_UnlockSurface(src);
-
     return pixelData;
 }
 
-void AnmManager::FlipSurface(SDL_Surface *surface)
+void AnmManager::FlipSurface(STB_Surface *surface)
 {
     u8 *copyBuf;
     u8 *highPtr;
@@ -257,8 +443,6 @@ void AnmManager::FlipSurface(SDL_Surface *surface)
     {
         return;
     }
-
-    SDL_LockSurface(surface);
 
     copyBuf = new u8[surface->h / 2 * surface->pitch];
 
@@ -276,8 +460,6 @@ void AnmManager::FlipSurface(SDL_Surface *surface)
         highPtr -= surface->pitch;
     }
 
-    SDL_UnlockSurface(surface);
-
     delete[] copyBuf;
 }
 
@@ -287,7 +469,7 @@ void AnmManager::ReleaseSurfaces(void)
     {
         if (this->surfaces[idx] != NULL)
         {
-            SDL_FreeSurface(this->surfaces[idx]);
+            STB_FreeSurface(this->surfaces[idx]);
             this->surfaces[idx] = NULL;
         }
     }
@@ -326,18 +508,6 @@ AnmManager::AnmManager()
 {
     // UNKNOWN <= index 0
     LOG_COMPAT("AnmManager::AnmManager 1\n");
-    SDL_PIXEL_FORMAT_COMPAT_LOAD();
-    g_TextureFormatSDLMapping[0] = SDL_PIXELFORMAT_UNKNOWN; 
-    // RGBA32 (RGBA8888) <= index 1
-    g_TextureFormatSDLMapping[1] = SDL_PIXELFORMAT_RGBA32;
-    // RGBA5551 <= index 2
-    g_TextureFormatSDLMapping[2] = SDL_PIXELFORMAT_RGBA5551;
-    // RGB565 <= index 3
-    g_TextureFormatSDLMapping[3] = SDL_PIXELFORMAT_RGB565;
-    // RGB24 <= index 4
-    g_TextureFormatSDLMapping[4] = SDL_PIXELFORMAT_RGB24;
-    // RGBA4444 <= index 5
-    g_TextureFormatSDLMapping[5] = SDL_PIXELFORMAT_RGBA4444;
 
     this->maybeLoadedSpriteCount = 0;
 
@@ -451,7 +621,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
 {
     LOG_COMPAT("LoadTexture 1");
     u8 *rawTextureData;
-    SDL_Surface *textureSurface;
+    STB_Surface *textureSurface;
 
     LOG_COMPAT("LoadTexture 2");
     ReleaseTexture(textureIdx);
@@ -469,7 +639,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     #endif
 
     LOG_COMPAT("LoadTexture 3");
-    textureSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat],
+    textureSurface = LoadToSurfaceWithFormat(textureName, g_PixelChannels[textureFormat],
                                              (u8 **)&this->textures[textureIdx].fileData);
 
     // Hideous hack to account for ANM entries that report a different texture size than the actual size
@@ -477,10 +647,10 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     if (textureSurface->w != entry->width || textureSurface->h != entry->height)
     {
         LOG_COMPAT("LoadTexture 4");
-        SDL_Surface *textureSurface2 = SDL_CREATE_RGB_SURFACE_COMPAT(
+        STB_Surface *textureSurface2 = STB_CreateSurface(
             entry->width,
             entry->height,
-            g_TextureFormatSDLMapping[textureFormat]
+            g_PixelChannels[textureFormat]
         );
         STB_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
         STB_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
@@ -488,7 +658,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         STB_SoftStretch(textureSurface, &srcRect, textureSurface2, &dstRect);
         LOG_COMPAT("LoadTexture 6");
         LOG_COMPAT("Blits %s",textureName);
-        SDL_FreeSurface(textureSurface);
+        STB_FreeSurface(textureSurface);
         textureSurface = textureSurface2;
     }
 
@@ -524,7 +694,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
                                 g_TextureFormatTypeMapping[textureFormat], rawTextureData);
 
     LOG_COMPAT("LoadTexture 10");
-    SDL_FreeSurface(textureSurface);
+    STB_FreeSurface(textureSurface);
 
     // LOG_COMPAT("GL Error (hex): 0x%X\n", g_glFuncTable.glGetError());
     if (g_GfxBackend->HasError()){
@@ -539,7 +709,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
 ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
     LOG_COMPAT("LoadTextureAlphaChannel 1\n");
-    SDL_Surface *alphaSurface;
+    STB_Surface *alphaSurface;
     TextureData *textureDesc;
 
     u8 *dstData;
@@ -566,7 +736,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     */
 
     LOG_COMPAT("LoadTextureAlphaChannel 2 format=%i\n",textureFormat);
-    alphaSurface = LoadToSurfaceWithFormat(textureName, g_TextureFormatSDLMapping[textureFormat], NULL);
+    alphaSurface = LoadToSurfaceWithFormat(textureName, g_PixelChannels[textureFormat], NULL);
 
     LOG_COMPAT("LoadTextureAlphaChannel 3\n");
     if (alphaSurface == NULL)
@@ -575,7 +745,6 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     }
 
     LOG_COMPAT("LoadTextureAlphaChannel 4\n");
-    SDL_LockSurface(alphaSurface);
     LOG_COMPAT("LoadTextureAlphaChannel 5\n");
 
     dstData = (u8 *)textureDesc->textureData;
@@ -665,8 +834,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
         break;
     }
     LOG_COMPAT("LoadTextureAlphaChannel 7\n");
-    SDL_UnlockSurface(alphaSurface);
-    SDL_FreeSurface(alphaSurface);
+    STB_FreeSurface(alphaSurface);
 
     LOG_COMPAT("LoadTextureAlphaChannel 8\n");
     this->SetCurrentTexture(this->textures[textureIdx].handle);
@@ -716,9 +884,6 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     LOG_COMPAT("LoadAnm 5");
     const char *anmName = (char *)((u8 *)anm + anm->nameOffset);
 
-    // D3D seems to treat unknown texture format as a wildcard, but SDL treats it as an error
-    //   This is a hack to avoid that for now
-    #ifdef WIN98
     if (anm->format == TEX_FMT_UNKNOWN || anm->format == 5)
     {
         anm->format = TEX_FMT_A8R8G8B8;
@@ -726,12 +891,7 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     if(anm->format==3){    
         anm->format = 4;
     }
-    #else
-    if (anm->format == TEX_FMT_UNKNOWN)
-    {
-        anm->format = TEX_FMT_A8R8G8B8;
-    }
-    #endif
+
 
     LOG_COMPAT("LoadAnm 6");
     if (*anmName == '@')
@@ -2100,14 +2260,14 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
         this->ReleaseSurface(surfaceIdx);
     }
 
-    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, SDL_PIXELFORMAT_RGB24, NULL);
+    this->surfaces[surfaceIdx] = LoadToSurfaceWithFormat(path, 3, NULL);
 
     if (this->surfaces[surfaceIdx] == NULL)
     {
         return ZUN_ERROR;
     }
 
-    // SDL_Surface *src = this->surfaces[surfaceIdx];
+    // STB_Surface *src = this->surfaces[surfaceIdx];
     
     // u32 textureWidth = BitCeil((u32)src->w);
     // u32 textureHeight = BitCeil((u32)src->h);
@@ -2195,14 +2355,14 @@ void AnmManager::ReleaseSurface(i32 surfaceIdx)
 {
     if (this->surfaces[surfaceIdx] != NULL)
     {
-        SDL_FreeSurface(this->surfaces[surfaceIdx]);
+        STB_FreeSurface(this->surfaces[surfaceIdx]);
         this->surfaces[surfaceIdx] = NULL;
     }
 }
 
 void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 srcX, Sint16 srcY, Sint16 dstX, Sint16 dstY)
 {
-    SDL_Surface *srcSurface = this->surfaces[surfaceIdx];
+    STB_Surface *srcSurface = this->surfaces[surfaceIdx];
 
     if (srcSurface == NULL)
     {
@@ -2255,7 +2415,7 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 srcX, Sint16 src
 void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 dstX, Sint16 dstY, Sint16 rectLeft, Sint16 rectTop,
                                              Uint16 rectWidth, Uint16 rectHeight)
 {
-    SDL_Surface *srcSurface = this->surfaces[surfaceIdx];
+    STB_Surface *srcSurface = this->surfaces[surfaceIdx];
 
     if (srcSurface == NULL)
     {
@@ -2312,11 +2472,11 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
 {
     u8 *backBufferPixels = NULL;
     u8 *dstFormatPixels = NULL;
-    SDL_Surface *dstFormatSurface = NULL;
+    STB_Surface *dstFormatSurface = NULL;
     STB_Rect stretchDstRect;
     STB_Rect stretchSrcRect;
-    SDL_Surface *stretchedSurface = NULL;
-    SDL_Surface *unstretchedSurface = NULL;
+    STB_Surface *stretchedSurface = NULL;
+    STB_Surface *unstretchedSurface = NULL;
 
     // OpenGL throws an error specifically for negative W / H and pixels are undefined for 0 inputs.
     if (this->textures[textureId].handle == 0 || width <= 0 || height <= 0)
@@ -2337,18 +2497,17 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
         backBufferPixels
     );
 
-    unstretchedSurface = SDL_CREATE_RGB_SURFACE_FROM_COMPAT(
+    unstretchedSurface = STB_CreateSurfaceFrom(
         backBufferPixels,
         width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
         height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
-        32,
         width * g_GameWindow.WIDTH_RESOLUTION_SCALE * 4,
-        g_TextureFormatSDLMapping[1]
+        g_PixelChannels[1]
     );
-    stretchedSurface = SDL_CREATE_RGB_SURFACE_COMPAT(
+    stretchedSurface = STB_CreateSurface(
         this->textures[textureId].width,
         this->textures[textureId].height,
-        g_TextureFormatSDLMapping[1]
+        g_PixelChannels[1]
     );
     if (unstretchedSurface == NULL || stretchedSurface == NULL)
     {
@@ -2375,7 +2534,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     }
 
     dstFormatSurface =
-        SDL_CONVERT_SURFACE_FORMAT_COMPAT(stretchedSurface, g_TextureFormatSDLMapping[this->textures[textureId].format], 0);
+        STB_ConvertSurfaceFormat(stretchedSurface, g_PixelChannels[this->textures[textureId].format]);
 
     if (dstFormatSurface == NULL)
     {
@@ -2383,22 +2542,22 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     }
 
     dstFormatPixels =
-        ExtractSurfacePixels(dstFormatSurface, g_TextureFormatBPP[this->textures[textureId].format]);
+        ExtractSurfacePixels(dstFormatSurface, g_PixelChannels[this->textures[textureId].format]);
 
     g_GfxBackend->SetTextureImage(this->textures[textureId].width, this->textures[textureId].height,
                                 g_TextureFormatTypeGfxMapping[this->textures[textureId].format],
                                 g_TextureFormatTypeMapping[this->textures[textureId].format], dstFormatPixels);
 
 cleanup:
-    SDL_FreeSurface(unstretchedSurface);
-    SDL_FreeSurface(stretchedSurface);
-    SDL_FreeSurface(dstFormatSurface);
+    STB_FreeSurface(unstretchedSurface);
+    STB_FreeSurface(stretchedSurface);
+    STB_FreeSurface(dstFormatSurface);
     delete[] backBufferPixels;
     delete[] dstFormatPixels;
 }
 
 // Utter mess that needs to be rewritten
-void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const STB_Rect &srcRect, const STB_Rect &dstRect)
+void AnmManager::ApplySurfaceToColorBuffer(STB_Surface *src, const STB_Rect &srcRect, const STB_Rect &dstRect)
 {
     ZunViewport originalViewport;
     ZunViewport fullscreenViewport;
