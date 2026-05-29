@@ -9,7 +9,7 @@
 
 #include "SDLCompat.hpp"
 
-#ifdef WIN98
+#ifdef WIN98X
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
 #define DISABLE_SOUNDPLAYER_BGM return 0
 #define DISABLE_SOUNDPLAYER return

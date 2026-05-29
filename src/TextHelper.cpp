@@ -630,7 +630,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         outTexture->textureData = (u8 *)malloc(outTexture->width * outTexture->height * 4);
         memset(outTexture->textureData, 0, outTexture->width * outTexture->height * 4);
     }
-
+    
     outTexture->format = TEX_FMT_A8R8G8B8;
     // SDL_Surface *textureSurface = SDL_CreateRGBSurfaceWithFormatFrom(
     //     outTexture->textureData, outTexture->width, outTexture->height, SDL_BITSPERPIXEL(SDL_PIXELFORMAT_RGBA32),

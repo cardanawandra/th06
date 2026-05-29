@@ -15,7 +15,13 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_SIMD
+#define STBI_ONLY_PNG
+#define STBI_ONLY_JPEG
 #include "thirdparty/stb_image.h"
+#define STBIR_NO_SIMD
+#define STBIR_NON_IEEE_FLOAT
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "thirdparty/stb_image_resize.h"
 
 #include "SDLCompat.hpp"
 
@@ -36,6 +42,92 @@ static const PixelDataType g_TextureFormatTypeMapping[6] = {static_cast<PixelDat
                                             PIXEL_UNSIGNED_SHORT_4_4_4_4};
  
 static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
+
+int STB_SoftStretch(
+    SDL_Surface* src,
+    STB_Rect* srcrect,
+    SDL_Surface* dst,
+    STB_Rect* dstrect)
+{
+    if (!src || !dst)
+        return -1;
+
+    if (!src->pixels || !dst->pixels)
+        return -1;
+
+    /* SDL_SoftStretch requires same format */
+    if (src->format->BytesPerPixel != dst->format->BytesPerPixel)
+        return -1;
+
+    STB_Rect full_src;
+    STB_Rect full_dst;
+
+    if (!srcrect) {
+        full_src.x = 0;
+        full_src.y = 0;
+        full_src.w = src->w;
+        full_src.h = src->h;
+        srcrect = &full_src;
+    }
+
+    if (!dstrect) {
+        full_dst.x = 0;
+        full_dst.y = 0;
+        full_dst.w = dst->w;
+        full_dst.h = dst->h;
+        dstrect = &full_dst;
+    }
+
+    const int bpp = src->format->BytesPerPixel;
+
+    const unsigned char* src_pixels =
+        (const unsigned char*)src->pixels +
+        srcrect->y * src->pitch +
+        srcrect->x * bpp;
+
+    unsigned char* dst_pixels =
+        (unsigned char*)dst->pixels +
+        dstrect->y * dst->pitch +
+        dstrect->x * bpp;
+
+    if (SDL_MUSTLOCK(src))
+        SDL_LockSurface(src);
+
+    if (SDL_MUSTLOCK(dst))
+        SDL_LockSurface(dst);
+
+    int ok = stbir_resize_uint8_generic(
+        src_pixels,
+        srcrect->w,
+        srcrect->h,
+        src->pitch,
+
+        dst_pixels,
+        dstrect->w,
+        dstrect->h,
+        dst->pitch,
+
+        bpp,
+        -1,
+        0,
+
+        STBIR_EDGE_CLAMP,
+
+        /* closest to SDL_SoftStretch */
+        STBIR_FILTER_BOX,
+
+        STBIR_COLORSPACE_LINEAR,
+        NULL
+    );
+
+    if (SDL_MUSTLOCK(src))
+        SDL_UnlockSurface(src);
+
+    if (SDL_MUSTLOCK(dst))
+        SDL_UnlockSurface(dst);
+
+    return ok ? 0 : -1;
+}
 
 void AnmManager::CreateTextureObject()
 {
@@ -390,10 +482,10 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
             entry->height,
             g_TextureFormatSDLMapping[textureFormat]
         );
-        SDL_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
-        SDL_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
+        STB_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
+        STB_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
         LOG_COMPAT("LoadTexture 5");
-        SDL_SoftStretch(textureSurface, &srcRect, textureSurface2, &dstRect);
+        STB_SoftStretch(textureSurface, &srcRect, textureSurface2, &dstRect);
         LOG_COMPAT("LoadTexture 6");
         LOG_COMPAT("Blits %s",textureName);
         SDL_FreeSurface(textureSurface);
@@ -2170,8 +2262,8 @@ void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 dstX, Sint16
         return;
     }
 
-    SDL_Rect srcRect = {rectLeft, rectTop, rectWidth, rectHeight}; 
-    SDL_Rect dstRect = {dstX, dstY, rectWidth, rectHeight};
+    STB_Rect srcRect = {rectLeft, rectTop, rectWidth, rectHeight}; 
+    STB_Rect dstRect = {dstX, dstY, rectWidth, rectHeight};
     ApplySurfaceToColorBuffer(srcSurface, srcRect,dstRect);
     //
     //    IDirect3DSurface8 *D3D_Surface;
@@ -2221,8 +2313,8 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     u8 *backBufferPixels = NULL;
     u8 *dstFormatPixels = NULL;
     SDL_Surface *dstFormatSurface = NULL;
-    SDL_Rect stretchDstRect;
-    SDL_Rect stretchSrcRect;
+    STB_Rect stretchDstRect;
+    STB_Rect stretchSrcRect;
     SDL_Surface *stretchedSurface = NULL;
     SDL_Surface *unstretchedSurface = NULL;
 
@@ -2277,7 +2369,7 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     stretchDstRect.h = this->textures[textureId].height;
     stretchDstRect.w = this->textures[textureId].width;
 
-    if (SDL_SoftStretch(unstretchedSurface, &stretchSrcRect, stretchedSurface, &stretchDstRect) < 0)
+    if (STB_SoftStretch(unstretchedSurface, &stretchSrcRect, stretchedSurface, &stretchDstRect) < 0)
     {
         goto cleanup;
     }
@@ -2306,7 +2398,7 @@ cleanup:
 }
 
 // Utter mess that needs to be rewritten
-void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const SDL_Rect &srcRect, const SDL_Rect &dstRect)
+void AnmManager::ApplySurfaceToColorBuffer(SDL_Surface *src, const STB_Rect &srcRect, const STB_Rect &dstRect)
 {
     ZunViewport originalViewport;
     ZunViewport fullscreenViewport;

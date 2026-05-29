@@ -43,11 +43,11 @@ static const struct
     #ifdef RENDER_FIXED_FUNCTION_DX2
     {"Fixed function DX2", FixedFunctionDX2::Init},
     #endif
+    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
+    // {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
+    #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
     {"Fixed function GL(ES)", FixedFunctionGL::Init},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
-    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
     #endif
     #ifdef RENDER_SOFTWARE
     {"Software fallback (VERY SLOW)", Software::Init},

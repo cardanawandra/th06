@@ -21,6 +21,14 @@
 #define TEX_FMT_R8G8B8 4u
 #define TEX_FMT_A4R4G4B4 5u
 
+struct STB_Rect
+{
+    int x;
+    int y;
+    int w;
+    int h;
+};
+
 struct TextureData
 {
     GfxTextureHandle handle;
@@ -430,7 +438,7 @@ struct AnmManager
     static SDL_Surface *LoadToSurfaceWithFormat(const char *filename, SDL_PIXEL_FORMAT_COMPAT format, u8 **fileData);
     static u8 *ExtractSurfacePixels(SDL_Surface *src, u8 pixelDepth);
     static void FlipSurface(SDL_Surface *surface);
-    void ApplySurfaceToColorBuffer(SDL_Surface *surface, const SDL_Rect &srcRect, const SDL_Rect &dstRect);
+    void ApplySurfaceToColorBuffer(SDL_Surface *surface, const STB_Rect &srcRect, const STB_Rect &dstRect);
     // Creates, binds, and set parameters for a new texture
     void CreateTextureObject();
     void UpdateDirtyStates();
