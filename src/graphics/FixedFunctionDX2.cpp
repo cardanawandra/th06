@@ -3,7 +3,7 @@
 #include "Supervisor.hpp"
 #include "GameWindow.hpp"
 #include "i18n.hpp"
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 // ---------------------------------------------------------------------------
 // Internal helpers (file-scope, not exposed in the header)

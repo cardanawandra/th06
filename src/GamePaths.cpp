@@ -10,7 +10,7 @@
 #else
 #include <sys/stat.h>
 #endif
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 namespace GamePaths
 {
@@ -19,8 +19,9 @@ static char s_userPath[512] = "";
 
 void Init()
 {
-#ifdef __ANDROID__
-    const char *internalPath = SDL_AndroidGetExternalStoragePath();
+    // On Android, SDL must be initialized before GamePaths::Init()
+    STORAGE_INIT();
+    const char *internalPath = GET_EXTERNAL_STORAGE_PATH();
     if (internalPath)
     {
         SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
@@ -28,13 +29,8 @@ void Init()
     }
     else
     {
-        // LOG_COMPATWarn(LOG_COMPAT_CATEGORY_APPLICATION, "GamePaths: SDL_AndroidGetExternalStoragePath() returned NULL, using cwd");
         s_userPath[0] = '\0';
     }
-#else
-    // Desktop: all files relative to the working directory.
-    s_userPath[0] = '\0';
-#endif
 }
 
 const char *GetUserPath()

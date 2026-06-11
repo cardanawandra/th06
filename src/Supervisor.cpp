@@ -19,22 +19,22 @@
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 #include <stdio.h>
 #include <cstring>
 #include <ctime>
 
 Supervisor g_Supervisor;
 ControllerMapping g_ControllerMapping = {
-    (i16)SDL_CONTROLLER_BUTTON_A,
-    (i16)SDL_CONTROLLER_BUTTON_B,
-    (i16)SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
-    (i16)SDL_CONTROLLER_BUTTON_START,
-    (i16)SDL_CONTROLLER_BUTTON_DPAD_UP,
-    (i16)SDL_CONTROLLER_BUTTON_DPAD_DOWN,
-    (i16)SDL_CONTROLLER_BUTTON_DPAD_LEFT,
-    (i16)SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
-    (i16)SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+    (i16)COMPAT_CONTROLLER_BUTTON_A,
+    (i16)COMPAT_CONTROLLER_BUTTON_B,
+    (i16)COMPAT_CONTROLLER_BUTTON_LEFTSHOULDER,
+    (i16)COMPAT_CONTROLLER_BUTTON_START,
+    (i16)COMPAT_CONTROLLER_BUTTON_DPAD_UP,
+    (i16)COMPAT_CONTROLLER_BUTTON_DPAD_DOWN,
+    (i16)COMPAT_CONTROLLER_BUTTON_DPAD_LEFT,
+    (i16)COMPAT_CONTROLLER_BUTTON_DPAD_RIGHT,
+    (i16)COMPAT_CONTROLLER_BUTTON_RIGHTSHOULDER,
 };
 STB_Surface *g_TextBufferSurface;
 u16 g_LastFrameInput;
@@ -348,7 +348,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     g_AnmManager->ReleaseSurface(0);
 
     LOG_COMPAT("set startupTimeBeforeMenuMusic");
-    s->startupTimeBeforeMenuMusic = SDL_GetTicks();
+    s->startupTimeBeforeMenuMusic = GET_TICKS();
     LOG_COMPAT("Supervisor::SetupDInput");
     Supervisor::SetupDInput(s);
 
@@ -464,11 +464,11 @@ ZunResult Supervisor::SetupDInput(Supervisor *supervisor)
     //    supervisor->keyboard->Acquire();
     GameErrorContext::Log(&g_GameErrorContext, TH_ERR_DIRECTINPUT_INITIALIZED);
 
-    int numSticks = SDL_NumJoysticks();
+    int numSticks = COMPAT_NumJoysticks();
 
     for (int i = 0; i < numSticks; i++)
     {
-        if ((supervisor->joystick = SDL_JOYSTICK_COMPATOpen(i)) != NULL)
+        if ((supervisor->joystick = JOYSTICK_COMPATOpen(i)) != NULL)
         {
             break;
         }
@@ -542,7 +542,7 @@ ZunResult Supervisor::DeletedCallback(Supervisor *s)
     //    }
     if (s->joystick != NULL)
     {
-        SDL_JOYSTICK_COMPATClose(s->joystick);
+        JOYSTICK_COMPATClose(s->joystick);
         s->joystick = NULL;
     }
     //    if (s->dinputIface != NULL)
@@ -562,10 +562,10 @@ void Supervisor::DrawFpsCounter()
     ZunVec3 fpsCounterPos;
 
     static u32 g_NumFramesSinceLastTime = 0;
-    static u32 g_LastTime = SDL_GetTicks();
+    static u32 g_LastTime = GET_TICKS();
     static char g_FpsCounterBuffer[256];
 
-    curTime = SDL_GetTicks();
+    curTime = GET_TICKS();
     g_NumFramesSinceLastTime = g_NumFramesSinceLastTime + 1 + (u32)g_Supervisor.cfg.frameskipConfig;
     if (500 <= curTime - g_LastTime)
     {

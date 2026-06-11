@@ -2,7 +2,7 @@
 
 #include "inttypes.hpp"
 
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 enum TouhouButton
 {
@@ -37,7 +37,7 @@ namespace Controller
 {
 u16 GetJoystickCaps(void);
 u32 SetButtonFromControllerInputs(u16 *outButtons, i16 controllerButtonToTest, enum TouhouButton touhouButton,
-                                  SDL_JOYSTICK_COMPAT *controller);
+                                  JOYSTICK_COMPAT *controller);
 
 u32 SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controllerButtonToTest, enum TouhouButton touhouButton,
                                      const u8 *inputButtons);

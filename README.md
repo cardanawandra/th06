@@ -29,16 +29,16 @@ EoSD-crossplatform has the following dependencies:
 <h3>SDL 3</h3>
 - `SDL-3.4.8`
 
-#### Building Windows
+#### Building Windows SDL
 building uses CMAKE 3.20 and a compiler that supports C++98.<br>
 selected SDL are either sdl1.2, sdl2, or sdl3<br>
 
-run "cd {selected SDL}"<br>
+run "cd ports/{selected SDL}"<br>
 run "cmake -B build -A Win32"<br>
 if success then<br>
 run "cmake --build build --config Release"<br>
 <br>
-result will be on "{selected SDL}\build\Release"
+result will be on "ports\{selected SDL}\build\Release"
 
 #### Building Windows 95/98
 building uses CMAKE 2.4 and a compiler that supports C++98 like msvc6. it has WIN32 support<br>
@@ -55,6 +55,7 @@ result are exe only, will be on "pc98\Release", just copy th06.exe into build_sd
 cleanup? <br>
 run "removeCache.bat"<br>
 <br>
+
 #### Building Android
 -download source SDL 2.32.10 and place it in android/SDL_SRC<br>
 -set your sdk dir in android/local.properties ("sdk.dir=your android sdk path")<br>
@@ -62,6 +63,11 @@ run "removeCache.bat"<br>
 -then "./gradlew clean assembleDebug" (for windows "gradlew.bat clean assembleDebug")<br>
 <br>
 result will be on "android\app\build\outputs\apk\debug\app_debug.apk"
+
+#### Building Playstation 2
+pacman -S mingw-w64-x86_64-libsystre
+pacman -S mingw-w64-x86_64-cmake
+pacman -S msys/diffutils
 
 ### Use
 

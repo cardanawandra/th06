@@ -19,10 +19,6 @@ inline u32 CountrZero(u32 n)
 {
     return countr_zero(n);
 }
-inline u16 RotateLeft16(u16 n, u8 s)
-{
-    return rotl(n, s);
-}
 #else
 
 #if __has_builtin(__builtin_clz)

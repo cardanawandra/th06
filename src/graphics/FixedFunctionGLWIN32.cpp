@@ -5,6 +5,8 @@
 
 #include <windows.h>
 #include <gl/GL.h>
+#include "GLLegacyCompat.hpp"
+
 
 static LRESULT CALLBACK WndProc(
     HWND hwnd,

@@ -29,11 +29,14 @@ android/startDebug.bat
 src_bak
 
 source3rdparty
-window98/SDL*
-window98/Release
-window98/CMakeFiles
-window98/*ds*
-window98/cmake_install.cmake
-window98/th06.plg
-window98/.clang-format
-window98/CMakeCache.txt
+ports/window98/SDL*
+ports/window98/Release
+ports/window98/CMakeFiles
+ports/window98/*ds*
+ports/window98/cmake_install.cmake
+ports/window98/th06.plg
+ports/window98/.clang-format
+ports/window98/CMakeCache.txt
+
+3rdparty/SFML
+3rdparty/RAYLIB6

@@ -1,8 +1,6 @@
 #pragma once
 
-#ifdef WIN98
 #define RENDER_FIXED_FUNCTION_GL_WIN32 true
-#endif
 
 #include "GfxInterface.hpp"
 #include "GLFunc.hpp"

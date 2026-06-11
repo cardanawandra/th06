@@ -2,9 +2,7 @@
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include <SDL.h>
-#include <SDL_audio.h>
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 enum SoundIdx
 {
@@ -59,7 +57,7 @@ struct SoundData
 
 struct WavData
 {
-    SDL_RWOPS_COMPAT *fileStream;
+    RWOPS_COMPAT *fileStream;
     u32 dataStartOffset;
     u32 samples;
 };
@@ -92,24 +90,24 @@ struct SoundPlayer
     ZunResult LoadPos(const char *path);
 
     // SDL1.2 audio system
-    static void AudioCallback(void *userdata, Uint8 *stream, int len);
+    static void AudioCallback(void *userdata, u8 *stream, int len);
 
     // SDL3 audio system
-    SDL_AUDIO_STREAM_COMPAT stream;
+    AUDIO_STREAM_COMPAT stream;
 
     void MixAudio(u32 samples);
 
     SoundData soundBuffers[128];
 
     // removed SDL_AudioDeviceID
-    SDL_AudioSpec obtainedSpec;   // store opened audio format
+    COMPAT_AudioSpec obtainedSpec;   // store opened audio format
 
     // threading (optional but kept)
     //todo remove thread
-    SDL_Thread* backgroundMusicThreadHandle;
+    COMPAT_Thread* backgroundMusicThreadHandle;
     
-    static int SDLCALL BackgroundMusicPlayerThread(void* data);
-    SDL_AUDIO_DEVICE_ID_COMPAT audioDev;
+    static int CALLCOMPAT BackgroundMusicPlayerThread(void* data);
+    AUDIO_DEVICE_ID_COMPAT audioDev;
     int terminateFlag;
 
     i32 soundBuffersToPlay[3];

@@ -6,25 +6,25 @@
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-#include <SDL_endian.h>
+#include "compat/Compat.hpp"
 #include <cstdlib>
 #include <cstring>
 
 //todo : midioutdev
-void MidiOutput::StartTimer(u32 delay, SDL_TimerCallback cb, void *data)
+void MidiOutput::StartTimer(u32 delay, COMPAT_TimerCallback cb, void *data)
 {
     return;
     this->StopTimer();
 
-    this->lastTimerTicks = SDL_GetTicks();
+    this->lastTimerTicks = GET_TICKS();
 
     if (cb != NULL)
     {
-        // this->timerId = SDL_AddTimer(delay, cb, data);
+        // this->timerId = COMPAT_AddTimer(delay, cb, data);
     }
     else
     {
-        // this->timerId = SDL_AddTimer(delay, (SDL_TimerCallback)&MidiOutput::DefaultTimerCallback, this);
+        // this->timerId = COMPAT_AddTimer(delay, (COMPAT_TimerCallback)&MidiOutput::DefaultTimerCallback, this);
     }
 }
 
@@ -284,7 +284,7 @@ u32 MidiOutput::SetFadeOut(u32 ms)
 //   assuming that there is exactly 1 ms between calls. In my testing, the time between
 //   calls with the SDL timer actually ends up averaging to 1.08 ms and the MIDI playback
 //   ends up noticeably slow, so the timing mechanism has been replaced with getting a
-//   delta from SDL_GetTicks instead.
+//   delta from GET_TICKS instead.
 void MidiOutput::OnTimerElapsed()
 {
     u64 timePos;
@@ -330,7 +330,7 @@ void MidiOutput::OnTimerElapsed()
         }
     }
 
-    u32 curTicks = SDL_GetTicks();
+    u32 curTicks = GET_TICKS();
     this->elapsedMS += curTicks - this->lastTimerTicks;
     this->lastTimerTicks = curTicks;
 
@@ -444,7 +444,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             break;
         }
 
-        // SDL_FALLTHROUGH;
+        // COMPAT_FALLTHROUGH;
     case MIDI_OPCODE_NOTE_OFF:
         this->channels[opcodeLow].keyPressedFlags[arg1 >> 3] &= ~(ZUN_BIT(arg1 & 7));
         break;

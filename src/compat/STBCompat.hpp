@@ -1,5 +1,6 @@
 #pragma once
 
+#include "inttypes.hpp"
 struct STB_Rect
 {
     int x;

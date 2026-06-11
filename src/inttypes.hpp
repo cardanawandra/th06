@@ -1,7 +1,31 @@
 #pragma once
-#include <SDL.h>
-#if defined(_MSC_VER) && (_MSC_VER < 1600)
-typedef int intptr_t;
+#ifndef NO_SDL
+    #include <SDL.h>
+#else
+    #ifdef USE_CPP98
+
+        typedef signed char      int8_t;
+        typedef unsigned char    uint8_t;
+
+        typedef signed short     int16_t;
+        typedef unsigned short   uint16_t;
+
+        typedef signed long      int32_t;
+        typedef unsigned long    uint32_t;
+
+        typedef int                intptr_t;
+    #else
+        #include <stdint.h>
+    #endif
+#endif
+
+#if defined(_MSC_VER)
+    typedef unsigned __int64   uint64_t;
+#elif defined(__WATCOMC__)
+    typedef unsigned __int64   uint64_t;
+    typedef int                intptr_t;
+#else
+    typedef uint32_t   uint64_t;
 #endif
 
 typedef int8_t i8;

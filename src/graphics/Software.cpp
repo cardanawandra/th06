@@ -1,5 +1,3 @@
-#include <SDL.h>
-#if SDL_MAJOR_VERSION >= 2
 #include "Software.hpp"
 #include "Supervisor.hpp"
 #include "GameWindow.hpp"
@@ -7,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include "utils.hpp"
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 constexpr u8 alphaThreshold = 4;
 
@@ -618,4 +616,3 @@ void Software::SwapBuffers()
     SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
-#endif

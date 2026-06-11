@@ -4,6 +4,7 @@
 #include "ReplayData.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
+#include <stdlib.h>
 
 #define TH6K_MAGIC 'K6HT'
 #define HSCR_MAGIC 'RCSH'

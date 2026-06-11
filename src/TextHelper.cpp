@@ -361,7 +361,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         {
             g_AnmManager->STB_FillRect(shadowText, NULL, 0);
 
-            Uint32 *pixels = (Uint32 *)shadowText->pixels;
+            u32 *pixels = (u32 *)shadowText->pixels;
 
             int ascent;
             int descent;
@@ -489,7 +489,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     {
         g_AnmManager->STB_FillRect(regularText, NULL, 0);
 
-        Uint32 *pixels = (Uint32 *)regularText->pixels;
+        u32 *pixels = (u32 *)regularText->pixels;
 
         int ascent;
         int descent;

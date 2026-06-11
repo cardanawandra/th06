@@ -652,8 +652,8 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
             entry->height,
             g_PixelChannels[textureFormat]
         );
-        STB_Rect srcRect = {0, 0, (Uint16)textureSurface->w, (Uint16)textureSurface->h};
-        STB_Rect dstRect = {0, 0, (Uint16)entry->width, (Uint16)entry->height};
+        STB_Rect srcRect = {0, 0, (u16)textureSurface->w, (u16)textureSurface->h};
+        STB_Rect dstRect = {0, 0, (u16)entry->width, (u16)entry->height};
         LOG_COMPAT("LoadTexture 5");
         STB_SoftStretch(textureSurface, &srcRect, textureSurface2, &dstRect);
         LOG_COMPAT("LoadTexture 6");
@@ -2360,7 +2360,7 @@ void AnmManager::ReleaseSurface(i32 surfaceIdx)
     }
 }
 
-void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 srcX, Sint16 srcY, Sint16 dstX, Sint16 dstY)
+void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, i16 srcX, i16 srcY, i16 dstX, i16 dstY)
 {
     STB_Surface *srcSurface = this->surfaces[surfaceIdx];
 
@@ -2412,8 +2412,8 @@ void AnmManager::CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 srcX, Sint16 src
     //    destSurface->Release();
 }
 
-void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 dstX, Sint16 dstY, Sint16 rectLeft, Sint16 rectTop,
-                                             Uint16 rectWidth, Uint16 rectHeight)
+void AnmManager::CopySurfaceRectToBackBuffer(i32 surfaceIdx, i16 dstX, i16 dstY, i16 rectLeft, i16 rectTop,
+                                             u16 rectWidth, u16 rectHeight)
 {
     STB_Surface *srcSurface = this->surfaces[surfaceIdx];
 

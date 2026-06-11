@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL.h>
-#if SDL_MAJOR_VERSION >= 2
 #define RENDER_SOFTWARE true
 
 #include "AnmManager.hpp"
@@ -168,5 +167,3 @@ struct Software : GfxInterface
     inline ZunVec2 ProjectTexCoordToNDC(ZunVec2 texCoord, ZunMatrix textureMatrix);
     inline ZunVec3 NDCToScreen(ZunVec3 vertex);
 };
-
-#endif

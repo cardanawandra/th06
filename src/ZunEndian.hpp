@@ -3,8 +3,8 @@
 // Header originally created by Zero318
 //   Any bad parts were tacked on by me
 
-#include "SDLCompat.hpp"
-#ifdef WIN98
+#include "compat/Compat.hpp"
+#if __cplusplus < 201103L
 template<typename T>
 struct LE
 {
@@ -24,22 +24,21 @@ struct LE
 #else
 #include <cstring>
 #include "inttypes.hpp"
-#include <SDL_endian.h>
 #include <type_traits>
 
 static_assert(
-    SDL_BYTEORDER == SDL_LIL_ENDIAN ||
-    SDL_BYTEORDER == SDL_BIG_ENDIAN
+    BYTEORDER == LIL_ENDIAN ||
+    BYTEORDER == BIG_ENDIAN
     , "System endian must be either big or little!"
 );
 
-#ifndef SDL_FLOATWORDORDER
-#define SDL_FLOATWORDORDER SDL_BYTEORDER
+#ifndef FLOATWORDORDER
+#define FLOATWORDORDER BYTEORDER
 #endif
 
 static_assert(
-    SDL_FLOATWORDORDER == SDL_LIL_ENDIAN ||
-    SDL_FLOATWORDORDER == SDL_BIG_ENDIAN
+    FLOATWORDORDER == LIL_ENDIAN ||
+    FLOATWORDORDER == BIG_ENDIAN
     , "Float endian must be either big or little!"
 );
 
@@ -119,9 +118,9 @@ static inline constexpr T bit_cast_to_size(UIForSize<T> value) {
 }
 
 static constexpr inline u8  ZunByteswap(u8 in)  { return in; }
-static inline u16 ZunByteswap(u16 in) { return SDL_Swap16(in); }
-static inline u32 ZunByteswap(u32 in) { return SDL_Swap32(in); }
-static inline u64 ZunByteswap(u64 in) { return SDL_Swap64(in); }
+static inline u16 ZunByteswap(u16 in) { return COMPAT_Swap16(in); }
+static inline u32 ZunByteswap(u32 in) { return COMPAT_Swap32(in); }
+static inline u64 ZunByteswap(u64 in) { return COMPAT_Swap64(in); }
 
 template <typename T>
 struct LE {
@@ -130,7 +129,7 @@ struct LE {
     inline constexpr operator T() const {
         UIForSize<T> ui = read_to_ui_unaligned<T>((void *)&raw);
 
-        if constexpr ((std::is_floating_point<T>::value ? SDL_FLOATWORDORDER : SDL_BYTEORDER) == SDL_BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
+        if constexpr ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
             ui = ZunByteswap(ui);
         }
 
@@ -140,7 +139,7 @@ struct LE {
     inline constexpr LE &operator=(const T &a) {
         UIForSize<T> ui = bit_cast_from_size<T>(a);
 
-        if constexpr ((std::is_floating_point<T>::value ? SDL_FLOATWORDORDER : SDL_BYTEORDER) == SDL_BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
+        if constexpr ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
             ui = ZunByteswap(ui);
         }
 

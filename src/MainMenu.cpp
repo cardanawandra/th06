@@ -21,7 +21,7 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 #include <cstring>
 
 static const char *const g_ShortCharacterList[4] = {"ReimuA ", "ReimuB ", "MarisaA", "MarisaB"};
@@ -65,9 +65,9 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
     {
         if (menu->lastFrameTime == 0)
         {
-            menu->lastFrameTime = SDL_GetTicks();
+            menu->lastFrameTime = GET_TICKS();
         }
-        time = SDL_GetTicks();
+        time = GET_TICKS();
         menu->frameCountForRefreshRateCalc = menu->frameCountForRefreshRateCalc + 1;
         deltaTime = time - menu->lastFrameTime;
         if (deltaTime >= 700)
@@ -188,12 +188,12 @@ ChainCallbackResult MainMenu::OnUpdate(MainMenu *menu)
         if (32 <= menu->stateTimer)
         {
             controllerData = Controller::GetControllerState();
-            for (sVar1 = 0; sVar1 < SDL_CONTROLLER_BUTTON_MAX_COMPAT; sVar1++)
+            for (sVar1 = 0; sVar1 < COMPAT_CONTROLLER_BUTTON_MAX; sVar1++)
             {
                 if ((controllerData[sVar1] & 0x80) != 0)
                     break;
             }
-            if (sVar1 < SDL_CONTROLLER_BUTTON_MAX_COMPAT && g_LastJoystickInput != sVar1)
+            if (sVar1 < COMPAT_CONTROLLER_BUTTON_MAX && g_LastJoystickInput != sVar1)
             {
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT);
                 switch (menu->cursor)
@@ -1009,11 +1009,11 @@ ZunResult MainMenu::BeginStartup()
     }
     if (g_Supervisor.startupTimeBeforeMenuMusic > 0)
     {
-        time = SDL_GetTicks();
+        time = GET_TICKS();
         while ((time - g_Supervisor.startupTimeBeforeMenuMusic >= 0) &&
                (3000 > time - g_Supervisor.startupTimeBeforeMenuMusic))
         {
-            time = SDL_GetTicks();
+            time = GET_TICKS();
         }
         g_Supervisor.startupTimeBeforeMenuMusic = 0;
         g_Supervisor.PlayAudio("bgm/th06_01.mid");

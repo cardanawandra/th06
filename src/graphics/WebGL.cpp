@@ -1,10 +1,7 @@
-#include "SDLCompat.hpp"
-#if SDL_MAJOR_VERSION >= 2
 #include "WebGL.hpp"
 #include "Supervisor.hpp"
 #include "GameWindow.hpp"
 #include "utils.hpp"
-#include "SDLCompat.hpp"
 #include <new>
 #include <unordered_set>
 
@@ -538,4 +535,3 @@ void WebGL::SwapBuffers()
 {
     SDL_GL_SWAP_COMPAT(window);
 }
-#endif

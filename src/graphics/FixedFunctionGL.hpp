@@ -3,9 +3,8 @@
 #define RENDER_FIXED_FUNCTION_GL true
 #include "GfxInterface.hpp"
 #include "GLFunc.hpp"
-#include <SDL.h>
 #include <vector>
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 
 struct FixedFunctionGL : GfxInterface
 {

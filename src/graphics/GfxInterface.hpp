@@ -4,6 +4,7 @@
 #include "ZunMath.hpp"
 #include "inttypes.hpp"
 #include <cstddef>
+#include <vector>
 
 enum DepthFunc
 {

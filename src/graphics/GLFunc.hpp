@@ -1,9 +1,25 @@
 #pragma once
 
-#include <SDL.h>
-#include <SDL_opengl.h>
 #include "inttypes.hpp"
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
+
+#ifdef NO_SDL
+    #ifdef _WIN32
+        #include <windows.h>
+        #include <GL/gl.h>
+    #elif defined(__APPLE__)
+        #include <OpenGL/gl.h>
+    #else
+        #include <GL/gl.h>
+        #include <GL/glx.h>
+    #endif
+#else
+    #include <SDL.h>
+    #include <SDL_opengl.h>
+    #if SDL_MAJOR_VERSION >= 2
+        #define GLES2
+    #endif
+#endif
 
 // Function pointers for OpenGL functions.
 // Works with SDL 1.2 using SDL_GL_GetProcAddress.
@@ -57,7 +73,7 @@ struct GLFuncTable
     void (APIENTRY *glDepthRangef)(GLclampf, GLclampf);
 
     // GL(ES) 2.X / WebGL
-    #if SDL_MAJOR_VERSION >= 2
+    #ifdef GLES2
     PFNGLATTACHSHADERPROC glAttachShader;
     PFNGLBINDATTRIBLOCATIONPROC glBindAttribLocation;
     PFNGLCOMPILESHADERPROC glCompileShader;

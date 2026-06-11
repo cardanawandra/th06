@@ -7,14 +7,7 @@
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"
 
-#ifdef WIN98
-// #include "graphics/FixedFunctionDX2.hpp"
-#include "graphics/FixedFunctionGLWIN32.hpp"
-#endif
-
-#include "graphics/FixedFunctionGL.hpp"
-#include "graphics/WebGL.hpp"
-#include "graphics/Software.hpp"
+#include "graphics/Graphics.hpp"
 
 #include "i18n.hpp"
 #include "utils.hpp"
@@ -37,14 +30,20 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
+    #ifdef RENDER_HARDWARE
+    // {"Hardware renderer (VERY PORTABLE)", Hardware::Init},
+    #endif
     #ifdef RENDER_WEBGL
     {"GL(ES) 2.0 / WebGL", WebGL::Create},
     #endif
     #ifdef RENDER_FIXED_FUNCTION_DX2
     {"Fixed function DX2", FixedFunctionDX2::Init},
     #endif
+    #ifdef RENDER_FIXED_FUNCTION_GL_SFML
+    {"Fixed function GL SFML", FixedFunctionGLSFML::Init},
+    #endif
     #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
-    // {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
+    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
     #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
     {"Fixed function GL(ES)", FixedFunctionGL::Init},
@@ -61,7 +60,7 @@ RenderResult GameWindow::Render()
     f64 slowdown;
     ZunViewport viewport;
     f64 delta;
-    Uint32 curtime;
+    u32 curtime;
 
     LOG_COMPAT("Render 2");
     if (this->lastActiveAppValue == 0)
@@ -142,7 +141,7 @@ RUN_CHAINS:
         {
             g_Supervisor.framerateMultiplier = 1.0;
 
-            Uint32 slowdownTicks = SDL_GetTicks();
+            u32 slowdownTicks = GET_TICKS();
             slowdown = (f64)slowdownTicks;
 
             if (slowdown < g_LastFrameTime)
@@ -181,7 +180,7 @@ SKIP_PRESENT:
         {
             if (2 <= g_TickCountToEffectiveFramerate)
             {
-                curtime = SDL_GetTicks();
+                curtime = GET_TICKS();
 
                 if (curtime < g_Supervisor.lastFrameTime)
                     g_Supervisor.lastFrameTime = curtime;
@@ -237,9 +236,7 @@ void GameWindow::Present()
 void GameWindow::CreateGameWindow()
 {
     LOG_COMPAT("GameWindow::CreateGameWindow 1\n");
-    SDL_Init(SDL_INIT_GAMECONTROLLER_COMPAT);
 
-    // SDL1.2: try render backends (mostly just GL variants)
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
         LOG_COMPAT("Try Using renderer backend %s\n", s_RenderBackends[i].name);

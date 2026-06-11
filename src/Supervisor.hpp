@@ -6,8 +6,7 @@
 #include "ZunMath.hpp"
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-#include "SDLCompat.hpp"
-#include "STBCompat.hpp"
+#include "compat/Compat.hpp"
 #include "pbg3/Pbg3Archive.hpp"
 
 #define GAME_VERSION 0x102
@@ -138,7 +137,7 @@ struct Supervisor
     }
 
     // SDL1.2 joystick (no GameController API)
-    SDL_JOYSTICK_COMPAT *joystick;
+    JOYSTICK_COMPAT *joystick;
 
     ZunMatrix viewMatrix;
     ZunMatrix projectionMatrix;

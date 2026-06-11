@@ -4,10 +4,8 @@
 #include "Supervisor.hpp"
 #include "i18n.hpp"
 #include "utils.hpp"
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 #include "GamePaths.hpp"
-
-#include "SDLCompat.hpp"
 
 #ifdef WIN98
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
@@ -699,11 +697,11 @@ int SDLCALL SoundPlayer::BackgroundMusicPlayerThread(void* data)
 
     u32 latencyLimit = 14700; // ~5 frames
     u64 samplesSent = 0;
-    u64 startTick = SDL_GetTicks();
+    u64 startTick = GET_TICKS();
 
     while (1)
     {
-        u64 curTicks = SDL_GetTicks();
+        u64 curTicks = GET_TICKS();
 
         // Keep slightly more than 1 frame's worth of samples in the audio buffer at all times
         i32 targetSamples =

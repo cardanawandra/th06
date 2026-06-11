@@ -30,14 +30,6 @@ int main(int argc, char *argv[])
     LOG_COMPAT("Starting");
     i32 renderResult = 0;
 
-#ifdef __ANDROID__
-    // On Android, SDL must be initialized before GamePaths::Init()
-    // because SDL_AndroidGetInternalStoragePath() requires SDL_Init.
-    if (SDL_Init(0) < 0)
-    {
-        return 1;
-    }
-#endif
 
     LOG_COMPAT("Init Gamepath");
     GamePaths::Init();
@@ -98,7 +90,7 @@ restart:
     }
     if (!g_Supervisor.cfg.windowed)
     {
-        SDL_HIDECURSOR_COMPAT();
+        HIDECURSOR_COMPAT();
     }
 
     g_GameWindow.curFrame = 0;
@@ -114,37 +106,6 @@ restart:
         {
             break;
         }
-
-        //        SDL_Delay(1000.0f / 60.0f);
-
-        //        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        //        {
-        //            TranslateMessage(&msg);
-        //            DispatchMessage(&msg);
-        //        }
-        //        else
-        //        {
-        //            testCoopLevelRes = g_Supervisor.d3dDevice->TestCooperativeLevel();
-        //            if (testCoopLevelRes == D3D_OK)
-        //            {
-        //                renderResult = g_GameWindow.Render();
-        //                if (renderResult != 0)
-        //                {
-        //                    goto stop;
-        //                }
-        //            }
-        //            else if (testCoopLevelRes == D3DERR_DEVICENOTRESET)
-        //            {
-        //                g_AnmManager->ReleaseSurfaces();
-        //                testResetRes = g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-        //                if (testResetRes != 0)
-        //                {
-        //                    goto stop;
-        //                }
-        //                GameWindow::InitD3dDevice();
-        //                g_Supervisor.unk198 = 3;
-        //            }
-        //        }
     }
 
 
@@ -156,19 +117,7 @@ stop:
     delete g_AnmManager;
     g_AnmManager = NULL;
 
-    // Clean up GL resources while the context is still valid.
-    // THPrac::THPracGuiShutdown();
-    // {
-    //     SDL_GLContext ctx = g_Renderer ? g_Renderer->glContext : nullptr;
-    //     if (g_Renderer)
-    //         g_Renderer->Release();
-    //     if (ctx)
-    //         SDL_GL_DeleteContext(ctx);
-    // }
-
     if(g_GfxBackend != NULL) delete g_GfxBackend;
-    // SDL_DESTROY_WINDOW_COMPAT(g_GameWindow.screen);
-    // SDL_GL_DELETE_CONTEXT_COMPAT(g_GameWindow.glContext);
 
     if (renderResult == 2)
     {
@@ -193,15 +142,15 @@ stop:
 
         if (!g_Supervisor.cfg.windowed)
         {
-            SDL_SHOWCURSOR_COMPAT();
+            SHOWCURSOR_COMPAT();
         }
         goto restart;
     }
 
     FileSystem::WriteDataToFile(TH_CONFIG_FILE, &g_Supervisor.cfg, sizeof(g_Supervisor.cfg));
 
-    SDL_SHOWCURSOR_COMPAT();
+    SHOWCURSOR_COMPAT();
     g_GameErrorContext.Flush();
-    SDL_Quit();
+    COMPAT_Quit();
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "graphics/GLFunc.hpp"
 
-#include <SDL_video.h>
 #include "inttypes.hpp"
+#include "compat/Compat.hpp"
 
 GLFuncTable g_glFuncTable;
 

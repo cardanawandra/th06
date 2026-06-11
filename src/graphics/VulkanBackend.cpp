@@ -1,5 +1,5 @@
 #include "FixedFunctionGL.hpp"
-#include "SDLCompat.hpp"
+#include "compat/SDLCompat.hpp"
 #include <vulkan/vulkan.h>
 #include <SDL_vulkan.h>
 #include <vector>

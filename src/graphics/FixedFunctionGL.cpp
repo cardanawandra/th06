@@ -4,14 +4,22 @@
 #include "GameWindow.hpp"
 #include "i18n.hpp"
 
-#include "SDLCompat.hpp"
+#include "compat/SDLCompat.hpp"
 
 void FixedFunctionGL::SetContextFlags()
 {
     #if SDL_MAJOR_VERSION >= 2
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        #ifdef __ANDROID__
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                                SDL_GL_CONTEXT_PROFILE_ES);
+
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+        #else
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        #endif
     #endif
     // SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -65,6 +73,14 @@ GfxInterface *FixedFunctionGL::Init()
         delete gfx;
         return NULL;
     }
+    LOG_COMPAT("GL_VERSION=%s\n",
+        glGetString(GL_VERSION));
+
+    LOG_COMPAT("GL_RENDERER=%s\n",
+        glGetString(GL_RENDERER));
+
+    LOG_COMPAT("GL_EXTENSIONS=%s\n",
+        glGetString(GL_EXTENSIONS));
 
     LOG_COMPAT("FixedFunctionGL::Init 9\n");
     if (SDL_GL_MAKE_CURRENT_COMPAT(gfx->window, gfx->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
@@ -78,7 +94,11 @@ GfxInterface *FixedFunctionGL::Init()
     SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
     LOG_COMPAT("FixedFunctionGL::Init 11\n");
-    g_glFuncTable.ResolveFunctions(false);
+    #ifdef __ANDROID__
+    g_glFuncTable.ResolveFunctions(true);
+    #else
+        g_glFuncTable.ResolveFunctions(false);
+    #endif
 
     g_glFuncTable.glEnable(GL_TEXTURE_2D);
     g_glFuncTable.glEnableClientState(GL_VERTEX_ARRAY);
@@ -101,6 +121,7 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glFogf(GL_FOG_DENSITY, 1.0f);
     g_glFuncTable.glFogf(GL_FOG_MODE, GL_LINEAR);
 
+    #ifndef __ANDROID__
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 
     LOG_COMPAT("FixedFunctionGL::Init 14\n");
@@ -112,6 +133,7 @@ GfxInterface *FixedFunctionGL::Init()
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
     }
+    #endif
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 
@@ -128,6 +150,7 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 
     LOG_COMPAT("FixedFunctionGL::Init 16\n");
+    #ifndef __ANDROID__
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -136,6 +159,7 @@ GfxInterface *FixedFunctionGL::Init()
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
     }
+    #endif
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
 
@@ -254,9 +278,11 @@ void FixedFunctionGL::SetColorOp(TextureOpComponent component, ColorOp op)
         return;
     }
 
+    #ifndef __ANDROID__
     GLenum componentEnum = component == COMPONENT_ALPHA ? GL_COMBINE_ALPHA : GL_COMBINE_RGB;
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, componentEnum, opEnums[op]);
+    #endif
 }
 
 void FixedFunctionGL::SetTextureFactor(ZunColor factor)

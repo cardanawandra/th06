@@ -29,7 +29,6 @@ u16 Controller::GetJoystickCaps(void)
 #define JOYSTICK_MIDPOINT(min, max) ((min + max) / 2)
 #define JOYSTICK_BUTTON_PRESSED(button, x, y) (x > y ? button : 0)
 #define JOYSTICK_BUTTON_PRESSED_INVERT(button, x, y) (x < y ? button : 0)
-#define KEYBOARD_KEY_PRESSED(button, x) keyboardState[x] ? button : 0
 
 u16 Controller::GetControllerInput(u16 buttons)
 {
@@ -106,17 +105,17 @@ u16 Controller::GetControllerInput(u16 buttons)
         SetButtonFromControllerInputs(&buttons, g_Supervisor.cfg.controllerMapping.skipButton, TH_BUTTON_SKIP,
                                       g_Supervisor.joystick);
 
-        if (SDL_JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_LEFTX) &&
-            SDL_JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_LEFTY))
+        if (JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, CONTROLLER_AXIS_LEFTX) &&
+            JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, CONTROLLER_AXIS_LEFTY))
         {
-            stickX = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_LEFTX);
-            stickY = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_LEFTY);
+            stickX = JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, CONTROLLER_AXIS_LEFTX);
+            stickY = JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, CONTROLLER_AXIS_LEFTY);
         }
-        else if (SDL_JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_RIGHTX) &&
-                 SDL_JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_RIGHTY))
+        else if (JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, CONTROLLER_AXIS_RIGHTX) &&
+                 JOYSTICK_COMPATHasAxis(g_Supervisor.joystick, CONTROLLER_AXIS_RIGHTY))
         {
-            stickX = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_RIGHTX);
-            stickY = SDL_JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, SDL_CONTROLLER_AXIS_RIGHTY);
+            stickX = JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, CONTROLLER_AXIS_RIGHTX);
+            stickY = JOYSTICK_COMPATGetAxis(g_Supervisor.joystick, CONTROLLER_AXIS_RIGHTY);
         }
         else
         {
@@ -259,7 +258,7 @@ u32 Controller::SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controller
 }
 
 u32 Controller::SetButtonFromControllerInputs(u16 *outButtons, i16 controllerButtonToTest,
-                                              enum TouhouButton touhouButton, SDL_JOYSTICK_COMPAT *controller)
+                                              enum TouhouButton touhouButton, JOYSTICK_COMPAT *controller)
 {
     u8 pressed;
 
@@ -268,14 +267,14 @@ u32 Controller::SetButtonFromControllerInputs(u16 *outButtons, i16 controllerBut
         return 0;
     }
 
-    pressed = SDL_JOYSTICK_COMPATGetButton(controller, (SDL_JOYSTICK_COMPATButton)controllerButtonToTest);
+    pressed = JOYSTICK_COMPATGetButton(controller, (JOYSTICK_COMPATButton)controllerButtonToTest);
 
     *outButtons |= pressed ? touhouButton & 0xFFFF : 0;
 
     return pressed ? touhouButton & 0xFFFF : 0;
 }
 
-static u8 g_ControllerData[SDL_CONTROLLER_BUTTON_MAX_COMPAT];
+static u8 g_ControllerData[COMPAT_CONTROLLER_BUTTON_MAX];
 
 // This is for rebinding keys
 const u8 *Controller::GetControllerState()
@@ -284,11 +283,11 @@ const u8 *Controller::GetControllerState()
     {
         memset(&g_ControllerData, 0, sizeof(g_ControllerData));
 
-        SDL_Joystick *joystick = SDL_JOYSTICK_COMPATGetJoystick(g_Supervisor.joystick);
+        SDL_Joystick *joystick = JOYSTICK_COMPATGetJoystick(g_Supervisor.joystick);
 
-        for (int i = 0; i < SDL_CONTROLLER_BUTTON_MAX_COMPAT; i++)
+        for (int i = 0; i < COMPAT_CONTROLLER_BUTTON_MAX; i++)
         {
-            if (SDL_JOYSTICK_COMPATGetButton(g_Supervisor.joystick, (SDL_JOYSTICK_COMPATButton)i))
+            if (JOYSTICK_COMPATGetButton(g_Supervisor.joystick, (JOYSTICK_COMPATButton)i))
             {
                 g_ControllerData[i] = 0x80;
             }
@@ -349,7 +348,7 @@ const u8 *Controller::GetControllerState()
 u16 Controller::GetInput(void)
 {
     //only works on sdl1.2
-    SDL_PUMP_EVENTS_COMPAT();
+    PUMP_EVENTS_COMPAT();
     u16 buttons = 0;
 
     buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_UP, KEY_UP);
@@ -389,13 +388,15 @@ u16 Controller::GetInput(void)
 
 void Controller::ResetKeyboard(void)
 {
-    keyboardState = (u8 *)SDL_GET_KEYSTATE_COMPAT();
+    CONTROLLER_INIT_COMPAT();
+
+    keyboardState = (u8 *)GET_KEYSTATE_COMPAT();
 
     // Ensure IMEs are disabled so they don't interfer with EoSD input
     //   Doesn't work on Wine :( but hopefully works on Windows?
     //   We both start and stop due to this bug https://github.com/libsdl-org/SDL/issues/13172
     //   Since I can't test on Windows, it's good to be on the safe side
     //only works on sdl2
-    SDL_START_TEXT_INPUT_COMPAT();//SDL_StartTextInput
-    SDL_STOP_TEXT_INPUT_COMPAT();//SDL_StopTextInput
+    START_TEXT_INPUT_COMPAT();//StartTextInput
+    STOP_TEXT_INPUT_COMPAT();//StopTextInput
 }

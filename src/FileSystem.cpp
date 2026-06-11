@@ -15,7 +15,7 @@
 #include "GamePaths.hpp"
 #include "pbg3/Pbg3Archive.hpp"
 #include "utils.hpp"
-#include "SDLCompat.hpp"
+#include "compat/Compat.hpp"
 #ifdef __ANDROID__
 #include <sys/stat.h>
 #include <sys/types.h>

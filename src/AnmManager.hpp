@@ -12,8 +12,7 @@
 #include "ZunTimer.hpp"
 #include "GameWindow.hpp"
 #include "inttypes.hpp"
-#include "SDLCompat.hpp"
-#include "STBCompat.hpp"
+#include "compat/Compat.hpp"
 
 #define TEX_FMT_UNKNOWN 0u
 #define TEX_FMT_A8R8G8B8 1u
@@ -392,9 +391,9 @@ struct AnmManager
     void ReleaseSurfaces(void);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
     void ReleaseSurface(i32 surfaceIdx);
-    void CopySurfaceToBackBuffer(i32 surfaceIdx, Sint16 left, Sint16 top, Sint16 x, Sint16 y);
-    void CopySurfaceRectToBackBuffer(i32 surfaceIdx, Sint16 rectX, Sint16 rectY, Sint16 rectLeft, Sint16 rectTop, Uint16 width,
-                                     Uint16 height);
+    void CopySurfaceToBackBuffer(i32 surfaceIdx, i16 left, i16 top, i16 x, i16 y);
+    void CopySurfaceRectToBackBuffer(i32 surfaceIdx, i16 rectX, i16 rectY, i16 rectLeft, i16 rectTop, u16 width,
+                                     u16 height);
 
     void TranslateRotation(VertexTex1Xyzrhw *param_1, float x, float y, float sine, float cosine, float xOffset,
                            float yOffset);

@@ -3,7 +3,7 @@
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
 
-#include <SDL_timer.h>
+#include "compat/Compat.hpp"
 
 // #include "midi/MidiDefault.hpp"
 
@@ -78,9 +78,9 @@ struct MidiOutput
     ~MidiOutput();
 
     i32 StopTimer();
-    void StartTimer(u32 delay, SDL_TimerCallback cb, void *data);
+    void StartTimer(u32 delay, COMPAT_TimerCallback cb, void *data);
 
-    static u32 SDLCALL DefaultTimerCallback(u32 interval, MidiOutput *timer);
+    static u32 CALLCOMPAT DefaultTimerCallback(u32 interval, MidiOutput *timer);
 
     void OnTimerElapsed();
 
@@ -100,7 +100,7 @@ struct MidiOutput
 
     static u32 ReadVariableLength(u8 **curTrackDataCursor);
 
-    SDL_TimerID timerId;
+    COMPAT_TimerID timerId;
     u32 lastTimerTicks;
 
     u8 *midiFileData[32];
