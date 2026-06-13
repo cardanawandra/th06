@@ -1334,7 +1334,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 );
                 break;
 
-            case KeyEvent.KEYCODE_4:
+            case KeyEvent.KEYCODE_6:
                 // 4 -> Arrow Up
                 event = new KeyEvent(
                         event.getDownTime(),
@@ -1382,7 +1382,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 );
                 break;
 
-            case KeyEvent.KEYCODE_6:
+            case KeyEvent.KEYCODE_4:
                 // 6 -> Arrow Down
                 event = new KeyEvent(
                         event.getDownTime(),
