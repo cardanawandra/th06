@@ -93,7 +93,12 @@ set(TH06_GAME_SOURCES
     ../../src/ZunMath.cpp
     ../../src/ZunTimer.cpp
     ../../src/thirdparty/sjis_converter.cpp
+
+#    ../../src/midi/MidiAlsa.cpp
+#    ../../src/midi/MidiCoreAudio.cpp
     ../../src/midi/MidiDefault.cpp
+#    ../../src/midi/MidiWin32.cpp
+
     ../../src/graphics/GLFunc.cpp
     ../../src/graphics/FixedFunctionGLWIN32.cpp
     ../../src/graphics/FixedFunctionGL.cpp

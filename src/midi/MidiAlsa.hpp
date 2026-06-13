@@ -2,9 +2,7 @@
 
 #include "ZunResult.hpp"
 #include "inttypes.hpp"
-
-// The MIDI interface used if a specific platform MIDI API is not supported
-// Obviously can't do much, but something needs to be linked
+#include <alsa/asoundlib.h>
 
 struct MidiDevice
 {
@@ -18,5 +16,18 @@ struct MidiDevice
     bool SendLongMsg(const u8 *buf, u32 len);
 
   private:
-    bool printedWarning;
+    void Reset();
+    bool GetDestPort();
+
+    snd_seq_t *sequencer;
+
+    snd_midi_event_t *encoder;
+    u32 encoderBufferSize;
+
+    int sourcePort;
+
+    int destClient;
+    int destPort;
+
+    bool hasConnection;
 };

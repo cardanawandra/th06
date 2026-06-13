@@ -5,7 +5,7 @@
 
 #include "compat/Compat.hpp"
 
-// #include "midi/MidiDefault.hpp"
+#include "midi/MidiDefault.hpp"
 
 enum MidiOpcode
 {
@@ -111,7 +111,7 @@ struct MidiOutput
     u64 elapsedMS;
     u64 tickBase;
     MidiTrack *tracks;
-    // MidiDevice midiOutDev;
+    MidiDevice midiOutDev;
     MidiChannel channels[16];
     f32 fadeOutVolumeMultiplier;
     u32 fadeOutLastSetVolume;

@@ -1,0 +1,39 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnCensor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Censor"/>
+
+    <Button
+        android:id="@+id/btnShare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Share"/>
+
+    <Button
+        android:id="@+id/btnImport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Import"/>
+    
+    <TextView
+        android:id="@+id/txtSensitivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Joystick Sensitivity: 0%"/>
+
+    <SeekBar
+        android:id="@+id/seekSensitivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0"/>
+
+</LinearLayout>

@@ -248,6 +248,16 @@ void GameWindow::CreateGameWindow()
             LOG_COMPAT("Failed renderer backend %s\n", s_RenderBackends[i].name);
         }
     }
+    if(g_GameWindow.GAME_WINDOW_REFRESH_RATE<60){
+        if(g_GameWindow.GAME_WINDOW_REFRESH_RATE<30){
+            g_Supervisor.cfg.frameskipConfig = 2;
+        }
+        else{
+            g_Supervisor.cfg.frameskipConfig = 1;
+        }
+    }else{
+        g_Supervisor.cfg.frameskipConfig = 0;
+    }
 
     g_GameWindow.lastActiveAppValue = 1;
 }

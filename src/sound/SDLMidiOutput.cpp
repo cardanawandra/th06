@@ -6,25 +6,23 @@
 #include "inttypes.hpp"
 #include "utils.hpp"
 
-#include "compat/Compat.hpp"
+#include <SDL_endian.h>
 #include <cstdlib>
 #include <cstring>
 
-//todo : midioutdev
-void MidiOutput::StartTimer(u32 delay, COMPAT_TimerCallback cb, void *data)
+void MidiOutput::StartTimer(u32 delay, SDL_TimerCallback cb, void *data)
 {
-    return;
     this->StopTimer();
 
-    this->lastTimerTicks = GET_TICKS();
+    this->lastTimerTicks = SDL_GetTicks();
 
     if (cb != NULL)
     {
-        // this->timerId = COMPAT_AddTimer(delay, cb, data);
+        this->timerId = SDL_AddTimer(delay, cb, data);
     }
     else
     {
-        // this->timerId = COMPAT_AddTimer(delay, (COMPAT_TimerCallback)&MidiOutput::DefaultTimerCallback, this);
+        this->timerId = SDL_AddTimer(delay, (SDL_TimerCallback)&MidiOutput::DefaultTimerCallback, this);
     }
 }
 
@@ -95,7 +93,6 @@ MidiOutput::~MidiOutput()
 
 ZunResult MidiOutput::ReadFileData(u32 idx, const char *path)
 {
-    return ZUN_SUCCESS;
     if (g_Supervisor.cfg.musicMode != MIDI)
     {
         return ZUN_SUCCESS;
@@ -108,7 +105,7 @@ ZunResult MidiOutput::ReadFileData(u32 idx, const char *path)
 
     if (this->midiFileData[idx] == NULL)
     {
-        g_GameErrorContext.Log(&g_GameErrorContext, TH_ERR_MIDI_FAILED_TO_READ_FILE, path);
+        // g_GameErrorContext.Log(TH_ERR_MIDI_FAILED_TO_READ_FILE, path);
         return ZUN_ERROR;
     }
 
@@ -117,7 +114,7 @@ ZunResult MidiOutput::ReadFileData(u32 idx, const char *path)
 
 void MidiOutput::ReleaseFileData(u32 idx)
 {
-    free(this->midiFileData[idx]);
+    std::free(this->midiFileData[idx]);
 
     this->midiFileData[idx] = NULL;
 }
@@ -131,11 +128,11 @@ void MidiOutput::ClearTracks()
     for (trackIndex = 0; trackIndex < this->numTracks; trackIndex++)
     {
         data = this->tracks[trackIndex].trackData;
-        free(data);
+        std::free(data);
     }
 
     tracks = this->tracks;
-    free(tracks);
+    std::free(tracks);
     this->tracks = NULL;
     this->numTracks = 0;
 }
@@ -160,7 +157,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 
     // Read midi header chunk
     // First, read the header len
-    memcpy(&hdrRaw, currentCursor, 8);
+    std::memcpy(&hdrRaw, currentCursor, 8);
 
     // Get a pointer to the end of the header chunk
     currentCursor += sizeof(hdrRaw);
@@ -185,7 +182,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 
     // Allocate this->divisions * 32 bytes.
     this->tracks = (MidiTrack *)ZunMemory::Alloc(sizeof(MidiTrack) * this->numTracks);
-    memset(this->tracks, 0, sizeof(MidiTrack) * this->numTracks);
+    std::memset(this->tracks, 0, sizeof(MidiTrack) * this->numTracks);
     for (trackIdx = 0; trackIdx < this->numTracks; trackIdx++)
     {
         currentCursorTrack = currentCursor;
@@ -198,16 +195,15 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
         this->tracks[trackIdx].trackLength = trackLength;
         this->tracks[trackIdx].trackData = (u8 *)ZunMemory::Alloc(trackLength);
         this->tracks[trackIdx].trackPlaying = 1;
-        memcpy(this->tracks[trackIdx].trackData, currentCursor, trackLength);
+        std::memcpy(this->tracks[trackIdx].trackData, currentCursor, trackLength);
         currentCursor += trackLength;
     }
-    this->tempo = 1000000;
+    this->tempo = 1'000'000;
     return ZUN_SUCCESS;
 }
 
 ZunResult MidiOutput::LoadFile(const char *midiPath)
 {
-    return ZUN_SUCCESS;
     if (this->ReadFileData(0x1f, midiPath) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
@@ -221,7 +217,6 @@ ZunResult MidiOutput::LoadFile(const char *midiPath)
 
 void MidiOutput::LoadTracks()
 {
-    return;
     i32 trackIndex;
     MidiTrack *track = this->tracks;
 
@@ -241,14 +236,13 @@ void MidiOutput::LoadTracks()
 
 ZunResult MidiOutput::Play()
 {
-    return ZUN_SUCCESS;
     if (this->tracks == NULL)
     {
         return ZUN_ERROR;
     }
 
     this->LoadTracks();
-    // this->midiOutDev.OpenDevice(0xFFFF'FFFF);
+    this->midiOutDev.OpenDevice(0xFFFF'FFFF);
     this->StartTimer(1, NULL, NULL);
 
     return ZUN_SUCCESS;
@@ -256,7 +250,6 @@ ZunResult MidiOutput::Play()
 
 ZunResult MidiOutput::StopPlayback()
 {
-    return ZUN_SUCCESS;
     if (this->tracks == NULL)
     {
         return ZUN_ERROR;
@@ -264,7 +257,7 @@ ZunResult MidiOutput::StopPlayback()
     else
     {
         this->StopTimer();
-        // this->midiOutDev.Close();
+        this->midiOutDev.Close();
 
         return ZUN_SUCCESS;
     }
@@ -284,7 +277,7 @@ u32 MidiOutput::SetFadeOut(u32 ms)
 //   assuming that there is exactly 1 ms between calls. In my testing, the time between
 //   calls with the SDL timer actually ends up averaging to 1.08 ms and the MIDI playback
 //   ends up noticeably slow, so the timing mechanism has been replaced with getting a
-//   delta from GET_TICKS instead.
+//   delta from SDL_GetTicks instead.
 void MidiOutput::OnTimerElapsed()
 {
     u64 timePos;
@@ -330,7 +323,7 @@ void MidiOutput::OnTimerElapsed()
         }
     }
 
-    u32 curTicks = GET_TICKS();
+    u32 curTicks = SDL_GetTicks();
     this->elapsedMS += curTicks - this->lastTimerTicks;
     this->lastTimerTicks = curTicks;
 
@@ -348,7 +341,6 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
     u8 metaEventID;
     i32 idx;
     u8 *sysExData;
-    i32 i;
 
     opcode = *track->curTrackDataCursor;
     if (opcode < MIDI_OPCODE_NOTE_OFF)
@@ -370,16 +362,16 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
         {
             curTrackLength = MidiOutput::ReadVariableLength(&track->curTrackDataCursor);
 
-            sysExData = (u8 *)malloc(curTrackLength + 1);
+            sysExData = (u8 *)std::malloc(curTrackLength + 1);
             sysExData[0] = MIDI_OPCODE_SYSTEM_EXCLUSIVE;
 
-            memcpy(sysExData + 1, track->curTrackDataCursor, curTrackLength);
+            std::memcpy(sysExData + 1, track->curTrackDataCursor, curTrackLength);
 
-            // this->midiOutDev.SendLongMsg(sysExData, curTrackLength + 1);
+            this->midiOutDev.SendLongMsg(sysExData, curTrackLength + 1);
 
             track->curTrackDataCursor += curTrackLength;
 
-            free(sysExData);
+            std::free(sysExData);
         }
         else if (opcode == MIDI_OPCODE_SYSTEM_RESET)
         {
@@ -444,7 +436,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             break;
         }
 
-        // COMPAT_FALLTHROUGH;
+        SDL_FALLTHROUGH;
     case MIDI_OPCODE_NOTE_OFF:
         this->channels[opcodeLow].keyPressedFlags[arg1 >> 3] &= ~(ZUN_BIT(arg1 & 7));
         break;
@@ -482,7 +474,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
         //   instead of adding a meta event? Who knows...
         case 2:
             // Breath control
-            for (i = 0; i < this->numTracks; i++)
+            for (i32 i = 0; i < this->numTracks; i++)
             {
                 this->tracks[i].loopPointTarget = this->tracks[i].curTrackDataCursor;
                 this->tracks[i].loopPointTimePos = this->tracks[i].nextMessageTimePos;
@@ -494,7 +486,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
             break;
         case 4:
             // Foot controller
-            for (i = 0; i < this->numTracks; i++)
+            for (i32 i = 0; i < this->numTracks; i++)
             {
                 this->tracks[i].curTrackDataCursor = this->tracks[i].loopPointTarget;
                 this->tracks[i].nextMessageTimePos = this->tracks[i].loopPointTimePos;
@@ -510,7 +502,7 @@ void MidiOutput::ProcessMsg(MidiTrack *track)
 
     if (opcode < MIDI_OPCODE_SYSTEM_EXCLUSIVE)
     {
-        // this->midiOutDev.SendShortMsg(opcode, arg1, arg2);
+        this->midiOutDev.SendShortMsg(opcode, arg1, arg2);
     }
 
     track->opcode = opcode;
@@ -536,6 +528,6 @@ void MidiOutput::FadeOutSetVolume(i32 volume)
         }
 
         // 7: Controller value number for volume (with range 0 - 127)
-        // this->midiOutDev.SendShortMsg(MIDI_OPCODE_MODE_CHANGE | idx, 7, volumeClamped);
+        this->midiOutDev.SendShortMsg(MIDI_OPCODE_MODE_CHANGE | idx, 7, volumeClamped);
     }
 }

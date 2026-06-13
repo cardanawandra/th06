@@ -35,7 +35,7 @@
 
     #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS true
 
-    inline void GetWindowSize(int *w, int *h)
+    inline void GetWindowSize(int *w, int *h, int *r)
     {
         const SDL_DisplayMode* mode =
             SDL_GetCurrentDisplayMode(0);
@@ -44,6 +44,7 @@
         {
             *w = mode->w;
             *h = mode->h;
+            *r = mode->refresh_rate;
         }
     }
 
@@ -187,11 +188,12 @@
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
     #define SDL_CONVERT_SURFACE_FORMAT_COMPAT SDL_ConvertSurfaceFormat
 
-    inline void GetWindowSize(int *w, int *h){
+    inline void GetWindowSize(int *w, int *h, int *r){
         SDL_DisplayMode mode;
         if (SDL_GetCurrentDisplayMode(0, &mode) == 0) {
             *w = mode.w;
             *h = mode.h;
+            *r = mode.refresh_rate;
         }
     }
     #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudioDevice(NULL, 0,a,b,0)
@@ -366,13 +368,14 @@
     #define SDL_BITSPERPIXEL_COMPAT(a) a.BitsPerPixel
     #define SDL_BYTESPERPIXEL_COMPAT(a) a.BytesPerPixel
 
-    inline void GetWindowSize(int *w, int *h){
+    inline void GetWindowSize(int *w, int *h, int *r){
         const SDL_VideoInfo* info = SDL_GetVideoInfo();
         if (info)
         {
-            *w  = info->current_w;
+            *w = info->current_w;
             *h = info->current_h;
         }
+        *r = 60;
     }
 
     #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat

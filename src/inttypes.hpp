@@ -25,7 +25,7 @@
     typedef unsigned __int64   uint64_t;
     typedef int                intptr_t;
 #else
-    typedef uint32_t   uint64_t;
+    // typedef uint32_t   uint64_t;
 #endif
 
 typedef int8_t i8;

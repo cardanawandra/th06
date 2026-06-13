@@ -145,7 +145,7 @@ GfxInterface *WebGL::Create()
 
     g_GameWindow.CONFIGURE_INIT();
     #ifdef __ANDROID__
-    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL, &g_GameWindow.GAME_WINDOW_REFRESH_RATE);
     #endif
     g_GameWindow.CONFIGURE_VIEW();
     i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;

@@ -55,7 +55,9 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/BulletData.cpp
     ${TH06_ROOT}/src/BulletManager.cpp
     ${TH06_ROOT}/src/Chain.cpp
-    ${TH06_ROOT}/src/Controller.cpp
+
+    ${TH06_ROOT}/src/controller/SDLController.cpp
+
     ${TH06_ROOT}/src/EclManager.cpp
     ${TH06_ROOT}/src/EffectManager.cpp
     ${TH06_ROOT}/src/Ending.cpp
@@ -69,14 +71,18 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/Gui.cpp
     ${TH06_ROOT}/src/ItemManager.cpp
     ${TH06_ROOT}/src/MainMenu.cpp
-    ${TH06_ROOT}/src/MidiOutput.cpp
+
+    ${TH06_ROOT}/src/sound/SDLMidiOutput.cpp
+
     ${TH06_ROOT}/src/MusicRoom.cpp
     ${TH06_ROOT}/src/Player.cpp
     ${TH06_ROOT}/src/ReplayManager.cpp
     ${TH06_ROOT}/src/ResultScreen.cpp
     ${TH06_ROOT}/src/Rng.cpp
     ${TH06_ROOT}/src/ScreenEffect.cpp
-    ${TH06_ROOT}/src/SoundPlayer.cpp
+
+    ${TH06_ROOT}/src/sound/SDLSoundPlayer.cpp
+
     ${TH06_ROOT}/src/Stage.cpp
     ${TH06_ROOT}/src/Supervisor.cpp
     ${TH06_ROOT}/src/TextHelper.cpp
@@ -93,7 +99,6 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
     ${TH06_ROOT}/src/graphics/Software.cpp
     ${TH06_ROOT}/src/graphics/GLFunc.cpp
-    ${TH06_ROOT}/src/graphics/FixedFunctionGL.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
 )
 
@@ -131,9 +136,13 @@ endif()
 # Find Android system libraries
 find_library(log-lib log)
 find_library(android-lib android)
+find_library(egl-lib EGL)
+find_library(gles2-lib GLESv2)
 
 target_link_libraries(main PRIVATE
     SDL2::SDL2
     ${log-lib}
     ${android-lib}
+    ${egl-lib}
+    ${gles2-lib}
 )

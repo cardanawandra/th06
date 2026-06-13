@@ -9,7 +9,10 @@
     #endif
 #else
     #include <SDL.h>
+    #ifndef __ANDROID__
     #include "graphics/FixedFunctionGL.hpp"
+    #endif
+    
     #if SDL_MAJOR_VERSION >= 2
         #ifdef __ANDROID__
             #include "graphics/WebGL.hpp"

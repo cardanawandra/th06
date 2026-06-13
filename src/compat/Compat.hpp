@@ -15,7 +15,7 @@
 #define INT16_MAX_COMPAT 32767
 #define JOYSTICK_COMPATButton i16
 
-#define COMPAT_NumJoysticks 0
+#define COMPAT_NumJoysticks() 0
 #define COMPAT_CONTROLLER_BUTTON_A              0
 #define COMPAT_CONTROLLER_BUTTON_B              1
 #define COMPAT_CONTROLLER_BUTTON_X              2

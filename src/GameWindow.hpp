@@ -68,6 +68,8 @@ struct GameWindow
     i32 powerOffActive;
     u32 renderBackendIndex;
 
+    i32 GAME_WINDOW_REFRESH_RATE;
+
     i32 GAME_WINDOW_WIDTH_REAL;
     i32 GAME_WINDOW_HEIGHT_REAL;
     i32 VIEWPORT_WIDTH;
@@ -79,23 +81,44 @@ struct GameWindow
     f32 HEIGHT_RESOLUTION_SCALE;
 
     void CONFIGURE_INIT(){
+        this->GAME_WINDOW_REFRESH_RATE = 60;
         this->GAME_WINDOW_WIDTH_REAL = GAME_WINDOW_WIDTH;
         this->GAME_WINDOW_HEIGHT_REAL = GAME_WINDOW_HEIGHT;
+        this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
+        this->VIEWPORT_HEIGHT = this->GAME_WINDOW_HEIGHT_REAL;
+        this->WIDTH_RESOLUTION_SCALE = 1;
+        this->HEIGHT_RESOLUTION_SCALE = 1;
     }
     void CONFIGURE_VIEW()
     {
+        // stop rescaling
+        if(this->GAME_WINDOW_WIDTH_REAL>1920){
+            this->GAME_WINDOW_WIDTH_REAL = 1920;
+        }
+        if(this->GAME_WINDOW_HEIGHT_REAL>1080){
+            this->GAME_WINDOW_HEIGHT_REAL = 1080;
+        }
+
         this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
         this->VIEWPORT_HEIGHT = this->GAME_WINDOW_HEIGHT_REAL;
 
         if ((this->GAME_WINDOW_WIDTH_REAL * 3) > (this->GAME_WINDOW_HEIGHT_REAL * 4))
         {
             this->VIEWPORT_WIDTH = (u32)((this->GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f);
+            #ifdef VIEWPORT_OFF_EXISTS
             this->VIEWPORT_OFF_X = ((this->GAME_WINDOW_WIDTH_REAL - this->VIEWPORT_WIDTH) / 2);
+            #else
+            this->GAME_WINDOW_WIDTH_REAL = this->VIEWPORT_WIDTH;
+            #endif
         }
         else if ((this->GAME_WINDOW_WIDTH_REAL * 3) < (this->GAME_WINDOW_HEIGHT_REAL * 4))
         {
             this->VIEWPORT_HEIGHT = (u32)((this->GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f);
+            #ifdef VIEWPORT_OFF_EXISTS
             this->VIEWPORT_OFF_Y = ((this->GAME_WINDOW_HEIGHT_REAL - this->VIEWPORT_HEIGHT) / 2);
+            #else
+            this->GAME_WINDOW_HEIGHT_REAL = this->VIEWPORT_HEIGHT;
+            #endif
         }
 
         this->WIDTH_RESOLUTION_SCALE = ((f32)this->VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH;

@@ -13,6 +13,7 @@ public class JoystickView extends View {
     private float centerX, centerY;
     private float knobX, knobY;
     private float radius;
+    private float sensitivity = 0.2f;
 
     private Paint basePaint = new Paint();
     private Paint knobPaint = new Paint();
@@ -25,6 +26,12 @@ public class JoystickView extends View {
 
     public void setListener(JoystickListener listener) {
         this.listener = listener;
+    }
+    public float getSensitivity() {
+        return 1-this.sensitivity;
+    }
+    public void setSensitivity(float s) {
+        this.sensitivity = 1-s;
     }
 
     public enum Direction {
@@ -71,7 +78,7 @@ public class JoystickView extends View {
 
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        double deadZone = radius * 0.2; // <-- sensitivity control
+        double deadZone = radius * sensitivity; // <-- sensitivity control
 
         // Clamp knob inside circle
         if (distance < radius) {

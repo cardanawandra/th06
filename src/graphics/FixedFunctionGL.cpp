@@ -45,7 +45,7 @@ GfxInterface *FixedFunctionGL::Init()
     LOG_COMPAT("FixedFunctionGL::Init 4\n");
     g_GameWindow.CONFIGURE_INIT();
     #ifdef __ANDROID__
-    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL, &g_GameWindow.GAME_WINDOW_REFRESH_RATE);
     #endif
     g_GameWindow.CONFIGURE_VIEW();
     i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
@@ -73,14 +73,6 @@ GfxInterface *FixedFunctionGL::Init()
         delete gfx;
         return NULL;
     }
-    LOG_COMPAT("GL_VERSION=%s\n",
-        glGetString(GL_VERSION));
-
-    LOG_COMPAT("GL_RENDERER=%s\n",
-        glGetString(GL_RENDERER));
-
-    LOG_COMPAT("GL_EXTENSIONS=%s\n",
-        glGetString(GL_EXTENSIONS));
 
     LOG_COMPAT("FixedFunctionGL::Init 9\n");
     if (SDL_GL_MAKE_CURRENT_COMPAT(gfx->window, gfx->glContext) != SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS)
