@@ -103,7 +103,8 @@ set(TH06_GAME_SOURCES
     ../../src/graphics/FixedFunctionGLWIN32.cpp
     ../../src/graphics/FixedFunctionGL.cpp
     ../../src/graphics/WebGL.cpp
-    ../../src/graphics/Software.cpp
+    ../../src/graphics/Software2D.cpp
+    
     ../../src/pbg3/FileAbstraction.cpp
     ../../src/pbg3/IPbg3Parser.cpp
     ../../src/pbg3/Pbg3Archive.cpp

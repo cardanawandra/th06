@@ -20,11 +20,15 @@ GfxInterface *Software::Init()
         return NULL;
     }
 
-    Uint32 flags = SDL_SWSURFACE;
+    #if SDL_MAJOR_VERSION == 1
+    Uint32 flags = SDL_HWSURFACE;
+    #else
+    Uint32 flags = 0;
+    #endif
 
     if (g_Supervisor.cfg.windowed == 0)
     {
-        flags |= SDL_FULLSCREEN;
+        flags |= SDL_FULLSCREEN_COMPAT;
     }
 
     g_GameWindow.CONFIGURE_INIT();
@@ -36,11 +40,45 @@ GfxInterface *Software::Init()
         &g_GameWindow.GAME_WINDOW_REFRESH_RATE
     );
 #endif
+    g_GameWindow.GAME_WINDOW_REFRESH_RATE = g_GameWindow.GAME_WINDOW_REFRESH_RATE / 2;
 
     g_GameWindow.CONFIGURE_VIEW();
 
     int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
     int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+
+    #if SDL_MAJOR_VERSION >= 2
+    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+    gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
+
+    if (gfx->window == NULL)
+    {
+        delete gfx;
+        return NULL;
+    }
+
+    //SDL 2 are on 3th variable... i'm trying SDL_RENDERER_SOFTWARE
+    //SDL 3 are on 4th variable... i'm trying "direct3d12"
+    //set 4th var into NULL to get the fastest SDL rendering
+    gfx->renderer = SDL_CreateRendererCompat(
+        gfx->window, 
+        -1, 
+        SDL_RENDERER_ACCELERATED, 
+        NULL
+    );
+    if (gfx->renderer == NULL)
+    {
+        delete gfx;
+        return NULL;
+    }
+    SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_GameWindow.GAME_WINDOW_WIDTH_REAL, g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    gfx->framebufferTexture = framebufferTexture;
+    if (framebufferTexture == NULL)    {
+        delete gfx;
+        return NULL;
+    }
+    #else
 
     gfx->screen = SDL_SetVideoMode(
         width,
@@ -54,6 +92,7 @@ GfxInterface *Software::Init()
         delete gfx;
         return NULL;
     }
+    #endif
 
     // Can't init on header, init on creation instead
     gfx->boundTexture=NULL;
@@ -94,6 +133,32 @@ bool Software::GameLoop(){
 
 void Software::Exit()
 {
+    #if SDL_MAJOR_VERSION >= 2
+    if (this->renderer)
+    {
+        SDL_DestroyRenderer(this->renderer);
+        this->renderer = NULL;
+    }
+    if (this->window)
+    {
+        SDL_DestroyWindow(this->window);
+        this->window = NULL;
+    }
+    if (this->framebufferTexture)
+    {
+        SDL_DestroyTexture(this->framebufferTexture);
+        this->framebufferTexture = NULL;
+    }
+    if (this->framebuffer)    {
+        delete[] this->framebuffer;
+        this->framebuffer = NULL;
+    }
+    if (this->depthBuffer)
+    {
+        delete[] this->depthBuffer;
+        this->depthBuffer = NULL;
+    }
+    #else
     delete[] framebuffer;
     framebuffer = NULL;
 
@@ -101,15 +166,19 @@ void Software::Exit()
     depthBuffer = NULL;
 
     SDL_Quit();
+    #endif
 }
 
 void Software::SwapBuffers()
 {
+    #if SDL_MAJOR_VERSION >= 2
+    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, g_GameWindow.GAME_WINDOW_WIDTH_REAL * sizeof(u32));
+    SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+    #else
     SDL_LockSurface(screen);
-
     const int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
     const int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
-
     for (int y = 0; y < height; y++)
     {
         memcpy(
@@ -118,10 +187,9 @@ void Software::SwapBuffers()
             width * sizeof(u32)
         );
     }
-
     SDL_UnlockSurface(screen);
-
     SDL_Flip(screen);
+    #endif
 }
 
 void Software::SetFogRange(f32 nearPlane, f32 farPlane)
@@ -462,8 +530,7 @@ inline ZunVec2 ProjectToNDCZunvec2(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p) {
     ZunVec4 clip = mv * ZunVec4(vertex, 1.0f);
     clip = p * clip;
 
-    if (clip.w != 0.0f)
-    {
+    if (clip.w > 0){
         clip.x /= clip.w;
         clip.y /= clip.w;
     }
@@ -536,38 +603,47 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     u32 last_index = start + count;
     if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
     ZunMatrix modelview = view * model;
+
+    //i move this outside, why this is inside?
+    const f32 precompInvFogDif = 1.0f/(fogFar - fogNear);
+    u32* texels;
+    i32 texW, texH;
+    if(boundTexture) {
+        texels = &boundTexture->texels[0];
+        texW = boundTexture->width;
+        texH = boundTexture->height;
+    }
+    const u8* vData = (u8*)vertexData;
+    const u8* tData = (u8*)texCoordData;
+    const u8* dData = (u8*)diffuseData;
+
     while (index < last_index) {
-        //Resurrection of Fog
+        // Resurrection of Fog (killed by super msvc 6)
         // f32 invw0, invw1, invw2;
         // f32 viewZ0, viewZ1, viewZ2;
         // f32 ndcZ0, ndcZ1, ndcZ2;
         // ZunVec3 v0 = ProjectToNDC(*(ZunVec3*)((u8*)vertexData + vertexStride * index),modelview,projection,viewZ0,invw0);
         // ZunVec3 v1 = ProjectToNDC(*(ZunVec3*)((u8*)vertexData + vertexStride * (index+1)),modelview,projection,viewZ1,invw1);
         // ZunVec3 v2 = ProjectToNDC(*(ZunVec3*)((u8*)vertexData + vertexStride * (index+2)),modelview,projection,viewZ2,invw2);
-        ZunVec2 v0 = ProjectToNDCZunvec2(*(ZunVec3*)((u8*)vertexData + vertexStride * index),modelview,projection);
-        ZunVec2 v1 = ProjectToNDCZunvec2(*(ZunVec3*)((u8*)vertexData + vertexStride * (index+1)),modelview,projection);
-        ZunVec2 v2 = ProjectToNDCZunvec2(*(ZunVec3*)((u8*)vertexData + vertexStride * (index+2)),modelview,projection);
+
+        //pre calculate
+        ZunVec2 v0 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * index),modelview,projection);
+        ZunVec2 v1 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+1)),modelview,projection);
+        ZunVec2 v2 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+2)),modelview,projection);
 
         ZunVec2 tc0, tc1, tc2;
         Diffuse diffuse0, diffuse1, diffuse2;
-        u32* texels;
-        i32 texW, texH;
         if(useTexCoord) {
             const ZunVec2 texDim = {(f32)(boundTexture ? boundTexture->width : 0), (f32)(boundTexture ? boundTexture->height : 0)};
-            tc0 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * index), textureMatrix) * texDim;
-            tc1 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * (index+1)), textureMatrix) * texDim;
-            tc2 = ProjectTexCoordToNDC(*(ZunVec2*)((u8*)texCoordData + texCoordStride * (index+2)), textureMatrix) * texDim;
-            if(boundTexture) {
-                texels = &boundTexture->texels[0];
-                texW = boundTexture->width;
-                texH = boundTexture->height;
-            }
+            tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;
+            tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;
+            tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;
         }
 
         if(useDiffuse) {
-            diffuse0 = Diffuse(*(ColorData*)((u8*)diffuseData + diffuseStride * index));
-            diffuse1 = Diffuse(*(ColorData*)((u8*)diffuseData + diffuseStride * (index+1)));
-            diffuse2 = Diffuse(*(ColorData*)((u8*)diffuseData + diffuseStride * (index+2)));
+            diffuse0 = Diffuse(*(ColorData*)(dData + diffuseStride * index));
+            diffuse1 = Diffuse(*(ColorData*)(dData + diffuseStride * (index+1)));
+            diffuse2 = Diffuse(*(ColorData*)(dData + diffuseStride * (index+2)));
         }
         
         if (type == PRIM_TRIANGLE_STRIP && ((index - start) & 1))
@@ -632,141 +708,108 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const ZunVec3 w_dx = e_dx * invarea;
         const ZunVec3 w_dy = e_dy * invarea;
 
-        ZunVec2 uv_row =
-            tc0 * w0.x +
-            tc1 * w0.y +
-            tc2 * w0.z;
+        const float invArea = 1.0f / area;
 
-        const ZunVec2 uv_dx =
-            tc0 * w_dx.x +
-            tc1 * w_dx.y +
-            tc2 * w_dx.z;
+        // remove ZunVec2 struct usages (is this barycentrics?)
+        const float w0_dx = w_dx.x;
+        const float w1_dx = w_dx.y;
+        const float w2_dx = w_dx.z;
 
-        const ZunVec2 uv_dy =
-            tc0 * w_dy.x +
-            tc1 * w_dy.y +
-            tc2 * w_dy.z;
+        const float w0_dy = w_dy.x;
+        const float w1_dy = w_dy.y;
+        const float w2_dy = w_dy.z;
 
-        Diffuse dif0;
-        Diffuse dif_dx;
-        Diffuse dif_dy;
+        // starting barycentrics
+        float w0_row = edges.x * invArea;
+        float w1_row = edges.y * invArea;
+        float w2_row = edges.z * invArea;
 
-        if (useDiffuse)
+        for (int y = ymin; y <= ymax; ++y,
+            w0_row += w0_dy,
+            w1_row += w1_dy,
+            w2_row += w2_dy)
         {
-            dif0 =
-                diffuse0 * w0.x +
-                diffuse1 * w0.y +
-                diffuse2 * w0.z;
+            float w0 = w0_row;
+            float w1 = w1_row;
+            float w2 = w2_row;
 
-            dif_dx =
-                diffuse0 * w_dx.x +
-                diffuse1 * w_dx.y +
-                diffuse2 * w_dx.z;
+            int rowOffset = y * g_GameWindow.GAME_WINDOW_WIDTH_REAL;
 
-            dif_dy =
-                diffuse0 * w_dy.x +
-                diffuse1 * w_dy.y +
-                diffuse2 * w_dy.z;
-        }
-
-        ZunColor precompTextureFactor = textureFactor;
-        //Resurrection of Fog TODO : remove invw_row and fogZ_row, commented btw
-        // f32 invw_row = invw0*w0.x + invw1*w0.y + invw2*w0.z;
-        // const f32 invw_dx = invw0*w_dx.x + invw1*w_dx.y + invw2*w_dx.z;
-        // const f32 invw_dy = invw0*w_dy.x + invw1*w_dy.y + invw2*w_dy.z;
-
-        // f32 fogZ_row = viewZ0*invw0*w0.x + viewZ1*invw1*w0.y + viewZ2*invw2*w0.z;
-        // const f32 fogZ_dx = viewZ0*invw0*w_dx.x + viewZ1*invw1*w_dx.y + viewZ2*invw2*w_dx.z;
-        // const f32 fogZ_dy = viewZ0*invw0*w_dy.x + viewZ1*invw1*w_dy.y + viewZ2*invw2*w_dy.z;
-
-        const f32 precompInvFogDif = 1.0f/(fogFar - fogNear);
-
-        for (int y = ymin; y <= ymax; y++,
-            w0 += w_dy,
-            uv_row += uv_dy,
-            // invw_row += invw_dy,
-            // fogZ_row += fogZ_dy,
-            dif0 += dif_dy)
-        {
-            ZunVec3 w = w0;
-            ZunVec2 uv1 = uv_row;
-            // f32 invw = invw_row;
-            // f32 fogZ = fogZ_row;
-            Diffuse dif = dif0;
-            for (int x = xmin; x <= xmax; x++,
-                w += w_dx,
-                uv1 += uv_dx,
-                // invw += invw_dx,
-                // fogZ += fogZ_dx,
-                dif += dif_dx)
+            for (int x = xmin; x <= xmax; ++x,
+                w0 += w0_dx,
+                w1 += w1_dx,
+                w2 += w2_dx)
             {
-                if (w.x >= 0 && w.y >= 0 && w.z >= 0) {
-                    const i32 pixelCoord = y * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x;
-                    // const f32 clipW = 1.0f / invw; //bad
-                    i32 u = (i32)uv1.x;
-                    i32 v = (i32)uv1.y;
-                    f32 depth;
-                    // if(useDepthTest) {
-                    //     depth = ((ndcZ * clipW) * 0.5f + 0.5f) * depthDif + depthNear;
-                    //     if(depthFunc == DEPTH_FUNC_LEQUAL && depth > depthBuffer[pixelCoord]) {
-                    //         continue;
-                    //     }
-                    // }
-                    ZunColor diffuse = RGBAToZunColor(
-                        (u8)dif.r,
-                        (u8)dif.g,
-                        (u8)dif.b,
-                        (u8)dif.a);
-                    ZunColor fragColor = COLOR_WHITE;
-                    ZunColor fragArg1 = fragColor;
-                    ZunColor fragArg2 = fragColor;
-                    if (boundTexture && useTexCoord) {
-                        fragArg1 = texels[(v & (texH - 1)) * texW + (u & (texW - 1))];
-                    } else {
-                        fragArg1 = diffuse;
+                // barycentric inside test (fast reject first)
+                if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
+                {
+                    const int pixel = rowOffset + x;
+
+                    // INTERPOLATED UV (inline)
+                    int u, v;
+
+                    if (useTexCoord)
+                    {
+                        float iu =
+                            tc0.x * w0 +
+                            tc1.x * w1 +
+                            tc2.x * w2;
+
+                        float iv =
+                            tc0.y * w0 +
+                            tc1.y * w1 +
+                            tc2.y * w2;
+
+                        u = (int)iu;
+                        v = (int)iv;
                     }
 
-                    if(!noVertexBuffer) {
-                        fragArg2 = precompTextureFactor;
-                    } else {
-                        fragArg2 = diffuse;
+                    // diffuse... (but remove everything)
+                    ZunColor src;
+
+                    if (useTexCoord)
+                    {
+                        src = texels[(v & (texH - 1)) * texW + (u & (texW - 1))];
+                    }
+                    else
+                    {
+                        src = RGBAToZunColor(
+                            (u8)((diffuse0.r * w0 + diffuse1.r * w1 + diffuse2.r * w2)),
+                            (u8)((diffuse0.g * w0 + diffuse1.g * w1 + diffuse2.g * w2)),
+                            (u8)((diffuse0.b * w0 + diffuse1.b * w1 + diffuse2.b * w2)),
+                            255
+                        );
                     }
 
-                    switch(colorOp) {
+                    // remove frags
+                    ZunColor frag = src;
+
+                    switch(colorOp){
                         case COLOR_OP_MODULATE:
-                            fragColor = ZunColorMul(fragArg1, fragArg2);
+                            frag = ZunColorMul(src, textureFactor);
                             break;
                         case COLOR_OP_ADD:
-                            fragColor = RGBAToZunColor(
-                                ZunR(fragArg1) + ZunR(fragArg2),
-                                ZunG(fragArg1) + ZunG(fragArg2),
-                                ZunB(fragArg1) + ZunB(fragArg2),
-                                (ZunA(fragArg1) * ZunA(fragArg2)) >> 8);
+                            frag = RGBAToZunColor(
+                                ZunR(src) + ZunR(textureFactor),
+                                ZunG(src) + ZunG(textureFactor),
+                                ZunB(src) + ZunB(textureFactor),
+                                ZunA(src)
+                            );
                             break;
-                        case COLOR_OP_REPLACE:
-                            fragColor = fragArg1;
                     }
 
-                    // if(!noFog) {
-                    //     f32 fogDepth = fogZ*clipW;
-                    //     f32 fogCoefficient = (fogFar - fogDepth) * precompInvFogDif;
-                    //     fragColor = InterpZunColor(fragColor, fogColor, 255 - (u32)(ZUN_MIN(ZUN_MAX(fogCoefficient, 0.0f), 1.0f) * 255.0f));
-                    // }
+                    if (ZunA(frag) >= alphaThreshold)
+                    {
+                        ZunColor dst = framebuffer[pixel];
 
-                    ZunColor src = fragColor;
-                    ZunColor dst = framebuffer[pixelCoord];
-                    u8 srcFactor = ZunA(src);
-                    u8 dstFactor = 255;
-                    if(blendMode == BLEND_INV_SRC_ALPHA) {
-                        dstFactor -= srcFactor;
-                    }
-                    if(ZunA(fragColor) >= alphaThreshold) {
-                        if(useDepthTest && depthMask) depthBuffer[pixelCoord] = depth;
-                        framebuffer[pixelCoord] = RGBAToZunColor(
-                            AlphaBlendU8(ZunR(src),ZunR(dst),srcFactor,dstFactor),
-                            AlphaBlendU8(ZunG(src),ZunG(dst),srcFactor,dstFactor),
-                            AlphaBlendU8(ZunB(src),ZunB(dst),srcFactor,dstFactor),
-                            ZunA(src)
+                        u8 sa = ZunA(frag);
+                        u8 da = 255 - sa;
+
+                        framebuffer[pixel] = RGBAToZunColor(
+                            (ZunR(frag) * sa + ZunR(dst) * da) >> 8,
+                            (ZunG(frag) * sa + ZunG(dst) * da) >> 8,
+                            (ZunB(frag) * sa + ZunB(dst) * da) >> 8,
+                            sa
                         );
                     }
                 }

@@ -94,8 +94,10 @@ struct GameWindow
         // stop rescaling
         if(this->GAME_WINDOW_WIDTH_REAL>1280){
             this->GAME_WINDOW_WIDTH_REAL = 1280;
+            this->GAME_WINDOW_HEIGHT_REAL = 720;
         }
         if(this->GAME_WINDOW_HEIGHT_REAL>720){
+            this->GAME_WINDOW_WIDTH_REAL = 1280;
             this->GAME_WINDOW_HEIGHT_REAL = 720;
         }
 

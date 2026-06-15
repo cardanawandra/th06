@@ -97,7 +97,7 @@ set(TH06_GAME_SOURCES
     # graphics
     ${TH06_ROOT}/src/thirdparty/sjis_converter.cpp
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
-    ${TH06_ROOT}/src/graphics/Software.cpp
+    ${TH06_ROOT}/src/graphics/Software2D.cpp
     ${TH06_ROOT}/src/graphics/GLFunc.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
 )
