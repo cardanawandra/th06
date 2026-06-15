@@ -30,6 +30,9 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
+    #ifdef RENDER_SOFTWARE
+    {"Software fallback (VERY SLOW)", Software::Init},
+    #endif
     #ifdef RENDER_HARDWARE
     // {"Hardware renderer (VERY PORTABLE)", Hardware::Init},
     #endif

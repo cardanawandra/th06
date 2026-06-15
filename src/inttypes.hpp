@@ -13,7 +13,7 @@
         typedef signed long      int32_t;
         typedef unsigned long    uint32_t;
 
-        typedef int                intptr_t;
+        typedef int              intptr_t;
     #else
         #include <stdint.h>
     #endif
@@ -21,6 +21,9 @@
 
 #if defined(_MSC_VER)
     typedef unsigned __int64   uint64_t;
+    #if _MSC_VER < 1600
+        typedef int intptr_t;
+    #endif
 #elif defined(__WATCOMC__)
     typedef unsigned __int64   uint64_t;
     typedef int                intptr_t;

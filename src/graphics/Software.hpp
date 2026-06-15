@@ -7,6 +7,7 @@
 #include "GfxInterface.hpp"
 #include <vector>
 #include <memory>
+#include <stddef.h>
 
 struct Texture {
     std::vector<u32> texels; //ARGB8888
@@ -20,10 +21,10 @@ struct Texture {
 //because it runs extremely slow on Debug
 //(or just straight up avoid using it unless extremely necessary)
 
-constexpr inline u8 ZunA(ZunColor c) { return c >> 24; }
-constexpr inline u8 ZunR(ZunColor c) { return (c >> 16) & 0xFF; }
-constexpr inline u8 ZunG(ZunColor c) { return (c >> 8) & 0xFF; }
-constexpr inline u8 ZunB(ZunColor c) { return c & 0xFF; }
+inline u8 ZunA(ZunColor c) { return c >> 24; }
+inline u8 ZunR(ZunColor c) { return (c >> 16) & 0xFF; }
+inline u8 ZunG(ZunColor c) { return (c >> 8) & 0xFF; }
+inline u8 ZunB(ZunColor c) { return c & 0xFF; }
 
 struct Diffuse {
     f32 r,g,b,a;
@@ -73,14 +74,14 @@ struct Software : GfxInterface
     static GfxInterface *Init();
     static void SetContextFlags();
     virtual void Exit();
-    ~Software() override {
+    ~Software() {
         Exit();
     };
 
     virtual void SetFogRange(f32 nearPlane, f32 farPlane);
     virtual void SetFogColor(ZunColor color);
     virtual void ToggleVertexAttribute(u8 attr, bool enable);
-    virtual void SetAttributePointer(VertexAttributeArrays attr, std::size_t stride, void *ptr);
+    virtual void SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr);
     virtual void SetColorOp(TextureOpComponent component, ColorOp op);
     virtual void SetTextureFactor(ZunColor factor);
     virtual void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix);
@@ -116,21 +117,25 @@ struct Software : GfxInterface
     virtual bool GameLoop();
 
   private:
-    std::vector<std::unique_ptr<Texture>> textures;
+    std::vector<Texture*> textures;
     std::vector<u32> freeTextures;
 
 
-    Texture* boundTexture = nullptr;
+    Texture* boundTexture;// = nullptr;
 
+    #if SDL_MAJOR_VERSION == 1
+    SDL_Surface* screen;
+    #else
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* framebufferTexture;
+    #endif
     u32* framebuffer;
     f32* depthBuffer;
 
     i32 viewport[4];   //x, y, w, h
     ZunColor clearColor; //r, g, b, a
-    f32 clearDepth = 1;
+    f32 clearDepth;// = 1;
     f32 fogNear;
     f32 fogFar;
     ZunColor fogColor;
@@ -152,14 +157,14 @@ struct Software : GfxInterface
     bool useFragDepth;
 
     void* vertexData;
-    std::size_t vertexStride;
+    size_t vertexStride;
     void* texCoordData;
-    std::size_t texCoordStride;
+    size_t texCoordStride;
     void* diffuseData;
-    std::size_t diffuseStride;
+    size_t diffuseStride;
 
-    bool useTexCoord = false;
-    bool useDiffuse = false;
+    bool useTexCoord;// = false;
+    bool useDiffuse;// = false;
 
     ColorOp colorOp;
 

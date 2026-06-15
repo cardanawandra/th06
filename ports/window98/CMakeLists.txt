@@ -6,14 +6,30 @@ add_definitions(
 
     -D_WINDOWS
 
-    -DNO_SDL
+#    -DNO_SDL
 
     -D_CRT_SECURE_NO_DEPRECATE
 )
 
+
+project(th06_sdl)
+
+option(TH06_USE_SDL "TH06 SDL" ON)
+
+# ---- Paths ----
+set(SDL_DIR "${CMAKE_SOURCE_DIR}/../../3rdparty/SDL")
+
+# No 64-bit support in VC6 realistically → force x86
+set(SDL_ARCH "x86")
+
 # ---- Include + Lib dirs ----
 include_directories(
+    ${SDL_DIR}/include
     ${CMAKE_SOURCE_DIR}/../../src
+)
+
+link_directories(
+    ${SDL_DIR}/lib/${SDL_ARCH}
 )
 
 # ---- Sources ----
@@ -26,7 +42,7 @@ set(TH06_GAME_SOURCES
     ../../src/BulletManager.cpp
     ../../src/Chain.cpp
 
-    ../../src/controller/EmptyController.cpp
+    ../../src/controller/SDLController.cpp
 
     ../../src/EclManager.cpp
     ../../src/EffectManager.cpp
@@ -51,7 +67,7 @@ set(TH06_GAME_SOURCES
     ../../src/Rng.cpp
     ../../src/ScreenEffect.cpp
 
-    ../../src/sound/EmptySoundPlayer.cpp
+    ../../src/sound/SDLSoundPlayer.cpp
 
     ../../src/Stage.cpp
     ../../src/Supervisor.cpp
@@ -63,7 +79,8 @@ set(TH06_GAME_SOURCES
     ../../src/midi/MidiDefault.cpp
 
     ../../src/graphics/GLFunc.cpp
-    ../../src/graphics/FixedFunctionGLWIN32.cpp
+    ../../src/graphics/Software2D.cpp
+#    ../../src/graphics/FixedFunctionGLWIN32.cpp
 
     ../../src/pbg3/FileAbstraction.cpp
     ../../src/pbg3/IPbg3Parser.cpp
@@ -76,15 +93,10 @@ add_executable(th06 ${TH06_GAME_SOURCES})
 
 # ---- Link libraries (old style) ----
 target_link_libraries(th06
+    SDLmain
+    SDL
     opengl32
     winmm
-    
-    ddraw
-    dxguid
-        
-    gdi32
-    user32
-    kernel32
 )
 
 # ---- Custom command (simplified) ----

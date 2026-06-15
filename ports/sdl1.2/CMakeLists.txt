@@ -68,7 +68,7 @@ set(TH06_GAME_SOURCES
     ../../src/ItemManager.cpp
     ../../src/MainMenu.cpp
 
-    ../../src/sound/SDLMidiOutput.cpp
+    ../../src/sound/EmptyMidiOutput.cpp
 
     ../../src/MusicRoom.cpp
     ../../src/Player.cpp
@@ -89,6 +89,7 @@ set(TH06_GAME_SOURCES
     ../../src/midi/MidiDefault.cpp
 
     ../../src/graphics/GLFunc.cpp
+    ../../src/graphics/Software2D.cpp
     ../../src/graphics/FixedFunctionGL.cpp
 
     ../../src/pbg3/FileAbstraction.cpp

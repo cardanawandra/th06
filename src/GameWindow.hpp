@@ -92,11 +92,11 @@ struct GameWindow
     void CONFIGURE_VIEW()
     {
         // stop rescaling
-        if(this->GAME_WINDOW_WIDTH_REAL>1920){
-            this->GAME_WINDOW_WIDTH_REAL = 1920;
+        if(this->GAME_WINDOW_WIDTH_REAL>1280){
+            this->GAME_WINDOW_WIDTH_REAL = 1280;
         }
-        if(this->GAME_WINDOW_HEIGHT_REAL>1080){
-            this->GAME_WINDOW_HEIGHT_REAL = 1080;
+        if(this->GAME_WINDOW_HEIGHT_REAL>720){
+            this->GAME_WINDOW_HEIGHT_REAL = 720;
         }
 
         this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
