@@ -254,18 +254,13 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
     switch (type) {
         case MATRIX_MODEL:
             model = matrix;
-            printf("mvp calc model\n");
-            mvp = projection * (model * view);
             break;
         case MATRIX_VIEW:
             view = matrix;
-            printf("mvp calc view\n");
-            mvp = projection * (model * view);
             break;
         case MATRIX_PROJECTION:
             projection = matrix;
-            printf("mvp calc projection\n");
-            mvp = projection * (model * view);
+            mvp = projection * (view * model);
             break;
         case MATRIX_TEXTURE:
             textureMatrix = matrix;
@@ -818,14 +813,24 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                         ZunColor dst = framebuffer[pixel];
 
                         u8 sa = ZunA(frag);
-                        u8 da = 255 - sa;
-
+                        u8 da = 255;
+                        if(blendMode == BLEND_INV_SRC_ALPHA) {
+                            da -= sa;
+                        }
                         framebuffer[pixel] = RGBAToZunColor(
-                            (ZunR(frag) * sa + ZunR(dst) * da) >> 8,
-                            (ZunG(frag) * sa + ZunG(dst) * da) >> 8,
-                            (ZunB(frag) * sa + ZunB(dst) * da) >> 8,
-                            sa
+                            AlphaBlendU8(ZunR(frag),ZunR(dst),sa,da),
+                            AlphaBlendU8(ZunG(frag),ZunG(dst),sa,da),
+                            AlphaBlendU8(ZunB(frag),ZunB(dst),sa,da),
+                            ZunA(frag)
                         );
+
+
+                        // framebuffer[pixel] = RGBAToZunColor(
+                        //     (ZunR(frag) * sa + ZunR(dst) * da) >> 8,
+                        //     (ZunG(frag) * sa + ZunG(dst) * da) >> 8,
+                        //     (ZunB(frag) * sa + ZunB(dst) * da) >> 8,
+                        //     sa
+                        // );
                     }
                 }
             }
