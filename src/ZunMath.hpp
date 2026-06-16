@@ -340,6 +340,13 @@ struct ZunVec4
         this->z = vec.z;
         this->w = w;
     }
+    ZunVec4(ZunVec2 vec, f32 w)
+    {
+        this->x = vec.x;
+        this->y = vec.y;
+        this->z = 0;
+        this->w = w;
+    }
 };
 //static_assert(sizeof(ZunVec4) == 0x10, "ZunVec4 has additional padding between struct members!");
 
@@ -364,6 +371,16 @@ struct ZunMatrix
                 }
             }
         }
+
+        return result;
+    }
+
+    ZunVec2 operator*(const ZunVec2& b) const
+    {
+        ZunVec2 result = {0.0f, 0.0f};
+
+        result.x = this->m[0][0] * b.x + this->m[1][0] * b.y + this->m[3][0];
+        result.y = this->m[0][1] * b.x + this->m[1][1] * b.y + this->m[3][1];
 
         return result;
     }

@@ -149,6 +149,9 @@ struct Software : GfxInterface
 
     ZunMatrix model;
     ZunMatrix view;
+    //pre calculate
+    ZunMatrix mvp;
+
     ZunMatrix projection;
     ZunMatrix textureMatrix;
 
@@ -169,6 +172,8 @@ struct Software : GfxInterface
     ColorOp colorOp;
 
     inline ZunVec3 ProjectToNDC(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p, f32 &viewZ, f32 &W);
+    inline ZunVec2 ProjectToNDCZunvec2(ZunVec3 vertex);
     inline ZunVec2 ProjectTexCoordToNDC(ZunVec2 texCoord, ZunMatrix textureMatrix);
     inline ZunVec3 NDCToScreen(ZunVec3 vertex);
+    inline ZunVec2 NDCToScreenZunVec2(ZunVec2 vertex);
 };

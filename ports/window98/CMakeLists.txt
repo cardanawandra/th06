@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 2.4)
 project(th06_sdl)
 
 # OPTIMALIZATION
-set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob2 /Ot /DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /Ot /DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /O2 /Ob2 /Ot /G5 /DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /Ot /G5 /DNDEBUG")
 
-set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /Og /Oy")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Og /Oy")
+set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /Og /Oy /G5")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Og /Oy /G5")
 
 add_definitions(
 
@@ -85,7 +85,7 @@ set(TH06_GAME_SOURCES
     ../../src/thirdparty/sjis_converter.cpp
     ../../src/midi/MidiDefault.cpp
 
-    ../../src/graphics/GLFunc.cpp
+#    ../../src/graphics/GLFunc.cpp
     ../../src/graphics/Software2D.cpp
 #    ../../src/graphics/FixedFunctionGLWIN32.cpp
 
@@ -102,7 +102,6 @@ add_executable(th06 ${TH06_GAME_SOURCES})
 target_link_libraries(th06
     SDLmain
     SDL
-    opengl32
     winmm
 )
 

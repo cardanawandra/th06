@@ -7,98 +7,33 @@
 #include "utils.hpp"
 #include "compat/Compat.hpp"
 #include <math.h>
+#include <conio.h>
+#include <dpmi.h>
+
+unsigned char* g_VesaLFB = nullptr;
 
 u8 alphaThreshold = 4;
 
-GfxInterface *Software::Init()
+GfxInterface* Software::Init()
 {
     Software* gfx = new Software;
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        delete gfx;
-        return NULL;
-    }
-
-    #if SDL_MAJOR_VERSION == 1
-    Uint32 flags = SDL_SWSURFACE;
-    #else
-    Uint32 flags = 0;
-    #endif
-
-    if (g_Supervisor.cfg.windowed == 0)
-    {
-        flags |= SDL_FULLSCREEN_COMPAT;
-    }
-
     g_GameWindow.CONFIGURE_INIT();
-
-#ifdef __ANDROID__
-    GetWindowSize(
-        &g_GameWindow.GAME_WINDOW_WIDTH_REAL,
-        &g_GameWindow.GAME_WINDOW_HEIGHT_REAL,
-        &g_GameWindow.GAME_WINDOW_REFRESH_RATE
-    );
-#endif
-    g_GameWindow.GAME_WINDOW_REFRESH_RATE = g_GameWindow.GAME_WINDOW_REFRESH_RATE / 2;
-
     g_GameWindow.CONFIGURE_VIEW();
 
     int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
     int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
 
-    #if SDL_MAJOR_VERSION >= 2
-    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
-    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
-    gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
+    // DOS fallback if config didn't set a size
+    if (width <= 0)  width  = 640;
+    if (height <= 0) height = 480;
 
-    if (gfx->window == NULL)
-    {
-        delete gfx;
-        return NULL;
-    }
+    // No SDL window/renderer/surface
 
-    //SDL 2 are on 3th variable... i'm trying SDL_RENDERER_SOFTWARE
-    //SDL 3 are on 4th variable... i'm trying "direct3d12"
-    //set 4th var into NULL to get the fastest SDL rendering
-    gfx->renderer = SDL_CreateRendererCompat(
-        gfx->window, 
-        -1, 
-        SDL_RENDERER_ACCELERATED, 
-        NULL
-    );
-    if (gfx->renderer == NULL)
-    {
-        delete gfx;
-        return NULL;
-    }
-    SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_GameWindow.GAME_WINDOW_WIDTH_REAL, g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
-    gfx->framebufferTexture = framebufferTexture;
-    if (framebufferTexture == NULL)    {
-        delete gfx;
-        return NULL;
-    }
-    #else
-
-    gfx->screen = SDL_SetVideoMode(
-        width,
-        height,
-        32,
-        flags
-    );
-
-    if (!gfx->screen)
-    {
-        delete gfx;
-        return NULL;
-    }
-    #endif
-
-    // Can't init on header, init on creation instead
-    gfx->boundTexture=NULL;
-    gfx->clearDepth = 1.0f;
-    gfx->useTexCoord = false;
-    gfx->useDiffuse = false;
+    gfx->boundTexture = NULL;
+    gfx->clearDepth   = 1.0f;
+    gfx->useTexCoord  = false;
+    gfx->useDiffuse   = false;
 
     gfx->model.Identity();
     gfx->view.Identity();
@@ -107,6 +42,14 @@ GfxInterface *Software::Init()
 
     gfx->framebuffer = new u32[width * height];
     gfx->depthBuffer = new f32[width * height];
+
+    if (!gfx->framebuffer || !gfx->depthBuffer)
+    {
+        delete[] gfx->framebuffer;
+        delete[] gfx->depthBuffer;
+        delete gfx;
+        return NULL;
+    }
 
     gfx->noVertexBuffer =
         g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_VERTEX_BUF);
@@ -118,78 +61,45 @@ GfxInterface *Software::Init()
 }
 
 bool Software::GameLoop(){
-    SDL_Event e;
-
-    while (SDL_PollEvent(&e))
+    if (kbhit())
     {
-        if (e.type == SDL_QUIT)
+        int key = getch();
+
+        if (key == 27)
         {
             return false;
         }
     }
+
     return true;
 }
 
 
 void Software::Exit()
 {
-    #if SDL_MAJOR_VERSION >= 2
-    if (this->renderer)
+    if (framebuffer)
     {
-        SDL_DestroyRenderer(this->renderer);
-        this->renderer = NULL;
+        delete[] framebuffer;
+        framebuffer = NULL;
     }
-    if (this->window)
-    {
-        SDL_DestroyWindow(this->window);
-        this->window = NULL;
-    }
-    if (this->framebufferTexture)
-    {
-        SDL_DestroyTexture(this->framebufferTexture);
-        this->framebufferTexture = NULL;
-    }
-    if (this->framebuffer)    {
-        delete[] this->framebuffer;
-        this->framebuffer = NULL;
-    }
-    if (this->depthBuffer)
-    {
-        delete[] this->depthBuffer;
-        this->depthBuffer = NULL;
-    }
-    #else
-    delete[] framebuffer;
-    framebuffer = NULL;
 
-    delete[] depthBuffer;
-    depthBuffer = NULL;
-
-    SDL_Quit();
-    #endif
+    if (depthBuffer)
+    {
+        delete[] depthBuffer;
+        depthBuffer = NULL;
+    }
 }
 
 void Software::SwapBuffers()
 {
-    #if SDL_MAJOR_VERSION >= 2
-    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, g_GameWindow.GAME_WINDOW_WIDTH_REAL * sizeof(u32));
-    SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-    #else
-    SDL_LockSurface(screen);
     const int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
     const int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
-    for (int y = 0; y < height; y++)
-    {
-        memcpy(
-            (u8*)screen->pixels + y * screen->pitch,
-            framebuffer + y * width,
-            width * sizeof(u32)
-        );
-    }
-    SDL_UnlockSurface(screen);
-    SDL_Flip(screen);
-    #endif
+
+    memcpy(
+        g_VesaLFB,
+        framebuffer,
+        width * height * sizeof(u32)
+    );
 }
 
 void Software::SetFogRange(f32 nearPlane, f32 farPlane)
@@ -254,18 +164,12 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
     switch (type) {
         case MATRIX_MODEL:
             model = matrix;
-            printf("mvp calc model\n");
-            mvp = projection * (model * view);
             break;
         case MATRIX_VIEW:
             view = matrix;
-            printf("mvp calc view\n");
-            mvp = projection * (model * view);
             break;
         case MATRIX_PROJECTION:
             projection = matrix;
-            printf("mvp calc projection\n");
-            mvp = projection * (model * view);
             break;
         case MATRIX_TEXTURE:
             textureMatrix = matrix;
@@ -532,34 +436,16 @@ inline ZunVec3 Software::ProjectToNDC(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p,
     return v;
 }
 
-inline ZunVec2 Software::ProjectToNDCZunvec2(ZunVec3 vertex) {
+inline ZunVec2 ProjectToNDCZunvec2(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p) {
+    ZunVec4 clip = mv * ZunVec4(vertex, 1.0f);
+    clip = p * clip;
 
-    //i bring calculation matrix here, remove z usages
-    //change this calculation=>ZunVec4 clip = mv * ZunVec4(vertex, 1.0f);
-    ZunVec2 v;
-
-    v.x =
-        mvp.m[0][0] * vertex.x +
-        mvp.m[1][0] * vertex.y +
-        mvp.m[2][0] * vertex.z +
-        mvp.m[3][0];
-
-    v.y =
-        mvp.m[0][1] * vertex.x +
-        mvp.m[1][1] * vertex.y +
-        mvp.m[2][1] * vertex.z +
-        mvp.m[3][1];
-
-    f32 w =
-        mvp.m[0][3] * vertex.x +
-        mvp.m[1][3] * vertex.y +
-        mvp.m[2][3] * vertex.z +
-        mvp.m[3][3];
-
-    if (w > 0){
-        v.x /= w;
-        v.y /= w;
+    if (clip.w > 0){
+        clip.x /= clip.w;
+        clip.y /= clip.w;
     }
+
+    ZunVec2 v = { clip.x, clip.y };
     return v;
 }
 
@@ -577,7 +463,7 @@ inline ZunVec3 Software::NDCToScreen(ZunVec3 vertex) {
     return screen;
 }
 
-inline ZunVec2 Software::NDCToScreenZunVec2(ZunVec2 vertex) {
+inline ZunVec2 NDCToScreenZunVec2(ZunVec2 vertex,i32 viewport[4]) {
     ZunVec2 screen;
     screen.x = (vertex.x + 1) / 2.0f * viewport[2] + viewport[0];
     screen.y = (1 - (vertex.y + 1) / 2.0f) * viewport[3] + viewport[1];
@@ -626,6 +512,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     u32 index = start;
     u32 last_index = start + count;
     if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
+    ZunMatrix modelview = view * model;
 
     //i move this outside, why this is inside?
     const f32 precompInvFogDif = 1.0f/(fogFar - fogNear);
@@ -650,9 +537,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         // ZunVec3 v2 = ProjectToNDC(*(ZunVec3*)((u8*)vertexData + vertexStride * (index+2)),modelview,projection,viewZ2,invw2);
 
         //pre calculate
-        ZunVec2 v0 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * index));
-        ZunVec2 v1 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+1)));
-        ZunVec2 v2 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+2)));
+        ZunVec2 v0 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * index),modelview,projection);
+        ZunVec2 v1 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+1)),modelview,projection);
+        ZunVec2 v2 = ProjectToNDCZunvec2(*(ZunVec3*)(vData + vertexStride * (index+2)),modelview,projection);
 
         ZunVec2 tc0, tc1, tc2;
         Diffuse diffuse0, diffuse1, diffuse2;
@@ -688,18 +575,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         // ndcZ0 = v0.z;
         // ndcZ1 = v1.z;
         // ndcZ2 = v2.z;
-        v0 = NDCToScreenZunVec2(v0);
-        v1 = NDCToScreenZunVec2(v1);
-        v2 = NDCToScreenZunVec2(v2);
-
-        // immediately check area
-        f32 area = EdgeFunctionZunVec2(v0, v1, v2);
-
-        if (area == 0.0f)
-        {
-            index += increment;
-            continue;
-        }
+        v0 = NDCToScreenZunVec2(v0,viewport);
+        v1 = NDCToScreenZunVec2(v1,viewport);
+        v2 = NDCToScreenZunVec2(v2,viewport);
 
         i32 xmin = ZUN_MAX(viewport[0],(i32)floor(ZUN_MIN3(v0.x, v1.x, v2.x)));
         i32 xmax = ZUN_MIN(viewport[0] + viewport[2] - 1,(i32)ceil(ZUN_MAX3(v0.x, v1.x, v2.x)));
@@ -713,6 +591,14 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             EdgeFunctionZunVec2(v2, v0, vP),
             EdgeFunctionZunVec2(v0, v1, vP)
         };
+
+        f32 area = EdgeFunctionZunVec2(v0, v1, v2);
+
+        if (area == 0.0f)
+        {
+            index += increment;
+            continue;
+        }
 
         ZunVec3 e_dx = {
             v1.y - v2.y,
@@ -732,30 +618,30 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const ZunVec3 w_dx = e_dx * invarea;
         const ZunVec3 w_dy = e_dy * invarea;
 
-        const f32 invArea = 1.0f / area;
+        const float invArea = 1.0f / area;
 
         // remove ZunVec2 struct usages (is this barycentrics?)
-        const f32 w0_dx = w_dx.x;
-        const f32 w1_dx = w_dx.y;
-        const f32 w2_dx = w_dx.z;
+        const float w0_dx = w_dx.x;
+        const float w1_dx = w_dx.y;
+        const float w2_dx = w_dx.z;
 
-        const f32 w0_dy = w_dy.x;
-        const f32 w1_dy = w_dy.y;
-        const f32 w2_dy = w_dy.z;
+        const float w0_dy = w_dy.x;
+        const float w1_dy = w_dy.y;
+        const float w2_dy = w_dy.z;
 
         // starting barycentrics
-        f32 w0_row = edges.x * invArea;
-        f32 w1_row = edges.y * invArea;
-        f32 w2_row = edges.z * invArea;
+        float w0_row = edges.x * invArea;
+        float w1_row = edges.y * invArea;
+        float w2_row = edges.z * invArea;
 
         for (int y = ymin; y <= ymax; ++y,
             w0_row += w0_dy,
             w1_row += w1_dy,
             w2_row += w2_dy)
         {
-            f32 w0 = w0_row;
-            f32 w1 = w1_row;
-            f32 w2 = w2_row;
+            float w0 = w0_row;
+            float w1 = w1_row;
+            float w2 = w2_row;
 
             int rowOffset = y * g_GameWindow.GAME_WINDOW_WIDTH_REAL;
 
@@ -768,23 +654,32 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                 if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
                 {
                     const int pixel = rowOffset + x;
+
+                    // INTERPOLATED UV (inline)
+                    int u, v;
+
+                    if (useTexCoord)
+                    {
+                        float iu =
+                            tc0.x * w0 +
+                            tc1.x * w1 +
+                            tc2.x * w2;
+
+                        float iv =
+                            tc0.y * w0 +
+                            tc1.y * w1 +
+                            tc2.y * w2;
+
+                        u = (int)iu;
+                        v = (int)iv;
+                    }
+
                     // diffuse... (but remove everything)
                     ZunColor src;
 
                     if (useTexCoord)
                     {
-                        //directly inside
-                        src = texels[
-                            // (v & (texH - 1))
-                            ((int)(tc0.y * w0 +
-                            tc1.y * w1 +
-                            tc2.y * w2) & (texH-1))
-                             * texW + 
-                            //  (u & (texW - 1))
-                             ((int)(tc0.x * w0 +
-                            tc1.x * w1 +
-                            tc2.x * w2) & (texW-1))
-                        ];
+                        src = texels[(v & (texH - 1)) * texW + (u & (texW - 1))];
                     }
                     else
                     {
