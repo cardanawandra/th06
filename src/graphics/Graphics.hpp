@@ -3,7 +3,8 @@
 #endif
 
 #ifdef NO_SDL
-    #include "graphics/FixedFunctionGLWIN32.hpp"
+    #include "graphics/Software.hpp"
+    // #include "graphics/FixedFunctionGLWIN32.hpp"
     #ifdef USE_SFML
         #include "graphics/FixedFunctionGLSFML.hpp"
     #endif

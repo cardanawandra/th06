@@ -30,30 +30,31 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
-    #ifdef RENDER_SOFTWARE
     {"Software fallback (VERY SLOW)", Software::Init},
-    #endif
-    #ifdef RENDER_HARDWARE
-    // {"Hardware renderer (VERY PORTABLE)", Hardware::Init},
-    #endif
-    #ifdef RENDER_WEBGL
-    {"GL(ES) 2.0 / WebGL", WebGL::Create},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_DX2
-    {"Fixed function DX2", FixedFunctionDX2::Init},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_GL_SFML
-    {"Fixed function GL SFML", FixedFunctionGLSFML::Init},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
-    {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
-    #endif
-    #ifdef RENDER_FIXED_FUNCTION_GL
-    {"Fixed function GL(ES)", FixedFunctionGL::Init},
-    #endif
-    #ifdef RENDER_SOFTWARE
-    {"Software fallback (VERY SLOW)", Software::Init},
-    #endif
+    // #ifdef RENDER_SOFTWARE
+    // {"Software fallback (VERY SLOW)", Software::Init},
+    // #endif
+    // #ifdef RENDER_HARDWARE
+    // // {"Hardware renderer (VERY PORTABLE)", Hardware::Init},
+    // #endif
+    // #ifdef RENDER_WEBGL
+    // {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    // #endif
+    // #ifdef RENDER_FIXED_FUNCTION_DX2
+    // {"Fixed function DX2", FixedFunctionDX2::Init},
+    // #endif
+    // #ifdef RENDER_FIXED_FUNCTION_GL_SFML
+    // {"Fixed function GL SFML", FixedFunctionGLSFML::Init},
+    // #endif
+    // #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
+    // {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
+    // #endif
+    // #ifdef RENDER_FIXED_FUNCTION_GL
+    // {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    // #endif
+    // #ifdef RENDER_SOFTWARE
+    // {"Software fallback (VERY SLOW)", Software::Init},
+    // #endif
 };
 
 RenderResult GameWindow::Render()
@@ -251,8 +252,8 @@ void GameWindow::CreateGameWindow()
             LOG_COMPAT("Failed renderer backend %s\n", s_RenderBackends[i].name);
         }
     }
-    if(g_GameWindow.GAME_WINDOW_REFRESH_RATE<60){
-        if(g_GameWindow.GAME_WINDOW_REFRESH_RATE<30){
+    if(GAME_WINDOW_REFRESH_RATE<60){
+        if(GAME_WINDOW_REFRESH_RATE<30){
             g_Supervisor.cfg.frameskipConfig = 2;
         }
         else{
@@ -547,4 +548,50 @@ void GameWindow::InitD3dDevice(void)
     }
     g_Stage.skyFogNeedsSetup = 1;
     return;
+}
+
+void GameWindow::ConfigureInit()
+{
+    gameWindowRefreshRate = 60;
+    gameWindowWidthReal = GAME_WINDOW_WIDTH;
+    gameWindowHeightReal = GAME_WINDOW_HEIGHT;
+
+    viewportWidth = gameWindowWidthReal;
+    viewportHeight = gameWindowHeightReal;
+
+    widthResolutionScale = 1.0f;
+    heightResolutionScale = 1.0f;
+}
+
+void GameWindow::ConfigureView()
+{
+    viewportWidth = gameWindowWidthReal;
+    viewportHeight = gameWindowHeightReal;
+
+    if ((gameWindowWidthReal * 3) > (gameWindowHeightReal * 4))
+    {
+        viewportWidth = (u32)((gameWindowHeightReal / 3.0f) * 4.0f);
+
+#ifdef VIEWPORT_OFF_EXISTS
+        viewportOffX = (gameWindowWidthReal - viewportWidth) / 2;
+#else
+        gameWindowWidthReal = viewportWidth;
+#endif
+    }
+    else if ((gameWindowWidthReal * 3) < (gameWindowHeightReal * 4))
+    {
+        viewportHeight = (u32)((gameWindowWidthReal / 4.0f) * 3.0f);
+
+#ifdef VIEWPORT_OFF_EXISTS
+        viewportOffY = (gameWindowHeightReal - viewportHeight) / 2;
+#else
+        gameWindowHeightReal = viewportHeight;
+#endif
+    }
+
+    widthResolutionScale =
+        static_cast<f32>(viewportWidth) / GAME_WINDOW_WIDTH;
+
+    heightResolutionScale =
+        static_cast<f32>(viewportHeight) / GAME_WINDOW_HEIGHT;
 }

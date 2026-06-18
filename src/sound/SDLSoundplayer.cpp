@@ -51,7 +51,7 @@ SoundPlayer::SoundPlayer()
     terminateFlag = false;
 }
 
-void SoundPlayer::AudioCallback(void* userdata, Uint8* stream, int len)
+void SDLAudioCallback(void* userdata, uint8_t* stream, int len)
 {
     DISABLE_SOUNDPLAYER;
     i16* out = (i16*)stream;
@@ -94,7 +94,7 @@ ZunResult SoundPlayer::InitializeDSound()
     #endif
     #if SDL_MAJOR_VERSION == 1
     desired.samples = 1024;
-    desired.callback = SoundPlayer::AudioCallback;
+    desired.callback = SDLAudioCallback;
     #endif
     this->audioDev = SDL_OPEN_AUDIO_COMPAT(&desired, &obtained);
     if (this->audioDev == SDL_OPEN_AUDIO_COMPAT_ERROR){
@@ -365,8 +365,8 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     SDL_AudioCVT sampleConversionDesc;
     SDL_AudioSpec wavFormat;
     u8 *wavRawData;
-    u8 *wavRawSamples;
-    u32 wavRawSampleByteCount;
+    uint8_t *wavRawSamples;
+    uint32_t wavRawSampleByteCount;
 
     LOG_COMPAT("load sound 2\n");
     // soundBufMutex.lock();
@@ -442,7 +442,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
                           44100) == 1)
     {
         sampleConversionDesc.len = wavRawSampleByteCount;
-        sampleConversionDesc.buf = new u8[wavRawSampleByteCount * sampleConversionDesc.len_mult];
+        sampleConversionDesc.buf = new uint8_t[wavRawSampleByteCount * sampleConversionDesc.len_mult];
         memcpy(sampleConversionDesc.buf, wavRawSamples, wavRawSampleByteCount);
 
         SDL_ConvertAudio(&sampleConversionDesc);
@@ -696,12 +696,12 @@ int SDLCALL SoundPlayer::BackgroundMusicPlayerThread(void* data)
     SoundPlayer* self = (SoundPlayer*)data;
 
     u32 latencyLimit = 14700; // ~5 frames
-    u64 samplesSent = 0;
-    u64 startTick = GET_TICKS();
+    u32 samplesSent = 0;
+    u32 startTick = GET_TICKS();
 
     while (1)
     {
-        u64 curTicks = GET_TICKS();
+        u32 curTicks = GET_TICKS();
 
         // Keep slightly more than 1 frame's worth of samples in the audio buffer at all times
         i32 targetSamples =

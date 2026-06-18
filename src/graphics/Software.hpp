@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef NO_SDL
 #include <SDL.h>
+#endif
 #define RENDER_SOFTWARE true
 
 #include "AnmManager.hpp"
@@ -9,8 +11,28 @@
 #include <memory>
 #include <stddef.h>
 
+struct ZunRGBA {
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 a;
+};
+inline ZunRGBA ZunRGBAGet(ZunColor c) { 
+    ZunRGBA result = {
+        (c >> 16) & 0xFF,
+        (c >> 8) & 0xFF,
+        c & 0xFF,
+        c >> 24
+    };
+    return result;
+}
+
 struct Texture {
     std::vector<u32> texels; //ARGB8888
+    std::vector<u8> texR;
+    std::vector<u8> texG;
+    std::vector<u8> texB;
+    std::vector<u8> texA;
     i32 width, height;
     PixelFormat format;
     PixelDataType type;
@@ -27,9 +49,9 @@ inline u8 ZunG(ZunColor c) { return (c >> 8) & 0xFF; }
 inline u8 ZunB(ZunColor c) { return c & 0xFF; }
 
 struct Diffuse {
-    f32 r,g,b,a;
+    u8 r,g,b,a;
     Diffuse() {}
-    Diffuse(f32 r, f32 g, f32 b, f32 a) {
+    Diffuse(u8 r, u8 g, u8 b, u8 a) {
         this->r = r;
         this->g = g;
         this->b = b;
@@ -41,7 +63,7 @@ struct Diffuse {
         this->b = colorData.b;
         this->a = colorData.a;
     }
-    Diffuse operator*(const f32 mult) const
+    Diffuse operator*(const u8 mult) const
     {
         return Diffuse(this->r * mult, this->g * mult, this->b * mult, this->a * mult);
     }
@@ -50,7 +72,7 @@ struct Diffuse {
     {
         return Diffuse(this->r * mult.r, this->g * mult.g, this->b * mult.b, this->a * mult.a);
     }
-    Diffuse operator+(const f32 mult) const
+    Diffuse operator+(const u8 mult) const
     {
         return Diffuse(this->r + mult, this->g + mult, this->b + mult, this->a + mult);
     }
@@ -117,18 +139,20 @@ struct Software : GfxInterface
     virtual bool GameLoop();
 
   private:
-    std::vector<Texture*> textures;
+    std::vector<Texture> textures;
     std::vector<u32> freeTextures;
 
 
     Texture* boundTexture;// = nullptr;
 
+    #ifndef NO_SDL
     #if SDL_MAJOR_VERSION == 1
     SDL_Surface* screen;
     #else
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* framebufferTexture;
+    #endif
     #endif
     u32* framebuffer;
     f32* depthBuffer;
@@ -138,13 +162,16 @@ struct Software : GfxInterface
     f32 clearDepth;// = 1;
     f32 fogNear;
     f32 fogFar;
-    ZunColor fogColor;
+    ZunRGBA fogColor;
+    f32 precompFogScale;
+    f32 precompFogBias;
+    
     f32 depthNear, depthFar;
     bool depthMask;
     DepthFunc depthFunc;
     bool useDepthTest;
 
-    ZunColor textureFactor;
+    ZunRGBA textureFactor;
     BlendMode blendMode;
 
     ZunMatrix model;
@@ -172,7 +199,7 @@ struct Software : GfxInterface
     ColorOp colorOp;
 
     inline ZunVec3 ProjectToNDC(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p, f32 &viewZ, f32 &W);
-    inline ZunVec2 ProjectToNDCZunvec2(ZunVec3 vertex);
+    inline ZunVec2 ProjectToNDCZunVec2(ZunVec3 vertex, f32 &z);
     inline ZunVec2 ProjectTexCoordToNDC(ZunVec2 texCoord, ZunMatrix textureMatrix);
     inline ZunVec3 NDCToScreen(ZunVec3 vertex);
     inline ZunVec2 NDCToScreenZunVec2(ZunVec2 vertex);

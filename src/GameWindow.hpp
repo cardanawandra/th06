@@ -12,36 +12,61 @@
 //   At some point there should be a method to change this without recompiling but for now
 //   this'll do
 
-/*
-#ifndef GAME_WINDOW_WIDTH_REAL
-#define GAME_WINDOW_WIDTH_REAL (GAME_WINDOW_WIDTH)
+#ifndef GAME_WINDOW_DYNAMIC
+    #ifndef GAME_WINDOW_WIDTH_REAL
+    #define GAME_WINDOW_WIDTH_REAL (GAME_WINDOW_WIDTH)
+    #endif
+
+    #ifndef GAME_WINDOW_HEIGHT_REAL
+    #define GAME_WINDOW_HEIGHT_REAL (GAME_WINDOW_HEIGHT)
+    #endif
+
+    #define VIEWPORT_WIDTH GAME_WINDOW_WIDTH_REAL
+    #define VIEWPORT_OFF_X 0
+    #define VIEWPORT_HEIGHT GAME_WINDOW_HEIGHT_REAL
+    #define VIEWPORT_OFF_Y 0
+
+    // Aspect ratio wider than 4:3
+    #if (GAME_WINDOW_WIDTH_REAL * 3) > (GAME_WINDOW_HEIGHT_REAL * 4)
+    #undef VIEWPORT_WIDTH
+    #undef VIEWPORT_OFF_X
+    #define VIEWPORT_WIDTH ((u32)((GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f))
+    #define VIEWPORT_OFF_X ((GAME_WINDOW_WIDTH_REAL - VIEWPORT_WIDTH) / 2)
+    #elif (GAME_WINDOW_WIDTH_REAL * 3) < (GAME_WINDOW_HEIGHT_REAL * 4)
+    #undef VIEWPORT_HEIGHT
+    #undef VIEWPORT_OFF_Y
+    #define VIEWPORT_HEIGHT ((u32)((GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f))
+    #define VIEWPORT_OFF_Y ((GAME_WINDOW_HEIGHT_REAL - VIEWPORT_HEIGHT) / 2)
+    #endif
+
+    #define WIDTH_RESOLUTION_SCALE (((f32)VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH)
+    #define HEIGHT_RESOLUTION_SCALE (((f32)VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT)
+#else
+    #define GAME_WINDOW_WIDTH_REAL   g_GameWindow.gameWindowWidthReal
+    #define GAME_WINDOW_HEIGHT_REAL  g_GameWindow.gameWindowHeightReal
+
+    #define VIEWPORT_WIDTH           g_GameWindow.viewportWidth
+    #define VIEWPORT_OFF_X           g_GameWindow.viewportOffX
+    #define VIEWPORT_HEIGHT          g_GameWindow.viewportHeight
+    #define VIEWPORT_OFF_Y           g_GameWindow.viewportOffY
+
+    #define WIDTH_RESOLUTION_SCALE   g_GameWindow.widthResolutionScale
+    #define HEIGHT_RESOLUTION_SCALE  g_GameWindow.heightResolutionScale
+
+    #ifndef GAME_WINDOW_SCALE
+    #define GAME_WINDOW_SCALE
+    #endif
 #endif
 
-#ifndef GAME_WINDOW_HEIGHT_REAL
-#define GAME_WINDOW_HEIGHT_REAL (GAME_WINDOW_HEIGHT)
+#ifdef GAME_WINDOW_SCALE
+    #define X_WIDTH_RESOLUTION_SCALE(a) (a * WIDTH_RESOLUTION_SCALE)
+    #define X_HEIGHT_RESOLUTION_SCALE(a) (a * HEIGHT_RESOLUTION_SCALE)
+#else
+    #define X_WIDTH_RESOLUTION_SCALE(a) a
+    #define X_HEIGHT_RESOLUTION_SCALE(a) a
 #endif
 
-#define VIEWPORT_WIDTH GAME_WINDOW_WIDTH_REAL
-#define VIEWPORT_OFF_X 0
-#define VIEWPORT_HEIGHT GAME_WINDOW_HEIGHT_REAL
-#define VIEWPORT_OFF_Y 0
-
-// Aspect ratio wider than 4:3
-#if (GAME_WINDOW_WIDTH_REAL * 3) > (GAME_WINDOW_HEIGHT_REAL * 4)
-#undef VIEWPORT_WIDTH
-#undef VIEWPORT_OFF_X
-#define VIEWPORT_WIDTH ((u32)((GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f))
-#define VIEWPORT_OFF_X ((GAME_WINDOW_WIDTH_REAL - VIEWPORT_WIDTH) / 2)
-#elif (GAME_WINDOW_WIDTH_REAL * 3) < (GAME_WINDOW_HEIGHT_REAL * 4)
-#undef VIEWPORT_HEIGHT
-#undef VIEWPORT_OFF_Y
-#define VIEWPORT_HEIGHT ((u32)((GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f))
-#define VIEWPORT_OFF_Y ((GAME_WINDOW_HEIGHT_REAL - VIEWPORT_HEIGHT) / 2)
-#endif
-
-#define WIDTH_RESOLUTION_SCALE (((f32)VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH)
-#define HEIGHT_RESOLUTION_SCALE (((f32)VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT)
-*/
+#define GAME_WINDOW_REFRESH_RATE g_GameWindow.gameWindowRefreshRate
 
 enum RenderResult
 {
@@ -68,64 +93,21 @@ struct GameWindow
     i32 powerOffActive;
     u32 renderBackendIndex;
 
-    i32 GAME_WINDOW_REFRESH_RATE;
+    i32 gameWindowRefreshRate;
 
-    i32 GAME_WINDOW_WIDTH_REAL;
-    i32 GAME_WINDOW_HEIGHT_REAL;
-    i32 VIEWPORT_WIDTH;
-    i32 VIEWPORT_OFF_X;
-    i32 VIEWPORT_HEIGHT;
-    i32 VIEWPORT_OFF_Y;
+    i32 gameWindowWidthReal;
+    i32 gameWindowHeightReal;
 
-    f32 WIDTH_RESOLUTION_SCALE;
-    f32 HEIGHT_RESOLUTION_SCALE;
+    i32 viewportWidth;
+    i32 viewportOffX;
+    i32 viewportHeight;
+    i32 viewportOffY;
 
-    void CONFIGURE_INIT(){
-        this->GAME_WINDOW_REFRESH_RATE = 60;
-        this->GAME_WINDOW_WIDTH_REAL = GAME_WINDOW_WIDTH;
-        this->GAME_WINDOW_HEIGHT_REAL = GAME_WINDOW_HEIGHT;
-        this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
-        this->VIEWPORT_HEIGHT = this->GAME_WINDOW_HEIGHT_REAL;
-        this->WIDTH_RESOLUTION_SCALE = 1;
-        this->HEIGHT_RESOLUTION_SCALE = 1;
-    }
-    void CONFIGURE_VIEW()
-    {
-        // stop rescaling
-        if(this->GAME_WINDOW_WIDTH_REAL>1280){
-            this->GAME_WINDOW_WIDTH_REAL = 1280;
-            this->GAME_WINDOW_HEIGHT_REAL = 720;
-        }
-        if(this->GAME_WINDOW_HEIGHT_REAL>720){
-            this->GAME_WINDOW_WIDTH_REAL = 1280;
-            this->GAME_WINDOW_HEIGHT_REAL = 720;
-        }
+    f32 widthResolutionScale;
+    f32 heightResolutionScale;
 
-        this->VIEWPORT_WIDTH = this->GAME_WINDOW_WIDTH_REAL;
-        this->VIEWPORT_HEIGHT = this->GAME_WINDOW_HEIGHT_REAL;
-
-        if ((this->GAME_WINDOW_WIDTH_REAL * 3) > (this->GAME_WINDOW_HEIGHT_REAL * 4))
-        {
-            this->VIEWPORT_WIDTH = (u32)((this->GAME_WINDOW_HEIGHT_REAL / 3.0f) * 4.0f);
-            #ifdef VIEWPORT_OFF_EXISTS
-            this->VIEWPORT_OFF_X = ((this->GAME_WINDOW_WIDTH_REAL - this->VIEWPORT_WIDTH) / 2);
-            #else
-            this->GAME_WINDOW_WIDTH_REAL = this->VIEWPORT_WIDTH;
-            #endif
-        }
-        else if ((this->GAME_WINDOW_WIDTH_REAL * 3) < (this->GAME_WINDOW_HEIGHT_REAL * 4))
-        {
-            this->VIEWPORT_HEIGHT = (u32)((this->GAME_WINDOW_WIDTH_REAL / 4.0f) * 3.0f);
-            #ifdef VIEWPORT_OFF_EXISTS
-            this->VIEWPORT_OFF_Y = ((this->GAME_WINDOW_HEIGHT_REAL - this->VIEWPORT_HEIGHT) / 2);
-            #else
-            this->GAME_WINDOW_HEIGHT_REAL = this->VIEWPORT_HEIGHT;
-            #endif
-        }
-
-        this->WIDTH_RESOLUTION_SCALE = ((f32)this->VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH;
-        this->HEIGHT_RESOLUTION_SCALE = ((f32)this->VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT;
-    }
+    void ConfigureInit();
+    void ConfigureView();
 };
 
 extern GameWindow g_GameWindow;

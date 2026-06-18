@@ -43,13 +43,13 @@ GfxInterface *FixedFunctionGL::Init()
     }
 
     LOG_COMPAT("FixedFunctionGL::Init 4\n");
-    g_GameWindow.CONFIGURE_INIT();
+    g_GameWindow.ConfigureInit();
     #ifdef __ANDROID__
-    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL, &g_GameWindow.GAME_WINDOW_REFRESH_RATE);
+    GetWindowSize(&GAME_WINDOW_WIDTH_REAL,&GAME_WINDOW_HEIGHT_REAL, &GAME_WINDOW_REFRESH_RATE);
     #endif
-    g_GameWindow.CONFIGURE_VIEW();
-    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    g_GameWindow.ConfigureView();
+    i32 width=GAME_WINDOW_WIDTH_REAL;
+    i32 height=GAME_WINDOW_HEIGHT_REAL;
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
 

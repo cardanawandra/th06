@@ -74,10 +74,10 @@ GfxInterface *FixedFunctionDX2::Init()
     RegisterClass(&wc);
 
     // NO SDL PROCESSING
-    g_GameWindow.CONFIGURE_INIT();
-    g_GameWindow.CONFIGURE_VIEW();
-    int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    g_GameWindow.ConfigureInit();
+    g_GameWindow.ConfigureView();
+    int width  = GAME_WINDOW_WIDTH_REAL;
+    int height = GAME_WINDOW_HEIGHT_REAL;
 
     HWND hwnd = CreateWindowEx(
         0,

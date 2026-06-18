@@ -66,7 +66,7 @@ bool IsAssetPath(const char *path)
 
     return false;
 }
-void Resolve(char *outBuf, size_t outBufSize, const char *path)
+void Resolve(char *outBuf, int outBufSize, const char *path)
 {
     if (!path || !*path)
     {

@@ -64,11 +64,11 @@ GfxInterface* FixedFunctionGLWIN32::Init()
 
     LOG_COMPAT("FixedFunctionGL::Init 2\n");
 
-    g_GameWindow.CONFIGURE_INIT();
-    g_GameWindow.CONFIGURE_VIEW();
+    g_GameWindow.ConfigureInit();
+    g_GameWindow.ConfigureView();
 
-    int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    int width  = GAME_WINDOW_WIDTH_REAL;
+    int height = GAME_WINDOW_HEIGHT_REAL;
 
     DWORD style = WS_OVERLAPPEDWINDOW;
 

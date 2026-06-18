@@ -342,15 +342,13 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     g_AnmManager->STB_FillRect(g_TextBufferSurface, &finalCopySrc, 0);
 
+    i16 surfaceW = 1024;
+    i16 surfaceH = 128;
     if (shadowColor != COLOR_WHITE)
     {
         STB_Surface *shadowText;
 
         // Render shadow.
-
-        int surfaceW = 1024;
-        int surfaceH = 128;
-
         shadowText = g_AnmManager->STB_CreateSurface(
             surfaceW,
             surfaceH,
@@ -468,16 +466,11 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
             shadowRect.w = shadowText->w;
             shadowRect.h = shadowText->h;
 
-            g_AnmManager->STB_SoftStretch(shadowText, NULL, g_TextBufferSurface, &shadowRect);
-
-            g_AnmManager->STB_FreeSurface(shadowText);
+            SurfaceOverwriteBlend(shadowText, g_TextBufferSurface, xPos * 2);
         }
     }
 
     STB_Surface *regularText;
-
-    int surfaceW = 1024;
-    int surfaceH = 128;
 
     regularText = g_AnmManager->STB_CreateSurface(
         surfaceW,

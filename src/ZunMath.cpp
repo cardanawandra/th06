@@ -10,10 +10,10 @@
 #include "GameWindow.hpp"
 
 void ZunViewport::Set() const{
-    g_GfxBackend->SetViewport(this->x * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
-                                (g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE)) -
-                                    g_GameWindow.VIEWPORT_OFF_Y,
-                                this->width * g_GameWindow.WIDTH_RESOLUTION_SCALE, this->height * g_GameWindow.HEIGHT_RESOLUTION_SCALE);
+    g_GfxBackend->SetViewport(X_WIDTH_RESOLUTION_SCALE(this->x) + VIEWPORT_OFF_X,
+                                (GAME_WINDOW_HEIGHT_REAL - (X_HEIGHT_RESOLUTION_SCALE(this->y + this->height))) -
+                                    VIEWPORT_OFF_Y,
+                                X_WIDTH_RESOLUTION_SCALE(this->width), X_HEIGHT_RESOLUTION_SCALE(this->height));
 
     g_GfxBackend->SetDepthRange(this->minZ, this->maxZ);
 }
@@ -25,10 +25,10 @@ void ZunViewport::Get() {
     g_GfxBackend->GetViewport(viewPortGet);
     g_GfxBackend->GetDepthRange(depthRangeGet);
 
-    this->x = (viewPortGet[0] - g_GameWindow.VIEWPORT_OFF_X) / g_GameWindow.WIDTH_RESOLUTION_SCALE;
-    this->y = (viewPortGet[1] - g_GameWindow.VIEWPORT_OFF_Y) / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
-    this->width = viewPortGet[2] / g_GameWindow.WIDTH_RESOLUTION_SCALE;
-    this->height = viewPortGet[3] / g_GameWindow.HEIGHT_RESOLUTION_SCALE;
+    this->x = (viewPortGet[0] - VIEWPORT_OFF_X) / WIDTH_RESOLUTION_SCALE;
+    this->y = (viewPortGet[1] - VIEWPORT_OFF_Y) / HEIGHT_RESOLUTION_SCALE;
+    this->width = viewPortGet[2] / WIDTH_RESOLUTION_SCALE;
+    this->height = viewPortGet[3] / HEIGHT_RESOLUTION_SCALE;
     this->minZ = depthRangeGet[0];
     this->maxZ = depthRangeGet[1];
 

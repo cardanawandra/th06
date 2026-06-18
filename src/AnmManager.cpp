@@ -1218,22 +1218,28 @@ void AnmManager::UpdateDirtyStates()
     LOG_COMPAT("AnmManager::UpdateDirtyStates fin\n");
 }
 
+inline float rintf_compat(float x)
+{
+    return (x >= 0.0f)
+        ? floorf(x + 0.5f)
+        : ceilf(x - 0.5f);
+}
 ZunResult AnmManager::DrawOrthographic(const AnmVm *vm, bool roundToPixel)
 {
-    float triangleX1, triangleX2, triangleY1, triangleY2;
+    f32 triangleX1, triangleX2, triangleY1, triangleY2;
     if (roundToPixel)
     {
         // In the original D3D code, 0.5 was subtracted from the final position here to center on D3D
         //   pixels. This has been changed to round to OpenGL pixels. See comment in inverseViewportMatrix()
         //   for a more detailed explanation and porting notes.
 
-        g_PrimitivesToDrawVertexBuf[0].position.x = (float)((int)(g_PrimitivesToDrawVertexBuf[0].position.x));
+        g_PrimitivesToDrawVertexBuf[0].position.x = rintf_compat(g_PrimitivesToDrawVertexBuf[0].position.x);
         g_PrimitivesToDrawVertexBuf[2].position.x = g_PrimitivesToDrawVertexBuf[0].position.x;
-        g_PrimitivesToDrawVertexBuf[1].position.x = (float)((int)(g_PrimitivesToDrawVertexBuf[1].position.x));
+        g_PrimitivesToDrawVertexBuf[1].position.x = rintf_compat(g_PrimitivesToDrawVertexBuf[1].position.x);
         g_PrimitivesToDrawVertexBuf[3].position.x = g_PrimitivesToDrawVertexBuf[1].position.x;
-        g_PrimitivesToDrawVertexBuf[0].position.y = (float)((int)(g_PrimitivesToDrawVertexBuf[0].position.y));
+        g_PrimitivesToDrawVertexBuf[0].position.y = rintf_compat(g_PrimitivesToDrawVertexBuf[0].position.y);
         g_PrimitivesToDrawVertexBuf[1].position.y = g_PrimitivesToDrawVertexBuf[0].position.y;
-        g_PrimitivesToDrawVertexBuf[2].position.y = (float)((int)(g_PrimitivesToDrawVertexBuf[2].position.y));
+        g_PrimitivesToDrawVertexBuf[2].position.y = rintf_compat(g_PrimitivesToDrawVertexBuf[2].position.y);
         g_PrimitivesToDrawVertexBuf[3].position.y = g_PrimitivesToDrawVertexBuf[2].position.y;
     }
     g_PrimitivesToDrawVertexBuf[0].position.z = g_PrimitivesToDrawVertexBuf[1].position.z =
@@ -2487,21 +2493,21 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
     this->SetCurrentTexture(this->textures[textureId].handle);
 
     backBufferPixels =
-        new u8[((u32)(width * g_GameWindow.WIDTH_RESOLUTION_SCALE + 1)) * ((u32)(height * g_GameWindow.HEIGHT_RESOLUTION_SCALE + 1)) * 4];
+        new u8[((u32)(X_WIDTH_RESOLUTION_SCALE(width) + 1)) * ((u32)(X_HEIGHT_RESOLUTION_SCALE(height) + 1)) * 4];
 
     g_GfxBackend->ReadPixels(
-        left * g_GameWindow.WIDTH_RESOLUTION_SCALE + g_GameWindow.VIEWPORT_OFF_X,
-        g_GameWindow.GAME_WINDOW_HEIGHT_REAL - ((top + height) * g_GameWindow.HEIGHT_RESOLUTION_SCALE) - g_GameWindow.VIEWPORT_OFF_Y,
-        width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
-        height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
+        X_WIDTH_RESOLUTION_SCALE(left) + VIEWPORT_OFF_X,
+        GAME_WINDOW_HEIGHT_REAL - (X_HEIGHT_RESOLUTION_SCALE(top + height)) - VIEWPORT_OFF_Y,
+        X_WIDTH_RESOLUTION_SCALE(width),
+        X_HEIGHT_RESOLUTION_SCALE(height),
         backBufferPixels
     );
 
     unstretchedSurface = STB_CreateSurfaceFrom(
         backBufferPixels,
-        width * g_GameWindow.WIDTH_RESOLUTION_SCALE,
-        height * g_GameWindow.HEIGHT_RESOLUTION_SCALE,
-        width * g_GameWindow.WIDTH_RESOLUTION_SCALE * 4,
+        X_WIDTH_RESOLUTION_SCALE(width),
+        X_HEIGHT_RESOLUTION_SCALE(height),
+        X_WIDTH_RESOLUTION_SCALE(width) * 4,
         g_PixelChannels[1]
     );
     stretchedSurface = STB_CreateSurface(
@@ -2520,8 +2526,8 @@ void AnmManager::TakeScreenshot(i32 textureId, i32 left, i32 top, i32 width, i32
 
     stretchSrcRect.x = 0;
     stretchSrcRect.y = 0;
-    stretchSrcRect.h = height * g_GameWindow.HEIGHT_RESOLUTION_SCALE;
-    stretchSrcRect.w = width * g_GameWindow.WIDTH_RESOLUTION_SCALE;
+    stretchSrcRect.h = X_HEIGHT_RESOLUTION_SCALE(height);
+    stretchSrcRect.w = X_WIDTH_RESOLUTION_SCALE(width);
 
     stretchDstRect.x = 0;
     stretchDstRect.y = 0;

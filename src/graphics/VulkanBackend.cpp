@@ -203,8 +203,8 @@ GfxInterface *FixedFunctionGL::Init()
         TH_WINDOW_TITLE,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        g_GameWindow.GAME_WINDOW_WIDTH_REAL,
-        g_GameWindow.GAME_WINDOW_HEIGHT_REAL,
+        GAME_WINDOW_WIDTH_REAL,
+        GAME_WINDOW_HEIGHT_REAL,
         SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN
     );
 
@@ -244,8 +244,8 @@ GfxInterface *FixedFunctionGL::Init()
     sci.surface = surface;
     sci.minImageCount = 2;
     sci.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
-    sci.imageExtent = {(u32)g_GameWindow.GAME_WINDOW_WIDTH_REAL,
-                       (u32)g_GameWindow.GAME_WINDOW_HEIGHT_REAL};
+    sci.imageExtent = {(u32)GAME_WINDOW_WIDTH_REAL,
+                       (u32)GAME_WINDOW_HEIGHT_REAL};
 
     vkCreateSwapchainKHR(device, &sci, nullptr, &swapchain);
 

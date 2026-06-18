@@ -19,14 +19,14 @@ GfxInterface* FixedFunctionGLSFML::Init()
 
     FixedFunctionGLSFML* gfx = new FixedFunctionGLSFML();
 
-    g_GameWindow.CONFIGURE_INIT();
-    g_GameWindow.CONFIGURE_VIEW();
+    g_GameWindow.ConfigureInit();
+    g_GameWindow.ConfigureView();
 
     const unsigned width =
-        static_cast<unsigned>(g_GameWindow.GAME_WINDOW_WIDTH_REAL);
+        static_cast<unsigned>(GAME_WINDOW_WIDTH_REAL);
 
     const unsigned height =
-        static_cast<unsigned>(g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+        static_cast<unsigned>(GAME_WINDOW_HEIGHT_REAL);
 
     sf::ContextSettings settings;
     settings.depthBits = 24;

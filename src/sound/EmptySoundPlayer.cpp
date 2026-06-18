@@ -45,11 +45,6 @@ SoundPlayer::SoundPlayer()
     terminateFlag = false;
 }
 
-void SoundPlayer::AudioCallback(void* userdata, u8* stream, int len)
-{
-    DISABLE_SOUNDPLAYER;
-}
-
 ZunResult SoundPlayer::InitializeDSound()
 {
     DISABLE_SOUNDPLAYER_ZUN;

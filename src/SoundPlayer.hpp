@@ -89,9 +89,6 @@ struct SoundPlayer
     ZunResult LoadWav(const char *path);
     ZunResult LoadPos(const char *path);
 
-    // SDL1.2 audio system
-    static void AudioCallback(void *userdata, u8 *stream, int len);
-
     // SDL3 audio system
     AUDIO_STREAM_COMPAT stream;
 

@@ -34,13 +34,13 @@ GfxInterface *Hardware::Init()
         flags |= SDL_FULLSCREEN_COMPAT;
     }
 
-    g_GameWindow.CONFIGURE_INIT();
+    g_GameWindow.ConfigureInit();
     #ifdef __ANDROID__
-    GetWindowSize(&g_GameWindow.GAME_WINDOW_WIDTH_REAL,&g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    GetWindowSize(&GAME_WINDOW_WIDTH_REAL,&GAME_WINDOW_HEIGHT_REAL);
     #endif
-    g_GameWindow.CONFIGURE_VIEW();
-    i32 width=g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    i32 height=g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    g_GameWindow.ConfigureView();
+    i32 width=GAME_WINDOW_WIDTH_REAL;
+    i32 height=GAME_WINDOW_HEIGHT_REAL;
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
 
@@ -97,17 +97,17 @@ GfxInterface *Hardware::Init()
     gfx->projection.Identity();
     gfx->textureMatrix.Identity();
 
-    SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_GameWindow.GAME_WINDOW_WIDTH_REAL, g_GameWindow.GAME_WINDOW_HEIGHT_REAL);
+    SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GAME_WINDOW_WIDTH_REAL, GAME_WINDOW_HEIGHT_REAL);
     gfx->framebufferTexture = framebufferTexture;
     if (framebufferTexture == NULL)    {
         delete gfx;
         return NULL;
     }
 
-    u32* framebuffer = new u32[g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL];
+    u32* framebuffer = new u32[GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL];
     gfx->framebuffer = framebuffer;
 
-    f32* depthBuffer = new f32[g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL];
+    f32* depthBuffer = new f32[GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL];
     gfx->depthBuffer = depthBuffer;
 
     SDL_GPUShaderCreateInfo vertInfo = {};
@@ -389,10 +389,10 @@ void Hardware::SetClearDepth(f32 depth) {
 
 void Hardware::Clear(u32 clearBits) {
     if (clearBits & CLEAR_COLOR_BUFFER) {
-        std::fill(framebuffer, framebuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearColor);
+        std::fill(framebuffer, framebuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, clearColor);
     }
     if (clearBits & CLEAR_DEPTH_BUFFER) {
-        std::fill(depthBuffer, depthBuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearDepth);
+        std::fill(depthBuffer, depthBuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, clearDepth);
     }
 }
 
@@ -493,7 +493,7 @@ void Hardware::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixel
     u8* dst = (u8*)pixels;
     i32 pitch = width * 4;
     for (i32 row = 0; row < height; row++) {
-        const u8* src = (u8*)framebuffer + ((g_GameWindow.GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x) * 4;
+        const u8* src = (u8*)framebuffer + ((GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * GAME_WINDOW_WIDTH_REAL + x) * 4;
         memcpy(dst + row * pitch, src, pitch);
     }
 }
@@ -546,7 +546,7 @@ void Hardware::Draw(
 
 void Hardware::SwapBuffers()
 {
-    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, g_GameWindow.GAME_WINDOW_WIDTH_REAL * sizeof(u32));
+    SDL_UpdateTexture(framebufferTexture, NULL, framebuffer, GAME_WINDOW_WIDTH_REAL * sizeof(u32));
     SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
 }

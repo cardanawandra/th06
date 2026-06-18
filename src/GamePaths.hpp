@@ -43,7 +43,7 @@ bool IsAssetPath(const char *path);
 // Resolve `path` into `outBuf`.
 // If IsAssetPath(path), copies the path unchanged (SDL_RWFROMFILE_COMPAT reads assets).
 // Otherwise, prepends GetUserPath().
-void Resolve(char *outBuf, size_t outBufSize, const char *path);
+void Resolve(char *outBuf, int outBufSize, const char *path);
 
 // Convenience: ensure the user-data directory for a given path exists.
 // E.g. for "replay/th6_01.rpy", creates GetUserPath() + "replay/".

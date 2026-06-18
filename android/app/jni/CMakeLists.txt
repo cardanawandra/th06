@@ -119,6 +119,15 @@ target_compile_options(main PRIVATE
     -Wno-extra-qualification
     -Wno-unknown-warning-option
     -Wno-unknown-pragmas
+
+    -Wno-unused-value
+    -Wno-macro-redefined
+    -Wno-null-conversion
+    -Wno-inconsistent-missing-override
+    -Wno-switch
+    -Wno-null-arithmetic
+    -Wno-constant-conversion
+
     -Wno-address-of-temporary  # MSVC allows taking address of temporaries
     -Wno-format-security       # NDK promotes this to error; project has safe patterns
 )

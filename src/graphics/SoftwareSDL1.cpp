@@ -26,20 +26,20 @@ GfxInterface *Software::Init()
         flags |= SDL_FULLSCREEN;
     }
 
-    g_GameWindow.CONFIGURE_INIT();
+    g_GameWindow.ConfigureInit();
 
 #ifdef __ANDROID__
     GetWindowSize(
-        &g_GameWindow.GAME_WINDOW_WIDTH_REAL,
-        &g_GameWindow.GAME_WINDOW_HEIGHT_REAL,
-        &g_GameWindow.GAME_WINDOW_REFRESH_RATE
+        &GAME_WINDOW_WIDTH_REAL,
+        &GAME_WINDOW_HEIGHT_REAL,
+        &GAME_WINDOW_REFRESH_RATE
     );
 #endif
 
-    g_GameWindow.CONFIGURE_VIEW();
+    g_GameWindow.ConfigureView();
 
-    int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    int width  = GAME_WINDOW_WIDTH_REAL;
+    int height = GAME_WINDOW_HEIGHT_REAL;
 
     gfx->screen = SDL_SetVideoMode(
         width,
@@ -100,8 +100,8 @@ void Software::SwapBuffers()
 {
     SDL_LockSurface(screen);
 
-    const int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    const int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    const int width  = GAME_WINDOW_WIDTH_REAL;
+    const int height = GAME_WINDOW_HEIGHT_REAL;
 
     for (int y = 0; y < height; y++)
     {
@@ -243,10 +243,10 @@ void Software::SetClearDepth(f32 depth) {
 
 void Software::Clear(u32 clearBits) {
     if (clearBits & CLEAR_COLOR_BUFFER) {
-        std::fill(framebuffer, framebuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearColor);
+        std::fill(framebuffer, framebuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, clearColor);
     }
     if (clearBits & CLEAR_DEPTH_BUFFER) {
-        std::fill(depthBuffer, depthBuffer + g_GameWindow.GAME_WINDOW_WIDTH_REAL * g_GameWindow.GAME_WINDOW_HEIGHT_REAL, clearDepth);
+        std::fill(depthBuffer, depthBuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, clearDepth);
     }
 }
 
@@ -458,7 +458,7 @@ void Software::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixel
     u8* dst = (u8*)pixels;
     i32 pitch = width * 4;
     for (i32 row = 0; row < height; row++) {
-        const u8* src = (u8*)framebuffer + ((g_GameWindow.GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x) * 4;
+        const u8* src = (u8*)framebuffer + ((GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * GAME_WINDOW_WIDTH_REAL + x) * 4;
         memcpy(dst + row * pitch, src, pitch);
     }
 }
@@ -638,7 +638,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             Diffuse dif = dif0;
             for (int x = xmin; x <= xmax; x++, w += w_dx, uv1 += uv_dx, invw += invw_dx, ndcZ += ndcZ_dx, fogZ += fogZ_dx, dif += dif_dx) {
                 if (w.x >= 0 && w.y >= 0 && w.z >= 0) {
-                    const i32 pixelCoord = y * g_GameWindow.GAME_WINDOW_WIDTH_REAL + x;
+                    const i32 pixelCoord = y * GAME_WINDOW_WIDTH_REAL + x;
                     const f32 clipW = 1.0f / invw; //bad
                     i32 u = uv1.x * clipW;
                     i32 v = uv1.y * clipW;

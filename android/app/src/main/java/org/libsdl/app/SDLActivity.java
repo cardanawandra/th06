@@ -597,12 +597,45 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
         ensureAssetFile(this, "background.jpg", "background.jpg");
         ensureAssetFile(this, "background.jpg", "censor.jpg");
+        boolean hasTargetFile = false;
         File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
 
-        if (!targetFile.exists()) {
+        if (targetFile.exists()) {
+            hasTargetFile = true;
+        }
+        if(!hasTargetFile){
+            targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.dat");
+            if (targetFile.exists()) {
+                hasTargetFile = true;
+            }
+        }
+        if(!hasTargetFile){
+            targetFile = new File(getExternalFilesDir(null), "紅魔郷cmZz.dat");
+            if (targetFile.exists()) {
+                hasTargetFile = true;
+            }
+        }
+        if(!hasTargetFile){
+            targetFile = new File(getExternalFilesDir(null), "CM.DAT");
+            if (targetFile.exists()) {
+                hasTargetFile = true;
+            }
+        }
+        if(!hasTargetFile){
+            targetFile = new File(getExternalFilesDir(null), "CM.dat");
+            if (targetFile.exists()) {
+                hasTargetFile = true;
+            }
+        }
+        if(!hasTargetFile){
+            targetFile = new File(getExternalFilesDir(null), "cm.dat");
+            if (targetFile.exists()) {
+                hasTargetFile = true;
+            }
+        }
+        if(!hasTargetFile){
             openFolderPicker();
         }
-        
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);
         Log.v(TAG, "onCreate()");
@@ -772,12 +805,19 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
 
         // Arcade ViewPort
-        WindowMetrics metrics =
-                getWindowManager().getCurrentWindowMetrics();
+        int screenW;
+        int screenH;
 
-        int screenW = metrics.getBounds().width();
-        int screenH = metrics.getBounds().height();
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowMetrics metrics = getWindowManager().getCurrentWindowMetrics();
+            screenW = metrics.getBounds().width();
+            screenH = metrics.getBounds().height();
+        } else {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            screenW = displayMetrics.widthPixels;
+            screenH = displayMetrics.heightPixels;
+        }
         float aspect = 4.0f / 3.0f;
 
         int viewportW = (int)(screenH * aspect);

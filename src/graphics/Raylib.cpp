@@ -135,19 +135,19 @@ GfxInterface *WebGL::Create()
     // ----------------------------------------------------
     // Configure game window (your engine logic)
     // ----------------------------------------------------
-    g_GameWindow.CONFIGURE_INIT();
+    g_GameWindow.ConfigureInit();
 
 #ifdef __ANDROID__
     GetWindowSize(
-        &g_GameWindow.GAME_WINDOW_WIDTH_REAL,
-        &g_GameWindow.GAME_WINDOW_HEIGHT_REAL
+        &GAME_WINDOW_WIDTH_REAL,
+        &GAME_WINDOW_HEIGHT_REAL
     );
 #endif
 
-    g_GameWindow.CONFIGURE_VIEW();
+    g_GameWindow.ConfigureView();
 
-    int width  = g_GameWindow.GAME_WINDOW_WIDTH_REAL;
-    int height = g_GameWindow.GAME_WINDOW_HEIGHT_REAL;
+    int width  = GAME_WINDOW_WIDTH_REAL;
+    int height = GAME_WINDOW_HEIGHT_REAL;
 
     // ----------------------------------------------------
     // Raylib context flags (replacement for SDL GL flags)

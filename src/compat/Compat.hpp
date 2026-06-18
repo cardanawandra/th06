@@ -93,25 +93,12 @@
                 ((v & 0xFF000000UL) >> 24);
         #endif
         }
-
-        inline u64 COMPAT_Swap64(u64 v)
-        {
-        #if defined(_MSC_VER) && _MSC_VER >= 1400
-            return _byteswap_uint64(v);
-        #elif defined(__GNUC__) || defined(__clang__)
-            return __builtin_bswap64(v);
-        #else
-            return ((u64)COMPAT_Swap32((u32)v) << 32) |
-                    (u64)COMPAT_Swap32((u32)(v >> 32));
-        #endif
-        }
-
     #endif
 
     #define COMPAT_CONTROLLER_BUTTON_MAX 15 // adjust to your own enum
     #define JOYSTICK_COMPAT char
     #define JOYSTICK_COMPATOpen(a) NULL
-    #define JOYSTICK_COMPATClose()
+    #define JOYSTICK_COMPATClose(a)
     #define COMPAT_Quit() ((void)0)
     #define HIDECURSOR_COMPAT()
     #define SHOWCURSOR_COMPAT()

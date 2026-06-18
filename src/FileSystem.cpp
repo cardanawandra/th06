@@ -16,9 +16,9 @@
 #include "pbg3/Pbg3Archive.hpp"
 #include "utils.hpp"
 #include "compat/Compat.hpp"
-#ifdef __ANDROID__
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef __ANDROID__
 #include <stdio.h>
 #endif
 
@@ -127,9 +127,6 @@ void FileSystem::CreateDir(const char *path)
 #else
 #ifdef _WIN32
     _mkdir(path);
-#elif __cplusplus >= 201703L
-    auto p = filesystem::path(path);
-    filesystem::create_directory(p);
 #else
     mkdir(path, 0755);
 #endif

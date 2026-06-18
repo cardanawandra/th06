@@ -108,8 +108,8 @@ struct MidiOutput
     u32 format;
     i32 divisions;
     i32 tempo;
-    u64 elapsedMS;
-    u64 tickBase;
+    u32 elapsedMS;
+    u32 tickBase;
     MidiTrack *tracks;
     MidiDevice midiOutDev;
     MidiChannel channels[16];
@@ -119,6 +119,6 @@ struct MidiOutput
     i32 fadeOutInterval;
     i32 fadeOutElapsedMS;
     u32 loopPointTempo;
-    u64 loopPointMSCount;
-    u64 loopPointBaseTicks;
+    u32 loopPointMSCount;
+    u32 loopPointBaseTicks;
 };

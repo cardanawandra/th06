@@ -280,7 +280,7 @@ u32 MidiOutput::SetFadeOut(u32 ms)
 //   delta from SDL_GetTicks instead.
 void MidiOutput::OnTimerElapsed()
 {
-    u64 timePos;
+    u32 timePos;
     i32 trackIndex;
     bool trackLoaded;
 

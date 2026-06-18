@@ -46,8 +46,7 @@ template <typename T>
 using UIForSize = typename std::conditional<sizeof(T) == sizeof(u8), u8,
                   typename std::conditional<sizeof(T) == sizeof(u16), u16,
                   typename std::conditional<sizeof(T) == sizeof(u32), u32,
-                  typename std::conditional<sizeof(T) == sizeof(u64), u64,
-                  void>::type>::type>::type>::type;
+                  void>::type>::type>::type;
 
 // GCC-ARM without aligned access and GCC-SuperH both fail to inline a fixed-size unaligned memcpy,
 //    giving horrid codegen, but on just about every other platform, memcpy gets inlined and
@@ -120,7 +119,6 @@ static inline constexpr T bit_cast_to_size(UIForSize<T> value) {
 static constexpr inline u8  ZunByteswap(u8 in)  { return in; }
 static inline u16 ZunByteswap(u16 in) { return COMPAT_Swap16(in); }
 static inline u32 ZunByteswap(u32 in) { return COMPAT_Swap32(in); }
-static inline u64 ZunByteswap(u64 in) { return COMPAT_Swap64(in); }
 
 template <typename T>
 struct LE {

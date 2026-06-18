@@ -5,6 +5,11 @@
 #include "inttypes.hpp"
 #include "ZunColor.hpp"
 
+#ifdef __ANDROID__
+    #define GAME_WINDOW_SCALE
+    #define GAME_WINDOW_DYNAMIC
+#endif
+
 #undef TRY_RESOLVE_FUNCTION
 #undef TRY_RESOLVE_FUNCTION_GLES
 #undef INT16_MAX_COMPAT
@@ -35,7 +40,7 @@
 
     #define SDL_GL_MAKE_CURRENT_COMPAT_SUCCESS true
 
-    inline void GetWindowSize(int *w, int *h, int *r)
+    inline void GetWindowSizeF(int *w, int *h, int *r)
     {
         const SDL_DisplayMode* mode =
             SDL_GetCurrentDisplayMode(0);
@@ -188,7 +193,7 @@
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
     #define SDL_CONVERT_SURFACE_FORMAT_COMPAT SDL_ConvertSurfaceFormat
 
-    inline void GetWindowSize(int *w, int *h, int *r){
+    inline void GetWindowSizeF(int *w, int *h, int *r){
         SDL_DisplayMode mode;
         if (SDL_GetCurrentDisplayMode(0, &mode) == 0) {
             *w = mode.w;
@@ -367,8 +372,9 @@
     #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)
     #define SDL_BITSPERPIXEL_COMPAT(a) a.BitsPerPixel
     #define SDL_BYTESPERPIXEL_COMPAT(a) a.BytesPerPixel
+    #define SDL_SetHintCompat(a,b)
 
-    inline void GetWindowSize(int *w, int *h, int *r){
+    inline void GetWindowSizeF(int *w, int *h, int *r){
         const SDL_VideoInfo* info = SDL_GetVideoInfo();
         if (info)
         {
@@ -533,6 +539,11 @@
 
 
 //Controlers Compat
+#ifndef GAME_WINDOW_DYNAMIC
+#define GetWindowSize(a,b,c) GetWindowSizeF(NULL,NULL,c)
+#else
+#define GetWindowSize(a,b,c) GetWindowSizeF(a,b,c)
+#endif
 
 #define CONTROLLER_INIT_COMPAT() SDL_Init(SDL_INIT_GAMECONTROLLER_COMPAT)
 #define GET_KEYSTATE_COMPAT() SDL_GET_KEYSTATE_COMPAT()
@@ -634,4 +645,6 @@
     #undef GET_EXTERNAL_STORAGE_PATH
     #define STORAGE_INIT() SDL_Init(0)
     #define GET_EXTERNAL_STORAGE_PATH() SDL_AndroidGetExternalStoragePath()
+    #define GAME_WINDOW_SCALE
+    #define GAME_WINDOW_DYNAMIC
 #endif
