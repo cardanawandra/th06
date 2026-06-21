@@ -190,6 +190,7 @@ struct Software : GfxInterface
     ZunMatrix model;
     ZunMatrix view;
     //pre calculate
+    bool render2D;
     ZunMatrix mvp;
 
     ZunMatrix projection;

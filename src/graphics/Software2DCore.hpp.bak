@@ -77,11 +77,6 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
             view = matrix;
             break;
         case MATRIX_PROJECTION:
-            if(matrix.m[3][2] == 0.0f && matrix.m[3][3] == 1.0f){
-                render2D = true;
-                break;
-            }
-            render2D = false;
             projection = matrix;
             mvp = projection * (view * model);
             break;
@@ -482,16 +477,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     const u8* vData = (u8*)vertexData;
     #define s2dblock1\
         f32 viewZ0, viewZ1, viewZ2;\
-        ZunVec2 v0,v1,v2;\
-        if(render2D){\
-            v0 = *(ZunVec2*)(vData + vertexStride * index);\
-            v1 = *(ZunVec2*)(vData + vertexStride * (index+1));\
-            v2 = *(ZunVec2*)(vData + vertexStride * (index+2));\
-        }else{\
-            v0 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * index),viewZ0);\
-            v1 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+1)),viewZ1);\
-            v2 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+2)),viewZ2);\
-        }
+        ZunVec2 v0 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * index),viewZ0);\
+        ZunVec2 v1 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+1)),viewZ1);\
+        ZunVec2 v2 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+2)),viewZ2);
 
     //NDCToScreenZunVec2 value fetched to value_x, value_y
     // v0 = NDCToScreenZunVec2(v0); became
@@ -499,22 +487,12 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     // f32 v0_y = v0.y * screenScaleY + screenBiasY;
     // then EdgeFunctionZunVec2 became EdgeFunctionXY
     #define s2dblock2\
-        f32 v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;\
-        if(render2D){\
-            v0_x = v0.x;\
-            v0_y = v0.y;\
-            v1_x = v1.x;\
-            v1_y = v1.y;\
-            v2_x = v2.x;\
-            v2_y = v2.y;\
-        }else{\
-            v0_x = v0.x * screenScaleX + screenBiasX;\
-            v0_y = v0.y * screenScaleY + screenBiasY;\
-            v1_x = v1.x * screenScaleX + screenBiasX;\
-            v1_y = v1.y * screenScaleY + screenBiasY;\
-            v2_x = v2.x * screenScaleX + screenBiasX;\
-            v2_y = v2.y * screenScaleY + screenBiasY;\
-        }\
+        const f32 v0_x = v0.x * screenScaleX + screenBiasX;\
+        const f32 v0_y = v0.y * screenScaleY + screenBiasY;\
+        const f32 v1_x = v1.x * screenScaleX + screenBiasX;\
+        const f32 v1_y = v1.y * screenScaleY + screenBiasY;\
+        const f32 v2_x = v2.x * screenScaleX + screenBiasX;\
+        const f32 v2_y = v2.y * screenScaleY + screenBiasY;\
         const f32 area = EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y);\
         if (area == 0.0f)\
         {\
@@ -664,16 +642,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
 
     #define texCoordDeclare1\
         const ZunVec2 texDim = {(f32)(texW), (f32)(texH)};\
-        ZunVec2 tc0,tc1,tc2;\
-        if(render2D){\
-            tc0 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-            tc1 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-            tc2 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-        }else{\
-            tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
-            tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
-            tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
-        }
+        ZunVec2 tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
+        ZunVec2 tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
+        ZunVec2 tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;
 
     #define wDeclare1 w0_row += w0_dy, w1_row += w1_dy, w2_row += w2_dy
     #define wDeclare2 f32 w0 = w0_row; f32 w1 = w1_row; f32 w2 = w2_row;\
