@@ -97,9 +97,9 @@ ZunResult Player::AddedCallback(Player *p)
     }
     p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-    p->positionCenter.z = 0.49;
-    p->orbsPosition[0].z = 0.49;
-    p->orbsPosition[1].z = 0.49;
+    p->positionCenter.z = 0.49f;
+    p->orbsPosition[0].z = 0.49f;
+    p->orbsPosition[1].z = 0.49f;
     for (idx = 0; idx < ARRAY_SIZE_SIGNED(p->bombRegionSizes); idx++)
     {
         p->bombRegionSizes[idx].x = 0.0;
@@ -239,7 +239,7 @@ ChainCallbackResult Player::OnUpdate(Player *p)
                 p->playerState = PLAYER_STATE_SPAWNING;
                 p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
                 p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-                p->positionCenter.z = 0.2;
+                p->positionCenter.z = 0.2f;
                 p->invulnerabilityTimer.SetCurrent(0);
                 p->playerSprite.scaleX = 3.0;
                 p->playerSprite.scaleY = 3.0;
@@ -419,7 +419,7 @@ i32 Player::CalcDamageToEnemy(const ZunVec3 *enemyPos, const ZunVec3 *enemyHitbo
             {
                 g_AnmManager->SetAndExecuteScriptIdx(&bullet->sprite, bullet->sprite.anmFileIndex + 0x20);
                 g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_5, &bullet->position, 1, COLOR_WHITE);
-                bullet->position.z = 0.1;
+                bullet->position.z = 0.1f;
             }
             bullet->bulletState = BULLET_STATE_COLLIDED;
             bullet->velocity.x /= 8.0f;
@@ -594,7 +594,7 @@ ChainCallbackResult Player::OnDrawHighPrio(Player *p)
     }
     p->playerSprite.pos.x = g_GameManager.arcadeRegionTopLeftPos.x + p->positionCenter.x;
     p->playerSprite.pos.y = g_GameManager.arcadeRegionTopLeftPos.y + p->positionCenter.y;
-    p->playerSprite.pos.z = 0.49;
+    p->playerSprite.pos.z = 0.49f;
     if (!g_GameManager.isInRetryMenu)
     {
         g_AnmManager->DrawNoRotation(&p->playerSprite);
@@ -604,11 +604,11 @@ ChainCallbackResult Player::OnDrawHighPrio(Player *p)
             p->orbsSprite[0].pos = p->orbsPosition[0];
             p->orbsSprite[0].pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
             p->orbsSprite[0].pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
-            p->orbsSprite[0].pos.z = 0.491;
+            p->orbsSprite[0].pos.z = 0.491f;
             p->orbsSprite[1].pos = p->orbsPosition[1];
             p->orbsSprite[1].pos.x += g_GameManager.arcadeRegionTopLeftPos.x;
             p->orbsSprite[1].pos.y += g_GameManager.arcadeRegionTopLeftPos.y;
-            p->orbsSprite[1].pos.z = 0.491;
+            p->orbsSprite[1].pos.z = 0.491f;
             g_AnmManager->Draw(&p->orbsSprite[0]);
             g_AnmManager->Draw(&p->orbsSprite[1]);
         }
@@ -1065,7 +1065,7 @@ void Player::SpawnBullets(Player *p, u32 timer)
         {
             curBullet->sprite.pos.x = curBullet->position.x;
             curBullet->sprite.pos.y = curBullet->position.y;
-            curBullet->sprite.pos.z = 0.495;
+            curBullet->sprite.pos.z = 0.495f;
             curBullet->bulletState = BULLET_STATE_FIRED;
         }
         if (bulletResult == FBR_STOP_SPAWNING)
@@ -1090,8 +1090,8 @@ FireBulletResult Player::FireSingleBullet(Player *player, PlayerBullet *bullet, 
     const CharacterPowerBulletData *bulletData;
     f32 *pfVar4;
     i32 bulletFrame;
-    i32 unused;
-    i32 unused2;
+    // i32 unused;
+    // i32 unused2;
 
     while (g_GameManager.currentPower >= powerData->power)
     {
@@ -1246,7 +1246,7 @@ i32 Player::CalcKillBoxCollision(const ZunVec3 *bulletCenter, const ZunVec3 *bul
     f32 bulletLeft, bulletTop, bulletRight, bulletBottom;
     f32 bombProjectileLeft, bombProjectileTop, bombProjectileRight, bombProjectileBottom;
     i32 curBombIdx;
-    i32 padding1, padding2, padding3, padding4;
+    // i32 padding1, padding2, padding3, padding4;
 
     curBombProjectile = this->bombProjectiles;
     bulletLeft = bulletCenter->x - bulletSize->x / 2.0f;

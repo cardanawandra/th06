@@ -230,7 +230,7 @@ void AsciiManager::DrawStrings(void)
         charWidth = 14 * string->scale.x;
         if ((guiString!=0) != string->isGui)
         {
-            guiString = string->isGui;
+            guiString = (string->isGui!=0);
             if (guiString)
             {
                 g_Supervisor.viewport.x = g_GameManager.arcadeRegionTopLeftPos.x;

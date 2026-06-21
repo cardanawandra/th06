@@ -155,9 +155,14 @@ struct Software : GfxInterface
     #endif
     #endif
     u32* framebuffer;
-    f32* depthBuffer;
 
     i32 viewport[4];   //x, y, w, h
+    //precompute viewport
+    f32 screenScaleX;
+    f32 screenBiasX;
+    f32 screenScaleY;
+    f32 screenBiasY;
+
     ZunColor clearColor; //r, g, b, a
     f32 clearDepth;// = 1;
     f32 fogNear;

@@ -626,7 +626,6 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     LOG_COMPAT("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
-    #ifndef WIN98
     if (((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) != 0)
     {
         //use indexing instead
@@ -636,7 +635,6 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
             textureFormat = TEX_FMT_R5G6B5;
         }
     }
-    #endif
 
     LOG_COMPAT("LoadTexture 3");
     textureSurface = LoadToSurfaceWithFormat(textureName, g_PixelChannels[textureFormat],
@@ -1165,7 +1163,7 @@ void AnmManager::UpdateDirtyStates()
             {
                 u8 currBit = CountrZero(changedAttributes);
                 g_GfxBackend->ToggleVertexAttribute(changedAttributes & (1 << currBit),
-                                                  this->enabledVertexAttributes & (1 << currBit));
+                                                  (this->enabledVertexAttributes & (1 << currBit)!=0));
                 changedAttributes &= ~(1 << currBit);
             }
 

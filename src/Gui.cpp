@@ -38,7 +38,7 @@ void Gui::EndEnemySpellcard() const
 
 bool Gui::IsDialogueSkippable() const
 {
-    return (this->impl->msg).dialogueSkippable;
+    return (this->impl->msg).dialogueSkippable!=0;
 }
 
 void Gui::ShowBonusScore(u32 bonusScore) const
@@ -776,10 +776,8 @@ ZunResult GuiImpl::DrawDialogue() const
     g_AnmManager->DrawNoRotation(&this->msg.portraits[0]);
     g_AnmManager->DrawNoRotation(&this->msg.portraits[1]);
 
-    #ifndef WIN98
     g_AnmManager->SetColorOp(COMPONENT_ALPHA, COLOR_OP_REPLACE);
     g_AnmManager->SetColorOp(COMPONENT_RGB, COLOR_OP_REPLACE);
-    #endif
 
     g_AnmManager->SetDepthMask(false);
 
@@ -800,10 +798,8 @@ ZunResult GuiImpl::DrawDialogue() const
 
     g_AnmManager->SetCurrentBlendMode(0xff);
 
-    #ifndef WIN98
     g_AnmManager->SetColorOp(COMPONENT_ALPHA, COLOR_OP_MODULATE);
     g_AnmManager->SetColorOp(COMPONENT_RGB, COLOR_OP_MODULATE);
-    #endif
 
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[0]);
     g_AnmManager->DrawNoRotation(&this->msg.dialogueLines[1]);
@@ -1180,11 +1176,7 @@ void Gui::DrawGameScene()
     {
         VertexDiffuseXyzrhw vertices[4];
         //TODO windows 98 capability
-        #ifdef WIN98
-        if (g_GameManager.currentPower > 0&&false)
-        #else
         if (g_GameManager.currentPower > 0)
-        #endif
         {
             g_AnmManager->FlushVertexBuffer();
             //            memcpy(&vertices[0].position, &ZunGenVec3(496.0f, 186.0f, 0.1f), sizeof(ZunVec3));

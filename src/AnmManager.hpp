@@ -307,7 +307,7 @@ struct AnmManager
             this->SetTransformMatrix(MATRIX_TEXTURE, identityMatrix);
 
             ZunMatrix inverseMatrix = inverseViewportMatrix();
-
+            
             this->SetTransformMatrix(MATRIX_PROJECTION, inverseMatrix);
 
             return;
