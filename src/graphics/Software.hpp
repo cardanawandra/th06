@@ -49,9 +49,9 @@ inline u8 ZunG(ZunColor c) { return (c >> 8) & 0xFF; }
 inline u8 ZunB(ZunColor c) { return c & 0xFF; }
 
 struct Diffuse {
-    u8 r,g,b,a;
+    f32 r,g,b,a;
     Diffuse() {}
-    Diffuse(u8 r, u8 g, u8 b, u8 a) {
+    Diffuse(f32 r, f32 g, f32 b, f32 a) {
         this->r = r;
         this->g = g;
         this->b = b;
@@ -63,7 +63,7 @@ struct Diffuse {
         this->b = colorData.b;
         this->a = colorData.a;
     }
-    Diffuse operator*(const u8 mult) const
+    Diffuse operator*(const f32 mult) const
     {
         return Diffuse(this->r * mult, this->g * mult, this->b * mult, this->a * mult);
     }
@@ -72,7 +72,7 @@ struct Diffuse {
     {
         return Diffuse(this->r * mult.r, this->g * mult.g, this->b * mult.b, this->a * mult.a);
     }
-    Diffuse operator+(const u8 mult) const
+    Diffuse operator+(const f32 mult) const
     {
         return Diffuse(this->r + mult, this->g + mult, this->b + mult, this->a + mult);
     }
@@ -168,6 +168,10 @@ struct Software : GfxInterface
     f32 fogNear;
     f32 fogFar;
     ZunRGBA fogColor;
+    u8 fogColor_r;
+    u8 fogColor_g;
+    u8 fogColor_b;
+    u8 fogColor_a;
     f32 precompFogScale;
     f32 precompFogBias;
     
@@ -177,6 +181,10 @@ struct Software : GfxInterface
     bool useDepthTest;
 
     ZunRGBA textureFactor;
+    u8 textureFactor_r;
+    u8 textureFactor_g;
+    u8 textureFactor_b;
+    u8 textureFactor_a;
     BlendMode blendMode;
 
     ZunMatrix model;

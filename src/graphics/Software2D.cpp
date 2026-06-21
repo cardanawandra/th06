@@ -21,7 +21,7 @@ GfxInterface *Software::Init()
     }
 
     #if SDL_MAJOR_VERSION == 1
-    u32 flags = SDL_SWSURFACE;
+    u32 flags = SDL_HWSURFACE;
     #else
     u32 flags = 0;
     #endif
