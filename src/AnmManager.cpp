@@ -1209,6 +1209,7 @@ void AnmManager::UpdateDirtyStates()
             memcpy(&this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         &this->dirtyTransformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         sizeof(*this->transformMatrices));
+            g_GfxBackend->Set2D(false);
             g_GfxBackend->SetTransformMatrix((TransformMatrix)(currFlagIndex - DIRTY_MODEL_MATRIX),
                                            this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX]);
         }
@@ -1224,6 +1225,7 @@ inline float rintf_compat(float x)
 }
 ZunResult AnmManager::DrawOrthographic(const AnmVm *vm, bool roundToPixel)
 {
+    g_GfxBackend->Set2D(true);
     f32 triangleX1, triangleX2, triangleY1, triangleY2;
     if (roundToPixel)
     {
@@ -1396,8 +1398,11 @@ ZunResult AnmManager::AddSpriteToDrawBuffer(VertexTex1Xyzrhw *vertices)
     return ZUN_SUCCESS;
 }
 
+#define NEWDRAW
+#ifndef NEWDRAW
 ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
 {
+    g_GfxBackend->Set2D(true);
     float fVar2;
     float fVar3;
 
@@ -1440,6 +1445,66 @@ ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
     return this->DrawOrthographic(vm, true);
 }
 
+#else
+ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
+{
+    g_GfxBackend->Set2D(true);
+
+    if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
+        return ZUN_ERROR;
+
+    const AnmLoadedSprite *sprite = vm->sprite;
+
+    const float posX = vm->pos.x;
+    const float posY = vm->pos.y;
+    const float halfWidth  = (sprite->widthPx  * vm->scaleX) * 0.5f;
+    const float halfHeight = (sprite->heightPx * vm->scaleY) * 0.5f;
+
+    VertexTex1Xyzrhw *v = g_PrimitivesToDrawVertexBuf;
+    const unsigned int anchor = vm->flags.anchor;
+
+    float leftX;
+    float rightX;
+
+    if (anchor & AnmVmAnchor_Left)
+    {
+        leftX  = posX;
+        rightX = posX + halfWidth + halfWidth;
+    }
+    else
+    {
+        leftX  = posX - halfWidth;
+        rightX = posX + halfWidth;
+    }
+
+    v[0].position.x = leftX;
+    v[2].position.x = leftX;
+    v[1].position.x = rightX;
+    v[3].position.x = rightX;
+
+    float topY;
+    float bottomY;
+
+    if (anchor & AnmVmAnchor_Top)
+    {
+        topY    = posY;
+        bottomY = posY + halfHeight + halfHeight;
+    }
+    else
+    {
+        topY    = posY - halfHeight;
+        bottomY = posY + halfHeight;
+    }
+
+    v[0].position.y = topY;
+    v[1].position.y = topY;
+    v[2].position.y = bottomY;
+    v[3].position.y = bottomY;
+
+    return DrawOrthographic(vm, true);
+}
+#endif
+
 void AnmManager::TranslateRotation(VertexTex1Xyzrhw *param_1, f32 x, f32 y, f32 sine, f32 cosine, f32 xOffset,
                                    f32 yOffset)
 {
@@ -1448,6 +1513,7 @@ void AnmManager::TranslateRotation(VertexTex1Xyzrhw *param_1, f32 x, f32 y, f32 
     return;
 }
 
+#ifndef NEWDRAW
 ZunResult AnmManager::Draw(const AnmVm *vm)
 {
     f32 zSine;
@@ -1507,8 +1573,89 @@ ZunResult AnmManager::Draw(const AnmVm *vm)
     return this->DrawOrthographic(vm, false);
 }
 
+#else
+ZunResult AnmManager::Draw(const AnmVm *vm)
+{
+    if (vm->rotation.z == 0.0f)
+        return DrawNoRotation(vm);
+
+    if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
+        return ZUN_ERROR;
+
+    float zSine;
+    float zCosine;
+
+    const float z = vm->rotation.z;
+    fsincos_wrapper(&zSine, &zCosine, z);
+
+    const float xOffset = (float)(int)vm->pos.x;
+    const float yOffset = (float)(int)vm->pos.y;
+
+    const AnmLoadedSprite *sprite = vm->sprite;
+
+    const float spriteXCenter =
+        (float)(int)((sprite->widthPx * vm->scaleX) * 0.5f);
+
+    const float spriteYCenter =
+        (float)(int)((sprite->heightPx * vm->scaleY) * 0.5f);
+
+    const float left   = -spriteXCenter - 0.5f;
+    const float right  =  spriteXCenter - 0.5f;
+    const float top    = -spriteYCenter - 0.5f;
+    const float bottom =  spriteYCenter - 0.5f;
+
+    // Precompute products (8 multiplies instead of 16)
+    const float lc = left   * zCosine;
+    const float ls = left   * zSine;
+    const float rc = right  * zCosine;
+    const float rs = right  * zSine;
+    const float tc = top    * zCosine;
+    const float ts = top    * zSine;
+    const float bc = bottom * zCosine;
+    const float bs = bottom * zSine;
+
+    VertexTex1Xyzrhw *v = g_PrimitivesToDrawVertexBuf;
+
+    v[0].position.x = lc + ts + xOffset;
+    v[0].position.y = tc - ls + yOffset;
+    v[1].position.x = rc + ts + xOffset;
+    v[1].position.y = tc - rs + yOffset;
+    v[2].position.x = lc + bs + xOffset;
+    v[2].position.y = bc - ls + yOffset;
+    v[3].position.x = rc + bs + xOffset;
+    v[3].position.y = bc - rs + yOffset;
+
+    const float posZ = vm->pos.z;
+
+    v[0].position.z = posZ;
+    v[1].position.z = posZ;
+    v[2].position.z = posZ;
+    v[3].position.z = posZ;
+
+    if (vm->flags.anchor & AnmVmAnchor_Left)
+    {
+        v[0].position.x += spriteXCenter;
+        v[1].position.x += spriteXCenter;
+        v[2].position.x += spriteXCenter;
+        v[3].position.x += spriteXCenter;
+    }
+
+    if (vm->flags.anchor & AnmVmAnchor_Top)
+    {
+        v[0].position.y += spriteYCenter;
+        v[1].position.y += spriteYCenter;
+        v[2].position.y += spriteYCenter;
+        v[3].position.y += spriteYCenter;
+    }
+
+    return DrawOrthographic(vm, false);
+}
+#endif
+
+#ifndef NEWDRAW
 ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 {
+    g_GfxBackend->Set2D(true);
     f32 centerX;
     f32 centerY;
 
@@ -1552,8 +1699,68 @@ ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
     return this->DrawOrthographic(vm, false);
 }
 
+#else
+ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
+{
+    g_GfxBackend->Set2D(true);
+
+    if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
+        return ZUN_ERROR;
+
+    const AnmLoadedSprite *sprite = vm->sprite;
+
+    const float posX = vm->pos.x;
+    const float posY = vm->pos.y;
+    const float centerX = (sprite->widthPx  * vm->scaleX) * 0.5f;
+    const float centerY = (sprite->heightPx * vm->scaleY) * 0.5f;
+
+    VertexTex1Xyzrhw *v = g_PrimitivesToDrawVertexBuf;
+
+    const unsigned int anchor = vm->flags.anchor;
+    float leftX;
+    float rightX;
+
+    if (anchor & AnmVmAnchor_Left)
+    {
+        leftX  = posX;
+        rightX = posX + centerX + centerX;
+    }
+    else
+    {
+        leftX  = posX - centerX;
+        rightX = posX + centerX;
+    }
+
+    v[0].position.x = leftX;
+    v[2].position.x = leftX;
+    v[1].position.x = rightX;
+    v[3].position.x = rightX;
+    float topY;
+    float bottomY;
+
+    if (anchor & AnmVmAnchor_Top)
+    {
+        topY    = posY;
+        bottomY = posY + centerY + centerY;
+    }
+    else
+    {
+        topY    = posY - centerY;
+        bottomY = posY + centerY;
+    }
+
+    v[0].position.y = topY;
+    v[1].position.y = topY;
+    v[2].position.y = bottomY;
+    v[3].position.y = bottomY;
+    return DrawOrthographic(vm, false);
+}
+#endif
+
+#ifndef NEWDRAW
 ZunResult AnmManager::Draw3(const AnmVm *vm)
 {
+    g_GfxBackend->Set2D(false);
     ZunMatrix worldTransformMatrix;
     ZunMatrix rotationMatrix;
     ZunMatrix textureMatrix;
@@ -1698,6 +1905,182 @@ ZunResult AnmManager::Draw3(const AnmVm *vm)
     return ZUN_SUCCESS;
 }
 
+#else
+ZunResult AnmManager::Draw3(const AnmVm *vm)
+{
+    g_GfxBackend->Set2D(false);
+
+    if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
+        return ZUN_ERROR;
+
+    const bool dontUseVertexBuf =
+        ((g_Supervisor.cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) != 0;
+
+    const AnmLoadedSprite *sprite = vm->sprite;
+    const unsigned anchor = vm->flags.anchor;
+
+    const float scaleX = vm->scaleX;
+    const float scaleY = vm->scaleY;
+
+    const float posX = vm->pos.x;
+    const float posY = vm->pos.y;
+    const float posZ = vm->pos.z;
+
+    const float uvScrollX = vm->uvScrollPos.x;
+    const float uvScrollY = vm->uvScrollPos.y;
+
+    const float u0 = sprite->uvStart.x + uvScrollX;
+    const float u1 = sprite->uvEnd.x   + uvScrollX;
+    const float v0 = sprite->uvStart.y + uvScrollY;
+    const float v1 = sprite->uvEnd.y   + uvScrollY;
+
+    this->SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
+
+    ZunMatrix worldTransformMatrix = vm->matrix;
+
+    worldTransformMatrix.m[0][0] *= scaleX;
+    worldTransformMatrix.m[1][1] *= -scaleY;
+
+    const float rotX = vm->rotation.x;
+    const float rotY = vm->rotation.y;
+    const float rotZ = vm->rotation.z;
+
+    if (rotX != 0.0f)
+        worldTransformMatrix.Rotate(rotX, 1.0f, 0.0f, 0.0f);
+
+    if (rotY != 0.0f)
+        worldTransformMatrix.Rotate(rotY, 0.0f, 1.0f, 0.0f);
+
+    if (rotZ != 0.0f)
+        worldTransformMatrix.Rotate(rotZ, 0.0f, 0.0f, 1.0f);
+
+    if (anchor & AnmVmAnchor_Left)
+    {
+        const float halfWidth =
+            (sprite->widthPx * scaleX) * 0.5f;
+
+        worldTransformMatrix.m[3][0] =
+            posX + ZUN_FABSF(halfWidth);
+    }
+    else
+    {
+        worldTransformMatrix.m[3][0] = posX;
+    }
+
+    if (anchor & AnmVmAnchor_Top)
+    {
+        const float halfHeight =
+            (sprite->heightPx * scaleY) * 0.5f;
+
+        worldTransformMatrix.m[3][1] =
+            -posY - ZUN_FABSF(halfHeight);
+    }
+    else
+    {
+        worldTransformMatrix.m[3][1] = -posY;
+    }
+
+    worldTransformMatrix.m[3][2] = posZ;
+
+    if (dontUseVertexBuf)
+    {
+        ZunMatrix originalView =
+            this->dirtyTransformMatrices[MATRIX_VIEW];
+
+        ZunMatrix modelView =
+            originalView * worldTransformMatrix;
+
+        this->SetTransformMatrix(
+            MATRIX_VIEW,
+            modelView);
+
+        if (this->currentSprite != sprite)
+        {
+            this->currentSprite = sprite;
+
+            ZunMatrix textureMatrix = vm->matrix;
+
+            textureMatrix.m[3][0] = u0;
+            textureMatrix.m[3][1] = v0;
+
+            this->SetTransformMatrix(
+                MATRIX_TEXTURE,
+                textureMatrix);
+
+            this->SetCurrentTexture(
+                this->textures[sprite->sourceFileIndex].handle);
+        }
+
+        this->SetVertexAttributes(
+            VERTEX_ATTR_TEX_COORD | VERTEX_ATTR_DIFFUSE);
+
+        this->SetRenderStateForVm(vm);
+
+        this->SetAttributePointer(
+            VERTEX_ARRAY_POSITION,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].position);
+
+        this->SetAttributePointer(
+            VERTEX_ARRAY_TEX_COORD,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].textureUV);
+
+        this->SetAttributePointer(
+            VERTEX_ARRAY_DIFFUSE,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].diffuse);
+
+        this->BackendDrawCall();
+
+        this->SetTransformMatrix(
+            MATRIX_VIEW,
+            originalView);
+    }
+    else
+    {
+        VertexTex1Xyzrhw *dst =
+            g_PrimitivesToDrawVertexBuf;
+
+        const RenderVertexInfo *src =
+            this->vertexBufferContents;
+
+        dst[0].position =
+            ZunVec4(worldTransformMatrix * src[0].position, 1.0f);
+        dst[1].position =
+            ZunVec4(worldTransformMatrix * src[1].position, 1.0f);
+        dst[2].position =
+            ZunVec4(worldTransformMatrix * src[2].position, 1.0f);
+        dst[3].position =
+            ZunVec4(worldTransformMatrix * src[3].position, 1.0f);
+
+        dst[0].textureUV.x = dst[2].textureUV.x = u0;
+        dst[1].textureUV.x = dst[3].textureUV.x = u1;
+
+        dst[0].textureUV.y = dst[1].textureUV.y = v0;
+        dst[2].textureUV.y = dst[3].textureUV.y = v1;
+
+        if (this->currentSprite != sprite)
+        {
+            this->currentSprite = sprite;
+
+            this->SetCurrentTexture(
+                this->textures[sprite->sourceFileIndex].handle);
+        }
+
+        this->SetVertexAttributes(
+            VERTEX_ATTR_TEX_COORD);
+
+        this->SetRenderStateForVm(vm);
+
+        this->AddSpriteToDrawBuffer(dst);
+    }
+
+    return ZUN_SUCCESS;
+}
+#endif
+
+#ifndef NEWDRAW
 ZunResult AnmManager::Draw2(const AnmVm *vm)
 {
     ZunMatrix worldTransformMatrix;
@@ -1726,8 +2109,8 @@ ZunResult AnmManager::Draw2(const AnmVm *vm)
     SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
 
     worldTransformMatrix = vm->matrix;
-    worldTransformMatrix.m[3][0] = (float)((int)(vm->pos.x)) - 0.5f;
-    worldTransformMatrix.m[3][1] = -(float)((int)(vm->pos.y)) + 0.5f;
+    worldTransformMatrix.m[3][0] = rintf_compat(vm->pos.x) - 0.5f;
+    worldTransformMatrix.m[3][1] = -rintf_compat(vm->pos.y) + 0.5f;
     if ((vm->flags.anchor & AnmVmAnchor_Left) != 0)
     {
         worldTransformMatrix.m[3][0] += (vm->sprite->widthPx * vm->scaleX) / 2.0f;
@@ -1815,6 +2198,170 @@ ZunResult AnmManager::Draw2(const AnmVm *vm)
 
     return ZUN_SUCCESS;
 }
+
+#else
+ZunResult AnmManager::Draw2(const AnmVm *vm)
+{
+    if (!vm->flags.isVisible || !vm->flags.flag1)
+        return ZUN_ERROR;
+
+    if (vm->rotation.x != 0.0f ||
+        vm->rotation.y != 0.0f ||
+        vm->rotation.z != 0.0f)
+    {
+        return Draw3(vm);
+    }
+
+    if (!vm->color)
+        return ZUN_ERROR;
+
+    const bool dontUseVertexBuf =
+        ((g_Supervisor.cfg.opts >> GCOS_DONT_USE_VERTEX_BUF) & 1) != 0;
+
+    const AnmLoadedSprite *sprite = vm->sprite;
+    const unsigned anchor = vm->flags.anchor;
+
+    SetProjectionMode(PROJECTION_MODE_PERSPECTIVE);
+
+    ZunMatrix worldTransformMatrix = vm->matrix;
+    ZunMatrix textureMatrix;
+
+    worldTransformMatrix.m[3][0] =
+        rintf_compat(vm->pos.x) - 0.5f;
+
+    worldTransformMatrix.m[3][1] =
+        -rintf_compat(vm->pos.y) + 0.5f;
+
+    if (anchor & AnmVmAnchor_Left)
+    {
+        worldTransformMatrix.m[3][0] +=
+            (sprite->widthPx * vm->scaleX) * 0.5f;
+    }
+
+    if (anchor & AnmVmAnchor_Top)
+    {
+        worldTransformMatrix.m[3][1] -=
+            (sprite->heightPx * vm->scaleY) * 0.5f;
+    }
+
+    worldTransformMatrix.m[3][2] = vm->pos.z;
+
+    worldTransformMatrix.m[0][0] *= vm->scaleX;
+    worldTransformMatrix.m[1][1] *= -vm->scaleY;
+
+    ZunMatrix originalView =
+        this->dirtyTransformMatrices[MATRIX_VIEW];
+
+    if (dontUseVertexBuf)
+    {
+        ZunMatrix modelView =
+            originalView * worldTransformMatrix;
+
+        this->SetTransformMatrix(
+            MATRIX_VIEW,
+            modelView);
+    }
+    else
+    {
+        VertexTex1Xyzrhw *dst =
+            g_PrimitivesToDrawVertexBuf;
+        const RenderVertexInfo *src = this->vertexBufferContents;
+
+        dst[0].position =
+            ZunVec4(worldTransformMatrix * src[0].position, 1.0f);
+        dst[1].position =
+            ZunVec4(worldTransformMatrix * src[1].position, 1.0f);
+        dst[2].position =
+            ZunVec4(worldTransformMatrix * src[2].position, 1.0f);
+        dst[3].position =
+            ZunVec4(worldTransformMatrix * src[3].position, 1.0f);
+
+        const float u0 =
+            sprite->uvStart.x + vm->uvScrollPos.x;
+        const float u1 =
+            sprite->uvEnd.x + vm->uvScrollPos.x;
+
+        const float v0 =
+            sprite->uvStart.y + vm->uvScrollPos.y;
+        const float v1 =
+            sprite->uvEnd.y + vm->uvScrollPos.y;
+
+        dst[0].textureUV.x = dst[2].textureUV.x = u0;
+        dst[1].textureUV.x = dst[3].textureUV.x = u1;
+
+        dst[0].textureUV.y = dst[1].textureUV.y = v0;
+        dst[2].textureUV.y = dst[3].textureUV.y = v1;
+    }
+
+    if (this->currentSprite != sprite)
+    {
+        this->currentSprite = sprite;
+
+        if (dontUseVertexBuf)
+        {
+            textureMatrix = vm->matrix;
+
+            textureMatrix.m[3][0] =
+                sprite->uvStart.x + vm->uvScrollPos.x;
+
+            textureMatrix.m[3][1] =
+                sprite->uvStart.y + vm->uvScrollPos.y;
+
+            this->SetTransformMatrix(
+                MATRIX_TEXTURE,
+                textureMatrix);
+        }
+
+        this->SetCurrentTexture(
+            this->textures[sprite->sourceFileIndex].handle);
+
+        if (!dontUseVertexBuf)
+        {
+            this->SetVertexAttributes(
+                VERTEX_ATTR_TEX_COORD);
+        }
+        else
+        {
+            this->SetVertexAttributes(
+                VERTEX_ATTR_TEX_COORD |
+                VERTEX_ATTR_DIFFUSE);
+        }
+    }
+
+    this->SetRenderStateForVm(vm);
+
+    if (!dontUseVertexBuf)
+    {
+        this->AddSpriteToDrawBuffer(
+            g_PrimitivesToDrawVertexBuf);
+    }
+    else
+    {
+        this->SetAttributePointer(
+            VERTEX_ARRAY_POSITION,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].position);
+
+        this->SetAttributePointer(
+            VERTEX_ARRAY_TEX_COORD,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].textureUV);
+
+        this->SetAttributePointer(
+            VERTEX_ARRAY_DIFFUSE,
+            sizeof(*g_PrimitivesToDrawUnknown),
+            &g_PrimitivesToDrawUnknown[0].diffuse);
+
+        this->BackendDrawCall();
+
+        this->SetTransformMatrix(
+            MATRIX_VIEW,
+            originalView);
+    }
+
+    return ZUN_SUCCESS;
+}
+#endif
 
 #define AnmF32Arg(index) (*(LE<f32> *)&curInstr->args[index])
 #define AnmI32Arg(index) (*(LE<i32> *)&curInstr->args[index])

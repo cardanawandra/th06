@@ -10,6 +10,42 @@
 
 u8 alphaThreshold = 4;
 
+u8 ColorOpTable[3][256][256];
+u8 ColorAddTable[256][256];
+u8 ColorMulTable[256][256];
+u8 ColorClamp510[511];
+u8 ColorDA[2][256];
+void InitColorOpTable()
+{
+    i16 i;
+    for (i=0;i < 256; i++){
+        ColorDA[BLEND_INV_SRC_ALPHA][i] = 255-i;
+        ColorDA[BLEND_ONE][i] = 255;
+    }
+    //clamp 255+255
+    for (i=0;i<=510;i++)
+        ColorClamp510[i]=(i>255)?255:i;
+    u16 factor, value;
+    for (factor = 0; factor < 256; ++factor)
+    {
+        for (value = 0; value < 256; ++value)
+        {
+            //ColorMulTable
+            ColorMulTable[factor][value] = (factor * value + 128) >> 8;
+
+            // Modulate
+            ColorOpTable[COLOR_OP_MODULATE][factor][value] =
+                u8((value * factor) >> 8);
+
+            // Add
+            ColorOpTable[COLOR_OP_ADD][factor][value] = ColorClamp510[factor*value];
+
+            // replace (bruh)
+            ColorOpTable[COLOR_OP_REPLACE][factor][value] = value;
+        }
+    }
+}
+
 GfxInterface *Software::Init()
 {
     Software* gfx = new Software;
@@ -113,6 +149,8 @@ GfxInterface *Software::Init()
 
     gfx->noFog =
         (g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_FOG))!=0;
+
+    InitColorOpTable();
 
     return gfx;
 }

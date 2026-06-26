@@ -128,6 +128,7 @@ struct GfxInterface
         TransformMatrix type, 
         const ZunMatrix &matrix
     ) = 0;
+    virtual void Set2D(bool is2D) = 0;
 
     virtual void SetTextureFilter() = 0;
 

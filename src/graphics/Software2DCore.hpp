@@ -1,4 +1,3 @@
-
 void Software::SetFogRange(f32 nearPlane, f32 farPlane)
 {
     fogNear = nearPlane;
@@ -60,15 +59,17 @@ void Software::SetColorOp(TextureOpComponent component, ColorOp op)
 
 void Software::SetTextureFactor(ZunColor factor)
 {
-    textureFactor = ZunRGBAGet(factor);
-    textureFactor_r = textureFactor.r;
-    textureFactor_g = textureFactor.g;
-    textureFactor_b = textureFactor.b;
-    textureFactor_a = textureFactor.a;
+    textureFactor_r = (factor >> 16) & 0xFF;
+    textureFactor_g = (factor >> 8) & 0xFF;
+    textureFactor_b = factor & 0xFF;
+    textureFactor_a = factor >> 24;
 }
 
 void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
 {
+    // if(render2D && type!=MATRIX_TEXTURE){
+    //     return;
+    // }
     switch (type) {
         case MATRIX_MODEL:
             model = matrix;
@@ -77,11 +78,6 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
             view = matrix;
             break;
         case MATRIX_PROJECTION:
-            if(matrix.m[3][2] == 0.0f && matrix.m[3][3] == 1.0f){
-                render2D = true;
-                break;
-            }
-            render2D = false;
             projection = matrix;
             mvp = projection * (view * model);
             break;
@@ -90,7 +86,9 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
             break;
     }
 }
-
+void Software::Set2D(bool is2D){
+    render2D = is2D;
+}
 
 void Software::Enable(Capabilities cap) {
     if(cap == CAPS_DEPTH_TEST) {
@@ -226,6 +224,7 @@ static void ConvertToARGB8888Pitch(
     u32 width,
     u32 height,
     PixelFormat fmt,
+	PixelDataType type,
     const void* srcData,
     u32 srcPitchBytes,
     u32* dstData,
@@ -235,50 +234,96 @@ static void ConvertToARGB8888Pitch(
 
     if (fmt == PIXEL_RGBA)
     {
-        for (u32 y = 0; y < height; ++y)
-        {
-            const u8* src = srcBase + y * srcPitchBytes;
-            u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
-            const u8* s = src;
+		if (type == PIXEL_UNSIGNED_SHORT_4_4_4_4)
+		{
+			for (u32 y = 0; y < height; ++y)
+			{
+				const u16* src = (u16*)(srcBase + y * srcPitchBytes);
+				u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
+				const u16* s = src;
 
-            for (u32 x = 0; x < width; ++x, s += 4)
-            {
-                *dst++ = ((u32)s[3] << 24) | ((u32)s[0] << 16) | ((u32)s[1] << 8) | s[2];
-            }
-            // for (u32 x = 0; x < width; ++x)
-            // {
-            //     dst[x] =
-            //         (s[3] << 24) |
-            //         (s[0] << 16) |
-            //         (s[1] << 8)  |
-            //         (s[2]);
+				for (u32 x = 0; x < width; ++x, s++)
+				{
+					u8 r = (((*s)>>12)&0xF)*0x10;
+					u8 g = (((*s)>>8)&0xF)*0x10;
+					u8 b = (((*s)>>4)&0xF)*0x10;
+					u8 a = ((*s)&0xF)*0x10;
 
-            //     s += 4;
-            // }
-        }
+					*dst++ = ((u32)a << 24) | ((u32)r << 16) | ((u32)g << 8) | b;
+				}
+			}
+		}
+		else
+		{
+			for (u32 y = 0; y < height; ++y)
+			{
+				const u8* src = srcBase + y * srcPitchBytes;
+				u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
+				const u8* s = src;
+
+				for (u32 x = 0; x < width; ++x, s += 4)
+				{
+					*dst++ = ((u32)s[3] << 24) | ((u32)s[0] << 16) | ((u32)s[1] << 8) | s[2];
+				}
+				// for (u32 x = 0; x < width; ++x)
+				// {
+				//     dst[x] =
+				//         (s[3] << 24) |
+				//         (s[0] << 16) |
+				//         (s[1] << 8)  |
+				//         (s[2]);
+
+				//     s += 4;
+				// }
+			}
+		}
     }
     else if (fmt == PIXEL_RGB)
     {
-        for (u32 y = 0; y < height; ++y)
-        {
-            const u8* src = srcBase + y * srcPitchBytes;
-            u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
-            const u8* s = src;
+		if (type == PIXEL_UNSIGNED_SHORT_5_6_5)
+		{
+			for (u32 y = 0; y < height; ++y)
+			{
+				const u16* src = (u16*)(srcBase + y * srcPitchBytes);
+				u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
+				const u16* s = src;
 
-            for (u32 x = 0; x < width; ++x, s += 3)
-            {
-                *dst++ = (255 << 24) | (s[0] << 16) | (s[1] << 8) | s[2];
-            }
-            // for (u32 x = 0; x < width; ++x)
-            // {
-            //     dst[x] =
-            //         (255 << 24) |
-            //         (s[0] << 16) |
-            //         (s[1] << 8)  |
-            //         (s[2]);
-            //     s += 3;
-            // }
-        }
+				for (u32 x = 0; x < width; ++x, s++)
+				{
+					u8 r5 = ((*s)&0xF800)>>11;
+					u8 g6 = ((*s)&0x07E0)>>5;
+					u8 b5 = ((*s)&0x001F);
+					u8 r8 = (r5<<3)|(r5>>2);
+					u8 g8 = (g6<<2)|(g6>>4);
+					u8 b8 = (b5<<3)|(b5>>2);
+					*dst++ = (255 << 24) | (r8 << 16) | (g8 << 8) | b8;
+				}
+			}
+		}
+		else
+		{
+			for (u32 y = 0; y < height; ++y)
+			{
+				const u8* src = srcBase + y * srcPitchBytes;
+				u32* dst = (u32*)((u8*)dstData + y * dstPitchBytes);
+				const u8* s = src;
+
+				for (u32 x = 0; x < width; ++x, s += 3)
+				{
+					*dst++ = (255 << 24) | (s[0] << 16) | (s[1] << 8) | s[2];
+				}
+				// for (u32 x = 0; x < width; ++x)
+				// {
+				//     dst[x] =
+				//         (255 << 24) |
+				//         (s[0] << 16) |
+				//         (s[1] << 8)  |
+				//         (s[2]);
+				//     s += 3;
+				// }
+			}
+		}
+        
     }
 }
 
@@ -299,6 +344,7 @@ void Software::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelData
                 width,
                 height,
                 fmt,
+                type,
                 data,
                 width * bpp,
                 &boundTexture->texels[0],
@@ -319,6 +365,7 @@ void Software::SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 heigh
             width,
             height,
             PIXEL_RGB,
+            PIXEL_UNSIGNED_BYTE,
             data,
             width * 3, // bpp always 3
             &boundTexture->texels[0]
@@ -471,93 +518,6 @@ void ZunRGBAMul(ZunRGBA& src, ZunRGBA& dst) {
     src.a = (src.a * dst.a) >> 8;
 }
 
-void Software::Draw(PrimitiveType type, i32 start, i32 count)
-{
-    if (count == 0) return;
-    u32 increment = type == PRIM_TRIANGLE_STRIP ? 1 : 3;
-    u32 index = start;
-    u32 last_index = start + count;
-    if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
-
-    const u8* vData = (u8*)vertexData;
-    #define s2dblock1\
-        f32 viewZ0, viewZ1, viewZ2;\
-        ZunVec2 v0,v1,v2;\
-        if(render2D){\
-            v0 = *(ZunVec2*)(vData + vertexStride * index);\
-            v1 = *(ZunVec2*)(vData + vertexStride * (index+1));\
-            v2 = *(ZunVec2*)(vData + vertexStride * (index+2));\
-        }else{\
-            v0 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * index),viewZ0);\
-            v1 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+1)),viewZ1);\
-            v2 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+2)),viewZ2);\
-        }
-
-    //NDCToScreenZunVec2 value fetched to value_x, value_y
-    // v0 = NDCToScreenZunVec2(v0); became
-    // f32 v0_x = v0.x * screenScaleX + screenBiasX;
-    // f32 v0_y = v0.y * screenScaleY + screenBiasY;
-    // then EdgeFunctionZunVec2 became EdgeFunctionXY
-    #define s2dblock2\
-        f32 v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;\
-        if(render2D){\
-            v0_x = v0.x;\
-            v0_y = v0.y;\
-            v1_x = v1.x;\
-            v1_y = v1.y;\
-            v2_x = v2.x;\
-            v2_y = v2.y;\
-        }else{\
-            v0_x = v0.x * screenScaleX + screenBiasX;\
-            v0_y = v0.y * screenScaleY + screenBiasY;\
-            v1_x = v1.x * screenScaleX + screenBiasX;\
-            v1_y = v1.y * screenScaleY + screenBiasY;\
-            v2_x = v2.x * screenScaleX + screenBiasX;\
-            v2_y = v2.y * screenScaleY + screenBiasY;\
-        }\
-        const f32 area = EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y);\
-        if (area == 0.0f)\
-        {\
-            index += increment;\
-            continue;\
-        }\
-        const i32 xmin = ZUN_MAX(viewport[0],(i32)floor(ZUN_MIN3(v0_x, v1_x, v2_x)));\
-        const i32 xmax = ZUN_MIN(viewport[0] + viewport[2] - 1,(i32)ceil(ZUN_MAX3(v0_x, v1_x, v2_x)));\
-        const i32 ymin = ZUN_MAX(viewport[1],(i32)floor(ZUN_MIN3(v0_y, v1_y, v2_y)));\
-        const i32 ymax = ZUN_MIN(viewport[1] + viewport[3] - 1,(i32)ceil(ZUN_MAX3(v0_y, v1_y, v2_y)));\
-        const f32 vP_x = xmin+0.5f;\
-        const f32 vP_y = ymin+0.5f;\
-        const ZunVec3 edges = {\
-            EdgeFunctionXY(v1_x, v1_y, v2_x, v2_y, vP_x, vP_y),\
-            EdgeFunctionXY(v2_x, v2_y, v0_x, v0_y, vP_x, vP_y),\
-            EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, vP_x, vP_y)\
-        };\
-        const ZunVec3 e_dx = {\
-            v1_y - v2_y,\
-            v2_y - v0_y,\
-            v0_y - v1_y\
-        };\
-        const ZunVec3 e_dy = {\
-            v2_x - v1_x,\
-            v0_x - v2_x,\
-            v1_x - v0_x\
-        };\
-        const f32 invArea = 1.0f / area;\
-        const ZunVec3 w_dx = e_dx * invArea;\
-        const ZunVec3 w_dy = e_dy * invArea;
-
-    //barycentrics
-    #define s2dblock3\
-        const f32 w0_dx = w_dx.x;\
-        const f32 w1_dx = w_dx.y;\
-        const f32 w2_dx = w_dx.z;\
-        const f32 w0_dy = w_dy.x;\
-        const f32 w1_dy = w_dy.y;\
-        const f32 w2_dy = w_dy.z;\
-        f32 w0_row = edges.x * invArea;\
-        f32 w1_row = edges.y * invArea;\
-        f32 w2_row = edges.z * invArea;\
-
     //fog declare
     #define fogdeclare1\
         f32 fog_row,fog_dx,fog_dy;\
@@ -576,6 +536,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                 viewZ2 * w2_dy;\
         }
  
+    #define fogdeclare2 fog_row += fog_dy,
+    #define fogdeclare3 f32 fog = fog_row;
+    #define fogdeclare4 fog += fog_dx,
     #define fogdeclare5\
     if(!noFog) {\
         const u8 t = (u8)ZUN_MIN(\
@@ -590,90 +553,27 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         frag_g = (u8)((frag_g * invT + fogColor_g * t) >> 8);\
         frag_b = (u8)((frag_b * invT + fogColor_b * t) >> 8);\
     }
-
-    //unused
-    #define s2dblock7_Ex\
-    ZunColor dst = framebuffer[pixel];\
-    u8 da = 255;\
-    if(blendMode == BLEND_INV_SRC_ALPHA) {\
-        da -= frag_a;\
-    }\
-    framebuffer[pixel] = RGBAToZunColor(\
-        AlphaBlendU8(frag_r,ZunR(dst),frag_a,da),\
-        AlphaBlendU8(frag_g,ZunG(dst),frag_a,da),\
-        AlphaBlendU8(frag_b,ZunB(dst),frag_a,da),\
-        frag_a\
-    );
-
-    // u8 da = (blendMode == BLEND_INV_SRC_ALPHA) ? (255 - frag_a) : 255;
-    #define s2dblock7\
-    if (frag_a != 255) {\
-        ZunColor dst = framebuffer[pixel];\
-        const u8 da = (blendMode == BLEND_INV_SRC_ALPHA) ? (255 - frag_a) : 255;\
-        frag_r = (u8)ZUN_MIN(((frag_r * frag_a + (u32)ZunR(dst) * da + 128) >> 8),255);\
-        frag_g = (u8)ZUN_MIN(((frag_g * frag_a + (u32)ZunG(dst) * da + 128) >> 8),255);\
-        frag_b = (u8)ZUN_MIN(((frag_b * frag_a + (u32)ZunB(dst) * da + 128) >> 8),255);\
-    }\
-    framebuffer[pixel] = (ZunColor)((frag_a << 24) | (frag_r << 16) | (frag_g << 8) | frag_b);
-
-    //fog
-    #define fogdeclare2 fog_row += fog_dy,
-    #define fogdeclare3 f32 fog = fog_row;
-    #define fogdeclare4 fog += fog_dx,
-    
+    //disable it
+    #undef fogdeclare1
+    #undef fogdeclare2
+    #undef fogdeclare3
+    #undef fogdeclare4
+    #undef fogdeclare5
     #define fogdeclare1
     #define fogdeclare2
     #define fogdeclare3
     #define fogdeclare4
     #define fogdeclare5
 
-    #define uvdeclare1\
-        f32 u_row =\
-            tc0.x*w0_row +\
-            tc1.x*w1_row +\
-            tc2.x*w2_row;\
-        f32 v_row =\
-            tc0.y*w0_row +\
-            tc1.y*w1_row +\
-            tc2.y*w2_row;\
-        const f32 u_dx =\
-            tc0.x*w0_dx +\
-            tc1.x*w1_dx +\
-            tc2.x*w2_dx;\
-        const f32 u_dy =\
-            tc0.x*w0_dy +\
-            tc1.x*w1_dy +\
-            tc2.x*w2_dy;\
-        const f32 v_dx =\
-            tc0.y*w0_dx +\
-            tc1.y*w1_dx +\
-            tc2.y*w2_dx;\
-        const f32 v_dy =\
-            tc0.y*w0_dy +\
-            tc1.y*w1_dy +\
-            tc2.y*w2_dy;
-    #define uvdeclare2\
-        u_row += u_dy,\
-        v_row += v_dy,
-    #define uvdeclare3\
-        f32 u = u_row;\
-        f32 v = v_row;
-    #define uvdeclare4\
-        u += u_dx,\
-        v += v_dx,
+void Software::Draw(PrimitiveType type, i32 start, i32 count)
+{
+    if (count == 0) return;
+    u32 increment = type == PRIM_TRIANGLE_STRIP ? 1 : 3;
+    u32 index = start;
+    u32 last_index = start + count;
+    if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
 
-    #define texCoordDeclare1\
-        const ZunVec2 texDim = {(f32)(texW), (f32)(texH)};\
-        ZunVec2 tc0,tc1,tc2;\
-        if(render2D){\
-            tc0 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-            tc1 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-            tc2 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-        }else{\
-            tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
-            tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
-            tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
-        }
+    const u8* vData = (u8*)vertexData;
 
     #define wDeclare1 w0_row += w0_dy, w1_row += w1_dy, w2_row += w2_dy
     #define wDeclare2 f32 w0 = w0_row; f32 w1 = w1_row; f32 w2 = w2_row;\
@@ -682,6 +582,14 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     #define wDeclare4 w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f
 
     if(useTexCoord){
+        //precompute colorOp
+        const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
+        const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
+        const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
+        const u8 *tableA = ColorOpTable[COLOR_OP_MODULATE][textureFactor_a];
+        const u8 *tableDA = ColorDA[blendMode]; 
+        const u8 *clamp510 = ColorClamp510;
+
         const u8* tData = (u8*)texCoordData;
         //i move this outside, why this is inside?
         u32* texels;
@@ -694,8 +602,28 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             texMaskY = texH-1;
         }
         while (index < last_index) {
-            s2dblock1
-            texCoordDeclare1
+            f32 viewZ0, viewZ1, viewZ2;\
+            ZunVec2 v0,v1,v2;\
+            if(render2D){\
+                v0 = *(ZunVec2*)(vData + vertexStride * index);\
+                v1 = *(ZunVec2*)(vData + vertexStride * (index+1));\
+                v2 = *(ZunVec2*)(vData + vertexStride * (index+2));\
+            }else{\
+                v0 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * index),viewZ0);\
+                v1 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+1)),viewZ1);\
+                v2 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+2)),viewZ2);\
+            }
+            const ZunVec2 texDim = {(f32)(texW), (f32)(texH)};\
+            ZunVec2 tc0,tc1,tc2;\
+            if(false){\
+                tc0 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
+                tc1 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
+                tc2 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
+            }else{\
+                tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
+                tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
+                tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
+            }
             if (type == PRIM_TRIANGLE_STRIP && ((index - start) & 1))
             {
                 std::swap(v0, v1);
@@ -709,56 +637,145 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                 std::swap(viewZ1, viewZ2);
             }
 
-            s2dblock2
-            s2dblock3
-            uvdeclare1
+            //NDCToScreenZunVec2 value fetched to value_x, value_y
+            // v0 = NDCToScreenZunVec2(v0); became
+            // f32 v0_x = v0.x * screenScaleX + screenBiasX;
+            // f32 v0_y = v0.y * screenScaleY + screenBiasY;
+            // then EdgeFunctionZunVec2 became EdgeFunctionXY
+            f32 v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;\
+            if(render2D){\
+                v0_x = v0.x;\
+                v0_y = v0.y;\
+                v1_x = v1.x;\
+                v1_y = v1.y;\
+                v2_x = v2.x;\
+                v2_y = v2.y;\
+            }else{\
+                v0_x = v0.x * screenScaleX + screenBiasX;\
+                v0_y = v0.y * screenScaleY + screenBiasY;\
+                v1_x = v1.x * screenScaleX + screenBiasX;\
+                v1_y = v1.y * screenScaleY + screenBiasY;\
+                v2_x = v2.x * screenScaleX + screenBiasX;\
+                v2_y = v2.y * screenScaleY + screenBiasY;\
+            }\
+            const f32 area = EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y);\
+            if (area == 0.0f)\
+            {\
+                index += increment;\
+                continue;\
+            }\
+            const i32 xmin = ZUN_MAX(viewport[0],(i32)floor(ZUN_MIN3(v0_x, v1_x, v2_x)));\
+            const i32 xmax = ZUN_MIN(viewport[0] + viewport[2] - 1,(i32)ceil(ZUN_MAX3(v0_x, v1_x, v2_x)));\
+            const i32 ymin = ZUN_MAX(viewport[1],(i32)floor(ZUN_MIN3(v0_y, v1_y, v2_y)));\
+            const i32 ymax = ZUN_MIN(viewport[1] + viewport[3] - 1,(i32)ceil(ZUN_MAX3(v0_y, v1_y, v2_y)));\
+            const f32 vP_x = xmin+0.5f;\
+            const f32 vP_y = ymin+0.5f;\
+            const ZunVec3 edges = {\
+                EdgeFunctionXY(v1_x, v1_y, v2_x, v2_y, vP_x, vP_y),\
+                EdgeFunctionXY(v2_x, v2_y, v0_x, v0_y, vP_x, vP_y),\
+                EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, vP_x, vP_y)\
+            };\
+            const ZunVec3 e_dx = {\
+                v1_y - v2_y,\
+                v2_y - v0_y,\
+                v0_y - v1_y\
+            };\
+            const ZunVec3 e_dy = {\
+                v2_x - v1_x,\
+                v0_x - v2_x,\
+                v1_x - v0_x\
+            };\
+            const f32 invArea = 1.0f / area;\
+            const ZunVec3 w_dx = e_dx * invArea;\
+            const ZunVec3 w_dy = e_dy * invArea;
+
+            //barycentrics
+            const f32 w0_dx = w_dx.x;\
+            const f32 w1_dx = w_dx.y;\
+            const f32 w2_dx = w_dx.z;\
+            const f32 w0_dy = w_dy.x;\
+            const f32 w1_dy = w_dy.y;\
+            const f32 w2_dy = w_dy.z;\
+            f32 w0_row = edges.x * invArea;\
+            f32 w1_row = edges.y * invArea;\
+            f32 w2_row = edges.z * invArea;\
+
+            f32 u_row =\
+                tc0.x*w0_row +\
+                tc1.x*w1_row +\
+                tc2.x*w2_row;\
+            f32 v_row =\
+                tc0.y*w0_row +\
+                tc1.y*w1_row +\
+                tc2.y*w2_row;\
+            const f32 u_dx =\
+                tc0.x*w0_dx +\
+                tc1.x*w1_dx +\
+                tc2.x*w2_dx;\
+            const f32 u_dy =\
+                tc0.x*w0_dy +\
+                tc1.x*w1_dy +\
+                tc2.x*w2_dy;\
+            const f32 v_dx =\
+                tc0.y*w0_dx +\
+                tc1.y*w1_dx +\
+                tc2.y*w2_dx;\
+            const f32 v_dy =\
+                tc0.y*w0_dy +\
+                tc1.y*w1_dy +\
+                tc2.y*w2_dy;
             fogdeclare1
             for (i32 y = ymin; y <= ymax; ++y,
-                uvdeclare2
+                u_row += u_dy,\
+                v_row += v_dy,
                 fogdeclare2
                 wDeclare1)
             {
                 fogdeclare3
-                uvdeclare3
+                f32 u = u_row;\
+                f32 v = v_row;
                 wDeclare2
+                ZunColor *fb = framebuffer + rowOffset + xmin;
                 for (i32 x = xmin; x <= xmax; ++x,
-                    uvdeclare4
+                    ++fb,
+                    u += u_dx,\
+                    v += v_dx,
                     fogdeclare4
                     wDeclare3)
                 {
                     // barycentric inside test (fast reject first)
                     if (wDeclare4)
                     {
-                        const i32 pixel = rowOffset + x;
                         //directly inside
                         const ZunColor frag = texels[
                             ((i32)v & texMaskY) * texW +
                             ((i32)u & texMaskX)
                         ];
-                        u8 frag_a=ZunA(frag);
-                        if (frag_a+textureFactor.a < alphaThreshold){
+
+                        u8 frag_a=tableA[frag >> 24];
+                        if (frag_a < alphaThreshold){
                             continue;
                         }
-                        u8 frag_r=ZunR(frag);
-                        u8 frag_g=ZunG(frag);
-                        u8 frag_b=ZunB(frag);
+                        u8 frag_r=tableR[(frag >> 16) & 0xFF];
+                        u8 frag_g=tableG[(frag >> 8) & 0xFF];
+                        u8 frag_b=tableB[frag & 0xFF];
 
-                        switch(colorOp){\
-                            case COLOR_OP_MODULATE:\
-                                frag_r = (frag_r * textureFactor_r) >> 8;\
-                                frag_g = (frag_g * textureFactor_g) >> 8;\
-                                frag_b = (frag_b * textureFactor_b) >> 8;\
-                                frag_a = (frag_a * textureFactor_a) >> 8;\
-                                break;\
-                            case COLOR_OP_ADD:\
-                                frag_r += textureFactor_r;\
-                                frag_g += textureFactor_g;\
-                                frag_b += textureFactor_b;\
-                                frag_a = (frag_a * textureFactor_a) >> 8;\
-                                break;\
-                        }
                         fogdeclare5
-                        s2dblock7
+                        if (frag_a != 255) {
+                            const ZunColor dst = *fb;
+
+                            const u8 *srcMul = ColorMulTable[frag_a];
+                            const u8 *dstMul = ColorMulTable[tableDA[frag_a]];
+                            
+                            frag_r = clamp510[srcMul[frag_r] + dstMul[(dst >> 16) & 0xFF]];
+                            frag_g = clamp510[srcMul[frag_g] + dstMul[(dst >> 8) & 0xFF]];
+                            frag_b = clamp510[srcMul[frag_b] + dstMul[dst & 0xFF]];
+                        }
+                        *fb = (ZunColor)(
+                            (frag_a << 24) |
+                            (frag_r << 16) |
+                            (frag_g << 8)  |
+                            frag_b);
                     }
                 }
             }

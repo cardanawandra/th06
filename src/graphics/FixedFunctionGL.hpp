@@ -22,6 +22,7 @@ struct FixedFunctionGL : GfxInterface
     virtual void SetColorOp(TextureOpComponent component, ColorOp op);
     virtual void SetTextureFactor(ZunColor factor);
     virtual void SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix);
+    virtual void Set2D(bool is2D){};
 
     virtual void SetTextureFilter();
 
