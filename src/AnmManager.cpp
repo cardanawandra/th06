@@ -1398,7 +1398,7 @@ ZunResult AnmManager::AddSpriteToDrawBuffer(VertexTex1Xyzrhw *vertices)
     return ZUN_SUCCESS;
 }
 
-#define NEWDRAW
+// #define NEWDRAW
 #ifndef NEWDRAW
 ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
 {

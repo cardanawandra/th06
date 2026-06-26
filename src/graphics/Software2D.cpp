@@ -38,7 +38,7 @@ void InitColorOpTable()
                 u8((value * factor) >> 8);
 
             // Add
-            ColorOpTable[COLOR_OP_ADD][factor][value] = ColorClamp510[factor*value];
+            ColorOpTable[COLOR_OP_ADD][factor][value] = ColorClamp510[factor+value];
 
             // replace (bruh)
             ColorOpTable[COLOR_OP_REPLACE][factor][value] = value;

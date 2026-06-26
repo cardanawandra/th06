@@ -573,8 +573,6 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     u32 last_index = start + count;
     if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
 
-    const u8* vData = (u8*)vertexData;
-
     #define wDeclare1 w0_row += w0_dy, w1_row += w1_dy, w2_row += w2_dy
     #define wDeclare2 f32 w0 = w0_row; f32 w1 = w1_row; f32 w2 = w2_row;\
         i32 rowOffset = y * GAME_WINDOW_WIDTH_REAL;
@@ -591,6 +589,8 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const u8 *clamp510 = ColorClamp510;
 
         const u8* tData = (u8*)texCoordData;
+        const u8* vData = (u8*)vertexData;
+        const u8* vp = vData + vertexStride * start;
         //i move this outside, why this is inside?
         u32* texels;
         i32 texW, texH,texMaskX, texMaskY;
@@ -615,15 +615,10 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             }
             const ZunVec2 texDim = {(f32)(texW), (f32)(texH)};\
             ZunVec2 tc0,tc1,tc2;\
-            if(false){\
-                tc0 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-                tc1 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-                tc2 = *(ZunVec2*)(tData + texCoordStride * index) * texDim;\
-            }else{\
-                tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
-                tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
-                tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
-            }
+            tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
+            tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
+            tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
+
             if (type == PRIM_TRIANGLE_STRIP && ((index - start) & 1))
             {
                 std::swap(v0, v1);
