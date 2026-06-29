@@ -39,7 +39,8 @@ static const PixelDataType g_TextureFormatTypeMapping[6] = {static_cast<PixelDat
 
 static const u8 g_TextureFormatBPP[6] = {0, 4, 2, 2, 3, 2};
 
-int AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface* dst, STB_Rect* dstrect)
+i32 AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect,
+                                STB_Surface* dst, STB_Rect* dstrect)
 {
     if (!src || !dst)
         return -1;
@@ -47,24 +48,14 @@ int AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface
     if (!src->pixels || !dst->pixels)
         return -1;
 
-    /* STB_SoftStretch requires same format */
     if (src->channels != dst->channels)
         return -1;
-
-    if (dstrect->x + dstrect->w > dst->w)
-    {
-        dstrect->w = dst->w - dstrect->x;
-    }
-
-    if (dstrect->y + dstrect->h > dst->h)
-    {
-        dstrect->h = dst->h - dstrect->y;
-    }
 
     STB_Rect full_src;
     STB_Rect full_dst;
 
-    if (!srcrect) {
+    if (!srcrect)
+    {
         full_src.x = 0;
         full_src.y = 0;
         full_src.w = src->w;
@@ -72,7 +63,8 @@ int AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface
         srcrect = &full_src;
     }
 
-    if (!dstrect) {
+    if (!dstrect)
+    {
         full_dst.x = 0;
         full_dst.y = 0;
         full_dst.w = dst->w;
@@ -80,129 +72,174 @@ int AnmManager::STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface
         dstrect = &full_dst;
     }
 
-    const int bpp = src->channels;
+    if (dstrect->x + dstrect->w > dst->w)
+        dstrect->w = dst->w - dstrect->x;
 
-    const unsigned char* src_pixels =
-        (const unsigned char*)src->pixels +
-        srcrect->y * src->pitch +
-        srcrect->x * bpp;
+    if (dstrect->y + dstrect->h > dst->h)
+        dstrect->h = dst->h - dstrect->y;
 
-    unsigned char* dst_pixels =
-        (unsigned char*)dst->pixels +
-        dstrect->y * dst->pitch +
-        dstrect->x * bpp;
+    if (dstrect->w <= 0 || dstrect->h <= 0)
+        return -1;
 
-    for (int y = 0; y < dstrect->h; y++)
+    const i32 bpp = src->channels;
+    const i32 xstep = (srcrect->w << 16) / dstrect->w;
+    const i32 ystep = (srcrect->h << 16) / dstrect->h;
+
+    i32 ypos = 0;
+
+    for (i32 y = 0; y < dstrect->h; ++y)
     {
-        int sy = y * srcrect->h / dstrect->h;
+        i32 sy = ypos >> 16;
 
-        unsigned char *dst_row =
+        u8* dst_row =
             dst->pixels +
             (dstrect->y + y) * dst->pitch +
             dstrect->x * bpp;
 
-        unsigned char *src_row =
+        u8* src_row =
             src->pixels +
             (srcrect->y + sy) * src->pitch +
             srcrect->x * bpp;
 
-        for (int x = 0; x < dstrect->w; x++)
-        {
-            int sx = x * srcrect->w / dstrect->w;
+        i32 xpos = 0;
 
-            memcpy(
-                dst_row + x * bpp,
-                src_row + sx * bpp,
-                bpp
-            );
+        switch (bpp)
+        {
+        case 4:
+        {
+            unsigned long* d = (unsigned long*)dst_row;
+
+            for (i32 x = 0; x < dstrect->w; ++x)
+            {
+                i32 sx = xpos >> 16;
+                d[x] = ((unsigned long*)src_row)[sx];
+                xpos += xstep;
+            }
+            break;
         }
+
+        case 3:
+        {
+            u8* d = dst_row;
+
+            for (i32 x = 0; x < dstrect->w; ++x)
+            {
+                i32 sx = xpos >> 16;
+                u8* s = src_row + sx * 3;
+
+                d[0] = s[0];
+                d[1] = s[1];
+                d[2] = s[2];
+
+                d += 3;
+                xpos += xstep;
+            }
+            break;
+        }
+
+        case 1:
+        {
+            for (i32 x = 0; x < dstrect->w; ++x)
+            {
+                dst_row[x] = src_row[xpos >> 16];
+                xpos += xstep;
+            }
+            break;
+        }
+
+        default:
+        {
+            u8* d = dst_row;
+
+            for (i32 x = 0; x < dstrect->w; ++x)
+            {
+                memcpy(d, src_row + (xpos >> 16) * bpp, bpp);
+                d += bpp;
+                xpos += xstep;
+            }
+            break;
+        }
+        }
+
+        ypos += ystep;
     }
-    return 9;
+
+    return 0;
 }
 
-STB_Surface *AnmManager::STB_CreateSurface(int width, int height, int channels)
+STB_Surface* AnmManager::STB_CreateSurface(i32 width, i32 height, i32 channels)
 {
-    STB_Surface *surface =
-        (STB_Surface*)calloc(1, sizeof(STB_Surface));
-
+    STB_Surface* surface = (STB_Surface*)calloc(1, sizeof(STB_Surface));
     if (!surface)
         return NULL;
 
-    surface->w    = width;
-    surface->h   = height;
-    surface->channels = channels;
-    surface->pitch    = width * channels;
-    surface->owns_pixels = true;
+    i32 pitch = (i32)width * channels;
+    i32 size  = pitch * height;
 
-    size_t size =
-        surface->pitch * height;
-
-    surface->pixels =
-        (unsigned char*)malloc(size);
-
+    surface->pixels = (u8*)calloc(size, 1);
     if (!surface->pixels)
     {
         free(surface);
         return NULL;
     }
 
-    memset(surface->pixels, 0, size);
+    surface->w = width;
+    surface->h = height;
+    surface->channels = channels;
+    surface->pitch = (i32)pitch;
+    surface->owns_pixels = true;
 
     return surface;
 }
 
-STB_Surface *AnmManager::STB_CreateSurfaceFrom(void *pixels, int width, int height, int pitch, int channels)
+STB_Surface* AnmManager::STB_CreateSurfaceFrom(
+    u8* pixels,
+    i32 width,
+    i32 height,
+    i32 pitch,
+    i32 channels)
 {
-    STB_Surface *surface =
-        (STB_Surface*)calloc(1, sizeof(STB_Surface));
-
+    STB_Surface* surface = (STB_Surface*)malloc(sizeof(STB_Surface));
     if (!surface)
         return NULL;
 
-    surface->w    = width;
-    surface->h   = height;
-    surface->channels = channels;
-    surface->pitch    = pitch;
-
-    /* IMPORTANT: does NOT own memory */
-    surface->pixels =
-        (unsigned char*)pixels;
+    surface->w          = width;
+    surface->h          = height;
+    surface->channels   = channels;
+    surface->pitch      = pitch;
+    surface->pixels     = pixels;
+    surface->owns_pixels = false;
 
     return surface;
 }
 
-void AnmManager::STB_FreeSurface(STB_Surface *surface)
+void AnmManager::STB_FreeSurface(STB_Surface* surface)
 {
-    if (!surface)
-        return;
+    if (surface)
+    {
+        if (surface->owns_pixels && surface->pixels)
+            stbi_image_free(surface->pixels);
 
-    if (surface->owns_pixels && surface->pixels){
-        stbi_image_free(surface->pixels);
-        surface->pixels = NULL;
+        free(surface);
     }
-
-    free(surface);
 }
 
-STB_Surface *AnmManager::STB_ConvertSurfaceFormat(STB_Surface *src, int desired_channels)
+STB_Surface* AnmManager::STB_ConvertSurfaceFormat(STB_Surface* src, i32 desired_channels)
 {
     if (!src)
         return NULL;
 
     if (src->channels == desired_channels)
     {
-        STB_Surface *copy =
-            (STB_Surface*)malloc(sizeof(STB_Surface));
-
+        STB_Surface* copy = (STB_Surface*)malloc(sizeof(STB_Surface));
         if (!copy)
             return NULL;
 
         *copy = *src;
 
-        size_t size = src->pitch * src->h;
+        i32 size = (i32)src->pitch * src->h;
 
-        copy->pixels = (unsigned char*)malloc(size);
-
+        copy->pixels = (u8*)malloc(size);
         if (!copy->pixels)
         {
             free(copy);
@@ -213,67 +250,100 @@ STB_Surface *AnmManager::STB_ConvertSurfaceFormat(STB_Surface *src, int desired_
         return copy;
     }
 
-    STB_Surface *dst =
-        (STB_Surface*)calloc(1, sizeof(STB_Surface));
-
+    STB_Surface* dst = (STB_Surface*)malloc(sizeof(STB_Surface));
     if (!dst)
         return NULL;
 
-    dst->w  = src->w;
+    dst->w = src->w;
     dst->h = src->h;
     dst->channels = desired_channels;
     dst->pitch = dst->w * desired_channels;
+    dst->owns_pixels = true;
 
-    size_t dst_size = dst->pitch * dst->h;
+    i32 size = (i32)dst->pitch * dst->h;
 
-    dst->pixels = (unsigned char*)malloc(dst_size);
-
+    dst->pixels = (u8*)malloc(size);
     if (!dst->pixels)
     {
         free(dst);
         return NULL;
     }
 
-    for (int y = 0; y < src->h; y++)
+    const i32 sc = src->channels;
+
+    for (i32 y = 0; y < src->h; ++y)
     {
-        unsigned char *d =
-            dst->pixels + y * dst->pitch;
-
-        unsigned char *s =
-            src->pixels + y * src->pitch;
-
-        for (int x = 0; x < src->w; x++)
+        u8* s = src->pixels + y * src->pitch;
+        u8* d = dst->pixels + y * dst->pitch;
+        i32 x = 0;
+        switch (desired_channels)
         {
-            // unsigned char r = s[0];
-            // unsigned char g = s[1];
-            // unsigned char b = s[2];
-            // unsigned char a =
-            //     (src->channels >= 4) ? s[3] : 255;
+        case 4:
 
-            if (desired_channels == 4)
+            if (sc == 4)
             {
-                d[0] = s[0];
-                d[1] = s[1];
-                d[2] = s[2];
-                d[3] = (src->channels >= 4) ? s[3] : 255;
-            }
-            else if (desired_channels == 3)
-            {
-                d[0] = s[0];
-                d[1] = s[1];
-                d[2] = s[2];
-            }
-            else if (desired_channels == 1)
-            {
-                d[0] =
-                    (unsigned char)(
-                        (s[0] * 30 +
-                         s[1] * 59 +
-                         s[2] * 11) / 100);
-            }
+                for (x = 0; x < src->w; ++x)
+                {
+                    d[0] = s[0];
+                    d[1] = s[1];
+                    d[2] = s[2];
+                    d[3] = s[3];
 
-            s += src->channels;
-            d += desired_channels;
+                    s += 4;
+                    d += 4;
+                }
+            }
+            else
+            {
+                for (x = 0; x < src->w; ++x)
+                {
+                    d[0] = s[0];
+                    d[1] = s[1];
+                    d[2] = s[2];
+                    d[3] = 255;
+
+                    s += 3;
+                    d += 4;
+                }
+            }
+            break;
+
+        case 3:
+
+            if (sc == 4)
+            {
+                for (x = 0; x < src->w; ++x)
+                {
+                    d[0] = s[0];
+                    d[1] = s[1];
+                    d[2] = s[2];
+
+                    s += 4;
+                    d += 3;
+                }
+            }
+            else
+            {
+                memcpy(d, s, src->w * 3);
+            }
+            break;
+
+        case 1:
+            for (x = 0; x < src->w; ++x)
+            {
+                d[0] = (u8)
+                    ((s[0] * 30 + s[1] * 59 + s[2] * 11) / 100);
+
+                s += sc;
+                ++d;
+            }
+            break;
+
+        default:
+
+            free(dst->pixels);
+            free(dst);
+            return NULL;
         }
     }
 
@@ -300,12 +370,12 @@ u32 AnmManager::STB_MapRGBA(u8 r,u8 g,u8 b,u8 a)
         ((u32)r);
 }
 
-void AnmManager::STB_FillRect(STB_Surface *surface, STB_Rect *rect, unsigned char value)
+void AnmManager::STB_FillRect(STB_Surface *surface, STB_Rect *rect, u8 value)
 {
     if (!surface || !surface->pixels)
         return;
 
-    int bpp = surface->channels;
+    i32 bpp = surface->channels;
 
     if (rect == NULL)
     {
@@ -318,9 +388,9 @@ void AnmManager::STB_FillRect(STB_Surface *surface, STB_Rect *rect, unsigned cha
         return;
     }
 
-    for (int y = 0; y < rect->h; y++)
+    for (i32 y = 0; y < rect->h; y++)
     {
-        unsigned char *row =
+        u8 *row =
             surface->pixels +
             (rect->y + y) * surface->pitch +
             rect->x * bpp;
@@ -349,7 +419,7 @@ void AnmManager::CreateTextureObject()
 
 STB_Surface *AnmManager::LoadToSurfaceWithFormat(
     const char *filename,
-    int desired_channels,
+    i32 desired_channels,
     u8 **fileData)
 {
     u8 *data;
@@ -366,7 +436,7 @@ STB_Surface *AnmManager::LoadToSurfaceWithFormat(
         return NULL;
     }
 
-    unsigned char *pixels = stbi_load_from_memory(
+    u8 *pixels = (u8*)stbi_load_from_memory(
         (const stbi_uc*)data,
         g_LastFileSize,
         &width,
@@ -395,9 +465,9 @@ STB_Surface *AnmManager::LoadToSurfaceWithFormat(
     if (desired_channels != 0)
         channels = desired_channels;
 
-    surface->w    = width;
-    surface->h   = height;
-    surface->channels = channels;
+    surface->w    = (i32)width;
+    surface->h   = (i32)height;
+    surface->channels = (i32)channels;
     surface->pitch    = width * channels;
     surface->pixels   = pixels;
 
@@ -423,7 +493,7 @@ u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
     u8 *dstPtr = pixelData;
     const u8 *srcPtr = (u8 *)src->pixels;
 
-    for (int i = 0; i < src->h; i++)
+    for (i32 i = 0; i < src->h; i++)
     {
         memcpy(dstPtr, srcPtr, dstPitch);
         dstPtr += dstPitch;
@@ -451,7 +521,7 @@ void AnmManager::FlipSurface(STB_Surface *surface)
 
     memcpy(copyBuf, surface->pixels, surface->h / 2 * surface->pitch);
 
-    for (int i = 0; i < surface->h / 2; i++)
+    for (i32 i = 0; i < surface->h / 2; i++)
     {
         memcpy(((u8 *)surface->pixels) + lowIndex, highPtr, surface->pitch);
         memcpy(highPtr, copyBuf + lowIndex, surface->pitch);
@@ -1209,7 +1279,6 @@ void AnmManager::UpdateDirtyStates()
             memcpy(&this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         &this->dirtyTransformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX],
                         sizeof(*this->transformMatrices));
-            g_GfxBackend->Set2D(false);
             g_GfxBackend->SetTransformMatrix((TransformMatrix)(currFlagIndex - DIRTY_MODEL_MATRIX),
                                            this->transformMatrices[currFlagIndex - DIRTY_MODEL_MATRIX]);
         }
@@ -1225,7 +1294,6 @@ inline float rintf_compat(float x)
 }
 ZunResult AnmManager::DrawOrthographic(const AnmVm *vm, bool roundToPixel)
 {
-    g_GfxBackend->Set2D(true);
     f32 triangleX1, triangleX2, triangleY1, triangleY2;
     if (roundToPixel)
     {
@@ -1402,7 +1470,6 @@ ZunResult AnmManager::AddSpriteToDrawBuffer(VertexTex1Xyzrhw *vertices)
 #ifndef NEWDRAW
 ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(true);
     float fVar2;
     float fVar3;
 
@@ -1448,8 +1515,6 @@ ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
 #else
 ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(true);
-
     if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
         return ZUN_ERROR;
 
@@ -1461,7 +1526,7 @@ ZunResult AnmManager::DrawNoRotation(const AnmVm *vm)
     const float halfHeight = (sprite->heightPx * vm->scaleY) * 0.5f;
 
     VertexTex1Xyzrhw *v = g_PrimitivesToDrawVertexBuf;
-    const unsigned int anchor = vm->flags.anchor;
+    const unsigned i32 anchor = vm->flags.anchor;
 
     float leftX;
     float rightX;
@@ -1542,10 +1607,10 @@ ZunResult AnmManager::Draw(const AnmVm *vm)
     }
     z = vm->rotation.z;
     fsincos_wrapper(&zSine, &zCosine, z);
-    xOffset = (float)((int)(vm->pos.x));
-    yOffset = (float)((int)(vm->pos.y));
-    spriteXCenter = (float)((int)((vm->sprite->widthPx * vm->scaleX) / 2.0f));
-    spriteYCenter = (float)((int)((vm->sprite->heightPx * vm->scaleY) / 2.0f));
+    xOffset = (float)((i32)(vm->pos.x));
+    yOffset = (float)((i32)(vm->pos.y));
+    spriteXCenter = (float)((i32)((vm->sprite->widthPx * vm->scaleX) / 2.0f));
+    spriteYCenter = (float)((i32)((vm->sprite->heightPx * vm->scaleY) / 2.0f));
     this->TranslateRotation(&g_PrimitivesToDrawVertexBuf[0], -spriteXCenter - 0.5f, -spriteYCenter - 0.5f, zSine,
                             zCosine, xOffset, yOffset);
     this->TranslateRotation(&g_PrimitivesToDrawVertexBuf[1], spriteXCenter - 0.5f, -spriteYCenter - 0.5f, zSine,
@@ -1588,16 +1653,16 @@ ZunResult AnmManager::Draw(const AnmVm *vm)
     const float z = vm->rotation.z;
     fsincos_wrapper(&zSine, &zCosine, z);
 
-    const float xOffset = (float)(int)vm->pos.x;
-    const float yOffset = (float)(int)vm->pos.y;
+    const float xOffset = (float)(i32)vm->pos.x;
+    const float yOffset = (float)(i32)vm->pos.y;
 
     const AnmLoadedSprite *sprite = vm->sprite;
 
     const float spriteXCenter =
-        (float)(int)((sprite->widthPx * vm->scaleX) * 0.5f);
+        (float)(i32)((sprite->widthPx * vm->scaleX) * 0.5f);
 
     const float spriteYCenter =
-        (float)(int)((sprite->heightPx * vm->scaleY) * 0.5f);
+        (float)(i32)((sprite->heightPx * vm->scaleY) * 0.5f);
 
     const float left   = -spriteXCenter - 0.5f;
     const float right  =  spriteXCenter - 0.5f;
@@ -1655,7 +1720,6 @@ ZunResult AnmManager::Draw(const AnmVm *vm)
 #ifndef NEWDRAW
 ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(true);
     f32 centerX;
     f32 centerY;
 
@@ -1702,8 +1766,6 @@ ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 #else
 ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(true);
-
     if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
         return ZUN_ERROR;
 
@@ -1716,7 +1778,7 @@ ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 
     VertexTex1Xyzrhw *v = g_PrimitivesToDrawVertexBuf;
 
-    const unsigned int anchor = vm->flags.anchor;
+    const unsigned i32 anchor = vm->flags.anchor;
     float leftX;
     float rightX;
 
@@ -1760,7 +1822,6 @@ ZunResult AnmManager::DrawFacingCamera(const AnmVm *vm)
 #ifndef NEWDRAW
 ZunResult AnmManager::Draw3(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(false);
     ZunMatrix worldTransformMatrix;
     ZunMatrix rotationMatrix;
     ZunMatrix textureMatrix;
@@ -1842,7 +1903,7 @@ ZunResult AnmManager::Draw3(const AnmVm *vm)
     } else {
 
         //TODO: uhhh could this have a negative impact on performance?
-        for(int i = 0; i < 4; i++)
+        for(i32 i = 0; i < 4; i++)
             g_PrimitivesToDrawVertexBuf[i].position = ZunVec4(worldTransformMatrix * this->vertexBufferContents[i].position, 1.0f);
 
         g_PrimitivesToDrawVertexBuf[0].textureUV.x = g_PrimitivesToDrawVertexBuf[2].textureUV.x =
@@ -1908,8 +1969,6 @@ ZunResult AnmManager::Draw3(const AnmVm *vm)
 #else
 ZunResult AnmManager::Draw3(const AnmVm *vm)
 {
-    g_GfxBackend->Set2D(false);
-
     if (!vm->flags.isVisible || !vm->flags.flag1 || !vm->color)
         return ZUN_ERROR;
 
@@ -2132,7 +2191,7 @@ ZunResult AnmManager::Draw2(const AnmVm *vm)
     } else {
 
         //TODO: uhhh could this have a negative impact on performance?
-        for(int i = 0; i < 4; i++)
+        for(i32 i = 0; i < 4; i++)
             g_PrimitivesToDrawVertexBuf[i].position = ZunVec4(worldTransformMatrix * this->vertexBufferContents[i].position, 1.0f);
 
         g_PrimitivesToDrawVertexBuf[0].textureUV.x = g_PrimitivesToDrawVertexBuf[2].textureUV.x =

@@ -100,7 +100,7 @@ enum ProjectionMode
 struct VertexAttribArrayState
 {
     void *ptr;
-    size_t stride;
+    i32 stride;
 };
 
 enum DirtyRenderStateBitShifts
@@ -333,7 +333,7 @@ struct AnmManager
         this->dirtyFlags |= (1 << DIRTY_FOG);
     }
 
-    void SetAttributePointer(VertexAttributeArrays attr, size_t stride, void *ptr)
+    void SetAttributePointer(VertexAttributeArrays attr, i32 stride, void *ptr)
     {
         this->dirtyAttribArrays[attr].ptr = ptr;
         this->dirtyAttribArrays[attr].stride = stride;
@@ -428,16 +428,16 @@ struct AnmManager
     }
 
     //STB USAGE PART
-    int STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface* dst, STB_Rect* dstrect);
-    STB_Surface *STB_CreateSurface(int width, int height, int channels);
-    STB_Surface *STB_CreateSurfaceFrom(void *pixels, int width, int height, int pitch, int channels);
+    i32 STB_SoftStretch(STB_Surface* src, STB_Rect* srcrect, STB_Surface* dst, STB_Rect* dstrect);
+    STB_Surface *STB_CreateSurface(i32 width, i32 height, i32 channels);
+    STB_Surface *STB_CreateSurfaceFrom(u8 *pixels, i32 width, i32 height, i32 pitch, i32 channels);
     void STB_FreeSurface(STB_Surface *surface);
-    STB_Surface *STB_ConvertSurfaceFormat(STB_Surface *src, int desired_channels);
-    void STB_FillRect(STB_Surface *surface, STB_Rect *rect, unsigned char value);
+    STB_Surface *STB_ConvertSurfaceFormat(STB_Surface *src, i32 desired_channels);
+    void STB_FillRect(STB_Surface *surface, STB_Rect *rect, u8 value);
     STB_Color STB_TextColor(ZunColor shadowColor);
     u32 STB_MapRGBA(u8 r,u8 g,u8 b,u8 a);
 
-    static STB_Surface *LoadToSurfaceWithFormat(const char *filename, int desired_channels, u8 **fileData);
+    static STB_Surface *LoadToSurfaceWithFormat(const char *filename, i32 desired_channels, u8 **fileData);
     static u8 *ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth);
     static void FlipSurface(STB_Surface *surface);
     void ApplySurfaceToColorBuffer(STB_Surface *surface, const STB_Rect &srcRect, const STB_Rect &dstRect);

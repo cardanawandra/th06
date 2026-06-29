@@ -11,9 +11,7 @@
 u8 alphaThreshold = 4;
 
 u8 ColorOpTable[3][256][256];
-u8 ColorAddTable[256][256];
 u8 ColorMulTable[256][256];
-u8 ColorClamp510[511];
 u8 ColorDA[2][256];
 void InitColorOpTable()
 {
@@ -22,9 +20,6 @@ void InitColorOpTable()
         ColorDA[BLEND_INV_SRC_ALPHA][i] = 255-i;
         ColorDA[BLEND_ONE][i] = 255;
     }
-    //clamp 255+255
-    for (i=0;i<=510;i++)
-        ColorClamp510[i]=(i>255)?255:i;
     u16 factor, value;
     for (factor = 0; factor < 256; ++factor)
     {
@@ -38,7 +33,11 @@ void InitColorOpTable()
                 u8((value * factor) >> 8);
 
             // Add
-            ColorOpTable[COLOR_OP_ADD][factor][value] = ColorClamp510[factor+value];
+            if(factor+value>255){
+                ColorOpTable[COLOR_OP_ADD][factor][value] = 255;
+            }else{
+                ColorOpTable[COLOR_OP_ADD][factor][value] = factor+value;
+            }
 
             // replace (bruh)
             ColorOpTable[COLOR_OP_REPLACE][factor][value] = value;

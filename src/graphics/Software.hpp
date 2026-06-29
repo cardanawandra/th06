@@ -11,21 +11,8 @@
 #include <memory>
 #include <stddef.h>
 
-struct ZunRGBA {
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a;
-};
-inline ZunRGBA ZunRGBAGet(ZunColor c) { 
-    ZunRGBA result = {
-        (c >> 16) & 0xFF,
-        (c >> 8) & 0xFF,
-        c & 0xFF,
-        c >> 24
-    };
-    return result;
-}
+typedef i32 fixed32; // signed 16.16
+const fixed32 FIXED_ONE = 1 << 16;
 
 struct Texture {
     std::vector<u32> texels; //ARGB8888
@@ -168,7 +155,6 @@ struct Software : GfxInterface
     f32 clearDepth;// = 1;
     f32 fogNear;
     f32 fogFar;
-    ZunRGBA fogColor;
     u8 fogColor_r;
     u8 fogColor_g;
     u8 fogColor_b;
@@ -181,7 +167,6 @@ struct Software : GfxInterface
     DepthFunc depthFunc;
     bool useDepthTest;
 
-    ZunRGBA textureFactor;
     u8 textureFactor_r;
     u8 textureFactor_g;
     u8 textureFactor_b;
