@@ -11,8 +11,8 @@
 #include <memory>
 #include <stddef.h>
 
+#define FIXED_ONE 65536.0f
 typedef i32 fixed32; // signed 16.16
-const fixed32 FIXED_ONE = 1 << 16;
 
 struct Texture {
     std::vector<u32> texels; //ARGB8888
@@ -21,6 +21,7 @@ struct Texture {
     std::vector<u8> texB;
     std::vector<u8> texA;
     i32 width, height;
+    i8 shift;
     PixelFormat format;
     PixelDataType type;
     inline ZunColor GetPixel(i32 x, i32 y);
@@ -181,6 +182,12 @@ struct Software : GfxInterface
 
     ZunMatrix projection;
     ZunMatrix textureMatrix;
+    f32 tm00;
+    f32 tm01;
+    f32 tm02;
+    f32 tm10;
+    f32 tm11;
+    f32 tm12;
 
     bool noVertexBuffer;
     bool noFog;

@@ -11,7 +11,6 @@
 u8 alphaThreshold = 4;
 
 u8 ColorOpTable[3][256][256];
-u8 ColorMulTable[256][256];
 u8 ColorDA[2][256];
 void InitColorOpTable()
 {
@@ -25,9 +24,6 @@ void InitColorOpTable()
     {
         for (value = 0; value < 256; ++value)
         {
-            //ColorMulTable
-            ColorMulTable[factor][value] = (factor * value + 128) >> 8;
-
             // Modulate
             ColorOpTable[COLOR_OP_MODULATE][factor][value] =
                 u8((value * factor) >> 8);

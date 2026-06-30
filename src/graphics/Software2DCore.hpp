@@ -78,7 +78,12 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
             mvp = projection * (view * model);
             break;
         case MATRIX_TEXTURE:
-            textureMatrix = matrix;
+            tm00 = matrix.m[0][0];
+            tm01 = matrix.m[0][1];
+            tm02 = matrix.m[0][2] + matrix.m[0][3];
+            tm10 = matrix.m[1][0];
+            tm11 = matrix.m[1][1];
+            tm12 = matrix.m[1][2] + matrix.m[1][3];
             break;
     }
 }
@@ -344,6 +349,9 @@ void Software::SetTextureImage(u32 width, u32 height, PixelFormat fmt, PixelData
             );
         }
         boundTexture->width = width;
+        boundTexture->shift = 0;
+        for (u32 t = width; t > 1; t >>= 1)
+            ++boundTexture->shift;
         boundTexture->height = height;
         boundTexture->format = fmt;
         boundTexture->type = type;
@@ -495,50 +503,64 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
     u32 last_index = start + count;
     if(type == PRIM_TRIANGLE_STRIP) last_index -= 2;
 
-    if(useTexCoord){
+    if(useTexCoord&&boundTexture){
         //precompute colorOp
-        const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
-        const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
-        const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
-        const u8 *tableA = ColorOpTable[COLOR_OP_MODULATE][textureFactor_a];
-        const u8 *tableDA = ColorDA[blendMode]; 
-        const u8 (*tableAdd)[256] = ColorOpTable[COLOR_OP_ADD];
+        register const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
+        register const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
+        register const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
+        register const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
+        register const u8 *tableDA = ColorDA[blendMode]; 
+        register const u8 (*tableAdd)[256] = ColorOpTable[COLOR_OP_ADD];
+        register const u8 (*tableMul)[256] = ColorOpTable[COLOR_OP_MODULATE];
 
         const u8* tData = (u8*)texCoordData;
         const u8* vData = (u8*)vertexData;
-        const u8* vp = vData + vertexStride * start;
-        //i move this outside, why this is inside?
-        u32* texels;
-        i32 texW, texH,texMaskX, texMaskY;
-        if(boundTexture) {
-            texels = &boundTexture->texels[0];
-            texW = boundTexture->width;
-            texH = boundTexture->height;
-            texMaskX = texW-1;
-            texMaskY = texH-1;
-        }
+
+        const u32* texels = &boundTexture->texels[0];
+        const f32 ftexW = (f32)boundTexture->width;
+        const f32 ftexH = (f32)boundTexture->height;
+        const i32 texMaskX = boundTexture->width-1;
+        const i32 texMaskY = boundTexture->height-1;
+        const u8 texShift = boundTexture->shift;
+
         while (index < last_index) {
             f32 viewZ0, viewZ1, viewZ2;\
-            ZunVec2 v0 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * index),viewZ0);\
-            ZunVec2 v1 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+1)),viewZ1);\
-            ZunVec2 v2 = ProjectToNDCZunVec2(*(ZunVec3*)(vData + vertexStride * (index+2)),viewZ2);\
 
-            const ZunVec2 texDim = {(f32)(texW), (f32)(texH)};\
-            ZunVec2 tc0 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * index), textureMatrix) * texDim;\
-            ZunVec2 tc1 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+1)), textureMatrix) * texDim;\
-            ZunVec2 tc2 = ProjectTexCoordToNDC(*(ZunVec2*)(tData + texCoordStride * (index+2)), textureMatrix) * texDim;\
+            const u8* vp = vData + vertexStride * index;
+            ZunVec2 v0 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ0);vp += vertexStride;
+            ZunVec2 v1 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ1);vp += vertexStride;
+            ZunVec2 v2 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ2);
 
+            const u8* tcp = tData + texCoordStride * index;
+            const ZunVec2* ptc = (const ZunVec2*)tcp;
+            #define tcGetx (tm00 * ptc->x + tm01 * ptc->y + tm02) * ftexW
+            #define tcGety (tm10 * ptc->x + tm11 * ptc->y + tm12) * ftexH
+            f32 tc0x = tcGetx;
+            f32 tc0y = tcGety;
+            tcp += texCoordStride;
+            ptc = (const ZunVec2*)tcp;
+            f32 tc1x = tcGetx;
+            f32 tc1y = tcGety;
+            tcp += texCoordStride;
+            ptc = (const ZunVec2*)tcp;
+            f32 tc2x = tcGetx;
+            f32 tc2y = tcGety;
             if (type == PRIM_TRIANGLE_STRIP && ((index - start) & 1))
             {
-                std::swap(v0, v1);
-                std::swap(tc0, tc1);
-                std::swap(viewZ0, viewZ1);
+                ZunVec2 tv = v0;  v0 = v1;  v1 = tv;
+                f32 tf;
+                tf = tc0x; tc0x = tc1x; tc1x = tf;
+                tf = tc0y; tc0y = tc1y; tc1y = tf;
+                tf = viewZ0; viewZ0 = viewZ1; viewZ1 = tf;
             }
 
-            if(EdgeFunctionXY(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y) < 0) {
-                std::swap(v1, v2);
-                std::swap(tc1, tc2);
-                std::swap(viewZ1, viewZ2);
+            if (EdgeFunctionXY(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y) < 0)
+            {
+                ZunVec2 tv = v1;  v1 = v2;  v2 = tv;
+                f32 tf;
+                tf = tc1x; tc1x = tc2x; tc2x = tf;
+                tf = tc1y; tc1y = tc2y; tc2y = tf;
+                tf = viewZ1; viewZ1 = viewZ2; viewZ2 = tf;
             }
 
             //NDCToScreenZunVec2 value fetched to value_x, value_y
@@ -553,35 +575,18 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             f32 v2_x = v2.x * screenScaleX + screenBiasX;\
             f32 v2_y = v2.y * screenScaleY + screenBiasY;\
             const f32 area = EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y);\
-            const f32 invArea = 1.0f / area;\
             if (area == 0.0f)\
             {\
                 index += increment;\
                 continue;\
             }\
+            const f32 invArea = 1.0f / area;\
             const i32 xmin = ZUN_MAX(viewport[0],(i32)floor(ZUN_MIN3(v0_x, v1_x, v2_x)));\
             const i32 xmax = ZUN_MIN(viewport[0] + viewport[2] - 1,(i32)ceil(ZUN_MAX3(v0_x, v1_x, v2_x)));\
             const i32 ymin = ZUN_MAX(viewport[1],(i32)floor(ZUN_MIN3(v0_y, v1_y, v2_y)));\
             const i32 ymax = ZUN_MIN(viewport[1] + viewport[3] - 1,(i32)ceil(ZUN_MAX3(v0_y, v1_y, v2_y)));\
             const f32 vP_x = xmin+0.5f;\
             const f32 vP_y = ymin+0.5f;\
-
-            // replaced with better. keeping this for reference
-            // const ZunVec3 edgesInvArea = {\
-                invArea * EdgeFunctionXY(v1_x, v1_y, v2_x, v2_y, vP_x, vP_y),\
-                invArea * EdgeFunctionXY(v2_x, v2_y, v0_x, v0_y, vP_x, vP_y),\
-                invArea * EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, vP_x, vP_y)\
-            };\
-            const ZunVec3 w_dx = {\
-                invArea * (v1_y - v2_y),\
-                invArea * (v2_y - v0_y),\
-                invArea * (v0_y - v1_y)\
-            };\
-            const ZunVec3 w_dy = {\
-                invArea * (v2_x - v1_x),\
-                invArea * (v0_x - v2_x),\
-                invArea * (v1_x - v0_x)\
-            };\
 
             //barycentrics
             const f32 w0_dx = invArea * (v1_y - v2_y);\
@@ -605,29 +610,29 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             fixed32 fixedw2_row = (fixed32)(w2_row * FIXED_ONE);\
 
             const f32 fu_row =\
-                tc0.x*w0_row +\
-                tc1.x*w1_row +\
-                tc2.x*w2_row;\
+                tc0x*w0_row +\
+                tc1x*w1_row +\
+                tc2x*w2_row;\
             const f32 fv_row =\
-                tc0.y*w0_row +\
-                tc1.y*w1_row +\
-                tc2.y*w2_row;\
+                tc0y*w0_row +\
+                tc1y*w1_row +\
+                tc2y*w2_row;\
             const f32 fu_dx =\
-                tc0.x*w0_dx +\
-                tc1.x*w1_dx +\
-                tc2.x*w2_dx;\
+                tc0x*w0_dx +\
+                tc1x*w1_dx +\
+                tc2x*w2_dx;\
             const f32 fu_dy =\
-                tc0.x*w0_dy +\
-                tc1.x*w1_dy +\
-                tc2.x*w2_dy;\
+                tc0x*w0_dy +\
+                tc1x*w1_dy +\
+                tc2x*w2_dy;\
             const f32 fv_dx =\
-                tc0.y*w0_dx +\
-                tc1.y*w1_dx +\
-                tc2.y*w2_dx;\
+                tc0y*w0_dx +\
+                tc1y*w1_dx +\
+                tc2y*w2_dx;\
             const f32 fv_dy =\
-                tc0.y*w0_dy +\
-                tc1.y*w1_dy +\
-                tc2.y*w2_dy;
+                tc0y*w0_dy +\
+                tc1y*w1_dy +\
+                tc2y*w2_dy;
 
             fixed32 u_row = (fixed32)(fu_row * FIXED_ONE);
             fixed32 v_row = (fixed32)(fv_row * FIXED_ONE);
@@ -639,60 +644,58 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             fogdeclare1
             //add fb_row instead of Y multiplication
             ZunColor *fb_row = framebuffer + ymin * GAME_WINDOW_WIDTH_REAL;
-            for (i32 y = ymin; y <= ymax; ++y,
-                u_row += u_dy,
-                v_row += v_dy,
-                fb_row += GAME_WINDOW_WIDTH_REAL,
-                fogdeclare2
-                fixedw0_row += fixedw0_dy, fixedw1_row += fixedw1_dy, fixedw2_row += fixedw2_dy)
+            for (i32 y = ymin; y <= ymax; ++y)
             {
                 fogdeclare3
-                fixed32 u = u_row;
-                fixed32 v = v_row;
-                ZunColor *fb = fb_row + xmin;
-                fixed32 w0 = fixedw0_row; fixed32 w1 = fixedw1_row; fixed32 w2 = fixedw2_row;
-                for (i32 x = xmin; x <= xmax; ++x,
-                    ++fb,
-                    u += u_dx,
-                    v += v_dx,
-                    fogdeclare4
-                    w0 += fixedw0_dx, w1 += fixedw1_dx, w2 += fixedw2_dx)
+                register fixed32 u = u_row;
+                register fixed32 v = v_row;
+                register ZunColor *fb = fb_row + xmin;
+                register fixed32 w0 = fixedw0_row; fixed32 w1 = fixedw1_row; fixed32 w2 = fixedw2_row;
+                for (i32 x = xmin; x <= xmax; ++x)
                 {
                     // barycentric inside test (fast reject first)
-                    if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+                    if ((w0 | w1 | w2) >= 0)
                     {
                         //directly inside
-                        const ZunColor frag = texels[
-                            ((v >> 16) & texMaskY) * texW +
-                            ((u >> 16) & texMaskX)
-                        ];
+                        unsigned tu = ((unsigned)u >> 16) & texMaskX;
+                        unsigned tv = ((unsigned)v >> 16) & texMaskY;
+                        const ZunColor frag = texels[(tv << texShift) + tu];
 
                         u8 frag_a=tableA[frag >> 24];
-                        if (frag_a < alphaThreshold){
-                            continue;
+                        if (frag_a >= alphaThreshold){
+                            u8 frag_r=tableR[(frag >> 16) & 0xFF];
+                            u8 frag_g=tableG[(frag >> 8) & 0xFF];
+                            u8 frag_b=tableB[frag & 0xFF];
+
+                            fogdeclare5
+                            // const ZunColor dst = *fb;
+                            // const u8 *srcMul = tableMul[frag_a];
+                            // const u8 *dstMul = tableMul[tableDA[frag_a]];
+                            // const u8 *frag_rAdd = tableAdd[srcMul[frag_r]];
+                            // frag_r = frag_rAdd[dstMul[(dst >> 16) & 0xFF]];
+                            // const u8 *frag_gAdd = tableAdd[srcMul[frag_g]];
+                            // frag_g = frag_gAdd[dstMul[(dst >> 8) & 0xFF]];
+                            // const u8 *frag_bAdd = tableAdd[srcMul[frag_b]];
+                            // frag_b = frag_bAdd[dstMul[dst & 0xFF]];
+                            *fb = (ZunColor)(
+                                (frag_a << 24) |
+                                (frag_r << 16) |
+                                (frag_g << 8)  |
+                                frag_b);
                         }
-                        u8 frag_r=tableR[(frag >> 16) & 0xFF];
-                        u8 frag_g=tableG[(frag >> 8) & 0xFF];
-                        u8 frag_b=tableB[frag & 0xFF];
-
-                        fogdeclare5
-                        // if (frag_a != 255) {
-                            const ZunColor dst = *fb;
-
-                            const u8 *srcMul = ColorMulTable[frag_a];
-                            const u8 *dstMul = ColorMulTable[tableDA[frag_a]];
-                            
-                            frag_r = tableAdd[srcMul[frag_r]][dstMul[(dst >> 16) & 0xFF]];
-                            frag_g = tableAdd[srcMul[frag_g]][dstMul[(dst >> 8) & 0xFF]];
-                            frag_b = tableAdd[srcMul[frag_b]][dstMul[dst & 0xFF]];
-                        // }
-                        *fb = (ZunColor)(
-                            (frag_a << 24) |
-                            (frag_r << 16) |
-                            (frag_g << 8)  |
-                            frag_b);
                     }
+                    ++fb;
+                    u += u_dx;
+                    v += v_dx;
+                    fogdeclare4
+                    w0 += fixedw0_dx, w1 += fixedw1_dx, w2 += fixedw2_dx;
                 }
+
+                u_row += u_dy;
+                v_row += v_dy;
+                fb_row += GAME_WINDOW_WIDTH_REAL;
+                fogdeclare2
+                fixedw0_row += fixedw0_dy, fixedw1_row += fixedw1_dy, fixedw2_row += fixedw2_dy;
             }
             index += increment;
         }
