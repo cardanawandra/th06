@@ -13,9 +13,8 @@
     
     #include "graphics/Software.hpp"
     #if SDL_MAJOR_VERSION >= 2
-        #ifdef __ANDROID__
-            #include "graphics/WebGL.hpp"
-        #else
+        #include "graphics/WebGL.hpp"
+        #ifndef __ANDROID__
             #include "graphics/FixedFunctionGL.hpp"
         #endif
     #endif

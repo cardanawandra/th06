@@ -30,31 +30,16 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
+    // {"Software fallback (VERY SLOW)", Software::Init},
+    #ifdef RENDER_WEBGL
+    {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    #endif
+    #ifdef RENDER_FIXED_FUNCTION_GL
+    {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    #endif
+    #ifdef RENDER_SOFTWARE
     {"Software fallback (VERY SLOW)", Software::Init},
-    // #ifdef RENDER_SOFTWARE
-    // {"Software fallback (VERY SLOW)", Software::Init},
-    // #endif
-    // #ifdef RENDER_HARDWARE
-    // // {"Hardware renderer (VERY PORTABLE)", Hardware::Init},
-    // #endif
-    // #ifdef RENDER_WEBGL
-    // {"GL(ES) 2.0 / WebGL", WebGL::Create},
-    // #endif
-    // #ifdef RENDER_FIXED_FUNCTION_DX2
-    // {"Fixed function DX2", FixedFunctionDX2::Init},
-    // #endif
-    // #ifdef RENDER_FIXED_FUNCTION_GL_SFML
-    // {"Fixed function GL SFML", FixedFunctionGLSFML::Init},
-    // #endif
-    // #ifdef RENDER_FIXED_FUNCTION_GL_WIN32
-    // {"Fixed function GL(ES) WIN32", FixedFunctionGLWIN32::Init},
-    // #endif
-    // #ifdef RENDER_FIXED_FUNCTION_GL
-    // {"Fixed function GL(ES)", FixedFunctionGL::Init},
-    // #endif
-    // #ifdef RENDER_SOFTWARE
-    // {"Software fallback (VERY SLOW)", Software::Init},
-    // #endif
+    #endif
 };
 
 RenderResult GameWindow::Render()
@@ -243,13 +228,13 @@ void GameWindow::CreateGameWindow()
 
     for (u32 i = 0; i < ARRAY_SIZE(s_RenderBackends); i++)
     {
-        LOG_COMPAT("Try Using renderer backend %s\n", s_RenderBackends[i].name);
+        printf("Try Using renderer backend %s\n", s_RenderBackends[i].name);
         g_GfxBackend = s_RenderBackends[i].TryInit();
         if(g_GfxBackend) {
-            LOG_COMPAT("Using renderer backend %s\n", s_RenderBackends[i].name);
+            printf("Using renderer backend %s\n", s_RenderBackends[i].name);
             break;
         }else{
-            LOG_COMPAT("Failed renderer backend %s\n", s_RenderBackends[i].name);
+            printf("Failed renderer backend %s\n", s_RenderBackends[i].name);
         }
     }
     if(GAME_WINDOW_REFRESH_RATE<60){
@@ -594,4 +579,6 @@ void GameWindow::ConfigureView()
 
     heightResolutionScale =
         static_cast<f32>(viewportHeight) / GAME_WINDOW_HEIGHT;
+    printf("w :%f\n",widthResolutionScale);
+    printf("h :%f\n",heightResolutionScale);
 }

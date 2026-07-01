@@ -64,6 +64,7 @@ GfxInterface *Software::Init()
 
     g_GameWindow.ConfigureInit();
 
+    // todo : fix scaling
 #ifdef __ANDROID__
     GetWindowSize(
         &GAME_WINDOW_WIDTH_REAL,

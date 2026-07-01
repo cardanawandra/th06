@@ -24,7 +24,6 @@ struct Texture {
     i8 shift;
     PixelFormat format;
     PixelDataType type;
-    inline ZunColor GetPixel(i32 x, i32 y);
 };
 
 //It is extremely recommended that you compile as Release if you want to use the software rasterizer
@@ -210,4 +209,13 @@ struct Software : GfxInterface
     inline ZunVec2 ProjectTexCoordToNDC(ZunVec2 texCoord, ZunMatrix textureMatrix);
     inline ZunVec3 NDCToScreen(ZunVec3 vertex);
     inline ZunVec2 NDCToScreenZunVec2(ZunVec2 vertex);
+    void ConvertToARGB8888Pitch(
+        u32 width,
+        u32 height,
+        PixelFormat fmt,
+        PixelDataType type,
+        const void* srcData,
+        u32 srcPitchBytes,
+        u32* dstData,
+        u32 dstPitchBytes);
 };

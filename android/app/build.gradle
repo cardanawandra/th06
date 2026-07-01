@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.th06.game"
-        minSdkVersion 24
+        minSdkVersion 16
         targetSdkVersion 36
         versionCode 1
         versionName "1.0"

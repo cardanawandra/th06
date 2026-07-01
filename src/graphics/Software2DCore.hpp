@@ -217,7 +217,7 @@ void Software::DeleteTexture(GfxTextureHandle handle)
 //     }
 // }
 
-static void ConvertToARGB8888Pitch(
+void Software::ConvertToARGB8888Pitch(
     u32 width,
     u32 height,
     PixelFormat fmt,
@@ -228,6 +228,11 @@ static void ConvertToARGB8888Pitch(
     u32 dstPitchBytes)
 {
     const u8* srcBase = (const u8*)srcData;
+
+    const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
+    const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
+    const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
+    const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
 
     if (fmt == PIXEL_RGBA)
     {
@@ -378,6 +383,12 @@ void Software::SetTextureSubImage(i32 xoffset, i32 yoffset, i32 width, i32 heigh
 }
 
 void Software::ReadPixels(i32 x, i32 y, i32 width, i32 height, const void* pixels) {
+    u8* dst = (u8*)pixels;
+    i32 pitch = width * 4;
+    for (i32 row = 0; row < height; row++) {
+        const u8* src = (u8*)framebuffer + ((GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * GAME_WINDOW_WIDTH_REAL + x) * 4;
+        memcpy(dst + row * pitch, src, pitch);
+    }
 }
 
 inline ZunVec3 Software::ProjectToNDC(ZunVec3 vertex, ZunMatrix mv, ZunMatrix p, f32 &viewZ, f32 &W) {
@@ -505,13 +516,13 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
 
     if(useTexCoord&&boundTexture){
         //precompute colorOp
-        register const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
-        register const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
-        register const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
-        register const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
-        register const u8 *tableDA = ColorDA[blendMode]; 
-        register const u8 (*tableAdd)[256] = ColorOpTable[COLOR_OP_ADD];
-        register const u8 (*tableMul)[256] = ColorOpTable[COLOR_OP_MODULATE];
+        const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
+        const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
+        const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
+        const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
+        const u8 *tableDA = ColorDA[blendMode]; 
+        const u8 (*tableAdd)[256] = ColorOpTable[COLOR_OP_ADD];
+        const u8 (*tableMul)[256] = ColorOpTable[COLOR_OP_MODULATE];
 
         const u8* tData = (u8*)texCoordData;
         const u8* vData = (u8*)vertexData;
@@ -647,18 +658,18 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             for (i32 y = ymin; y <= ymax; ++y)
             {
                 fogdeclare3
-                register fixed32 u = u_row;
-                register fixed32 v = v_row;
-                register ZunColor *fb = fb_row + xmin;
-                register fixed32 w0 = fixedw0_row; fixed32 w1 = fixedw1_row; fixed32 w2 = fixedw2_row;
+                fixed32 u = u_row;
+                fixed32 v = v_row;
+                ZunColor *fb = fb_row + xmin;
+                fixed32 w0 = fixedw0_row; fixed32 w1 = fixedw1_row; fixed32 w2 = fixedw2_row;
                 for (i32 x = xmin; x <= xmax; ++x)
                 {
                     // barycentric inside test (fast reject first)
                     if ((w0 | w1 | w2) >= 0)
                     {
                         //directly inside
-                        unsigned tu = ((unsigned)u >> 16) & texMaskX;
-                        unsigned tv = ((unsigned)v >> 16) & texMaskY;
+                        u32 tu = (u >> 16) & texMaskX;
+                        u32 tv = (v >> 16) & texMaskY;
                         const ZunColor frag = texels[(tv << texShift) + tu];
 
                         u8 frag_a=tableA[frag >> 24];
@@ -668,15 +679,15 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                             u8 frag_b=tableB[frag & 0xFF];
 
                             fogdeclare5
-                            // const ZunColor dst = *fb;
-                            // const u8 *srcMul = tableMul[frag_a];
-                            // const u8 *dstMul = tableMul[tableDA[frag_a]];
-                            // const u8 *frag_rAdd = tableAdd[srcMul[frag_r]];
-                            // frag_r = frag_rAdd[dstMul[(dst >> 16) & 0xFF]];
-                            // const u8 *frag_gAdd = tableAdd[srcMul[frag_g]];
-                            // frag_g = frag_gAdd[dstMul[(dst >> 8) & 0xFF]];
-                            // const u8 *frag_bAdd = tableAdd[srcMul[frag_b]];
-                            // frag_b = frag_bAdd[dstMul[dst & 0xFF]];
+                            const ZunColor dst = *fb;
+                            const u8 *srcMul = tableMul[frag_a];
+                            const u8 *dstMul = tableMul[tableDA[frag_a]];
+                            const u8 *frag_rAdd = tableAdd[srcMul[frag_r]];
+                            frag_r = frag_rAdd[dstMul[(dst >> 16) & 0xFF]];
+                            const u8 *frag_gAdd = tableAdd[srcMul[frag_g]];
+                            frag_g = frag_gAdd[dstMul[(dst >> 8) & 0xFF]];
+                            const u8 *frag_bAdd = tableAdd[srcMul[frag_b]];
+                            frag_b = frag_bAdd[dstMul[dst & 0xFF]];
                             *fb = (ZunColor)(
                                 (frag_a << 24) |
                                 (frag_r << 16) |
