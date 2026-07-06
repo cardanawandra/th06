@@ -68,14 +68,58 @@ void Software::SetTransformMatrix(TransformMatrix type, const ZunMatrix &matrix)
 {
     switch (type) {
         case MATRIX_MODEL:
-            model = matrix;
+            modelm00 = matrix.m[0][0]; modelm01 = matrix.m[0][1]; modelm02 = matrix.m[0][2]; modelm03 = matrix.m[0][3];
+            modelm10 = matrix.m[1][0]; modelm11 = matrix.m[1][1]; modelm12 = matrix.m[1][2]; modelm13 = matrix.m[1][3];
+            modelm20 = matrix.m[2][0]; modelm21 = matrix.m[2][1]; modelm22 = matrix.m[2][2]; modelm23 = matrix.m[2][3];
+            modelm30 = matrix.m[3][0]; modelm31 = matrix.m[3][1]; modelm32 = matrix.m[3][2]; modelm33 = matrix.m[3][3];
             break;
+
         case MATRIX_VIEW:
-            view = matrix;
+            viewm00 = matrix.m[0][0]; viewm01 = matrix.m[0][1]; viewm02 = matrix.m[0][2]; viewm03 = matrix.m[0][3];
+            viewm10 = matrix.m[1][0]; viewm11 = matrix.m[1][1]; viewm12 = matrix.m[1][2]; viewm13 = matrix.m[1][3];
+            viewm20 = matrix.m[2][0]; viewm21 = matrix.m[2][1]; viewm22 = matrix.m[2][2]; viewm23 = matrix.m[2][3];
+            viewm30 = matrix.m[3][0]; viewm31 = matrix.m[3][1]; viewm32 = matrix.m[3][2]; viewm33 = matrix.m[3][3];
             break;
         case MATRIX_PROJECTION:
-            projection = matrix;
-            mvp = projection * (view * model);
+            vm00 = viewm00*modelm00 + viewm10*modelm01 + viewm20*modelm02 + viewm30*modelm03;
+            vm01 = viewm01*modelm00 + viewm11*modelm01 + viewm21*modelm02 + viewm31*modelm03;
+            vm02 = viewm02*modelm00 + viewm12*modelm01 + viewm22*modelm02 + viewm32*modelm03;
+            vm03 = viewm03*modelm00 + viewm13*modelm01 + viewm23*modelm02 + viewm33*modelm03;
+
+            vm10 = viewm00*modelm10 + viewm10*modelm11 + viewm20*modelm12 + viewm30*modelm13;
+            vm11 = viewm01*modelm10 + viewm11*modelm11 + viewm21*modelm12 + viewm31*modelm13;
+            vm12 = viewm02*modelm10 + viewm12*modelm11 + viewm22*modelm12 + viewm32*modelm13;
+            vm13 = viewm03*modelm10 + viewm13*modelm11 + viewm23*modelm12 + viewm33*modelm13;
+
+            vm20 = viewm00*modelm20 + viewm10*modelm21 + viewm20*modelm22 + viewm30*modelm23;
+            vm21 = viewm01*modelm20 + viewm11*modelm21 + viewm21*modelm22 + viewm31*modelm23;
+            vm22 = viewm02*modelm20 + viewm12*modelm21 + viewm22*modelm22 + viewm32*modelm23;
+            vm23 = viewm03*modelm20 + viewm13*modelm21 + viewm23*modelm22 + viewm33*modelm23;
+
+            vm30 = viewm00*modelm30 + viewm10*modelm31 + viewm20*modelm32 + viewm30*modelm33;
+            vm31 = viewm01*modelm30 + viewm11*modelm31 + viewm21*modelm32 + viewm31*modelm33;
+            vm32 = viewm02*modelm30 + viewm12*modelm31 + viewm22*modelm32 + viewm32*modelm33;
+            vm33 = viewm03*modelm30 + viewm13*modelm31 + viewm23*modelm32 + viewm33*modelm33;
+
+            mvpm00 = matrix.m[0][0]*vm00 + matrix.m[1][0]*vm01 + matrix.m[2][0]*vm02 + matrix.m[3][0]*vm03;
+            mvpm01 = matrix.m[0][1]*vm00 + matrix.m[1][1]*vm01 + matrix.m[2][1]*vm02 + matrix.m[3][1]*vm03;
+            mvpm02 = matrix.m[0][2]*vm00 + matrix.m[1][2]*vm01 + matrix.m[2][2]*vm02 + matrix.m[3][2]*vm03;
+            mvpm03 = matrix.m[0][3]*vm00 + matrix.m[1][3]*vm01 + matrix.m[2][3]*vm02 + matrix.m[3][3]*vm03;
+
+            mvpm10 = matrix.m[0][0]*vm10 + matrix.m[1][0]*vm11 + matrix.m[2][0]*vm12 + matrix.m[3][0]*vm13;
+            mvpm11 = matrix.m[0][1]*vm10 + matrix.m[1][1]*vm11 + matrix.m[2][1]*vm12 + matrix.m[3][1]*vm13;
+            mvpm12 = matrix.m[0][2]*vm10 + matrix.m[1][2]*vm11 + matrix.m[2][2]*vm12 + matrix.m[3][2]*vm13;
+            mvpm13 = matrix.m[0][3]*vm10 + matrix.m[1][3]*vm11 + matrix.m[2][3]*vm12 + matrix.m[3][3]*vm13;
+
+            mvpm20 = matrix.m[0][0]*vm20 + matrix.m[1][0]*vm21 + matrix.m[2][0]*vm22 + matrix.m[3][0]*vm23;
+            mvpm21 = matrix.m[0][1]*vm20 + matrix.m[1][1]*vm21 + matrix.m[2][1]*vm22 + matrix.m[3][1]*vm23;
+            mvpm22 = matrix.m[0][2]*vm20 + matrix.m[1][2]*vm21 + matrix.m[2][2]*vm22 + matrix.m[3][2]*vm23;
+            mvpm23 = matrix.m[0][3]*vm20 + matrix.m[1][3]*vm21 + matrix.m[2][3]*vm22 + matrix.m[3][3]*vm23;
+
+            mvpm30 = matrix.m[0][0]*vm30 + matrix.m[1][0]*vm31 + matrix.m[2][0]*vm32 + matrix.m[3][0]*vm33;
+            mvpm31 = matrix.m[0][1]*vm30 + matrix.m[1][1]*vm31 + matrix.m[2][1]*vm32 + matrix.m[3][1]*vm33;
+            mvpm32 = matrix.m[0][2]*vm30 + matrix.m[1][2]*vm31 + matrix.m[2][2]*vm32 + matrix.m[3][2]*vm33;
+            mvpm33 = matrix.m[0][3]*vm30 + matrix.m[1][3]*vm31 + matrix.m[2][3]*vm32 + matrix.m[3][3]*vm33;
             break;
         case MATRIX_TEXTURE:
             tm00 = matrix.m[0][0];
@@ -203,20 +247,6 @@ void Software::DeleteTexture(GfxTextureHandle handle)
     freeTextures.push_back(handle.id);
 }
 
-// inline SDL_PIXEL_FORMAT_COMPAT GetSDLPixelFormat(PixelFormat fmt, PixelDataType type) {
-//     switch(type) {
-//         case PIXEL_UNSIGNED_BYTE:
-//             if(fmt == PIXEL_RGB) return SDL_PIXELFORMAT_RGB24;
-//             else return SDL_PIXELFORMAT_RGBA32;
-//         case PIXEL_UNSIGNED_SHORT_4_4_4_4:
-//             return SDL_PIXELFORMAT_RGBA4444;
-//         case PIXEL_UNSIGNED_SHORT_5_5_5_1:
-//             return SDL_PIXELFORMAT_RGBA5551;
-//         case PIXEL_UNSIGNED_SHORT_5_6_5:
-//             return SDL_PIXELFORMAT_RGB565;
-//     }
-// }
-
 void Software::ConvertToARGB8888Pitch(
     u32 width,
     u32 height,
@@ -228,11 +258,6 @@ void Software::ConvertToARGB8888Pitch(
     u32 dstPitchBytes)
 {
     const u8* srcBase = (const u8*)srcData;
-
-    const u8 *tableR = ColorOpTable[colorOp][textureFactor_r];
-    const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
-    const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
-    const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
 
     if (fmt == PIXEL_RGBA)
     {
@@ -265,18 +290,8 @@ void Software::ConvertToARGB8888Pitch(
 
 				for (u32 x = 0; x < width; ++x, s += 4)
 				{
-					*dst++ = ((u32)s[3] << 24) | ((u32)s[0] << 16) | ((u32)s[1] << 8) | s[2];
+					*dst++ = (s[3] << 24) | (s[0] << 16) | (s[1] << 8) | s[2];
 				}
-				// for (u32 x = 0; x < width; ++x)
-				// {
-				//     dst[x] =
-				//         (s[3] << 24) |
-				//         (s[0] << 16) |
-				//         (s[1] << 8)  |
-				//         (s[2]);
-
-				//     s += 4;
-				// }
 			}
 		}
     }
@@ -457,6 +472,12 @@ inline ZunVec3 Software::NDCToScreen(ZunVec3 vertex) {
     return screen;
 }
 
+inline u8 AlphaBlendU8(u8 src, u8 dst, u8 a, u8 ia)
+{
+    u32 ret = (src * a + dst * ia + 128) >> 8;
+    return ret | -(ret > 255);
+}
+
 #define EdgeFunctionXY(x0,y0,x1,y1,x2,y2) ((x1 - x0) * (y2 - y0) - (y1 - y0) * (x2 - x0))
 
     //fog declare
@@ -477,9 +498,9 @@ inline ZunVec3 Software::NDCToScreen(ZunVec3 vertex) {
                 viewZ2 * w2_dy;\
         }
  
-    #define fogdeclare2 fog_row += fog_dy,
+    #define fogdeclare2 fog_row += fog_dy;
     #define fogdeclare3 f32 fog = fog_row;
-    #define fogdeclare4 fog += fog_dx,
+    #define fogdeclare4 fog += fog_dx;
     #define fogdeclare5\
     if(!noFog) {\
         const u8 t = (u8)ZUN_MIN(\
@@ -521,8 +542,6 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
         const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
         const u8 *tableDA = ColorDA[blendMode]; 
-        const u8 (*tableAdd)[256] = ColorOpTable[COLOR_OP_ADD];
-        const u8 (*tableMul)[256] = ColorOpTable[COLOR_OP_MODULATE];
 
         const u8* tData = (u8*)texCoordData;
         const u8* vData = (u8*)vertexData;
@@ -535,12 +554,37 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const u8 texShift = boundTexture->shift;
 
         while (index < last_index) {
-            f32 viewZ0, viewZ1, viewZ2;\
-
             const u8* vp = vData + vertexStride * index;
-            ZunVec2 v0 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ0);vp += vertexStride;
-            ZunVec2 v1 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ1);vp += vertexStride;
-            ZunVec2 v2 = ProjectToNDCZunVec2(*(const ZunVec3*)vp, viewZ2);
+            const ZunVec3* v0 = (const ZunVec3*)(vData + vertexStride * index);
+            const ZunVec3* v1 = (const ZunVec3*)((const u8*)v0 + vertexStride);
+            const ZunVec3* v2 = (const ZunVec3*)((const u8*)v1 + vertexStride);
+
+            //completely different takes for ProjectToNDCZunVec2
+            f32 vx, vy, vz;
+            #define vGetx mvpm00 * vx + mvpm10 * vy + mvpm20 * vz + mvpm30
+            #define vGety mvpm01 * vx + mvpm11 * vy + mvpm21 * vz + mvpm31
+            #define vGetz mvpm02 * vx + mvpm12 * vy + mvpm22 * vz + mvpm32
+            #define vGetw mvpm03 * vx + mvpm13 * vy + mvpm23 * vz + mvpm33
+            vx = v0->x;vy = v0->y;vz = v0->z;
+            f32 v0_x = vGetx;
+            f32 v0_y = vGety;
+            // f32 viewZ0 = vGetz;
+            const f32 v0_w = vGetw;
+            if (v0_w > 0.0f) {const f32 invw = 1.0f / v0_w; v0_x *= invw; v0_y *= invw; }
+
+            vx = v1->x;vy = v1->y;vz = v1->z;
+            f32 v1_x = vGetx;
+            f32 v1_y = vGety;
+            // f32 viewZ1 = vGetz;
+            const f32 v1_w = vGetw;
+            if (v1_w > 0.0f) {const f32 invw = 1.0f / v1_w; v1_x *= invw; v1_y *= invw; }
+
+            vx = v2->x;vy = v2->y;vz = v2->z;
+            f32 v2_x = vGetx;
+            f32 v2_y = vGety;
+            // f32 viewZ2 = vGetz;
+            const f32 v2_w = vGetw;
+            if (v2_w > 0.0f) {const f32 invw = 1.0f / v2_w; v2_x *= invw; v2_y *= invw; }
 
             const u8* tcp = tData + texCoordStride * index;
             const ZunVec2* ptc = (const ZunVec2*)tcp;
@@ -558,33 +602,34 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             f32 tc2y = tcGety;
             if (type == PRIM_TRIANGLE_STRIP && ((index - start) & 1))
             {
-                ZunVec2 tv = v0;  v0 = v1;  v1 = tv;
                 f32 tf;
+                tf = v0_x; v0_x = v1_x; v1_x = tf;
+                tf = v0_y; v0_y = v1_y; v1_y = tf;
                 tf = tc0x; tc0x = tc1x; tc1x = tf;
                 tf = tc0y; tc0y = tc1y; tc1y = tf;
-                tf = viewZ0; viewZ0 = viewZ1; viewZ1 = tf;
+                // tf = viewZ0; viewZ0 = viewZ1; viewZ1 = tf;
             }
 
-            if (EdgeFunctionXY(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y) < 0)
+            if (EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y) < 0)
             {
-                ZunVec2 tv = v1;  v1 = v2;  v2 = tv;
                 f32 tf;
+                tf = v1_x; v1_x = v2_x; v2_x = tf;
+                tf = v1_y; v1_y = v2_y; v2_y = tf;
                 tf = tc1x; tc1x = tc2x; tc2x = tf;
                 tf = tc1y; tc1y = tc2y; tc2y = tf;
-                tf = viewZ1; viewZ1 = viewZ2; viewZ2 = tf;
+                // tf = viewZ1; viewZ1 = viewZ2; viewZ2 = tf;
             }
-
             //NDCToScreenZunVec2 value fetched to value_x, value_y
             // v0 = NDCToScreenZunVec2(v0); became
             // f32 v0_x = v0.x * screenScaleX + screenBiasX;
             // f32 v0_y = v0.y * screenScaleY + screenBiasY;
             // then EdgeFunctionZunVec2 became EdgeFunctionXY
-            f32 v0_x = v0.x * screenScaleX + screenBiasX;\
-            f32 v0_y = v0.y * screenScaleY + screenBiasY;\
-            f32 v1_x = v1.x * screenScaleX + screenBiasX;\
-            f32 v1_y = v1.y * screenScaleY + screenBiasY;\
-            f32 v2_x = v2.x * screenScaleX + screenBiasX;\
-            f32 v2_y = v2.y * screenScaleY + screenBiasY;\
+            v0_x = v0_x * screenScaleX + screenBiasX;\
+            v0_y = v0_y * screenScaleY + screenBiasY;\
+            v1_x = v1_x * screenScaleX + screenBiasX;\
+            v1_y = v1_y * screenScaleY + screenBiasY;\
+            v2_x = v2_x * screenScaleX + screenBiasX;\
+            v2_y = v2_y * screenScaleY + screenBiasY;\
             const f32 area = EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, v2_x, v2_y);\
             if (area == 0.0f)\
             {\
@@ -606,19 +651,9 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
             const f32 w0_dy = invArea * (v2_x - v1_x);\
             const f32 w1_dy = invArea * (v0_x - v2_x);\
             const f32 w2_dy = invArea * (v1_x - v0_x);\
-            const f32 w0_row = invArea * EdgeFunctionXY(v1_x, v1_y, v2_x, v2_y, vP_x, vP_y);\
-            const f32 w1_row = invArea * EdgeFunctionXY(v2_x, v2_y, v0_x, v0_y, vP_x, vP_y);\
-            const f32 w2_row = invArea * EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, vP_x, vP_y);\
-
-            const fixed32 fixedw0_dx = (fixed32)(w0_dx * FIXED_ONE);\
-            const fixed32 fixedw1_dx = (fixed32)(w1_dx * FIXED_ONE);\
-            const fixed32 fixedw2_dx = (fixed32)(w2_dx * FIXED_ONE);\
-            const fixed32 fixedw0_dy = (fixed32)(w0_dy * FIXED_ONE);\
-            const fixed32 fixedw1_dy = (fixed32)(w1_dy * FIXED_ONE);\
-            const fixed32 fixedw2_dy = (fixed32)(w2_dy * FIXED_ONE);\
-            fixed32 fixedw0_row = (fixed32)(w0_row * FIXED_ONE);\
-            fixed32 fixedw1_row = (fixed32)(w1_row * FIXED_ONE);\
-            fixed32 fixedw2_row = (fixed32)(w2_row * FIXED_ONE);\
+            f32 w0_row = invArea * EdgeFunctionXY(v1_x, v1_y, v2_x, v2_y, vP_x, vP_y);\
+            f32 w1_row = invArea * EdgeFunctionXY(v2_x, v2_y, v0_x, v0_y, vP_x, vP_y);\
+            f32 w2_row = invArea * EdgeFunctionXY(v0_x, v0_y, v1_x, v1_y, vP_x, vP_y);\
 
             const f32 fu_row =\
                 tc0x*w0_row +\
@@ -661,11 +696,11 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                 fixed32 u = u_row;
                 fixed32 v = v_row;
                 ZunColor *fb = fb_row + xmin;
-                fixed32 w0 = fixedw0_row; fixed32 w1 = fixedw1_row; fixed32 w2 = fixedw2_row;
+                f32 w0 = w0_row; f32 w1 = w1_row; f32 w2 = w2_row;
                 for (i32 x = xmin; x <= xmax; ++x)
                 {
                     // barycentric inside test (fast reject first)
-                    if ((w0 | w1 | w2) >= 0)
+                    if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
                     {
                         //directly inside
                         u32 tu = (u >> 16) & texMaskX;
@@ -679,15 +714,12 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                             u8 frag_b=tableB[frag & 0xFF];
 
                             fogdeclare5
-                            const ZunColor dst = *fb;
-                            const u8 *srcMul = tableMul[frag_a];
-                            const u8 *dstMul = tableMul[tableDA[frag_a]];
-                            const u8 *frag_rAdd = tableAdd[srcMul[frag_r]];
-                            frag_r = frag_rAdd[dstMul[(dst >> 16) & 0xFF]];
-                            const u8 *frag_gAdd = tableAdd[srcMul[frag_g]];
-                            frag_g = frag_gAdd[dstMul[(dst >> 8) & 0xFF]];
-                            const u8 *frag_bAdd = tableAdd[srcMul[frag_b]];
-                            frag_b = frag_bAdd[dstMul[dst & 0xFF]];
+                            // const ZunColor dst = *fb;
+                            // const u8 da = tableDA[frag_a];
+                            // frag_r = AlphaBlendU8(frag_r, (dst >> 16) & 0xFF, frag_a, da);
+                            // frag_g = AlphaBlendU8(frag_g, (dst >> 8) & 0xFF, frag_a, da);
+                            // frag_b = AlphaBlendU8(frag_b, dst & 0xFF, frag_a, da);
+
                             *fb = (ZunColor)(
                                 (frag_a << 24) |
                                 (frag_r << 16) |
@@ -699,14 +731,14 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
                     u += u_dx;
                     v += v_dx;
                     fogdeclare4
-                    w0 += fixedw0_dx, w1 += fixedw1_dx, w2 += fixedw2_dx;
+                    w0 += w0_dx, w1 += w1_dx, w2 += w2_dx;
                 }
 
                 u_row += u_dy;
                 v_row += v_dy;
                 fb_row += GAME_WINDOW_WIDTH_REAL;
                 fogdeclare2
-                fixedw0_row += fixedw0_dy, fixedw1_row += fixedw1_dy, fixedw2_row += fixedw2_dy;
+                w0_row += w0_dy, w1_row += w1_dy, w2_row += w2_dy;
             }
             index += increment;
         }

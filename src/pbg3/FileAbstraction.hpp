@@ -1,6 +1,6 @@
 #pragma once
 
-#include "inttypes.hpp"
+#include "../inttypes.hpp"
 #include <stdio.h>
 
 enum AccessMode

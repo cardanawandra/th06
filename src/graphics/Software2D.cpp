@@ -1,45 +1,4 @@
-#include "Software.hpp"
-#include "Supervisor.hpp"
-#include "GameWindow.hpp"
-#include "i18n.hpp"
-#include <algorithm>
-#include <stddef.h>
-#include "utils.hpp"
-#include "compat/Compat.hpp"
-#include <math.h>
-
-u8 alphaThreshold = 4;
-
-u8 ColorOpTable[3][256][256];
-u8 ColorDA[2][256];
-void InitColorOpTable()
-{
-    i16 i;
-    for (i=0;i < 256; i++){
-        ColorDA[BLEND_INV_SRC_ALPHA][i] = 255-i;
-        ColorDA[BLEND_ONE][i] = 255;
-    }
-    u16 factor, value;
-    for (factor = 0; factor < 256; ++factor)
-    {
-        for (value = 0; value < 256; ++value)
-        {
-            // Modulate
-            ColorOpTable[COLOR_OP_MODULATE][factor][value] =
-                u8((value * factor) >> 8);
-
-            // Add
-            if(factor+value>255){
-                ColorOpTable[COLOR_OP_ADD][factor][value] = 255;
-            }else{
-                ColorOpTable[COLOR_OP_ADD][factor][value] = factor+value;
-            }
-
-            // replace (bruh)
-            ColorOpTable[COLOR_OP_REPLACE][factor][value] = value;
-        }
-    }
-}
+#include "Software2DHeader.hpp"
 
 GfxInterface *Software::Init()
 {
@@ -65,13 +24,16 @@ GfxInterface *Software::Init()
     g_GameWindow.ConfigureInit();
 
     // todo : fix scaling
-#ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     GetWindowSize(
         &GAME_WINDOW_WIDTH_REAL,
         &GAME_WINDOW_HEIGHT_REAL,
         &GAME_WINDOW_REFRESH_RATE
     );
-#endif
+    #endif
+    GAME_WINDOW_WIDTH_REAL/=2;
+    GAME_WINDOW_HEIGHT_REAL/=2;
+    GAME_WINDOW_REFRESH_RATE/=4;
     g_GameWindow.ConfigureView();
 
     i32 width  = GAME_WINDOW_WIDTH_REAL;
@@ -125,6 +87,7 @@ GfxInterface *Software::Init()
     #endif
 
     // Can't init on header, init on creation instead
+    InitColorOpTable();
     gfx->boundTexture=NULL;
     gfx->clearDepth = 1.0f;
     gfx->useTexCoord = false;
@@ -146,8 +109,7 @@ GfxInterface *Software::Init()
     gfx->noFog =
         (g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_FOG))!=0;
 
-    InitColorOpTable();
-
+    gfx->InitFlattenedMatrix();
     return gfx;
 }
 

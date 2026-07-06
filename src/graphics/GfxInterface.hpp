@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ZunColor.hpp"
-#include "ZunMath.hpp"
-#include "inttypes.hpp"
+#include "../ZunColor.hpp"
+#include "../ZunMath.hpp"
+#include "../inttypes.hpp"
 #include <cstddef>
 #include <vector>
 

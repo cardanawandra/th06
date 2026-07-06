@@ -1,9 +1,9 @@
-#include "Controller.hpp"
+#include "../Controller.hpp"
 
-#include "GameErrorContext.hpp"
-#include "Supervisor.hpp"
-#include "i18n.hpp"
-#include "utils.hpp"
+#include "../GameErrorContext.hpp"
+#include "../Supervisor.hpp"
+#include "../i18n.hpp"
+#include "../utils.hpp"
 
 // DIFFABLE_STATIC(JOYCAPSA, g_JoystickCaps)
 static u16 g_FocusButtonConflictState;

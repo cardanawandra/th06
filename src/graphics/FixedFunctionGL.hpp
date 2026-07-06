@@ -4,7 +4,7 @@
 #include "GfxInterface.hpp"
 #include "GLFunc.hpp"
 #include <vector>
-#include "compat/Compat.hpp"
+#include "../compat/Compat.hpp"
 
 struct FixedFunctionGL : GfxInterface
 {

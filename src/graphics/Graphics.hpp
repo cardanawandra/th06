@@ -14,7 +14,7 @@
     #include "graphics/Software.hpp"
     #if SDL_MAJOR_VERSION >= 2
         #include "graphics/WebGL.hpp"
-        #ifndef __ANDROID__
+        #ifndef COMPAT_PORTABLE
             #include "graphics/FixedFunctionGL.hpp"
         #endif
     #endif

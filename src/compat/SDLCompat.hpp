@@ -2,10 +2,10 @@
 #include <math.h>
 #include <algorithm>
 #include <SDL.h>
-#include "inttypes.hpp"
-#include "ZunColor.hpp"
+#include "../inttypes.hpp"
+#include "../ZunColor.hpp"
 
-#ifdef __ANDROID__
+#ifdef COMPAT_PORTABLE
     #define GAME_WINDOW_SCALE
     #define GAME_WINDOW_DYNAMIC
 #endif

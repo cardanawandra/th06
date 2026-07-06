@@ -7,7 +7,7 @@
 #include "compat/Compat.hpp"
 #include "GamePaths.hpp"
 
-#ifdef WIN98
+#ifdef WIN98X
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
 #define DISABLE_SOUNDPLAYER_BGM return 0
 #define DISABLE_SOUNDPLAYER return
@@ -176,7 +176,7 @@ ZunResult SoundPlayer::LoadWav(const char *path)
 
     LOG_COMPAT("load BGM\n");
 
-#ifdef __ANDROID__
+#ifdef COMPAT_PORTABLE
     char resolvedPath[512];
     snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
             GamePaths::GetUserPath(), path);

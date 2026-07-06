@@ -139,7 +139,7 @@
 // typedef uint16_t u16;
 // typedef int32_t i32;
 // typedef uint32_t u32;
-#ifdef __ANDROID__
+#ifdef COMPAT_PORTABLE
 #include <stdint.h>
 typedef intptr_t iptr;
 #else
@@ -149,7 +149,7 @@ typedef int iptr;
 typedef float f32;
 typedef double f64;
 
-#ifdef __ANDROID__
+#ifdef COMPAT_PORTABLE_ASM
 inline f32 uf32(const f32* ptr) {
     u32 temp = *(const u32*)ptr;
     __asm__ volatile ("":"+r"(temp));

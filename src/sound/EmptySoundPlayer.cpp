@@ -1,11 +1,11 @@
-#include "SoundPlayer.hpp"
+#include "../SoundPlayer.hpp"
 
-#include "FileSystem.hpp"
-#include "Supervisor.hpp"
-#include "i18n.hpp"
-#include "utils.hpp"
-#include "compat/Compat.hpp"
-#include "GamePaths.hpp"
+#include "../FileSystem.hpp"
+#include "../Supervisor.hpp"
+#include "../i18n.hpp"
+#include "../utils.hpp"
+#include "../compat/Compat.hpp"
+#include "../GamePaths.hpp"
 
 #define DISABLE_SOUNDPLAYER_ZUN return ZUN_SUCCESS
 #define DISABLE_SOUNDPLAYER_BGM return 0

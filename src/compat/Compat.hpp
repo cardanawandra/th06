@@ -1,6 +1,6 @@
 #pragma once
-#include "compat/STBCompat.hpp"
-#include "inttypes.hpp"
+#include "STBCompat.hpp"
+#include "../inttypes.hpp"
 
 #define STORAGE_INIT()
 #define GET_EXTERNAL_STORAGE_PATH() NULL
@@ -40,6 +40,22 @@
 
 #define TRY_RESOLVE_FUNCTION(name) this->name = ::name;
 
+//PLATFORM FORCE
+#ifdef _XBOX
+#undef GET_EXTERNAL_STORAGE_PATH()
+#define GET_EXTERNAL_STORAGE_PATH() "GAME://"
+#undef LOG_COMPAT
+#include <xtl.h>
+#define LOG_COMPAT(...)                     \
+    do {                                   \
+        char _logbuf[512];                 \
+        sprintf(_logbuf, __VA_ARGS__);     \
+        OutputDebugStringA(_logbuf);       \
+    } while (0)
+
+#else
+#endif
+
 #ifdef NO_SDL
 
     #ifndef USE_CPP98
@@ -71,27 +87,15 @@
     #else
         inline u16 COMPAT_Swap16(u16 v)
         {
-        #if defined(_MSC_VER) && _MSC_VER >= 1400
-            return _byteswap_ushort(v);
-        #elif defined(__GNUC__) || defined(__clang__)
-            return __builtin_bswap16(v);
-        #else
             return (u16)((v >> 8) | (v << 8));
-        #endif
         }
 
         inline u32 COMPAT_Swap32(u32 v)
         {
-        #if defined(_MSC_VER) && _MSC_VER >= 1400
-            return _byteswap_ulong(v);
-        #elif defined(__GNUC__) || defined(__clang__)
-            return __builtin_bswap32(v);
-        #else
             return ((v & 0x000000FFUL) << 24) |
                 ((v & 0x0000FF00UL) <<  8) |
                 ((v & 0x00FF0000UL) >>  8) |
                 ((v & 0xFF000000UL) >> 24);
-        #endif
         }
     #endif
 
@@ -122,7 +126,7 @@
     #endif
 #else
 
-    #include "compat/SDLCompat.hpp"
+    #include "SDLCompat.hpp"
 #endif
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)

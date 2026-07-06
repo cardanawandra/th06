@@ -10,11 +10,10 @@
 #include "GameWindow.hpp"
 
 void ZunViewport::Set() const{
-    g_GfxBackend->SetViewport(X_WIDTH_RESOLUTION_SCALE(this->x) + VIEWPORT_OFF_X,
-                                (GAME_WINDOW_HEIGHT_REAL - (X_HEIGHT_RESOLUTION_SCALE(this->y + this->height))) -
-                                    VIEWPORT_OFF_Y,
-                                X_WIDTH_RESOLUTION_SCALE(this->width), X_HEIGHT_RESOLUTION_SCALE(this->height));
-
+    g_GfxBackend->SetViewport(this->x * WIDTH_RESOLUTION_SCALE + VIEWPORT_OFF_X,
+                              (GAME_WINDOW_HEIGHT_REAL - ((this->y + this->height) * HEIGHT_RESOLUTION_SCALE)) -
+                                  VIEWPORT_OFF_Y,
+                              this->width * WIDTH_RESOLUTION_SCALE, this->height * HEIGHT_RESOLUTION_SCALE);
     g_GfxBackend->SetDepthRange(this->minZ, this->maxZ);
 }
 

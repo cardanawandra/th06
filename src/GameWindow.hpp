@@ -12,7 +12,22 @@
 //   At some point there should be a method to change this without recompiling but for now
 //   this'll do
 
-#ifndef GAME_WINDOW_DYNAMIC
+#ifdef GAME_WINDOW_DYNAMIC
+    #define GAME_WINDOW_WIDTH_REAL   g_GameWindow.gameWindowWidthReal
+    #define GAME_WINDOW_HEIGHT_REAL  g_GameWindow.gameWindowHeightReal
+
+    #define VIEWPORT_WIDTH           g_GameWindow.viewportWidth
+    #define VIEWPORT_OFF_X           g_GameWindow.viewportOffX
+    #define VIEWPORT_HEIGHT          g_GameWindow.viewportHeight
+    #define VIEWPORT_OFF_Y           g_GameWindow.viewportOffY
+
+    #define WIDTH_RESOLUTION_SCALE   g_GameWindow.widthResolutionScale
+    #define HEIGHT_RESOLUTION_SCALE  g_GameWindow.heightResolutionScale
+
+    #ifndef GAME_WINDOW_SCALE
+    #define GAME_WINDOW_SCALE
+    #endif
+#else
     #ifndef GAME_WINDOW_WIDTH_REAL
     #define GAME_WINDOW_WIDTH_REAL (GAME_WINDOW_WIDTH)
     #endif
@@ -41,21 +56,6 @@
 
     #define WIDTH_RESOLUTION_SCALE (((f32)VIEWPORT_WIDTH) / GAME_WINDOW_WIDTH)
     #define HEIGHT_RESOLUTION_SCALE (((f32)VIEWPORT_HEIGHT) / GAME_WINDOW_HEIGHT)
-#else
-    #define GAME_WINDOW_WIDTH_REAL   g_GameWindow.gameWindowWidthReal
-    #define GAME_WINDOW_HEIGHT_REAL  g_GameWindow.gameWindowHeightReal
-
-    #define VIEWPORT_WIDTH           g_GameWindow.viewportWidth
-    #define VIEWPORT_OFF_X           g_GameWindow.viewportOffX
-    #define VIEWPORT_HEIGHT          g_GameWindow.viewportHeight
-    #define VIEWPORT_OFF_Y           g_GameWindow.viewportOffY
-
-    #define WIDTH_RESOLUTION_SCALE   g_GameWindow.widthResolutionScale
-    #define HEIGHT_RESOLUTION_SCALE  g_GameWindow.heightResolutionScale
-
-    #ifndef GAME_WINDOW_SCALE
-    #define GAME_WINDOW_SCALE
-    #endif
 #endif
 
 #ifdef GAME_WINDOW_SCALE

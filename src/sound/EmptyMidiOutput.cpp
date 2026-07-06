@@ -1,12 +1,12 @@
-#include "MidiOutput.hpp"
-#include "FileSystem.hpp"
-#include "Supervisor.hpp"
-#include "ZunMemory.hpp"
-#include "i18n.hpp"
-#include "inttypes.hpp"
-#include "utils.hpp"
+#include "../MidiOutput.hpp"
+#include "../FileSystem.hpp"
+#include "../Supervisor.hpp"
+#include "../ZunMemory.hpp"
+#include "../i18n.hpp"
+#include "../inttypes.hpp"
+#include "../utils.hpp"
 
-#include "compat/Compat.hpp"
+#include "../compat/Compat.hpp"
 #include <cstdlib>
 #include <cstring>
 

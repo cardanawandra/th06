@@ -69,9 +69,11 @@ void GameErrorContext::Flush()
             // SDEL_ShowSimpleMessageBox(SDEL_MESSAGEBOX_ERROR, "log", m_Buffer, NULL);
         }
 
+#ifndef COMPAT_UNWRITABLE
         logFile = FileSystem::FopenUTF8("./log.txt", "w");
 
         fprintf(logFile, "%s", m_Buffer);
         fclose(logFile);
+#endif
     }
 }

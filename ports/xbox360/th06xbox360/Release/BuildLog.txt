@@ -1,0 +1,77 @@
+﻿Build started 7/6/2026 7:51:07 PM.
+     1>Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Release\th06xbox360.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\CL.exe /c /Zi /nologo /W3 /WX- /Ox /Os /D NO_SDL /D NDEBUG /D _XBOX /D XBOX_360 /D NO_IOB_REDECLARE /D GAME_WINDOW_DYNAMIC /D BYTEORDER_BIG_ENDIANX /D COMPAT_PORTABLE /D COMPAT_UNWRITABLE /D VIEWPORT_OFF_EXISTS /GF /Gm- /MT /GS- /Gy /fp:fast /fp:except- /Zc:wchar_t /Zc:forScope /GR- /openmp- /Fo"Release\\" /Fd"Release\vc100.pdb" /TP ..\..\..\src\graphics\Software2DXBOX360.cpp /FI"C:\Program Files (x86)\Microsoft Xbox 360 SDK\\include\xbox\xbox_intellisense_platform.h"
+         Software2DXBOX360.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DHeader.hpp(39): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\link.exe /ERRORREPORT:PROMPT /OUT:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.exe" /INCREMENTAL:NO /NOLOGO xapilib.lib d3d9.lib d3dx9.lib xgraphics.lib xboxkrnl.lib xnet.lib xaudio2.lib xact3.lib x3daudio.lib xmcore.lib vcomp.lib /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.pdb" /STACK:"262144","262144" /OPT:REF /OPT:ICF /TLBID:1 /RELEASE /IMPLIB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.lib" Release\AnmManager.obj
+         Release\AsciiManager.obj
+         Release\BombData.obj
+         Release\BulletData.obj
+         Release\BulletManager.obj
+         Release\Chain.obj
+         Release\EmptyController.obj
+         Release\EclManager.obj
+         Release\EffectManager.obj
+         Release\Ending.obj
+         Release\EnemyEclInstr.obj
+         Release\EnemyManager.obj
+         Release\FileSystem.obj
+         Release\GameErrorContext.obj
+         Release\GameManager.obj
+         Release\GamePaths.obj
+         Release\GameWindow.obj
+         Release\Software2DXBOX360.obj
+         Release\Gui.obj
+         Release\ItemManager.obj
+         Release\main.obj
+         Release\MainMenu.obj
+         Release\MidiDefault.obj
+         Release\MusicRoom.obj
+         Release\FileAbstraction.obj
+         Release\IPbg3Parser.obj
+         Release\Pbg3Archive.obj
+         Release\Pbg3Parser.obj
+         Release\Player.obj
+         Release\ReplayManager.obj
+         Release\ResultScreen.obj
+         Release\Rng.obj
+         Release\ScreenEffect.obj
+         Release\EmptyMidiOutput.obj
+         Release\EmptySoundPlayer.obj
+         Release\Stage.obj
+         Release\Supervisor.obj
+         Release\TextHelper.obj
+         Release\sjis_converter.obj
+         Release\utils.obj
+         Release\ZunMath.obj
+         Release\ZunTimer.obj
+         Release\stdafx.obj
+         Release\th06xbox360.obj /XEX:NO
+       ImageXex:
+         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\imagexex.exe /out:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.xex" "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.exe" 
+         Microsoft(R) Xbox 360 Image File Builder Version 2.0.21256.17
+         (c)2012 Microsoft Corporation. All rights reserved.
+         
+       FinalizeBuildStatus:
+         Deleting file "Release\th06xbox360.unsuccessfulbuild".
+         Touching "Release\th06xbox360.lastbuildstate".
+     1>Done Building Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:06.38

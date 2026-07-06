@@ -543,6 +543,9 @@ void GameWindow::ConfigureInit()
 
     viewportWidth = gameWindowWidthReal;
     viewportHeight = gameWindowHeightReal;
+    
+    viewportOffX = 0;
+    viewportOffY = 0;
 
     widthResolutionScale = 1.0f;
     heightResolutionScale = 1.0f;

@@ -640,15 +640,15 @@ void Supervisor::ReleasePbg3(i32 pbg3FileIdx)
 i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
 {
     LOG_COMPAT("Supervisor::LoadPbg3\n");
-    const char *previous = "紅魔郷";
-    size_t len1 = strlen(previous);
-    size_t len2 = strlen(filename);
+    const char *previousUTF8 = "\xE7\xB4\x85\xE9\xAD\x94\xE9\x83\xB7";
+    const char *previousSJIS = "\x8D\x67\x96\x82\x8B\xBF";
+    char *mergedUTF8 = (char *)malloc(strlen(previousUTF8) + strlen(filename) + 1); // +1 for '\0'
+    char *mergedSJIS = (char *)malloc(strlen(previousSJIS) + strlen(filename) + 1); // +1 for '\0'
+    strcpy(mergedUTF8, previousUTF8);
+    strcat(mergedUTF8, filename);
+    strcpy(mergedSJIS, previousSJIS);
+    strcat(mergedSJIS, filename);
 
-    char *merged = (char *)malloc(len1 + len2 + 1); // +1 for '\0'
-    if (!merged) return NULL;
-
-    strcpy(merged, previous);
-    strcat(merged, filename);
     if (this->pbg3Archives[pbg3FileIdx] == NULL || strcmp(filename, this->pbg3ArchiveNames[pbg3FileIdx]) != 0)
     {
         LOG_COMPAT("Supervisor::LoadPbg3 ReleasePbg3\n");
@@ -657,18 +657,21 @@ i32 Supervisor::LoadPbg3(i32 pbg3FileIdx, const char *filename)
         LOG_COMPAT("Supervisor::LoadPbg3 load %s\n",filename);
         if (this->pbg3Archives[pbg3FileIdx]->Load(filename) == 0)
         {
-            if (this->pbg3Archives[pbg3FileIdx]->Load(merged) == 0)
+            if (this->pbg3Archives[pbg3FileIdx]->Load(mergedUTF8) == 0)
             {
-                LOG_COMPAT("Supervisor::LoadPbg3 load %s failed\n",filename);
-                GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, filename);
-                delete this->pbg3Archives[pbg3FileIdx];
-                // Let's really make sure this is null by nulling twice. I assume
-                // there's some kind of inline function here, like it's actually
-                // calling this->pbg3Archives.delete(pbg3FileIdx), followed by a
-                // manual nulling?
-                this->pbg3Archives[pbg3FileIdx] = NULL;
-                this->pbg3Archives[pbg3FileIdx] = NULL;
-                return 0;
+                if (this->pbg3Archives[pbg3FileIdx]->Load(mergedSJIS) == 0)
+                {
+                    LOG_COMPAT("Supervisor::LoadPbg3 load %s failed\n",filename);
+                    GameErrorContext::Fatal(&g_GameErrorContext, TH_ERR_ANMMANAGER_SPRITE_CORRUPTED, filename);
+                    delete this->pbg3Archives[pbg3FileIdx];
+                    // Let's really make sure this is null by nulling twice. I assume
+                    // there's some kind of inline function here, like it's actually
+                    // calling this->pbg3Archives.delete(pbg3FileIdx), followed by a
+                    // manual nulling?
+                    this->pbg3Archives[pbg3FileIdx] = NULL;
+                    this->pbg3Archives[pbg3FileIdx] = NULL;
+                    return 1;
+                }
             }
         }
         strcpy(this->pbg3ArchiveNames[pbg3FileIdx], filename);

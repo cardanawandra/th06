@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef _WIN32
+#ifdef _XBOX
+#include <xtl.h>
+#elif defined(_WIN32)
 #include <direct.h>
 #include <new>
 #include <windows.h>
@@ -26,41 +28,32 @@ u32 g_LastFileSize = 0;
 
 FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
-#ifdef __ANDROID__
-
     char resolvedPath[1024];
-
-    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
-            GamePaths::GetUserPath(), filepath);
-
-    return fopen(resolvedPath, mode);
-
-#else
-
-#ifndef _WIN32
-    LOG_COMPAT("FileSystem::FopenUTF8 _WIN32 not defined for UTF8\n");
-    return fopen(filepath, mode);
-
-#else
-
-    LOG_COMPAT("FileSystem::FopenUTF8 ConvertToWide %s\n",filepath);
+    GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
+    LOG_COMPAT("FileSystem::FopenUTF8 %s => %s\n",filepath,resolvedPath);
+    LOG_COMPAT("FileSystem::FopenUTF8 ConvertToWide %s\n",resolvedPath);
      // First try native fopen().
     // On Japanese systems this handles Shift-JIS / CP932 correctly.
-    FILE *f = fopen(filepath, mode);
+    FILE *f = fopen(resolvedPath, mode);
 
     if (f)
     {
         LOG_COMPAT("FileSystem::FopenUTF8 open success\n");
         return f;
     }
+#ifdef COMPAT_NO_UTF8FALLBACK
+	return f;
+#else
     LOG_COMPAT("FileSystem::FopenUTF8 open failed, fallback\n");
-
+#ifndef MB_ERR_INVALID_CHARS
+#define MB_ERR_INVALID_CHARS 0
+#endif
     // Fallback: interpret filepath as UTF-8
     int filepathWLen =
         MultiByteToWideChar(
             CP_UTF8,
             MB_ERR_INVALID_CHARS,
-            filepath,
+            resolvedPath,
             -1,
             NULL,
             0);
@@ -85,7 +78,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
     if (!MultiByteToWideChar(
             CP_UTF8,
             MB_ERR_INVALID_CHARS,
-            filepath,
+            resolvedPath,
             -1,
             filepathW,
             filepathWLen))
@@ -110,26 +103,19 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 
     LOG_COMPAT("FileSystem::FopenUTF8 fallback success\n");
     return f;
-
-#endif
 #endif
 }
 
 void FileSystem::CreateDir(const char *path)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(_XBOX)
     char resolvedPath[1024];
 
-    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
-            GamePaths::GetUserPath(), path);
+    GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
 
-    mkdir(resolvedPath,0755);
-#else
-#ifdef _WIN32
+    CreateDirectory(resolvedPath, NULL);
+#elif defined(_WIN32)
     _mkdir(path);
-#else
-    mkdir(path, 0755);
-#endif
 #endif
 }
 
@@ -144,12 +130,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
     LOG_COMPAT("FileSystem::OpenPath 1\n");
 
     char resolvedPath[512];
-    #ifdef __ANDROID__
-    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
-            GamePaths::GetUserPath(), filepath);
-    #else
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), filepath);
-    #endif
     LOG_COMPAT("FileSystem::OpenPath src %s\n",resolvedPath);
 
     entryIdx = -1;
@@ -231,17 +212,13 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
 
 int FileSystem::WriteDataToFile(const char *path, const void *data, size_t size)
 {
+	#if COMPAT_UNWRITABLE
+		return 0;
+	#endif
     FILE *f;
 
     char resolvedPath[512];
-    #ifdef __ANDROID__
-    snprintf(resolvedPath, sizeof(resolvedPath), "%s%s",
-            GamePaths::GetUserPath(), path);
-    #else
-    // Resolve to writable user-data directory on Android.
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
-    GamePaths::EnsureParentDir(resolvedPath);
-    #endif
     f = fopen(resolvedPath, "wb");
 
     if (f == NULL)

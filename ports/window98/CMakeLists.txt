@@ -16,6 +16,7 @@ add_definitions(
 #    -DNO_SDL
 
     -D_CRT_SECURE_NO_DEPRECATE
+    -DNO_EFFECT
     #dynamic
     -DGAME_WINDOW_DYNAMIC
 )

@@ -1544,7 +1544,7 @@ ChainCallbackResult ResultScreen::OnUpdate(ResultScreen *resultScreen)
         if (IS_PRESSED(TH_BUTTON_FOCUS) || IS_PRESSED(TH_BUTTON_SKIP))
         {
 
-            #ifdef __ANDROID__
+            #ifdef COMPAT_PORTABLE
                 for (characterShotType = 0; characterShotType < HSCR_NUM_CHARS_SHOTTYPES; characterShotType++)
                 {
                     for (difficulty = 0; difficulty < HSCR_NUM_DIFFICULTIES; difficulty++)

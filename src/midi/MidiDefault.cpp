@@ -1,6 +1,6 @@
 #include "MidiDefault.hpp"
-#include "GameErrorContext.hpp"
-#include "i18n.hpp"
+#include "../GameErrorContext.hpp"
+#include "../i18n.hpp"
 
 MidiDevice::MidiDevice()
 {

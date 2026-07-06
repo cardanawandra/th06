@@ -4,7 +4,7 @@
 //   Any bad parts were tacked on by me
 
 #include "compat/Compat.hpp"
-#if __cplusplus < 201103L
+#if BYTEORDER == LIL_ENDIAN
 template<typename T>
 struct LE
 {
@@ -43,10 +43,38 @@ static_assert(
 );
 
 template <typename T>
-using UIForSize = typename std::conditional<sizeof(T) == sizeof(u8), u8,
-                  typename std::conditional<sizeof(T) == sizeof(u16), u16,
-                  typename std::conditional<sizeof(T) == sizeof(u32), u32,
-                  void>::type>::type>::type;
+struct UIForSize
+{
+    // fallback should never be used if you only pass u8/u16/u32
+    typedef u32 type;
+};
+
+// u8
+template <>
+struct UIForSize<u8>
+{
+    typedef u8 type;
+};
+
+// u16
+template <>
+struct UIForSize<u16>
+{
+    typedef u16 type;
+};
+
+// u32
+template <>
+struct UIForSize<u32>
+{
+    typedef u32 type;
+};
+
+template <>
+struct UIForSize<f32>
+{
+    typedef u32 type;
+};
 
 // GCC-ARM without aligned access and GCC-SuperH both fail to inline a fixed-size unaligned memcpy,
 //    giving horrid codegen, but on just about every other platform, memcpy gets inlined and
@@ -63,15 +91,17 @@ using UIForSize = typename std::conditional<sizeof(T) == sizeof(u8), u8,
 
 #if !DO_MANUAL_MEMCPY
 template <typename T>
-static inline constexpr UIForSize<T> read_to_ui_unaligned(void *value) {
-    UIForSize<T> ret;
+static inline typename UIForSize<T>::type read_to_ui_unaligned(const void *value)
+{
+    typename UIForSize<T>::type ret;
     std::memcpy(&ret, value, sizeof(T));
     return ret;
 }
 
-template <typename T>
-static inline constexpr void write_from_ui_unaligned(void *dst, const T &src) {
-    std::memcpy(dst, &src, sizeof(T));
+template <typename U>
+static inline void write_from_ui_unaligned(void *dst, const U &src)
+{
+    std::memcpy(dst, &src, sizeof(U));
 }
 #else
 
@@ -80,7 +110,7 @@ static inline constexpr void write_from_ui_unaligned(void *dst, const T &src) {
 //   doing a memcpy it'll "helpfully" outline it to the libc's memcpy :|
 
 template <typename T>
-static inline constexpr UIForSize<T> read_to_ui_unaligned(void *value) {
+static inline UIForSize<T> read_to_ui_unaligned(void *value) {
     UIForSize<T> ret = 0;
 
     for(i32 i = sizeof(T) - 1; i >= 0; i--) {
@@ -92,7 +122,7 @@ static inline constexpr UIForSize<T> read_to_ui_unaligned(void *value) {
 }
 
 template <typename T>
-static inline constexpr void write_from_ui_unaligned(void *dst, const T &src) {
+static inline void write_from_ui_unaligned(void *dst, const T &src) {
     T n = src;
 
     for(size_t i = 0; i < sizeof(T); i++) {
@@ -103,48 +133,58 @@ static inline constexpr void write_from_ui_unaligned(void *dst, const T &src) {
 #endif
 
 template <typename T>
-static inline constexpr UIForSize<T> bit_cast_from_size(const T &a) {
-    UIForSize<T> ret;
+static inline typename UIForSize<T>::type bit_cast_from_size(const T &a)
+{
+    typename UIForSize<T>::type ret;
     std::memcpy(&ret, &a, sizeof(T));
     return ret;
 }
 
 template <typename T>
-static inline constexpr T bit_cast_to_size(UIForSize<T> value) {
+static inline T bit_cast_to_size(typename UIForSize<T>::type value)
+{
     T ret;
-    std::memcpy(&ret, &value, sizeof(value));
+    std::memcpy(&ret, &value, sizeof(T));
     return ret;
 }
 
-static constexpr inline u8  ZunByteswap(u8 in)  { return in; }
+static inline u8  ZunByteswap(u8 in)  { return in; }
 static inline u16 ZunByteswap(u16 in) { return COMPAT_Swap16(in); }
 static inline u32 ZunByteswap(u32 in) { return COMPAT_Swap32(in); }
 
 template <typename T>
-struct LE {
+struct LE
+{
     T raw;
 
-    inline constexpr operator T() const {
-        UIForSize<T> ui = read_to_ui_unaligned<T>((void *)&raw);
+    inline operator T() const
+    {
+        typename UIForSize<T>::type ui =
+            read_to_ui_unaligned<T>(&raw);
 
-        if constexpr ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
+        if ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN &&
+            !DO_MANUAL_MEMCPY)
+        {
             ui = ZunByteswap(ui);
         }
 
         return bit_cast_to_size<T>(ui);
     }
 
-    inline constexpr LE &operator=(const T &a) {
-        UIForSize<T> ui = bit_cast_from_size<T>(a);
+    inline LE& operator=(const T& a)
+    {
+        typename UIForSize<T>::type ui =
+            bit_cast_from_size<T>(a);
 
-        if constexpr ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN && !DO_MANUAL_MEMCPY) {
+        if ((std::is_floating_point<T>::value ? FLOATWORDORDER : BYTEORDER) == BIG_ENDIAN &&
+            !DO_MANUAL_MEMCPY)
+        {
             ui = ZunByteswap(ui);
         }
 
-        write_from_ui_unaligned((void *)&raw, ui);
+        write_from_ui_unaligned(&raw, ui);
         return *this;
     }
 };
-
 #undef DO_MANUAL_MEMCPY
 #endif

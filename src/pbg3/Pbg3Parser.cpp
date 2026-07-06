@@ -1,4 +1,4 @@
-#include "pbg3/Pbg3Parser.hpp"
+#include "Pbg3Parser.hpp"
 
 Pbg3Parser::Pbg3Parser() : IPbg3Parser(), FileAbstraction()
 {
@@ -10,6 +10,7 @@ i32 Pbg3Parser::OpenArchive(const char *path)
     this->Reset();
     if (!FileAbstraction::Open(path, "r"))
     {
+        printf("noooooooooo");
         return false;
     }
     this->fileSize = GetSize();

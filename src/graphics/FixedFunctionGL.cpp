@@ -1,15 +1,15 @@
 #include <SDL.h>
 #include "FixedFunctionGL.hpp"
-#include "Supervisor.hpp"
-#include "GameWindow.hpp"
-#include "i18n.hpp"
+#include "../Supervisor.hpp"
+#include "../GameWindow.hpp"
+#include "../i18n.hpp"
 
-#include "compat/SDLCompat.hpp"
+#include "../compat/SDLCompat.hpp"
 
 void FixedFunctionGL::SetContextFlags()
 {
     #if SDL_MAJOR_VERSION >= 2
-        #ifdef __ANDROID__
+        #ifdef COMPAT_PORTABLE
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                                 SDL_GL_CONTEXT_PROFILE_ES);
 
@@ -44,7 +44,7 @@ GfxInterface *FixedFunctionGL::Init()
 
     LOG_COMPAT("FixedFunctionGL::Init 4\n");
     g_GameWindow.ConfigureInit();
-    #ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     GetWindowSize(&GAME_WINDOW_WIDTH_REAL,&GAME_WINDOW_HEIGHT_REAL, &GAME_WINDOW_REFRESH_RATE);
     #endif
     g_GameWindow.ConfigureView();
@@ -86,7 +86,7 @@ GfxInterface *FixedFunctionGL::Init()
     SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
     LOG_COMPAT("FixedFunctionGL::Init 11\n");
-    #ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     g_glFuncTable.ResolveFunctions(true);
     #else
         g_glFuncTable.ResolveFunctions(false);
@@ -113,7 +113,7 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glFogf(GL_FOG_DENSITY, 1.0f);
     g_glFuncTable.glFogf(GL_FOG_MODE, GL_LINEAR);
 
-    #ifndef __ANDROID__
+    #ifndef COMPAT_PORTABLE
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 
     LOG_COMPAT("FixedFunctionGL::Init 14\n");
@@ -142,7 +142,7 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 
     LOG_COMPAT("FixedFunctionGL::Init 16\n");
-    #ifndef __ANDROID__
+    #ifndef COMPAT_PORTABLE
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -270,7 +270,7 @@ void FixedFunctionGL::SetColorOp(TextureOpComponent component, ColorOp op)
         return;
     }
 
-    #ifndef __ANDROID__
+    #ifndef COMPAT_PORTABLE
     GLenum componentEnum = component == COMPONENT_ALPHA ? GL_COMBINE_ALPHA : GL_COMBINE_RGB;
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, componentEnum, opEnums[op]);

@@ -46,12 +46,12 @@ ZunResult TextHelper::CreateTextBuffer()
 {
     // Primary font is MSゴシック, which is nonfree and has to be taken from a Windows install
     // Fallback is Noto Sans Regular (JP) which is redistributable
-    #ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     char path[512];
     char path2[512];
-    snprintf(path, sizeof(path), "%s%s",
+    SNPRINTF(path, sizeof(path), "%s%s",
         GamePaths::GetUserPath(), "th06.ttc");
-    snprintf(path2, sizeof(path2), "%s%s",
+    SNPRINTF(path2, sizeof(path2), "%s%s",
         GamePaths::GetUserPath(), "th06.ttf");
     #else
     const char* path="th06.ttc";
@@ -266,47 +266,84 @@ static const char* UTF8_Decode(
     const char* s,
     int* outCodepoint)
 {
-    unsigned char c =
-        (unsigned char)s[0];
+    const unsigned char* p = (const unsigned char*)s;
+    unsigned char b0 = p[0];
 
-    if (c < 0x80)
+    if (b0 < 0x80)
     {
-        *outCodepoint = c;
+        *outCodepoint = (int)b0;
         return s + 1;
     }
 
-    if ((c >> 5) == 0x6)
+    if (b0 >= 0xC2 && b0 <= 0xDF)
     {
+        unsigned char b1 = p[1];
+
+        if ((b1 & 0xC0) != 0x80)
+            goto invalid;
+
         *outCodepoint =
-            ((c & 0x1F) << 6) |
-            (s[1] & 0x3F);
+            ((int)(b0 & 0x1F) << 6) |
+            (int)(b1 & 0x3F);
 
         return s + 2;
     }
 
-    if ((c >> 4) == 0xE)
+    if (b0 >= 0xE0 && b0 <= 0xEF)
     {
+        unsigned char b1 = p[1];
+        unsigned char b2 = p[2];
+
+        if ((b1 & 0xC0) != 0x80 ||
+            (b2 & 0xC0) != 0x80)
+            goto invalid;
+
+        /* Reject overlong sequences. */
+        if (b0 == 0xE0 && b1 < 0xA0)
+            goto invalid;
+
+        /* Reject UTF-16 surrogate halves. */
+        if (b0 == 0xED && b1 >= 0xA0)
+            goto invalid;
+
         *outCodepoint =
-            ((c & 0x0F) << 12) |
-            ((s[1] & 0x3F) << 6) |
-            (s[2] & 0x3F);
+            ((int)(b0 & 0x0F) << 12) |
+            ((int)(b1 & 0x3F) << 6) |
+            (int)(b2 & 0x3F);
 
         return s + 3;
     }
 
-    if ((c >> 3) == 0x1E)
+    if (b0 >= 0xF0 && b0 <= 0xF4)
     {
+        unsigned char b1 = p[1];
+        unsigned char b2 = p[2];
+        unsigned char b3 = p[3];
+
+        if ((b1 & 0xC0) != 0x80 ||
+            (b2 & 0xC0) != 0x80 ||
+            (b3 & 0xC0) != 0x80)
+            goto invalid;
+
+        /* Reject overlong sequences. */
+        if (b0 == 0xF0 && b1 < 0x90)
+            goto invalid;
+
+        /* Reject values above U+10FFFF. */
+        if (b0 == 0xF4 && b1 > 0x8F)
+            goto invalid;
+
         *outCodepoint =
-            ((c & 0x07) << 18) |
-            ((s[1] & 0x3F) << 12) |
-            ((s[2] & 0x3F) << 6) |
-            (s[3] & 0x3F);
+            ((int)(b0 & 0x07) << 18) |
+            ((int)(b1 & 0x3F) << 12) |
+            ((int)(b2 & 0x3F) << 6) |
+            (int)(b3 & 0x3F);
 
         return s + 4;
     }
 
-    *outCodepoint = '?';
-
+    invalid:
+    *outCodepoint = 0xFFFD;    /* Unicode replacement character */
     return s + 1;
 }
 
@@ -344,131 +381,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     i16 surfaceW = 1024;
     i16 surfaceH = 128;
-    if (shadowColor != COLOR_WHITE)
-    {
-        STB_Surface *shadowText;
 
-        // Render shadow.
-        shadowText = g_AnmManager->STB_CreateSurface(
-            surfaceW,
-            surfaceH,
-            4
-        );
-    
-        if (shadowText != NULL)
-        {
-            g_AnmManager->STB_FillRect(shadowText, NULL, 0);
-
-            u32 *pixels = (u32 *)shadowText->pixels;
-
-            int ascent;
-            int descent;
-            int lineGap;
-
-            stbtt_GetFontVMetrics(
-                &g_Font,
-                &ascent,
-                &descent,
-                &lineGap
-            );
-
-            int baseline =
-                (int)(ascent * g_FontScale);
-
-            int penX = 0;
-
-            const char *ptr = convertedText;
-
-            while (*ptr)
-            {
-                int codepoint;
-
-                ptr = UTF8_Decode(
-                    ptr,
-                    &codepoint);
-
-                int advanceWidth;
-                int leftBearing;
-
-                stbtt_GetCodepointHMetrics(
-                    &g_Font,
-                    codepoint,
-                    &advanceWidth,
-                    &leftBearing
-                );
-
-                int glyphW;
-                int glyphH;
-
-                int xoff;
-                int yoff;
-
-                unsigned char *bitmap =
-                    stbtt_GetCodepointBitmap(
-                        &g_Font,
-                        0,
-                        g_FontScale,
-                        codepoint,
-                        &glyphW,
-                        &glyphH,
-                        &xoff,
-                        &yoff
-                    );
-
-                if (bitmap != NULL)
-                {
-                    for (int y = 0; y < glyphH; y++)
-                    {
-                        for (int x = 0; x < glyphW; x++)
-                        {
-                            unsigned char a =
-                                bitmap[y * glyphW + x];
-
-                            if (a == 0)
-                                continue;
-
-                            int dstX =
-                                penX + x + xoff;
-
-                            int dstY =
-                                baseline + y + yoff;
-
-                            if (dstX < 0 || dstY < 0 ||
-                                dstX >= surfaceW ||
-                                dstY >= surfaceH)
-                            {
-                                continue;
-                            }
-
-                            STB_Color sdlShadowColor =
-                                g_AnmManager->STB_TextColor(shadowColor);
-
-                            pixels[
-                                dstY * surfaceW + dstX
-                            ] = g_AnmManager->STB_MapRGBA(
-                                sdlShadowColor.r,
-                                sdlShadowColor.g,
-                                sdlShadowColor.b,
-                                a
-                            );
-                        }
-                    }
-
-                    stbtt_FreeBitmap(bitmap, NULL);
-                }
-
-                penX +=
-                    (int)(advanceWidth * g_FontScale);
-            }
-
-            shadowRect.x = xPos * 2 + 3;
-            shadowRect.y = 2;
-            shadowRect.w = shadowText->w;
-            shadowRect.h = shadowText->h;
-
-            SurfaceOverwriteBlend(shadowText, g_TextBufferSurface, xPos * 2);
-        }
-    }
 
     STB_Surface *regularText;
 
@@ -477,12 +390,18 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         surfaceH,
         4
     );
+    STB_Surface *shadowText;
 
-    if (regularText != NULL)
+    shadowText = g_AnmManager->STB_CreateSurface(
+        surfaceW,
+        surfaceH,
+        4
+    );
+
+    // todo : if (shadowColor != COLOR_WHITE && shadowText != NULL), but anyway
+    if (regularText != NULL && shadowText != NULL)
     {
         g_AnmManager->STB_FillRect(regularText, NULL, 0);
-
-        u32 *pixels = (u32 *)regularText->pixels;
 
         int ascent;
         int descent;
@@ -498,10 +417,11 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
         int baseline =
             (int)(ascent * g_FontScale);
 
-        int penX = 0;
-
         const char *ptr = convertedText;
 
+        u32 *pixels = (u32 *)regularText->pixels;
+        u32 *shadowPixels = (u32 *)shadowText->pixels;
+        int penX = 0;
         while (*ptr)
         {
             int codepoint;
@@ -563,14 +483,17 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                             continue;
                         }
 
-                        pixels[
-                            dstY * surfaceW + dstX
-                        ] = g_AnmManager->STB_MapRGBA(
-                            (textColor >> 16) & 0xFF,
-                            (textColor >> 8) & 0xFF,
-                            textColor & 0xFF,
-                            a
-                        );
+                        shadowPixels[dstY * surfaceW + dstX] =
+                            ((u32)a << 24) |
+                            ((u32)((shadowColor >> 16) & 0xFF) << 16) |
+                            ((u32)((shadowColor >> 8) & 0xFF) << 8) |
+                            (u32)(shadowColor & 0xFF);
+
+                        pixels[dstY * surfaceW + dstX] =
+                            ((u32)a << 24) |
+                            ((u32)(textColor & 0xFF) << 0) |
+                            ((u32)((textColor >> 8) & 0xFF) << 8) |
+                            ((u32)((textColor >> 16) & 0xFF) << 16);
                     }
                 }
 
@@ -580,17 +503,19 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
             penX +=
                 (int)(advanceWidth * g_FontScale);
         }
-    }
+        shadowRect.x = xPos * 2 + 3;
+        shadowRect.y = 2;
+        shadowRect.w = shadowText->w;
+        shadowRect.h = shadowText->h;
+        SurfaceOverwriteBlend(shadowText, g_TextBufferSurface, xPos * 2);
 
-    if (regularText != NULL)
-    {
         textRect.x = xPos * 2;
         textRect.y = 0;
         textRect.w = regularText->w;
         textRect.h = regularText->h;
-
         SurfaceOverwriteBlend(regularText, g_TextBufferSurface, xPos * 2);
     }
+
 
     // Once we get an API abstraction layer for surface operations, this needs to change
     //   We really shouldn't be clobbering the texture format
@@ -629,6 +554,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
     g_AnmManager->STB_FreeSurface(textureSurface);
     
+    g_AnmManager->STB_FreeSurface(shadowText);
     g_AnmManager->STB_FreeSurface(regularText);
 
     return;

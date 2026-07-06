@@ -32,7 +32,7 @@ bool MidiDevice::OpenDevice(const char* soundFontPath)
         goto fail;
     }
 
-#ifndef __ANDROID__
+#ifndef COMPAT_PORTABLE
     this->audioDriver =
         new_fluid_audio_driver(
             this->settings,

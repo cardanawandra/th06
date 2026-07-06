@@ -22,7 +22,7 @@ GfxInterface *Software::Init()
     }
 
     g_GameWindow.CONFIGURE_INIT();
-    #ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     GetWindowSize(&GAME_WINDOW_WIDTH_REAL,&GAME_WINDOW_HEIGHT_REAL, &GAME_WINDOW_REFRESH_RATE);
     #endif
     g_GameWindow.CONFIGURE_VIEW();

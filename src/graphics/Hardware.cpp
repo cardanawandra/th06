@@ -35,7 +35,7 @@ GfxInterface *Hardware::Init()
     }
 
     g_GameWindow.ConfigureInit();
-    #ifdef __ANDROID__
+    #ifdef COMPAT_PORTABLE
     GetWindowSize(&GAME_WINDOW_WIDTH_REAL,&GAME_WINDOW_HEIGHT_REAL);
     #endif
     g_GameWindow.ConfigureView();

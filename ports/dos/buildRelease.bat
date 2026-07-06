@@ -66,6 +66,7 @@ copy /Y ..\..\th06.ttf build\ >nul
 echo.
 echo SUCCESS
 echo Output: build\th06.exe
+copy /Y build\th06.exe "E:\dosbox"
 goto :eof
 
 :error

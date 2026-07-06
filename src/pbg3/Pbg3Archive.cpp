@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "pbg3/Pbg3Archive.hpp"
+#include "Pbg3Archive.hpp"
 
 Pbg3Archive **g_Pbg3Archives;
 

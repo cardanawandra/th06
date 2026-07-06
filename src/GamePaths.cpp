@@ -24,7 +24,7 @@ void Init()
     const char *internalPath = GET_EXTERNAL_STORAGE_PATH();
     if (internalPath)
     {
-        SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
+        SNPRINTF(s_userPath, sizeof(s_userPath), "%s", internalPath);
         LOG_COMPAT("GamePaths: user data path = %s", s_userPath);
     }
     else
@@ -40,6 +40,7 @@ const char *GetUserPath()
 
 bool IsAssetPath(const char *path)
 {
+    return false;
     if (!path || !*path)
         return false;
 
@@ -51,44 +52,17 @@ bool IsAssetPath(const char *path)
     if (strncmp(path, "font/", 5) == 0 || strncmp(path, "font\\", 5) == 0)
         return true;
 
-    // Any .dat file (pbg3 archives like紅魔郷IN.dat)
-    const char *dot = strrchr(path, '.');
-    if (dot)
-    {
-#ifdef _WIN32
-        if (_stricmp(dot, ".dat") == 0)
-            return true;
-#else
-        if (strcasecmp(dot, ".dat") == 0)
-            return true;
-#endif
-    }
-
     return false;
 }
 void Resolve(char *outBuf, int outBufSize, const char *path)
 {
-    if (!path || !*path)
-    {
-        outBuf[0] = '\0';
-        return;
-    }
-
-    // Strip leading "./" or ".\\"
-    if (path[0] == '.' && (path[1] == '/' || path[1] == '\\'))
-        path += 2;
-
-    if (IsAssetPath(path))
-    {
-        // Asset: keep the relative path as-is.
-        // on Android reads from APK assets/ automatically.
-        SNPRINTF(outBuf, outBufSize, "%s", path);
-    }
-    else
-    {
-        // User data: prepend the writable user-data directory.
-        SNPRINTF(outBuf, outBufSize, "%s%s", s_userPath, path);
-    }
+	SNPRINTF(outBuf, outBufSize, "%s%s", s_userPath, path);
+	for (char* p = outBuf; *p; ++p)
+	{
+		if (*p == '/')
+			*p = '\\';
+	}
+	return;
 }
 
 void EnsureParentDir(const char *resolvedPath)

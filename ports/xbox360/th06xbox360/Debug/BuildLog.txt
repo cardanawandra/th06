@@ -1,0 +1,951 @@
+﻿Build started 7/6/2026 12:31:36 AM.
+     1>Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching "Debug\th06xbox360.unsuccessfulbuild".
+       ClCompile:
+         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\CL.exe /c /Zi /nologo /W3 /WX- /Od /D _DEBUG /D _XBOX /D NO_SDL /D GAME_WINDOW_DYNAMIC /D BYTEORDER_BIG_ENDIAN /D COMPAT_PORTABLE /GF- /Gm /MTd /GS- /Gy- /fp:fast /fp:except- /Zc:wchar_t /Zc:forScope /GR- /openmp- /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TP ..\..\..\src\AnmManager.cpp ..\..\..\src\AsciiManager.cpp ..\..\..\src\BombData.cpp ..\..\..\src\BulletData.cpp ..\..\..\src\BulletManager.cpp ..\..\..\src\Chain.cpp ..\..\..\src\EclManager.cpp ..\..\..\src\EffectManager.cpp ..\..\..\src\Ending.cpp ..\..\..\src\EnemyEclInstr.cpp ..\..\..\src\EnemyManager.cpp ..\..\..\src\FileSystem.cpp ..\..\..\src\GameManager.cpp ..\..\..\src\GamePaths.cpp ..\..\..\src\GameWindow.cpp ..\..\..\src\Gui.cpp ..\..\..\src\ItemManager.cpp ..\..\..\src\MainMenu.cpp ..\..\..\src\MusicRoom.cpp ..\..\..\src\Player.cpp ..\..\..\src\ReplayManager.cpp ..\..\..\src\ResultScreen.cpp ..\..\..\src\Rng.cpp ..\..\..\src\ScreenEffect.cpp ..\..\..\src\Stage.cpp ..\..\..\src\Supervisor.cpp ..\..\..\src\TextHelper.cpp ..\..\..\src\ZunMath.cpp ..\..\..\src\ZunTimer.cpp ..\..\..\src\controller\EmptyController.cpp ..\..\..\src\graphics\Software2DXBOX360.cpp ..\..\..\src\main.cpp ..\..\..\src\sound\EmptyMidiOutput.cpp ..\..\..\src\sound\EmptySoundPlayer.cpp ..\..\..\src\utils.cpp /callcap /FI"C:\Program Files (x86)\Microsoft Xbox 360 SDK\\include\xbox\xbox_intellisense_platform.h"
+         utils.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         EmptySoundPlayer.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         EmptyMidiOutput.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         main.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\main.cpp(33): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(33): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(37): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(37): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(47): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(47): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(50): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(50): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(58): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(58): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(61): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(61): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(64): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(64): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(67): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(67): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(74): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(74): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(76): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(76): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(78): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(78): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(81): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(81): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(93): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(93): error C2059: syntax error : ')'
+     1>..\..\..\src\main.cpp(108): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\main.cpp(108): error C2059: syntax error : ')'
+         Software2DXBOX360.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DHeader.hpp(39): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DCore.hpp(359): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DCore.hpp(359): error C2059: syntax error : ')'
+         EmptyController.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         ZunTimer.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         ZunMath.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(16): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(16): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(16): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(16): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(27): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(28): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(29): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(30): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(65): warning C4244: 'argument' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\ZunMath.cpp(65): warning C4244: 'argument' : conversion from 'i32' to 'f32', possible loss of data
+         TextHelper.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+         Supervisor.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\Supervisor.cpp(52): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(52): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(54): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(54): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(56): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(56): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(275): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(275): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(283): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(283): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(286): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(286): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(288): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(288): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(290): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(290): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(293): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(293): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(297): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(297): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(300): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(300): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(302): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(302): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(308): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(308): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(311): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(311): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(317): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(317): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(319): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(319): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(327): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(327): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(329): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(329): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(334): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(334): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(338): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(338): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(344): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(344): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(347): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(347): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(350): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(350): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(352): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(352): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(355): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(355): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(359): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(359): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(362): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(362): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(364): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(364): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(370): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(370): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(378): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(378): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(381): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(381): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(387): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(387): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(389): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(389): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(393): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(393): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(642): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(642): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(654): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\Supervisor.cpp(654): error C2059: syntax error : ')'
+     1>..\..\..\src\Supervisor.cpp(657): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [30]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\Supervisor.cpp(662): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [37]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\Supervisor.cpp(678): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [35]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\Supervisor.cpp(682): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [47]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\Supervisor.cpp(930): warning C4244: 'argument' : conversion from 'float' to 'u32', possible loss of data
+         Stage.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding4' : unreferenced local variable
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding3' : unreferenced local variable
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding6' : unreferenced local variable
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding2' : unreferenced local variable
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding5' : unreferenced local variable
+     1>..\..\..\src\Stage.cpp(430): warning C4101: 'padding1' : unreferenced local variable
+         ScreenEffect.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\ScreenEffect.cpp(47): warning C4244: '=' : conversion from 'float' to 'i32', possible loss of data
+     1>..\..\..\src\ScreenEffect.cpp(109): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+         Rng.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         ResultScreen.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\ResultScreen.cpp(495): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>..\..\..\src\ResultScreen.cpp(496): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>..\..\..\src\ResultScreen.cpp(584): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(584): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(591): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(591): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(732): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(732): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(1802): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(1802): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(1850): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(1850): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(1978): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\ResultScreen.cpp(1982): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\ResultScreen.cpp(2028): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(2028): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(2134): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\ResultScreen.cpp(2134): error C2059: syntax error : ')'
+     1>..\..\..\src\ResultScreen.cpp(2162): warning C4018: '<' : signed/unsigned mismatch
+         ReplayManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\ReplayManager.cpp(261): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>..\..\..\src\ReplayManager.cpp(417): warning C4244: '=' : conversion from 'u16' to 'i8', possible loss of data
+     1>..\..\..\src\ReplayManager.cpp(418): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>..\..\..\src\ReplayManager.cpp(419): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+         Player.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\Player.cpp(511): warning C4244: '=' : conversion from 'f64' to 'f32', possible loss of data
+     1>..\..\..\src\Player.cpp(530): warning C4244: '=' : conversion from 'f64' to 'f32', possible loss of data
+         MusicRoom.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+         MainMenu.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\MainMenu.cpp(36): warning C4101: 'waste2' : unreferenced local variable
+     1>..\..\..\src\MainMenu.cpp(36): warning C4101: 'waste1' : unreferenced local variable
+     1>..\..\..\src\MainMenu.cpp(36): warning C4101: 'waste4' : unreferenced local variable
+     1>..\..\..\src\MainMenu.cpp(36): warning C4101: 'waste3' : unreferenced local variable
+     1>..\..\..\src\MainMenu.cpp(247): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(248): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(249): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(250): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(251): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(252): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\MainMenu.cpp(1258): warning C4101: 'padding' : unreferenced local variable
+     1>..\..\..\src\MainMenu.cpp(1940): warning C4244: '=' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\MainMenu.cpp(1941): warning C4244: '=' : conversion from 'i32' to 'f32', possible loss of data
+         ItemManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+         Gui.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\Gui.cpp(647): warning C4309: '=' : truncation of constant value
+     1>..\..\..\src\Gui.cpp(1363): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\Gui.cpp(1364): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\Gui.cpp(1366): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\Gui.cpp(1367): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+         Generating Code...
+         Compiling...
+         GameWindow.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\GameWindow.cpp(47): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(47): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(54): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(54): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(75): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(75): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(83): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(83): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(86): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(86): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(88): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(88): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(92): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(92): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(96): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(96): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(98): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(98): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(107): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(107): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(111): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(111): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(113): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(113): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(188): warning C4244: '=' : conversion from 'f64' to 'f32', possible loss of data
+     1>..\..\..\src\GameWindow.cpp(203): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(203): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(211): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(211): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(218): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(218): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(221): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(221): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(227): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(227): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(256): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(256): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(266): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(266): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(294): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(294): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(324): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(324): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(428): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(428): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(445): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(445): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(486): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(486): error C2059: syntax error : ')'
+     1>..\..\..\src\GameWindow.cpp(492): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\GameWindow.cpp(492): error C2059: syntax error : ')'
+         GamePaths.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>..\..\..\src\GamePaths.cpp(28): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [31]' to 'size_t'
+                 There is no context in which this conversion is possible
+         GameManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\GameManager.cpp(156): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\GameManager.cpp(157): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\GameManager.cpp(158): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\GameManager.cpp(159): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\GameManager.cpp(277): warning C4101: 'padding' : unreferenced local variable
+     1>..\..\..\src\GameManager.cpp(473): warning C4101: 'padding3' : unreferenced local variable
+     1>..\..\..\src\GameManager.cpp(473): warning C4101: 'padding2' : unreferenced local variable
+     1>..\..\..\src\GameManager.cpp(473): warning C4101: 'padding1' : unreferenced local variable
+         FileSystem.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\FileSystem.cpp(135): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\FileSystem.cpp(135): error C2059: syntax error : ')'
+     1>..\..\..\src\FileSystem.cpp(139): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [29]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(144): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\FileSystem.cpp(144): error C2059: syntax error : ')'
+     1>..\..\..\src\FileSystem.cpp(154): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [37]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(156): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [50]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(167): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\FileSystem.cpp(167): error C2059: syntax error : ')'
+     1>..\..\..\src\FileSystem.cpp(172): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [61]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(183): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\FileSystem.cpp(183): error C2059: syntax error : ')'
+     1>..\..\..\src\FileSystem.cpp(189): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [67]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(191): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [60]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(196): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [31]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(200): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [40]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\FileSystem.cpp(214): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\FileSystem.cpp(214): error C2059: syntax error : ')'
+         EnemyManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\EnemyManager.cpp(111): warning C4244: '=' : conversion from 'i16' to 'i8', possible loss of data
+     1>..\..\..\src\EnemyManager.cpp(129): warning C4018: '<' : signed/unsigned mismatch
+     1>..\..\..\src\EnemyManager.cpp(749): warning C4018: '<' : signed/unsigned mismatch
+         EnemyEclInstr.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\EnemyEclInstr.cpp(234): warning C4244: 'initializing' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\EnemyEclInstr.cpp(457): warning C4244: '=' : conversion from 'i32' to 'f32', possible loss of data
+         Ending.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\Ending.cpp(213): warning C4244: '=' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\Ending.cpp(256): warning C4244: '=' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\Ending.cpp(121): warning C4101: 'fill' : unreferenced local variable
+     1>..\..\..\src\Ending.cpp(504): warning C4244: 'argument' : conversion from 'f32' to 'i16', possible loss of data
+     1>..\..\..\src\Ending.cpp(504): warning C4244: 'argument' : conversion from 'f32' to 'i16', possible loss of data
+         EffectManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+         EclManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\EclManager.cpp(119): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [14]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\EclManager.cpp(397): warning C4244: 'argument' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\EclManager.cpp(405): warning C4244: 'argument' : conversion from 'i32' to 'f32', possible loss of data
+     1>..\..\..\src\EclManager.cpp(723): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [23]' to 'size_t'
+                 There is no context in which this conversion is possible
+         Chain.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+         BulletManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\BulletManager.cpp(985): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\BulletManager.cpp(1044): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\BulletManager.cpp(1367): warning C4244: '=' : conversion from 'const f32' to 'u8', possible loss of data
+         BulletData.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+         BombData.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\BombData.cpp(34): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(34): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(41): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(41): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(50): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(50): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(70): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(70): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(97): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(97): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(189): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(189): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(195): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(195): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(201): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(201): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(207): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(207): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(211): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(211): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(214): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(214): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(217): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(217): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(224): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(224): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(232): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(232): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(240): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(240): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(248): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(248): error C2059: syntax error : ')'
+     1>..\..\..\src\BombData.cpp(256): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\BombData.cpp(256): error C2059: syntax error : ')'
+         AsciiManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\EclManager.hpp(341): warning C4200: nonstandard extension used : zero-sized array in struct/union
+                 Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
+     1>..\..\..\src\AsciiManager.cpp(115): warning C4101: 'y' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(115): warning C4101: 'x' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(115): warning C4101: 'z' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(236): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(237): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(238): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(239): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(213): warning C4101: 'padding_3' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(211): warning C4101: 'padding_1' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(212): warning C4101: 'padding_2' : unreferenced local variable
+     1>..\..\..\src\AsciiManager.cpp(597): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(598): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(599): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(600): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(810): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(811): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(812): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(813): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(850): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(851): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(852): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(853): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(901): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(902): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(903): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AsciiManager.cpp(904): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+         AnmManager.cpp
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+     1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(53): warning C4005: 'LOG_COMPAT' : macro redefinition
+                 e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(49) : see previous definition of 'LOG_COMPAT'
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(408): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(408): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(411): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(411): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(414): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(414): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(417): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(417): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(435): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(435): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(450): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(450): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(483): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(483): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(580): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(580): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(584): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(584): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(587): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(587): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(595): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(595): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(609): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(609): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(630): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(630): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(636): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(636): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(692): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(692): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(696): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(696): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(711): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(711): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(719): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(719): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(727): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(727): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(729): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(729): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(730): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [9]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\AnmManager.cpp(740): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(740): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(745): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(745): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(748): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(748): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(762): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(762): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(766): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(766): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(775): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(775): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(781): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(781): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(808): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [37]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\AnmManager.cpp(811): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(811): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(817): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(817): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(818): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(818): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(822): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(822): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(872): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(872): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(879): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(879): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(882): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(882): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(906): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(906): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(909): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(909): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(911): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(911): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(917): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(917): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(937): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(937): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(939): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(939): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(942): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(942): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(945): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(945): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(954): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(954): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(966): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(966): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(976): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(976): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(978): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(978): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(996): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(996): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(1012): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(1012): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(1021): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(1021): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(1188): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(1188): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(1197): error C2664: '_snprintf' : cannot convert parameter 2 from 'const char [48]' to 'size_t'
+                 There is no context in which this conversion is possible
+     1>..\..\..\src\AnmManager.cpp(1238): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>..\..\..\src\AnmManager.cpp(1288): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(1288): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2179): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2275): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2275): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2275): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2275): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2295): warning C4244: '=' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2298): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2298): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2298): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2318): warning C4244: '=' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2321): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2321): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2321): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2568): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2568): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2568): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2568): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2576): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2576): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2576): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2593): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2594): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2658): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2658): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2663): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2663): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2670): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2671): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2674): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2675): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2678): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2679): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2682): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2683): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2695): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2695): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2701): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2701): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2705): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2705): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2709): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2709): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2712): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2712): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2716): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2716): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2723): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2723): error C2059: syntax error : ')'
+     1>..\..\..\src\AnmManager.cpp(2725): warning C4003: not enough actual parameters for macro 'LOG_COMPAT'
+     1>..\..\..\src\AnmManager.cpp(2725): error C2059: syntax error : ')'
+         Generating Code...
+     1>Done Building Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" (build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:01:04.76

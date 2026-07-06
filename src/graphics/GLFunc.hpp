@@ -1,7 +1,7 @@
 #pragma once
 
-#include "inttypes.hpp"
-#include "compat/Compat.hpp"
+#include "../inttypes.hpp"
+#include "../compat/Compat.hpp"
 
 #ifdef NO_SDL
     #ifdef _WIN32

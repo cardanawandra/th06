@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "AnmManager.hpp"
 #include "Chain.hpp"
 #include "Controller.hpp"
@@ -16,14 +15,18 @@
 #include "i18n.hpp"
 #include "utils.hpp"
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1600)
-#include <iostream>
-FILE _iob[3] = { *stdin, *stdout, *stderr }; 
-extern "C" FILE* __cdecl __iob_func(void)
-{
-    return _iob;
-}
+#ifdef IOB_REDECLARE
+	#if defined(_MSC_VER) && (_MSC_VER >= 1600)
+	#include <iostream>
+	FILE _iob[3] = { *stdin, *stdout, *stderr }; 
+	extern "C" FILE* __cdecl __iob_func(void)
+	{
+		return _iob;
+	}
+	#endif
 #endif
+
+#include "../ports/xbox360/th06xbox360/stdafx.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,15 +47,8 @@ int main(int argc, char *argv[])
     LOG_COMPAT("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
-#ifdef __ANDROID__
-        // On Android, config file may not exist on first run.
-        // LoadConfig sets defaults and tries to write — if write fails,
-        // continue anyway with defaults.
+		return 1;
         LOG_COMPAT("LoadConfig failed (first run?), continuing with defaults");
-#else
-        g_GameErrorContext.Flush();
-        return -1;
-#endif
     }
 
     // if (GameWindow::InitD3dInterface())

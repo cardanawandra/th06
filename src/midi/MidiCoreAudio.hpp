@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ZunResult.hpp"
-#include "inttypes.hpp"
+#include "../ZunResult.hpp"
+#include "../inttypes.hpp"
 
 #include <AudioToolbox/AudioToolbox.h>
 
