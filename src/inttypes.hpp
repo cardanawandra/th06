@@ -149,7 +149,7 @@ typedef int iptr;
 typedef float f32;
 typedef double f64;
 
-#ifdef COMPAT_PORTABLE_ASM
+#ifdef __ANDROID__
 inline f32 uf32(const f32* ptr) {
     u32 temp = *(const u32*)ptr;
     __asm__ volatile ("":"+r"(temp));

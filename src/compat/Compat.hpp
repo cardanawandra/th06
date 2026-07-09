@@ -3,7 +3,7 @@
 #include "../inttypes.hpp"
 
 #define STORAGE_INIT()
-#define GET_EXTERNAL_STORAGE_PATH() NULL
+#define GET_EXTERNAL_STORAGE_PATH() "."
 #define CALLCOMPAT 
 #ifdef _MSC_VER
     #define SNPRINTF _snprintf
@@ -43,7 +43,7 @@
 //PLATFORM FORCE
 #ifdef _XBOX
 #undef GET_EXTERNAL_STORAGE_PATH()
-#define GET_EXTERNAL_STORAGE_PATH() "GAME://"
+#define GET_EXTERNAL_STORAGE_PATH() "GAME:/"
 #undef LOG_COMPAT
 #include <xtl.h>
 #define LOG_COMPAT(...)                     \
@@ -130,7 +130,7 @@
 #endif
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)
-#if 1
+#if 0 || defined(NO_LOG_COMPAT)
 #undef LOG_COMPAT
 #define LOG_COMPAT
 #endif

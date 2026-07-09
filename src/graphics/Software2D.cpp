@@ -24,16 +24,9 @@ GfxInterface *Software::Init()
     g_GameWindow.ConfigureInit();
 
     // todo : fix scaling
-    #ifdef COMPAT_PORTABLE
-    GetWindowSize(
-        &GAME_WINDOW_WIDTH_REAL,
-        &GAME_WINDOW_HEIGHT_REAL,
-        &GAME_WINDOW_REFRESH_RATE
-    );
-    #endif
-    GAME_WINDOW_WIDTH_REAL/=2;
-    GAME_WINDOW_HEIGHT_REAL/=2;
-    GAME_WINDOW_REFRESH_RATE/=4;
+    GAME_WINDOW_WIDTH_REAL=GAME_WINDOW_WIDTH / 4;
+    GAME_WINDOW_HEIGHT_REAL=GAME_WINDOW_HEIGHT / 4;
+    GAME_WINDOW_REFRESH_RATE=30;
     g_GameWindow.ConfigureView();
 
     i32 width  = GAME_WINDOW_WIDTH_REAL;
@@ -59,6 +52,7 @@ GfxInterface *Software::Init()
         SDL_RENDERER_ACCELERATED, 
         NULL
     );
+    SDL_RenderSetLogicalSize(gfx->renderer, width, height);
     if (gfx->renderer == NULL)
     {
         delete gfx;

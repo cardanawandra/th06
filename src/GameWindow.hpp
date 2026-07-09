@@ -11,7 +11,11 @@
 // The actual resolution used for the output window and viewport scaling
 //   At some point there should be a method to change this without recompiling but for now
 //   this'll do
-
+#ifdef COMPAT_PORTABLE
+    #ifndef GAME_WINDOW_DYNAMIC
+        #define GAME_WINDOW_DYNAMIC
+    #endif
+#endif
 #ifdef GAME_WINDOW_DYNAMIC
     #define GAME_WINDOW_WIDTH_REAL   g_GameWindow.gameWindowWidthReal
     #define GAME_WINDOW_HEIGHT_REAL  g_GameWindow.gameWindowHeightReal

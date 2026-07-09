@@ -1,4 +1,4 @@
-﻿Build started 7/6/2026 7:51:07 PM.
+﻿Build started 7/7/2026 8:46:54 PM.
      1>Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Release\th06xbox360.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -17,6 +17,8 @@
      1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DHeader.hpp(39): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
+     1>..\..\..\src\graphics\Software2DXBOX360.cpp(378): warning C4018: '<' : signed/unsigned mismatch
+     1>..\..\..\src\graphics\Software2DXBOX360.cpp(382): warning C4018: '<' : signed/unsigned mismatch
        Link:
          C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\link.exe /ERRORREPORT:PROMPT /OUT:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.exe" /INCREMENTAL:NO /NOLOGO xapilib.lib d3d9.lib d3dx9.lib xgraphics.lib xboxkrnl.lib xnet.lib xaudio2.lib xact3.lib x3daudio.lib xmcore.lib vcomp.lib /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.pdb" /STACK:"262144","262144" /OPT:REF /OPT:ICF /TLBID:1 /RELEASE /IMPLIB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.lib" Release\AnmManager.obj
          Release\AsciiManager.obj
@@ -74,4 +76,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:06.38
+Time Elapsed 00:00:05.62

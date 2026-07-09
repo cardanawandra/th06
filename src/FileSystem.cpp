@@ -41,7 +41,7 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
         LOG_COMPAT("FileSystem::FopenUTF8 open success\n");
         return f;
     }
-#ifdef COMPAT_NO_UTF8FALLBACK
+#ifdef COMPAT_PORTABLE
 	return f;
 #else
     LOG_COMPAT("FileSystem::FopenUTF8 open failed, fallback\n");
@@ -108,11 +108,11 @@ FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 
 void FileSystem::CreateDir(const char *path)
 {
-#if defined(__ANDROID__) || defined(_XBOX)
     char resolvedPath[1024];
-
     GamePaths::Resolve(resolvedPath, sizeof(resolvedPath), path);
-
+#if defined(__ANDROID__)
+    mkdir(resolvedPath,0755);
+#elif defined(_XBOX)
     CreateDirectory(resolvedPath, NULL);
 #elif defined(_WIN32)
     _mkdir(path);

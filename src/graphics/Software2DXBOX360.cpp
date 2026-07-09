@@ -372,17 +372,16 @@ void Software::SwapBuffers()
 
     const i32 width  = GAME_WINDOW_WIDTH_REAL;
     const i32 height = GAME_WINDOW_HEIGHT_REAL;
-	u32* dst = static_cast<u32*>(rect.pBits);
 
-	i32 i=0;
-	for (i32 y = 0; y < height/2; y++){
-		for (i32 x = 0; x < width; ++x,++i)
+	uint8_t* bits = (uint8_t*)rect.pBits;
+
+	for (uint32_t y = 0; y < height; ++y)
+	{
+		uint32_t* row = (uint32_t*)(bits + y * rect.Pitch);
+
+		for (uint32_t x = 0; x < width; ++x)
 		{
-			dst[i] = 0XFFFFFFFF;
-		}
-		for (i32 x = 0; x < width; ++x,++i)
-		{
-			dst[i] = 0XFFFF00FF;
+			row[x] = (x < 64) ? 0xFFFFFF00 : 0xFFFFFFFF;
 		}
 	}
 

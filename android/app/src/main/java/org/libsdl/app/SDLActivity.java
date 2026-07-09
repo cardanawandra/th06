@@ -860,7 +860,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         }
         censor.setVisibility(View.GONE);
 
-        mSurface.setTranslationX(sideWidth);
+        // mSurface.setTranslationX(sideWidth);
 
         // BUTTON MENU
         Button btnMenu = findViewById(R.id.btnMenu);

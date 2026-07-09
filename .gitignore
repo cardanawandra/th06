@@ -38,5 +38,10 @@ ports/window98/th06.plg
 ports/window98/.clang-format
 ports/window98/CMakeCache.txt
 
+ports/xbox360/ipch
+ports/xbox360/th06xbox360
+ports/xbox360/th06xbox360.suo
+ports/xbox360/th06xbox360.sdf
+
 3rdparty/SFML
 3rdparty/RAYLIB6

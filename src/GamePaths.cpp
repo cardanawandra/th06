@@ -24,8 +24,8 @@ void Init()
     const char *internalPath = GET_EXTERNAL_STORAGE_PATH();
     if (internalPath)
     {
-        SNPRINTF(s_userPath, sizeof(s_userPath), "%s", internalPath);
-        LOG_COMPAT("GamePaths: user data path = %s", s_userPath);
+        SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
+        LOG_COMPAT("GamePaths: user data path = %s/", s_userPath);
     }
     else
     {
@@ -59,8 +59,8 @@ void Resolve(char *outBuf, int outBufSize, const char *path)
 	SNPRINTF(outBuf, outBufSize, "%s%s", s_userPath, path);
 	for (char* p = outBuf; *p; ++p)
 	{
-		if (*p == '/')
-			*p = '\\';
+		if (*p == '\\')
+			*p = '/';
 	}
 	return;
 }

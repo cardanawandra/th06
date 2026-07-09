@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.th06.game"
     compileSdkVersion 36
-    ndkVersion "29.0.14206865"
+    ndkVersion "25.2.9519653"
 
     defaultConfig {
         applicationId "com.th06.game"

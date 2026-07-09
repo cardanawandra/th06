@@ -25,6 +25,10 @@
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
 
+#include <mutex>
+std::mutex soundBufMutex;
+
+
 static i16 g_audioBuffer[44100 * 4];
 static volatile u32 g_audioWritePos = 0;
 static volatile u32 g_audioReadPos = 0;
@@ -144,8 +148,10 @@ void SoundPlayer::StopBGM()
     DISABLE_SOUNDPLAYER;
     if (backgroundMusic.srcWav.fileStream)
     {
+        soundBufMutex.lock();
         SDL_RWCLOSE_COMPAT(backgroundMusic.srcWav.fileStream);
         backgroundMusic.srcWav.fileStream = NULL;
+        soundBufMutex.unlock();
     }
 }
 
@@ -369,7 +375,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     uint32_t wavRawSampleByteCount;
 
     LOG_COMPAT("load sound 2\n");
-    // soundBufMutex.lock();
+    soundBufMutex.lock();
 
     if (this->soundBuffers[idx].samples != NULL)
     {
@@ -473,7 +479,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     this->soundBuffers[idx].isPlaying = false;
 
     LOG_COMPAT("load sound success\n");
-    // soundBufMutex.unlock();
+    soundBufMutex.unlock();
     return ZUN_SUCCESS;
 }
 
@@ -536,7 +542,7 @@ void SoundPlayer::MixAudio(u32 samples)
 
     u8 playingChannels = 0;
 
-    // this->soundBufMutex.lock();
+    soundBufMutex.lock();
 
     // =========================
     // Sound effects mixing
@@ -659,7 +665,7 @@ void SoundPlayer::MixAudio(u32 samples)
         playingChannels++;
     }
 
-    // this->soundBufMutex.unlock();
+    soundBufMutex.unlock();
 
     // =========================
     // Final mix down
@@ -686,6 +692,7 @@ void SoundPlayer::MixAudio(u32 samples)
     }
 
     SDL_QUEUE_AUDIO_COMPAT(this->audioDev, this->stream, finalBuffer, samples * 2);
+    delete[] finalBuffer;
     #endif
     delete[] mixBuffer;
 }

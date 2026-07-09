@@ -107,6 +107,9 @@ add_library(main SHARED ${TH06_GAME_SOURCES})
 # Android define + GLES
 target_compile_definitions(main PRIVATE
     TH06_ANDROID=1
+    COMPAT_PORTABLE=1
+    NO_EFFECT=1
+    NO_LOG_COMPAT=1
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
