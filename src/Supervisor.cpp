@@ -340,7 +340,6 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     //    if (g_Supervisor.d3dDevice->Present(0, 0, 0, 0) < 0)
     //        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
     //
-
     LOG_COMPAT("g_GfxBackend->SwapBuffers 2");
     g_GfxBackend->SwapBuffers();
 
@@ -383,7 +382,7 @@ ZunResult Supervisor::AddedCallback(Supervisor *s)
     {
         return ZUN_ERROR;
     }
-
+	
     LOG_COMPAT("ReleasePbg3");
     s->ReleasePbg3(IN_PBG3_INDEX);
     LOG_COMPAT("LoadPbg3 MD.DAT");

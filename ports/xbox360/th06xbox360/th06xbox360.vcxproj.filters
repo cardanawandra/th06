@@ -373,11 +373,11 @@
     <ClCompile Include="..\..\..\src\midi\MidiDefault.cpp">
       <Filter>Source Files\midi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\controller\EmptyController.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\graphics\Software2DXBOX360.cpp">
       <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\controller\XBOX360Controller.cpp">
+      <Filter>Source Files\controller</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

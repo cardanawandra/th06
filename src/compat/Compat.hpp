@@ -44,16 +44,6 @@
 #ifdef _XBOX
 #undef GET_EXTERNAL_STORAGE_PATH()
 #define GET_EXTERNAL_STORAGE_PATH() "GAME:/"
-#undef LOG_COMPAT
-#include <xtl.h>
-#define LOG_COMPAT(...)                     \
-    do {                                   \
-        char _logbuf[512];                 \
-        sprintf(_logbuf, __VA_ARGS__);     \
-        OutputDebugStringA(_logbuf);       \
-    } while (0)
-
-#else
 #endif
 
 #ifdef NO_SDL
@@ -128,6 +118,21 @@
 
     #include "SDLCompat.hpp"
 #endif
+
+
+//ADDONS, include compat on your file
+#if BYTEORDER == BIG_ENDIAN
+    #undef COLOR_RED_BYTE_IDX
+    #undef COLOR_GREEN_BYTE_IDX
+    #undef COLOR_BLUE_BYTE_IDX
+    #undef COLOR_ALPHA_BYTE_IDX
+
+    #define COLOR_RED_BYTE_IDX 1
+    #define COLOR_GREEN_BYTE_IDX 2
+    #define COLOR_BLUE_BYTE_IDX 3
+    #define COLOR_ALPHA_BYTE_IDX 0
+#endif
+
 
 //DISABLE SDL LOG DEBUGGER (SET 1 for disable)
 #if 0 || defined(NO_LOG_COMPAT)

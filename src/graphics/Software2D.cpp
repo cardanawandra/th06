@@ -24,8 +24,8 @@ GfxInterface *Software::Init()
     g_GameWindow.ConfigureInit();
 
     // todo : fix scaling
-    GAME_WINDOW_WIDTH_REAL=GAME_WINDOW_WIDTH / 4;
-    GAME_WINDOW_HEIGHT_REAL=GAME_WINDOW_HEIGHT / 4;
+    GAME_WINDOW_WIDTH_REAL=GAME_WINDOW_WIDTH / 2;
+    GAME_WINDOW_HEIGHT_REAL=GAME_WINDOW_HEIGHT / 2;
     GAME_WINDOW_REFRESH_RATE=30;
     g_GameWindow.ConfigureView();
 

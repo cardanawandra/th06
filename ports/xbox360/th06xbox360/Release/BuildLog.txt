@@ -1,24 +1,64 @@
-﻿Build started 7/7/2026 8:46:54 PM.
+﻿Build started 7/12/2026 3:20:30 AM.
      1>Project "E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\th06xbox360.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Release\th06xbox360.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
          All outputs are up-to-date.
-         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\CL.exe /c /Zi /nologo /W3 /WX- /Ox /Os /D NO_SDL /D NDEBUG /D _XBOX /D XBOX_360 /D NO_IOB_REDECLARE /D GAME_WINDOW_DYNAMIC /D BYTEORDER_BIG_ENDIANX /D COMPAT_PORTABLE /D COMPAT_UNWRITABLE /D VIEWPORT_OFF_EXISTS /GF /Gm- /MT /GS- /Gy /fp:fast /fp:except- /Zc:wchar_t /Zc:forScope /GR- /openmp- /Fo"Release\\" /Fd"Release\vc100.pdb" /TP ..\..\..\src\graphics\Software2DXBOX360.cpp /FI"C:\Program Files (x86)\Microsoft Xbox 360 SDK\\include\xbox\xbox_intellisense_platform.h"
-         Software2DXBOX360.cpp
+         C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\CL.exe /c /Zi /nologo /W3 /WX- /Ox /Os /D NO_SDL /D NDEBUG /D _XBOX /D XBOX_360 /D NO_IOB_REDECLARE /D GAME_WINDOW_DYNAMIC /D BYTEORDER_BIG_ENDIAN /D COMPAT_PORTABLE /D COMPAT_UNWRITABLE /D VIEWPORT_OFF_EXISTS /GF /Gm- /MT /GS- /Gy /fp:fast /fp:except- /Zc:wchar_t /Zc:forScope /GR- /openmp- /Fo"Release\\" /Fd"Release\vc100.pdb" /TP ..\..\..\src\AnmManager.cpp /FI"C:\Program Files (x86)\Microsoft Xbox 360 SDK\\include\xbox\xbox_intellisense_platform.h"
+         AnmManager.cpp
      1>e:\proyek\c++\th06-android\th06\src\compat/Compat.hpp(45): warning C4067: unexpected tokens following preprocessor directive - expected a newline
      1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(154): warning C4244: 'return' : conversion from 'double' to 'f32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(646): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
      1>e:\proyek\c++\th06-android\th06\src\ZunMath.hpp(647): warning C4244: 'argument' : conversion from 'const i32' to 'f32', possible loss of data
-     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
-     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
-     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
-     1>e:\proyek\c++\th06-android\th06\src\graphics\../AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
-     1>e:\proyek\c++\th06-android\th06\src\graphics\Software2DHeader.hpp(39): warning C4244: '=' : conversion from 'u16' to 'u8', possible loss of data
-     1>..\..\..\src\graphics\Software2DXBOX360.cpp(378): warning C4018: '<' : signed/unsigned mismatch
-     1>..\..\..\src\graphics\Software2DXBOX360.cpp(382): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(424): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(425): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(426): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>e:\proyek\c++\th06-android\th06\src\AnmManager.hpp(427): warning C4244: '=' : conversion from 'double' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(791): warning C4101: 'srcRow' : unreferenced local variable
+     1>..\..\..\src\AnmManager.cpp(791): warning C4101: 'dstRow' : unreferenced local variable
+     1>..\..\..\src\AnmManager.cpp(1239): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>..\..\..\src\AnmManager.cpp(1625): warning C4101: 'rotationMatrix' : unreferenced local variable
+     1>..\..\..\src\AnmManager.cpp(1771): warning C4101: 'unusedMatrix' : unreferenced local variable
+     1>..\..\..\src\AnmManager.cpp(2174): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2270): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2270): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2270): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2270): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2288): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2288): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2288): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2288): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2290): warning C4244: '=' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2293): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2311): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2311): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2311): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2311): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2313): warning C4244: '=' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2316): warning C4244: 'argument' : conversion from 'const f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2563): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2563): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2563): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2563): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2571): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2571): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2571): warning C4244: 'argument' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2588): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2589): warning C4244: '=' : conversion from 'f32' to 'i32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2665): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2666): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2669): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2670): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2673): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2674): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2677): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
+     1>..\..\..\src\AnmManager.cpp(2678): warning C4244: '=' : conversion from 'const i32' to 'f32', possible loss of data
        Link:
          C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\link.exe /ERRORREPORT:PROMPT /OUT:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.exe" /INCREMENTAL:NO /NOLOGO xapilib.lib d3d9.lib d3dx9.lib xgraphics.lib xboxkrnl.lib xnet.lib xaudio2.lib xact3.lib x3daudio.lib xmcore.lib vcomp.lib /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.pdb" /STACK:"262144","262144" /OPT:REF /OPT:ICF /TLBID:1 /RELEASE /IMPLIB:"E:\proyek\c++\th06-android\th06\ports\xbox360\th06xbox360\Release\th06xbox360.lib" Release\AnmManager.obj
          Release\AsciiManager.obj
@@ -26,7 +66,7 @@
          Release\BulletData.obj
          Release\BulletManager.obj
          Release\Chain.obj
-         Release\EmptyController.obj
+         Release\XBOX360Controller.obj
          Release\EclManager.obj
          Release\EffectManager.obj
          Release\Ending.obj
@@ -76,4 +116,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.62
+Time Elapsed 00:00:05.39

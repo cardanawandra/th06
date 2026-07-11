@@ -201,7 +201,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <PrecompiledHeaderOutputFile>$(OutDir)$(ProjectName).pch</PrecompiledHeaderOutputFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>NO_SDL;NDEBUG;_XBOX;XBOX_360;NO_IOB_REDECLARE;GAME_WINDOW_DYNAMIC;BYTEORDER_BIG_ENDIANX;COMPAT_PORTABLE;COMPAT_UNWRITABLE;VIEWPORT_OFF_EXISTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NO_SDL;NDEBUG;_XBOX;XBOX_360;NO_IOB_REDECLARE;GAME_WINDOW_DYNAMIC;BYTEORDER_BIG_ENDIAN;COMPAT_PORTABLE;COMPAT_UNWRITABLE;VIEWPORT_OFF_EXISTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </ClCompile>
@@ -317,7 +317,7 @@
     <ClCompile Include="..\..\..\src\BulletData.cpp" />
     <ClCompile Include="..\..\..\src\BulletManager.cpp" />
     <ClCompile Include="..\..\..\src\Chain.cpp" />
-    <ClCompile Include="..\..\..\src\controller\EmptyController.cpp" />
+    <ClCompile Include="..\..\..\src\controller\XBOX360Controller.cpp" />
     <ClCompile Include="..\..\..\src\EclManager.cpp" />
     <ClCompile Include="..\..\..\src\EffectManager.cpp" />
     <ClCompile Include="..\..\..\src\Ending.cpp" />

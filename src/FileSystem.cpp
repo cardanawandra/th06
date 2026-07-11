@@ -113,7 +113,7 @@ void FileSystem::CreateDir(const char *path)
 #if defined(__ANDROID__)
     mkdir(resolvedPath,0755);
 #elif defined(_XBOX)
-    CreateDirectory(resolvedPath, NULL);
+//    CreateDirectory(resolvedPath, NULL);
 #elif defined(_WIN32)
     _mkdir(path);
 #endif
@@ -157,6 +157,25 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         {
             entryname = entryname + 1;
         }
+        // PATCH FIRST
+        char patchPath[512];
+        char patchPathRaw[512];
+        SNPRINTF(patchPathRaw, sizeof(patchPathRaw), "patch/%s", entryname);
+        GamePaths::Resolve(patchPath, sizeof(patchPath), patchPathRaw);
+        LOG_COMPAT("FileSystem::OpenPath patch fopen %s\n",patchPath);
+        file = fopen(patchPath, "rb");
+        if (file != NULL)
+        {
+            fseek(file, 0, SEEK_END);
+            fsize = ftell(file);
+            g_LastFileSize = fsize;
+            fseek(file, 0, SEEK_SET);
+            data = (u8 *)malloc(fsize);
+            fread(data, 1, fsize, file);
+            fclose(file);
+            return data;
+        }
+
         if (g_Pbg3Archives != NULL)
         {
             LOG_COMPAT("FileSystem::OpenPath g_Pbg3Archives exists\n");
@@ -214,7 +233,7 @@ int FileSystem::WriteDataToFile(const char *path, const void *data, size_t size)
 {
 	#if COMPAT_UNWRITABLE
 		return 0;
-	#endif
+	#else
     FILE *f;
 
     char resolvedPath[512];
@@ -238,4 +257,5 @@ int FileSystem::WriteDataToFile(const char *path, const void *data, size_t size)
             return 0;
         }
     }
+	#endif
 }

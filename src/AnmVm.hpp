@@ -61,7 +61,7 @@ struct AnmRawInstr
     LE<i16> time;
     u8 opcode;
     u8 argsCount;
-    u32 args[10];
+    LE<u32> args[10];
 };
 
 enum AnmVmFlagsEnum
@@ -107,17 +107,33 @@ union AnmVmFlags {
     u16 flags;
     struct
     {
-        u32 isVisible : 1;
-        u32 flag1 : 1;
-        u32 blendMode : 1;
-        u32 colorOp : 1;
-        u32 flag4 : 1;
-        u32 usePosOffset : 1;
-        u32 flip : 2;
-        u32 anchor : 2;
-        u32 posTime : 2;
-        u32 zWriteDisable : 1;
-        u32 isStopped : 1;
+#if BYTEORDER == BIG_ENDIAN
+        u16 : 2;
+        u16 isStopped : 1;
+        u16 zWriteDisable : 1;
+        u16 posTime : 2;
+        u16 anchor : 2;
+        u16 flip : 2;
+        u16 usePosOffset : 1;
+        u16 flag4 : 1;
+        u16 colorOp : 1;
+        u16 blendMode : 1;
+        u16 flag1 : 1;
+        u16 isVisible : 1;
+#else
+        u16 isVisible : 1;
+        u16 flag1 : 1;
+        u16 blendMode : 1;
+        u16 colorOp : 1;
+        u16 flag4 : 1;
+        u16 usePosOffset : 1;
+        u16 flip : 2;
+        u16 anchor : 2;
+        u16 posTime : 2;
+        u16 zWriteDisable : 1;
+        u16 isStopped : 1;
+        u16 : 2;
+#endif
     };
 };
 

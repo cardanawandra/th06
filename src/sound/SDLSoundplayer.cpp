@@ -25,9 +25,15 @@
 #define BACKGROUND_MUSIC_WAV_BLOCK_ALIGN (BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE / 8 * BACKGROUND_MUSIC_WAV_NUM_CHANNELS)
 #define BACKGROUND_MUSIC_WAV_BYTE_RATE (BACKGROUND_MUSIC_WAV_BLOCK_ALIGN * BACKGROUND_MUSIC_WAV_SAMPLE_RATE)
 
+#if defined(__ANDROID__)
 #include <mutex>
 std::mutex soundBufMutex;
-
+#define soundBufMutexLock() soundBufMutex.lock()
+#define soundBufMutexUnlock() soundBufMutex.unlock()
+#else
+#define soundBufMutexLock()
+#define soundBufMutexUnlock()
+#endif
 
 static i16 g_audioBuffer[44100 * 4];
 static volatile u32 g_audioWritePos = 0;
@@ -148,10 +154,10 @@ void SoundPlayer::StopBGM()
     DISABLE_SOUNDPLAYER;
     if (backgroundMusic.srcWav.fileStream)
     {
-        soundBufMutex.lock();
+        soundBufMutexLock();
         SDL_RWCLOSE_COMPAT(backgroundMusic.srcWav.fileStream);
         backgroundMusic.srcWav.fileStream = NULL;
-        soundBufMutex.unlock();
+        soundBufMutexUnlock();
     }
 }
 
@@ -375,7 +381,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     uint32_t wavRawSampleByteCount;
 
     LOG_COMPAT("load sound 2\n");
-    soundBufMutex.lock();
+    soundBufMutexLock();
 
     if (this->soundBuffers[idx].samples != NULL)
     {
@@ -479,7 +485,7 @@ ZunResult SoundPlayer::LoadSound(i32 idx, const char *path, f32 volumeMultiplier
     this->soundBuffers[idx].isPlaying = false;
 
     LOG_COMPAT("load sound success\n");
-    soundBufMutex.unlock();
+    soundBufMutexUnlock();
     return ZUN_SUCCESS;
 }
 
@@ -542,7 +548,7 @@ void SoundPlayer::MixAudio(u32 samples)
 
     u8 playingChannels = 0;
 
-    soundBufMutex.lock();
+    soundBufMutexLock();
 
     // =========================
     // Sound effects mixing
@@ -665,7 +671,7 @@ void SoundPlayer::MixAudio(u32 samples)
         playingChannels++;
     }
 
-    soundBufMutex.unlock();
+    soundBufMutexUnlock();
 
     // =========================
     // Final mix down

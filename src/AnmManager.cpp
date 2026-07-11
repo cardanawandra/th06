@@ -994,18 +994,19 @@ ZunResult AnmManager::LoadAnm(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     const AnmRawSprite *rawSprite;
 
     LOG_COMPAT("LoadAnm 9");
+
     for (index = 0; index < this->anmFiles[anmIdx]->numSprites; index++, curSpriteOffset++)
     {
         rawSprite = (AnmRawSprite *)((u8 *)anm + *curSpriteOffset);
 
         AnmLoadedSprite loadedSprite;
         loadedSprite.sourceFileIndex = this->anmFiles[anmIdx]->textureIdx;
-        loadedSprite.startPixelInclusive.x = rawSprite->offset.x;
-        loadedSprite.startPixelInclusive.y = rawSprite->offset.y;
-        loadedSprite.endPixelInclusive.x = rawSprite->offset.x + rawSprite->size.x;
-        loadedSprite.endPixelInclusive.y = rawSprite->offset.y + rawSprite->size.y;
-        loadedSprite.textureWidth = (float)anm->width;
-        loadedSprite.textureHeight = (float)anm->height;
+        loadedSprite.startPixelInclusive.x = (f32)rawSprite->offset.x;
+        loadedSprite.startPixelInclusive.y = (f32)rawSprite->offset.y;
+        loadedSprite.endPixelInclusive.x = (f32)rawSprite->offset.x + (f32)rawSprite->size.x;
+        loadedSprite.endPixelInclusive.y = (f32)rawSprite->offset.y + (f32)rawSprite->size.y;
+        loadedSprite.textureWidth = (f32)anm->width;
+        loadedSprite.textureHeight = (f32)anm->height;
         this->LoadSprite(rawSprite->id + spriteIdxOffset, &loadedSprite);
     }
 
@@ -1993,15 +1994,11 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
         case AnmOpcode_SetPosition:
             if (vm->flags.usePosOffset == 0)
             {
-                vm->pos.x = AnmF32Arg(0);
-                vm->pos.y = AnmF32Arg(1);
-                vm->pos.z = AnmF32Arg(2);
+                ZunTargetVec3(vm->pos, AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
             }
             else
             {
-                vm->posOffset.x = AnmF32Arg(0);
-                vm->posOffset.y = AnmF32Arg(1);
-                vm->posOffset.z = AnmF32Arg(2);
+                ZunTargetVec3(vm->posOffset, AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
             }
             break;
         case AnmOpcode_PosTimeAccel:
@@ -2025,9 +2022,7 @@ i32 AnmManager::ExecuteScript(AnmVm *vm)
                 // a memcpy
                 vm->posInterpInitial = vm->posOffset;
             }
-            vm->posInterpFinal.x = AnmF32Arg(0);
-            vm->posInterpFinal.y = AnmF32Arg(1);
-            vm->posInterpFinal.z = AnmF32Arg(2);
+            ZunTargetVec3(vm->posInterpFinal, AnmF32Arg(0), AnmF32Arg(1), AnmF32Arg(2));
             vm->posInterpEndTime = AnmI32Arg(3);
             vm->posInterpTime.InitializeForPopup();
             break;

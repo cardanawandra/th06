@@ -97,9 +97,9 @@ ZunResult Player::AddedCallback(Player *p)
     }
     p->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     p->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
-    p->positionCenter.z = 0.49f;
-    p->orbsPosition[0].z = 0.49f;
-    p->orbsPosition[1].z = 0.49f;
+    p->positionCenter.z = 0.49;
+    p->orbsPosition[0].z = 0.49;
+    p->orbsPosition[1].z = 0.49;
     for (idx = 0; idx < ARRAY_SIZE_SIGNED(p->bombRegionSizes); idx++)
     {
         p->bombRegionSizes[idx].x = 0.0;

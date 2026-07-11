@@ -83,8 +83,8 @@ GfxInterface *Software::Init()
     g_GameWindow.ConfigureInit();
 //    GAME_WINDOW_WIDTH_REAL  = min((int)videoMode.dwDisplayWidth, GAME_WINDOW_WIDTH);
 //    GAME_WINDOW_HEIGHT_REAL = min((int)videoMode.dwDisplayHeight, GAME_WINDOW_HEIGHT);
-	GAME_WINDOW_WIDTH_REAL  = 1280;
-	GAME_WINDOW_HEIGHT_REAL = 1024;
+	GAME_WINDOW_WIDTH_REAL  = 1280/4;
+	GAME_WINDOW_HEIGHT_REAL = 1024/4;
     g_GameWindow.ConfigureView();
 
     const int width  = GAME_WINDOW_WIDTH_REAL;
@@ -329,40 +329,6 @@ void Software::Exit()
         g_D3D = NULL;
     }
 }
-/*
-u16 current=0;
-void Software::SwapBuffers()
-{
-    D3DLOCKED_RECT rect;
-
-    if (FAILED(framebufferTexture->LockRect(0, &rect, NULL, 0)))
-        return;
-
-    const int width  = GAME_WINDOW_WIDTH_REAL;
-    const int height = GAME_WINDOW_HEIGHT_REAL;
-	memcpy(
-		rect.pBits,
-		framebuffer,
-		width * height * sizeof(u32));
-
-    framebufferTexture->UnlockRect(0);
-    g_Device->Clear(
-        0, NULL,
-        D3DCLEAR_TARGET,
-        D3DCOLOR_XRGB(0,0,0),
-        1.0f, 0);
-
-	g_Device->BeginScene();
-
-	g_Device->SetTexture(0, framebufferTexture);
-
-	g_Device->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-
-	g_Device->EndScene();
-
-    g_Device->Present(NULL,NULL,NULL,NULL);
-}
-*/
 void Software::SwapBuffers()
 {
     D3DLOCKED_RECT rect;
@@ -373,17 +339,16 @@ void Software::SwapBuffers()
     const i32 width  = GAME_WINDOW_WIDTH_REAL;
     const i32 height = GAME_WINDOW_HEIGHT_REAL;
 
-	uint8_t* bits = (uint8_t*)rect.pBits;
-
-	for (uint32_t y = 0; y < height; ++y)
-	{
-		uint32_t* row = (uint32_t*)(bits + y * rect.Pitch);
-
-		for (uint32_t x = 0; x < width; ++x)
-		{
-			row[x] = (x < 64) ? 0xFFFFFF00 : 0xFFFFFFFF;
-		}
-	}
+	XGTileSurface(
+		rect.pBits,                  // dst (tiled)
+		GAME_WINDOW_WIDTH_REAL,
+		GAME_WINDOW_HEIGHT_REAL,
+		NULL,                        // destination offset
+		framebuffer,                 // src (linear)
+		GAME_WINDOW_WIDTH_REAL * 4,  // bpp
+		NULL,                        // idk
+		4                            // bytes per texel (A8R8G8B8)
+	);
 
     framebufferTexture->UnlockRect(0);
 

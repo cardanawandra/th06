@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
     LOG_COMPAT("Load CONF File");
     if (g_Supervisor.LoadConfig(TH_CONFIG_FILE) != ZUN_SUCCESS)
     {
-		return 1;
         LOG_COMPAT("LoadConfig failed (first run?), continuing with defaults");
     }
 
