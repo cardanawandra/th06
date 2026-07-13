@@ -150,8 +150,8 @@ GfxInterface *WebGL::Create()
     g_GameWindow.ConfigureView();
     i32 width=GAME_WINDOW_WIDTH_REAL;
     i32 height=GAME_WINDOW_HEIGHT_REAL;
-    i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
-    i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
+    i32 x = VIEWPORT_OFF_X;
+    i32 y = VIEWPORT_OFF_Y;
 
     gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
 

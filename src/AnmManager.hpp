@@ -376,9 +376,13 @@ struct AnmManager
     ZunResult Draw(const AnmVm *vm);
     void DrawTextToSprite(u32 spriteDstIndex, i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontWidth,
                           i32 fontHeight, ZunColor textColor, ZunColor shadowColor, const char *strToPrint);
+    void DrawTextToSpritePatch(u32 spriteDstIndex, i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontWidth,
+                          i32 fontHeight, ZunColor textColor, ZunColor shadowColor, const char *strToPrint);
     void DrawStringFormat(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...);
+    void DrawStringFormatPatch(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...);
     void DrawStringFormat2(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...);
     void DrawVmTextFmt(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...);
+    void DrawVmTextFmtPatch(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...);
     ZunResult DrawNoRotation(const AnmVm *vm);
     ZunResult DrawOrthographic(const AnmVm *vm, bool roundToPixel);
     ZunResult DrawFacingCamera(const AnmVm *vm);

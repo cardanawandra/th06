@@ -532,9 +532,26 @@ void GuiImpl::MsgRead(i32 msgIdx)
     return;
 }
 
+
+#define GUI_CPP_PATCH_MSG_TEXT \
+            text = args->text.text;\
+            if(g_StageHasMsgPatch){\
+                    if (g_StageMsgPatchIndex < g_StageMsgPatch.size() &&\
+                        g_StageMsgPatch[g_StageMsgPatchIndex] != NULL)\
+                    {\
+                        text = GetSplitLine(g_StageMsgPatch[g_StageMsgPatchIndex],g_StageMsgPatchSecondHalf ? 1 : 0);\
+                    }\
+                    g_StageMsgPatchSecondHalf=!g_StageMsgPatchSecondHalf;\
+                    if(!g_StageMsgPatchSecondHalf){\
+                        g_StageMsgPatchIndex++;\
+                    }\
+                    printf("dialog double : %s\n",text);\
+            }
 ZunResult GuiImpl::RunMsg()
 {
     const MsgRawInstrArgs *args;
+    const char * top;
+    const char * bottom;
 
     if (this->msg.currentMsgIdx < 0)
     {
@@ -571,7 +588,7 @@ ZunResult GuiImpl::RunMsg()
             break;
         case MSG_OPCODE_TEXTDIALOGUE:
             args = &this->msg.currentInstr->args;
-            if ((i16)args->text.textLine == 0 && 0 <= this->msg.dialogueLines[1].anmFileIndex)
+            if ((i16)args->text.textLine == 0 && 0 <= this->msg.dialogueLines[1].anmFileIndex && !g_StageHasMsgPatch)
             {
                 g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[1],
                                             this->msg.textColorsA[(i16)args->text.textColor],
@@ -581,9 +598,24 @@ ZunResult GuiImpl::RunMsg()
                                                  0x702 + (i16)args->text.textLine);
             this->msg.dialogueLines[(i16)args->text.textLine].fontWidth =
                 this->msg.dialogueLines[(i16)args->text.textLine].fontHeight = this->msg.fontSize;
-            g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[(i16)args->text.textLine],
-                                        this->msg.textColorsA[(i16)args->text.textColor],
-                                        this->msg.textColorsB[(i16)args->text.textColor], args->text.text);
+            if(g_StageHasMsgPatch){
+                if((i16)args->text.textLine==0){
+                    if (g_StageMsgPatchIndex < g_StageMsgPatch.size() &&
+                        g_StageMsgPatch[g_StageMsgPatchIndex] != NULL)
+                    {
+                        printf("all %i : %s\n", (i16)args->text.textLine, g_StageMsgPatch[g_StageMsgPatchIndex]);
+                        g_AnmManager->DrawVmTextFmtPatch(&this->msg.dialogueLines[0],
+                            this->msg.textColorsA[(i16)args->text.textColor],
+                            this->msg.textColorsB[(i16)args->text.textColor], 
+                            g_StageMsgPatch[g_StageMsgPatchIndex]);
+                        g_StageMsgPatchIndex++;
+                    }
+                }
+            }else{
+                g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[(i16)args->text.textLine],
+                    this->msg.textColorsA[(i16)args->text.textColor],
+                    this->msg.textColorsB[(i16)args->text.textColor], args->text.text);
+            }
             this->msg.framesElapsedDuringPause = 0;
             break;
         case MSG_OPCODE_WAIT:
@@ -630,9 +662,20 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.currentInstr->args;
             g_AnmManager->SetAndExecuteScriptIdx(&this->msg.introLines[(i16)args->text.textLine],
                                                  (i16)args->text.textLine + 0x704);
-            g_AnmManager->DrawStringFormat(&this->msg.introLines[(i16)args->text.textLine],
-                                           this->msg.textColorsA[(i16)args->text.textColor],
-                                           this->msg.textColorsB[(i16)args->text.textColor], args->text.text);
+            if(g_StageHasMsgPatch){
+                top = g_StageMsgPatch[g_StageMsgPatchIndex];
+                printf("intro %i : %s\n", (i16)args->text.textLine, g_StageMsgPatch[g_StageMsgPatchIndex]);
+                g_AnmManager->DrawStringFormatPatch(&this->msg.introLines[(i16)args->text.textLine],
+                                            this->msg.textColorsA[(i16)args->text.textColor],
+                                            this->msg.textColorsB[(i16)args->text.textColor], top);
+                if((i16)args->text.textLine>0){
+                    g_StageMsgPatchIndex++;
+                }
+            }else{
+                g_AnmManager->DrawStringFormat(&this->msg.introLines[(i16)args->text.textLine],
+                                            this->msg.textColorsA[(i16)args->text.textColor],
+                                            this->msg.textColorsB[(i16)args->text.textColor], args->text.text);                
+            }
             this->msg.framesElapsedDuringPause = 0;
             break;
         case MSG_OPCODE_STAGERESULTS:
@@ -704,6 +747,7 @@ SKIP_TIME_INCREMENT:
     }
     return ZUN_SUCCESS;
 }
+#undef GUI_CPP_PATCH_MSG_TEXT
 
 ZunResult GuiImpl::DrawDialogue() const
 {

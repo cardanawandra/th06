@@ -597,6 +597,12 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
         ensureAssetFile(this, "background.jpg", "background.jpg");
         ensureAssetFile(this, "background.jpg", "censor.jpg");
+        ensureAssetFile(this, "CM.DAT", "CM.DAT");
+        ensureAssetFile(this, "ED.DAT", "ED.DAT");
+        ensureAssetFile(this, "IN.DAT", "IN.DAT");
+        ensureAssetFile(this, "MD.DAT", "MD.DAT");
+        ensureAssetFile(this, "ST.DAT", "ST.DAT");
+        ensureAssetFile(this, "TL.DAT", "TL.DAT");
         boolean hasTargetFile = false;
         File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
 

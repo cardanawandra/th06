@@ -347,7 +347,7 @@ static const char* UTF8_Decode(
     return s + 1;
 }
 
-void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
+void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
                                      i32 fontWidth, ZunColor textColor, ZunColor shadowColor, const char *string,
                                      TextureData *outTexture)
 {
@@ -359,15 +359,19 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
     STB_Rect shadowRect;
     STB_Rect textRect;
 
-    if (!isUTF8Encoded(string))
-    {
-        char *utf8 = sjis2utf8(string);
-        strncpy(convertedText, utf8,sizeof(convertedText));
-        free(utf8);
-    }
-    else
-    {
+    if(is_utf8){
         strncpy(convertedText, string,sizeof(convertedText));
+    }else{
+        if (!isUTF8Encoded(string))
+        {
+            char *utf8 = sjis2utf8(string);
+            strncpy(convertedText, utf8,sizeof(convertedText));
+            free(utf8);
+        }
+        else
+        {
+            strncpy(convertedText, string,sizeof(convertedText));
+        }
     }
 
     // TTF_SetFontSize(g_Font, fontHeight * 2);
@@ -421,9 +425,20 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
 
         u32 *pixels = (u32 *)regularText->pixels;
         u32 *shadowPixels = (u32 *)shadowText->pixels;
+
         int penX = 0;
+        int penY = 0;
+
         while (*ptr)
         {
+            if (*ptr == '\n')
+            {
+                ++ptr;
+                penX = 0;
+                penY += fontHeight * 2;
+                continue;
+            }
+
             int codepoint;
 
             ptr = UTF8_Decode(
@@ -437,8 +452,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                 &g_Font,
                 codepoint,
                 &advanceWidth,
-                &leftBearing
-            );
+                &leftBearing);
 
             int glyphW;
             int glyphH;
@@ -455,8 +469,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                     &glyphW,
                     &glyphH,
                     &xoff,
-                    &yoff
-                );
+                    &yoff);
 
             if (bitmap != NULL)
             {
@@ -464,17 +477,13 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                 {
                     for (int x = 0; x < glyphW; x++)
                     {
-                        unsigned char a =
-                            bitmap[y * glyphW + x];
+                        unsigned char a = bitmap[y * glyphW + x];
 
                         if (a == 0)
                             continue;
 
-                        int dstX =
-                            penX + x + xoff;
-
-                        int dstY =
-                            baseline + y + yoff;
+                        int dstX = penX + x + xoff;
+                        int dstY = penY + baseline + y + yoff;
 
                         if (dstX < 0 || dstY < 0 ||
                             dstX >= surfaceW ||
@@ -500,8 +509,7 @@ void TextHelper::RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 sp
                 stbtt_FreeBitmap(bitmap, NULL);
             }
 
-            penX +=
-                (int)(advanceWidth * g_FontScale);
+            penX += (int)(advanceWidth * g_FontScale);
         }
         shadowRect.x = xPos * 2 + 3;
         shadowRect.y = 2;

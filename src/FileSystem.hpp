@@ -16,3 +16,4 @@ u8 *OpenPath(const char *filepath, int isExternalResource);
 int WriteDataToFile(const char *path, const void *data, size_t size);
 } // namespace FileSystem
 extern u32 g_LastFileSize;
+extern bool g_LastFilePatched;

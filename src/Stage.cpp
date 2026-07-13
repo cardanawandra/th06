@@ -10,23 +10,30 @@
 #include "Supervisor.hpp"
 #include "ZunColor.hpp"
 #include "utils.hpp"
+#include "patch/PatchDialogue.hpp"
 // #include <d3d8.h>
 
 static ChainElem g_StageCalcChain;
 static ChainElem g_StageOnDrawHighPrioChain;
 static ChainElem g_StageOnDrawLowPrioChain;
 
+// added patch file, reimu order, and marisa order
 static const StageFile g_StageFiles[8] = {
     {"dummy", "dummy"},
-    {"data/stg1bg.anm", "data/stage1.std"},
-    {"data/stg2bg.anm", "data/stage2.std"},
-    {"data/stg3bg.anm", "data/stage3.std"},
-    {"data/stg4bg.anm", "data/stage4.std"},
-    {"data/stg5bg.anm", "data/stage5.std"},
-    {"data/stg6bg.anm", "data/stage6.std"},
-    {"data/stg7bg.anm", "data/stage7.std"},
+    {"data/stg1bg.anm", "data/stage1.std", "msg1.dat.jdiff", "0-1", "10-11"},
+    {"data/stg2bg.anm", "data/stage2.std", "msg2.dat.jdiff", "0-1", "10-11"},
+    {"data/stg3bg.anm", "data/stage3.std", "msg3.dat.jdiff", "2-0-1", "12-10-11"},
+    {"data/stg4bg.anm", "data/stage4.std", "msg4.dat.jdiff", "0-1", "10-11"},
+    {"data/stg5bg.anm", "data/stage5.std", "msg5.dat.jdiff", "2-0-1", "12-10-11"},
+    {"data/stg6bg.anm", "data/stage6.std", "msg6.dat.jdiff", "2-0", "12-10"},
+    {"data/stg7bg.anm", "data/stage7.std", "msg7.dat.jdiff", "2-0-1", "12-10-11"},
 };
 Stage g_Stage;
+PatchDialogue g_StageMsgPatchRaw;
+std::vector<char *> g_StageMsgPatch;
+bool g_StageHasMsgPatch = false;
+u16 g_StageMsgPatchIndex = 0;
+bool g_StageMsgPatchSecondHalf = false;
 
 Stage::Stage()
 {
@@ -324,6 +331,35 @@ ZunResult Stage::AddedCallback(Stage *stage)
     {
         return ZUN_ERROR;
     }
+    // Message Patch
+    g_StageHasMsgPatch = LoadPatchDialogue(g_StageFiles[g_GameManager.currentStage].msgPatchFile, &g_StageMsgPatchRaw);
+    if(g_StageHasMsgPatch){
+        // HARD CODED
+        if(g_GameManager.currentStage==STAGE5 && g_GameManager.difficulty == EASY){
+            if(g_GameManager.character == 0)
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, "2-0-3", &g_StageMsgPatch);
+            // MARISA
+            else
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, "12-10-13", &g_StageMsgPatch);
+        }else{
+            // REIMU
+            if(g_GameManager.character == 0)
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].reimuPatchOrder, &g_StageMsgPatch);
+            // MARISA
+            else
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].reimuPatchOrder, &g_StageMsgPatch);
+        }
+        for (size_t i = 0; i < g_StageMsgPatch.size(); ++i)
+        {
+            printf("[%u] ptr=%p text=%s\n",
+                (unsigned)i,
+                (void*)g_StageMsgPatch[i],
+                g_StageMsgPatch[i] ? g_StageMsgPatch[i] : "NULL");
+        }
+        g_StageMsgPatchIndex = 0;
+        g_StageMsgPatchSecondHalf = false;
+    }
+
     stage->skyFog.color = COLOR_BLACK;
     stage->skyFog.nearPlane = 200.0;
     stage->skyFog.farPlane = 500.0;

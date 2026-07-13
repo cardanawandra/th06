@@ -20,7 +20,7 @@ struct TextHelper
 {
     static ZunResult CreateTextBuffer();
     static void ReleaseTextBuffer();
-    static void RenderTextToTexture(i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
+    static void RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight, i32 fontHeight,
                                     i32 fontWidth, ZunColor textColor, ZunColor shadowColor, const char *string,
                                     TextureData *outTexture);
 

@@ -116,6 +116,7 @@ add_executable(th06 ${TH06_GAME_SOURCES})
 # Always define TH06_USE_GLES so both backends are available at runtime
 target_compile_definitions(th06 PRIVATE TH06_USE_GLES=1)
 target_compile_definitions(th06 PRIVATE GAME_WINDOW_DYNAMIC=1)
+target_compile_definitions(th06 PRIVATE NO_LOG_COMPAT=1)
 
 # MSVC: Generate map file for debugging
 if(MSVC)

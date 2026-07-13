@@ -778,6 +778,9 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
 
 ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textureName, i32 textureFormat, ZunColor colorKey)
 {
+    if(g_LastFilePatched){
+        return ZUN_SUCCESS;
+    }
     LOG_COMPAT("LoadTextureAlphaChannel 1\n");
     STB_Surface *alphaSurface;
     TextureData *textureDesc;
@@ -2245,7 +2248,7 @@ void AnmManager::DrawTextToSprite(u32 textureDstIdx, i32 xPos, i32 yPos, i32 spr
         fontHeight = 15;
     }
 
-    TextHelper::RenderTextToTexture(xPos, yPos, spriteWidth, spriteHeight, fontWidth, fontHeight, textColor,
+    TextHelper::RenderTextToTexture(false, xPos, yPos, spriteWidth, spriteHeight, fontWidth, fontHeight, textColor,
                                     shadowColor, strToPrint, &this->textures[textureDstIdx]);
     //
     //    this->SetCurrentTexture(this->textures[textureDstIdx].handle);
@@ -2254,6 +2257,27 @@ void AnmManager::DrawTextToSprite(u32 textureDstIdx, i32 xPos, i32 yPos, i32 spr
     return;
 }
 
+void AnmManager::DrawTextToSpritePatch(u32 textureDstIdx, i32 xPos, i32 yPos, i32 spriteWidth, i32 spriteHeight,
+                                  i32 fontWidth, i32 fontHeight, ZunColor textColor, ZunColor shadowColor,
+                                  const char *strToPrint)
+{
+    if (fontWidth <= 0)
+    {
+        fontWidth = 15;
+    }
+    if (fontHeight <= 0)
+    {
+        fontHeight = 15;
+    }
+
+    TextHelper::RenderTextToTexture(true, xPos, yPos, spriteWidth, spriteHeight, fontWidth, fontHeight, textColor,
+                                    shadowColor, strToPrint, &this->textures[textureDstIdx]);
+    //
+    //    this->SetCurrentTexture(this->textures[textureDstIdx].handle);
+    //    g_glFuncTable.glTexImage2D(GL_TEXTURE_2D, 0, g_TextureFormatGLFormatMapping[]);
+
+    return;
+}
 
 void AnmManager::DrawVmTextFmt(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...)
 {
@@ -2266,6 +2290,23 @@ void AnmManager::DrawVmTextFmt(AnmVm *vm, ZunColor textColor, ZunColor shadowCol
     vsprintf(buffer, fmt, argptr);
     va_end(argptr);
     this->DrawTextToSprite(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+                             vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
+                             fontWidth, vm->fontHeight, textColor, shadowColor, buffer);
+    vm->flags.isVisible = true;
+    return;
+}
+
+void AnmManager::DrawVmTextFmtPatch(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...)
+{
+    u32 fontWidth;
+    char buffer[64];
+    va_list argptr;
+
+    fontWidth = vm->fontWidth;
+    va_start(argptr, fmt);
+    vsprintf(buffer, fmt, argptr);
+    va_end(argptr);
+    this->DrawTextToSpritePatch(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
                              vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
                              fontWidth, vm->fontHeight, textColor, shadowColor, buffer);
     vm->flags.isVisible = true;
@@ -2289,6 +2330,28 @@ void AnmManager::DrawStringFormat(AnmVm *vm, ZunColor textColor, ZunColor shadow
     secondPartStartX =
         vm->sprite->startPixelInclusive.x + vm->sprite->textureWidth - ((f32)strlen(buf) * (f32)(fontWidth + 1) / 2.0f);
     this->DrawTextToSprite(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
+                          vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
+                          shadowColor, buf);
+    vm->flags.isVisible = true;
+    return;
+}
+void AnmManager::DrawStringFormatPatch(AnmVm *vm, ZunColor textColor, ZunColor shadowColor, const char *fmt, ...)
+{
+    char buf[64];
+    va_list args;
+    i32 fontWidth;
+    i32 secondPartStartX;
+
+    fontWidth = vm->fontWidth <= 0 ? 15 : vm->fontWidth;
+    va_start(args, fmt);
+    vsprintf(buf, fmt, args);
+    va_end(args);
+    this->DrawTextToSpritePatch(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
+                          vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
+                          fontWidth, vm->fontHeight, textColor, shadowColor, " ");
+    secondPartStartX =
+        vm->sprite->startPixelInclusive.x + vm->sprite->textureWidth - ((f32)strlen(buf) * (f32)(fontWidth + 1) / 2.0f);
+    this->DrawTextToSpritePatch(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
                           vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
                           shadowColor, buf);
     vm->flags.isVisible = true;

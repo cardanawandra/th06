@@ -25,6 +25,7 @@
 #endif
 
 u32 g_LastFileSize = 0;
+bool g_LastFilePatched = false;
 
 FILE *FileSystem::FopenUTF8(const char *filepath, const char *mode)
 {
@@ -119,6 +120,22 @@ void FileSystem::CreateDir(const char *path)
 #endif
 }
 
+void str_replace(char *str, const char *from, const char *to)
+{
+    char *pos = strstr(str, from);
+    if (!pos)
+        return;
+
+    size_t fromLen = strlen(from);
+    size_t toLen = strlen(to);
+
+    memmove(pos + toLen,
+            pos + fromLen,
+            strlen(pos + fromLen) + 1);
+
+    memcpy(pos, to, toLen);
+}
+
 u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
 {
     u8 *data;
@@ -162,10 +179,10 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         char patchPathRaw[512];
         SNPRINTF(patchPathRaw, sizeof(patchPathRaw), "patch/%s", entryname);
         GamePaths::Resolve(patchPath, sizeof(patchPath), patchPathRaw);
-        LOG_COMPAT("FileSystem::OpenPath patch fopen %s\n",patchPath);
         file = fopen(patchPath, "rb");
         if (file != NULL)
         {
+            printf("FileSystem::OpenPath patch fopen %s\n",patchPath);
             fseek(file, 0, SEEK_END);
             fsize = ftell(file);
             g_LastFileSize = fsize;
@@ -173,8 +190,11 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             data = (u8 *)malloc(fsize);
             fread(data, 1, fsize, file);
             fclose(file);
+            g_LastFilePatched = true;
             return data;
         }
+        g_LastFilePatched = false;
+        // printf("FileSystem::OpenPath no patch %s\n",patchPath);
 
         if (g_Pbg3Archives != NULL)
         {

@@ -4,6 +4,7 @@
 #include "Chain.hpp"
 #include "ZunTimer.hpp"
 #include "inttypes.hpp"
+#include "patch/PatchDialogue.hpp"
 // #include "zwave.hpp"
 // #include <d3d8.h>
 // #include <d3dx8math.h>
@@ -73,6 +74,9 @@ struct StageFile
 {
     const char *anmFile;
     const char *stdFile;
+    const char *msgPatchFile;
+    const char *reimuPatchOrder;
+    const char *marisaPatchOrder;
 };
 
 enum StageOpcode
@@ -134,3 +138,8 @@ struct Stage
 };
 
 extern Stage g_Stage;
+extern std::vector<char *> g_StageMsgPatch;
+extern PatchDialogue g_StageMsgPatchRaw;
+extern bool g_StageHasMsgPatch;
+extern u16 g_StageMsgPatchIndex;
+extern bool g_StageMsgPatchSecondHalf;

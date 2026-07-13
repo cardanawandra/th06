@@ -559,7 +559,7 @@ void GameWindow::ConfigureView()
     {
         viewportWidth = (u32)((gameWindowHeightReal / 3.0f) * 4.0f);
 
-#ifdef VIEWPORT_OFF_EXISTS
+#ifndef NO_VIEWPORT_OFF
         viewportOffX = (gameWindowWidthReal - viewportWidth) / 2;
 #else
         gameWindowWidthReal = viewportWidth;
@@ -569,7 +569,7 @@ void GameWindow::ConfigureView()
     {
         viewportHeight = (u32)((gameWindowWidthReal / 4.0f) * 3.0f);
 
-#ifdef VIEWPORT_OFF_EXISTS
+#ifndef NO_VIEWPORT_OFF
         viewportOffY = (gameWindowHeightReal - viewportHeight) / 2;
 #else
         gameWindowHeightReal = viewportHeight;
