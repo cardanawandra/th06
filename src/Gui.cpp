@@ -588,8 +588,9 @@ ZunResult GuiImpl::RunMsg()
             break;
         case MSG_OPCODE_TEXTDIALOGUE:
             args = &this->msg.currentInstr->args;
-            if ((i16)args->text.textLine == 0 && 0 <= this->msg.dialogueLines[1].anmFileIndex && !g_StageHasMsgPatch)
+            if ((i16)args->text.textLine == 0 && 0 <= this->msg.dialogueLines[1].anmFileIndex)
             {
+                printf("data %d",this->msg.dialogueLines[1]);
                 g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[1],
                                             this->msg.textColorsA[(i16)args->text.textColor],
                                             this->msg.textColorsB[(i16)args->text.textColor], " ");

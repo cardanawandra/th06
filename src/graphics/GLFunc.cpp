@@ -23,10 +23,9 @@ void GLFuncTable::ResolveFunctions(bool isGlesContext)
     TRY_RESOLVE_FUNCTION(glDrawArrays);
     TRY_RESOLVE_FUNCTION(glEnable);
     TRY_RESOLVE_FUNCTION(glEnableClientState);
-//    TRY_RESOLVE_FUNCTION(glFogf);
-//    TRY_RESOLVE_FUNCTION(glFogfv);
-
-//    TRY_RESOLVE_FUNCTION(glFogi);
+    TRY_RESOLVE_FUNCTION(glFogf);
+    TRY_RESOLVE_FUNCTION(glFogfv);
+    TRY_RESOLVE_FUNCTION(glFogi);
 
     TRY_RESOLVE_FUNCTION(glGenTextures);
     TRY_RESOLVE_FUNCTION(glGetError);
@@ -41,7 +40,7 @@ void GLFuncTable::ResolveFunctions(bool isGlesContext)
     TRY_RESOLVE_FUNCTION(glReadPixels);
     TRY_RESOLVE_FUNCTION(glShadeModel);
     TRY_RESOLVE_FUNCTION(glTexCoordPointer);
-//    TRY_RESOLVE_FUNCTION(glTexEnvfv);
+    TRY_RESOLVE_FUNCTION(glTexEnvfv);
     TRY_RESOLVE_FUNCTION(glTexEnvi);
     TRY_RESOLVE_FUNCTION(glTexImage2D);
     TRY_RESOLVE_FUNCTION(glTexParameteri);

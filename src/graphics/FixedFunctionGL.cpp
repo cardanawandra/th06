@@ -86,11 +86,7 @@ GfxInterface *FixedFunctionGL::Init()
     SDL_GL_SET_SWAP_INTERVAL_COMPAT(1);
 
     LOG_COMPAT("FixedFunctionGL::Init 11\n");
-    #ifdef COMPAT_PORTABLE
-    g_glFuncTable.ResolveFunctions(true);
-    #else
-        g_glFuncTable.ResolveFunctions(false);
-    #endif
+    g_glFuncTable.ResolveFunctions(false);
 
     g_glFuncTable.glEnable(GL_TEXTURE_2D);
     g_glFuncTable.glEnableClientState(GL_VERTEX_ARRAY);
@@ -113,7 +109,6 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glFogf(GL_FOG_DENSITY, 1.0f);
     g_glFuncTable.glFogf(GL_FOG_MODE, GL_LINEAR);
 
-    #ifndef COMPAT_PORTABLE
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 
     LOG_COMPAT("FixedFunctionGL::Init 14\n");
@@ -125,7 +120,6 @@ GfxInterface *FixedFunctionGL::Init()
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
     }
-    #endif
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 
@@ -142,7 +136,6 @@ GfxInterface *FixedFunctionGL::Init()
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 
     LOG_COMPAT("FixedFunctionGL::Init 16\n");
-    #ifndef COMPAT_PORTABLE
     if (((g_Supervisor.cfg.opts >> GCOS_NO_COLOR_COMP) & 1) == 0)
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -151,7 +144,6 @@ GfxInterface *FixedFunctionGL::Init()
     {
         g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
     }
-    #endif
 
     g_glFuncTable.glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
 

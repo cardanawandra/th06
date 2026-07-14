@@ -2,20 +2,21 @@
 // #include "graphics/FixedFunctionDX2.hpp"
 #endif
 
+#include "graphics/Software.hpp"
 #ifdef NO_SDL
-    #include "graphics/Software.hpp"
     // #include "graphics/FixedFunctionGLWIN32.hpp"
     #ifdef USE_SFML
         #include "graphics/FixedFunctionGLSFML.hpp"
     #endif
 #else
     #include <SDL.h>
-    
-    #include "graphics/Software.hpp"
+
+    #ifndef NO_FIXED_FUNCTION
+    #include "graphics/FixedFunctionGL.hpp"
+    #endif
     #if SDL_MAJOR_VERSION >= 2
         #include "graphics/WebGL.hpp"
         #ifndef COMPAT_PORTABLE
-            #include "graphics/FixedFunctionGL.hpp"
         #endif
     #endif
     #if SDL_MAJOR_VERSION >= 3
