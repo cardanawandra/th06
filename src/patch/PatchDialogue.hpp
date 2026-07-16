@@ -150,9 +150,11 @@ inline bool LoadPatchDialogue(
 inline void BuildPatchDialogueArray(
     const PatchDialogue &patch,
     const char *sectionNames,
-    std::vector<char *> *out)
+    std::vector<char *> *out,
+    std::vector<char *> *outHeader)
 {
     out->clear();
+    outHeader->clear();
 
     char buffer[256];
     strncpy(buffer, sectionNames, sizeof(buffer));
@@ -171,6 +173,7 @@ inline void BuildPatchDialogueArray(
 
             for (size_t i = 0; i < section.entries.size(); ++i)
             {
+                const std::string &key = section.entries[i].first;
                 const PatchDialogueEntry &entry = section.entries[i].second;
 
                 std::string merged;
@@ -178,7 +181,7 @@ inline void BuildPatchDialogueArray(
                 for (size_t j = 0; j < entry.lines.size(); ++j)
                 {
                     if (!merged.empty())
-                        merged += "\n"; // or " " if you want one line
+                        merged += '\n';
 
                     merged += entry.lines[j];
                 }
@@ -186,7 +189,10 @@ inline void BuildPatchDialogueArray(
                 char *copy = (char *)malloc(merged.size() + 1);
                 strcpy(copy, merged.c_str());
 
-                out->push_back(copy);
+                if (key.find("_h") != std::string::npos)
+                    outHeader->push_back(copy);
+                else
+                    out->push_back(copy);
             }
         }
 
@@ -196,19 +202,25 @@ inline void BuildPatchDialogueArray(
 
 inline const char *GetSplitLine(const char *text, int half)
 {
-    static char buffer[256];
+    static char buffers[2][256];
+    char *buffer = buffers[half & 1];
 
     if (!text)
-        return " ";
+    {
+        strcpy(buffer, " ");
+        return buffer;
+    }
 
     const char *start = text;
 
-    if (half == 1)
+    if (half)
     {
         start = strchr(text, '\n');
         if (!start)
-            return " ";
-
+        {
+            strcpy(buffer, " ");
+            return buffer;
+        }
         ++start;
     }
 
@@ -216,10 +228,13 @@ inline const char *GetSplitLine(const char *text, int half)
     size_t len = end ? (size_t)(end - start) : strlen(start);
 
     if (len == 0)
-        return " ";
+    {
+        strcpy(buffer, " ");
+        return buffer;
+    }
 
-    if (len >= sizeof(buffer))
-        len = sizeof(buffer) - 1;
+    if (len >= 255)
+        len = 255;
 
     memcpy(buffer, start, len);
     buffer[len] = '\0';

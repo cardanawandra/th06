@@ -31,9 +31,10 @@ static const StageFile g_StageFiles[8] = {
 Stage g_Stage;
 PatchDialogue g_StageMsgPatchRaw;
 std::vector<char *> g_StageMsgPatch;
+std::vector<char *> g_StageMsgPatchIntro;
 bool g_StageHasMsgPatch = false;
 u16 g_StageMsgPatchIndex = 0;
-bool g_StageMsgPatchSecondHalf = false;
+u16 g_StageMsgPatchIntroIndex = 0;
 
 Stage::Stage()
 {
@@ -333,21 +334,22 @@ ZunResult Stage::AddedCallback(Stage *stage)
     }
     // Message Patch
     g_StageHasMsgPatch = LoadPatchDialogue(g_StageFiles[g_GameManager.currentStage].msgPatchFile, &g_StageMsgPatchRaw);
+    printf("chara %i\n",g_GameManager.character);
     if(g_StageHasMsgPatch){
         // HARD CODED
         if(g_GameManager.currentStage==STAGE5 && g_GameManager.difficulty == EASY){
             if(g_GameManager.character == 0)
-                BuildPatchDialogueArray(g_StageMsgPatchRaw, "2-0-3", &g_StageMsgPatch);
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, "2-0-3", &g_StageMsgPatch, &g_StageMsgPatchIntro);
             // MARISA
             else
-                BuildPatchDialogueArray(g_StageMsgPatchRaw, "12-10-13", &g_StageMsgPatch);
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, "12-10-13", &g_StageMsgPatch, &g_StageMsgPatchIntro);
         }else{
             // REIMU
             if(g_GameManager.character == 0)
-                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].reimuPatchOrder, &g_StageMsgPatch);
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].reimuPatchOrder, &g_StageMsgPatch, &g_StageMsgPatchIntro);
             // MARISA
             else
-                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].reimuPatchOrder, &g_StageMsgPatch);
+                BuildPatchDialogueArray(g_StageMsgPatchRaw, g_StageFiles[g_GameManager.currentStage].marisaPatchOrder, &g_StageMsgPatch, &g_StageMsgPatchIntro);
         }
         for (size_t i = 0; i < g_StageMsgPatch.size(); ++i)
         {
@@ -357,7 +359,7 @@ ZunResult Stage::AddedCallback(Stage *stage)
                 g_StageMsgPatch[i] ? g_StageMsgPatch[i] : "NULL");
         }
         g_StageMsgPatchIndex = 0;
-        g_StageMsgPatchSecondHalf = false;
+        g_StageMsgPatchIntroIndex = 0;
     }
 
     stage->skyFog.color = COLOR_BLACK;

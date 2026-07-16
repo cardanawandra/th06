@@ -2307,7 +2307,7 @@ void AnmManager::DrawVmTextFmtPatch(AnmVm *vm, ZunColor textColor, ZunColor shad
     vsprintf(buffer, fmt, argptr);
     va_end(argptr);
     this->DrawTextToSpritePatch(vm->sprite->sourceFileIndex, vm->sprite->startPixelInclusive.x,
-                             vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight,
+                             vm->sprite->startPixelInclusive.y, vm->sprite->textureWidth, vm->sprite->textureHeight * 2.5,
                              fontWidth, vm->fontHeight, textColor, shadowColor, buffer);
     vm->flags.isVisible = true;
     return;
@@ -2352,7 +2352,7 @@ void AnmManager::DrawStringFormatPatch(AnmVm *vm, ZunColor textColor, ZunColor s
     secondPartStartX =
         vm->sprite->startPixelInclusive.x + vm->sprite->textureWidth - ((f32)strlen(buf) * (f32)(fontWidth + 1) / 2.0f);
     this->DrawTextToSpritePatch(vm->sprite->sourceFileIndex, secondPartStartX, vm->sprite->startPixelInclusive.y,
-                          vm->sprite->textureWidth, vm->sprite->textureHeight, fontWidth, vm->fontHeight, textColor,
+                          vm->sprite->textureWidth, vm->sprite->textureHeight*2.5, fontWidth, vm->fontHeight, textColor,
                           shadowColor, buf);
     vm->flags.isVisible = true;
     return;

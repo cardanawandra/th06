@@ -590,29 +590,43 @@ ZunResult GuiImpl::RunMsg()
             args = &this->msg.currentInstr->args;
             if ((i16)args->text.textLine == 0 && 0 <= this->msg.dialogueLines[1].anmFileIndex)
             {
-                printf("data %d",this->msg.dialogueLines[1]);
                 g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[1],
                                             this->msg.textColorsA[(i16)args->text.textColor],
                                             this->msg.textColorsB[(i16)args->text.textColor], " ");
             }
-            g_AnmManager->SetAndExecuteScriptIdx(&this->msg.dialogueLines[(i16)args->text.textLine],
-                                                 0x702 + (i16)args->text.textLine);
-            this->msg.dialogueLines[(i16)args->text.textLine].fontWidth =
-                this->msg.dialogueLines[(i16)args->text.textLine].fontHeight = this->msg.fontSize;
             if(g_StageHasMsgPatch){
                 if((i16)args->text.textLine==0){
+                    g_AnmManager->SetAndExecuteScriptIdx(&this->msg.dialogueLines[0],
+                        0x702 + 0);
+                    g_AnmManager->SetAndExecuteScriptIdx(&this->msg.dialogueLines[1],
+                        0x702 + 1);
+                    this->msg.dialogueLines[0].fontWidth =
+                        this->msg.dialogueLines[0].fontHeight =
+                    this->msg.dialogueLines[1].fontWidth =
+                        this->msg.dialogueLines[1].fontHeight = this->msg.fontSize;
+                    top = GetSplitLine(g_StageMsgPatch[g_StageMsgPatchIndex],0);
+                    bottom = GetSplitLine(g_StageMsgPatch[g_StageMsgPatchIndex],1);
                     if (g_StageMsgPatchIndex < g_StageMsgPatch.size() &&
                         g_StageMsgPatch[g_StageMsgPatchIndex] != NULL)
-                    {
-                        printf("all %i : %s\n", (i16)args->text.textLine, g_StageMsgPatch[g_StageMsgPatchIndex]);
+                    {   
+                        printf("top : %s\n", top);
                         g_AnmManager->DrawVmTextFmtPatch(&this->msg.dialogueLines[0],
                             this->msg.textColorsA[(i16)args->text.textColor],
                             this->msg.textColorsB[(i16)args->text.textColor], 
-                            g_StageMsgPatch[g_StageMsgPatchIndex]);
+                            top);
+                        printf("bottom : %s\n", bottom);
+                        g_AnmManager->DrawVmTextFmtPatch(&this->msg.dialogueLines[1],
+                            this->msg.textColorsA[(i16)args->text.textColor],
+                            this->msg.textColorsB[(i16)args->text.textColor], 
+                            bottom);
                         g_StageMsgPatchIndex++;
                     }
                 }
             }else{
+                g_AnmManager->SetAndExecuteScriptIdx(&this->msg.dialogueLines[(i16)args->text.textLine],
+                    0x702 + (i16)args->text.textLine);
+                this->msg.dialogueLines[(i16)args->text.textLine].fontWidth =
+                    this->msg.dialogueLines[(i16)args->text.textLine].fontHeight = this->msg.fontSize;
                 g_AnmManager->DrawVmTextFmt(&this->msg.dialogueLines[(i16)args->text.textLine],
                     this->msg.textColorsA[(i16)args->text.textColor],
                     this->msg.textColorsB[(i16)args->text.textColor], args->text.text);
@@ -664,13 +678,13 @@ ZunResult GuiImpl::RunMsg()
             g_AnmManager->SetAndExecuteScriptIdx(&this->msg.introLines[(i16)args->text.textLine],
                                                  (i16)args->text.textLine + 0x704);
             if(g_StageHasMsgPatch){
-                top = g_StageMsgPatch[g_StageMsgPatchIndex];
-                printf("intro %i : %s\n", (i16)args->text.textLine, g_StageMsgPatch[g_StageMsgPatchIndex]);
+                top = GetSplitLine(g_StageMsgPatchIntro[g_StageMsgPatchIntroIndex],(i16)args->text.textLine);
+                printf("intro %i : %s\n", (i16)args->text.textLine, top);
                 g_AnmManager->DrawStringFormatPatch(&this->msg.introLines[(i16)args->text.textLine],
                                             this->msg.textColorsA[(i16)args->text.textColor],
                                             this->msg.textColorsB[(i16)args->text.textColor], top);
                 if((i16)args->text.textLine>0){
-                    g_StageMsgPatchIndex++;
+                    g_StageMsgPatchIntroIndex++;
                 }
             }else{
                 g_AnmManager->DrawStringFormat(&this->msg.introLines[(i16)args->text.textLine],

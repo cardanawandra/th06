@@ -139,7 +139,8 @@ struct Stage
 
 extern Stage g_Stage;
 extern std::vector<char *> g_StageMsgPatch;
+extern std::vector<char *> g_StageMsgPatchIntro;
 extern PatchDialogue g_StageMsgPatchRaw;
 extern bool g_StageHasMsgPatch;
 extern u16 g_StageMsgPatchIndex;
-extern bool g_StageMsgPatchSecondHalf;
+extern u16 g_StageMsgPatchIntroIndex;
