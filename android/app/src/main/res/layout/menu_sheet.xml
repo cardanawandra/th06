@@ -1,39 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="200dp"
+    android:layout_width="260dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/btnCensor"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Censor"/>
+        android:gravity="center"
+        android:text="Settings"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingBottom="12dp"/>
 
-    <Button
-        android:id="@+id/btnShare"
+    <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Share"/>
+        android:columnCount="2"
+        android:useDefaultMargins="true">
 
-    <Button
-        android:id="@+id/btnImport"
+        <Button
+            android:id="@+id/btnDownload"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="🌐 Language"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/btnCustomize"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="✏ Customize"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/btnImportBackground"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="🖼 Background"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/btnCensor"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="🙈 Censor"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/btnShare"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="📤 Share"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/btnImport"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:background="@drawable/material_button"
+            android:text="📂 Import"
+            android:textAllCaps="false"/>
+
+    </GridLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Import"/>
-    
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="#40FFFFFF"/>
+
     <TextView
         android:id="@+id/txtSensitivity"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Joystick Sensitivity: 0%"/>
+        android:text="Joystick Sensitivity"
+        android:textStyle="bold"/>
 
     <SeekBar
         android:id="@+id/seekSensitivity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="0"/>
+        android:max="100"/>
 
 </LinearLayout>

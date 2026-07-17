@@ -14,8 +14,12 @@
 #include "thirdparty/stb_truetype.h"
 
 static stbtt_fontinfo g_Font;
+static stbtt_fontinfo g_FontPatch;
 static unsigned char *g_FontBuffer = NULL;
+static unsigned char *g_FontPatchBuffer = NULL;
 static float g_FontScale = 1.0f;
+static float g_FontPatchScale = 1.0f;
+bool g_FontPatchLoaded = false;
 
 bool textNotExist;
 
@@ -37,6 +41,11 @@ TextHelper::~TextHelper()
         free(g_FontBuffer);
         g_FontBuffer = NULL;
     }
+    if (g_FontPatchBuffer != NULL)
+    {
+        free(g_FontPatchBuffer);
+        g_FontPatchBuffer = NULL;
+    }
 }
 
 #define TEXT_BUFFER_HEIGHT 64
@@ -49,14 +58,53 @@ ZunResult TextHelper::CreateTextBuffer()
     #ifdef COMPAT_PORTABLE
     char path[512];
     char path2[512];
+    char pathPatch[512];
     SNPRINTF(path, sizeof(path), "%s%s",
         GamePaths::GetUserPath(), "th06.ttc");
     SNPRINTF(path2, sizeof(path2), "%s%s",
         GamePaths::GetUserPath(), "th06.ttf");
+    SNPRINTF(pathPatch, sizeof(pathPatch), "%s%s",
+        GamePaths::GetUserPath(), "Aroania.ttf");
     #else
     const char* path="th06.ttc";
     const char* path2="th06.ttf";
+    const char* pathPatch="Aroania.ttf";
     #endif
+
+    // Patch font (Aroania.ttf)
+    FILE* fpPatch = fopen(pathPatch, "rb");
+
+    if (fpPatch != NULL)
+    {
+        fseek(fpPatch, 0, SEEK_END);
+        size_t patchFileSize = ftell(fpPatch);
+        fseek(fpPatch, 0, SEEK_SET);
+
+        g_FontPatchBuffer = (unsigned char*)malloc(patchFileSize);
+
+        if (g_FontPatchBuffer != NULL)
+        {
+            fread(g_FontPatchBuffer, 1, patchFileSize, fpPatch);
+
+            int patchOffset = stbtt_GetFontOffsetForIndex(
+                g_FontPatchBuffer,
+                0);
+
+            if (stbtt_InitFont(&g_FontPatch, g_FontPatchBuffer, patchOffset))
+            {
+                g_FontPatchScale = stbtt_ScaleForPixelHeight(&g_FontPatch, 30.0f);
+                g_FontPatchLoaded = true;
+            }
+            else
+            {
+                free(g_FontPatchBuffer);
+                g_FontPatchBuffer = NULL;
+                g_FontPatchLoaded = false;
+            }
+        }
+
+        fclose(fpPatch);
+    }
 
     FILE* fp = fopen(path, "rb");
 
@@ -359,7 +407,12 @@ void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 sprit
     STB_Rect shadowRect;
     STB_Rect textRect;
 
+    stbtt_fontinfo* font = &g_Font;
+    float fontScale = g_FontScale;
+
     if(is_utf8){
+        font = &g_FontPatch;
+        fontScale = g_FontPatchScale;
         strncpy(convertedText, string,sizeof(convertedText));
     }else{
         if (!isUTF8Encoded(string))
@@ -412,14 +465,13 @@ void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 sprit
         int lineGap;
 
         stbtt_GetFontVMetrics(
-            &g_Font,
+            font,
             &ascent,
             &descent,
             &lineGap
         );
 
-        int baseline =
-            (int)(ascent * g_FontScale);
+        int baseline = (int)(ascent * fontScale);
 
         const char *ptr = convertedText;
 
@@ -449,7 +501,7 @@ void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 sprit
             int leftBearing;
 
             stbtt_GetCodepointHMetrics(
-                &g_Font,
+                font,
                 codepoint,
                 &advanceWidth,
                 &leftBearing);
@@ -462,9 +514,9 @@ void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 sprit
 
             unsigned char *bitmap =
                 stbtt_GetCodepointBitmap(
-                    &g_Font,
+                    font,
                     0,
-                    g_FontScale,
+                    fontScale,
                     codepoint,
                     &glyphW,
                     &glyphH,
@@ -509,7 +561,7 @@ void TextHelper::RenderTextToTexture(bool is_utf8, i32 xPos, i32 yPos, i32 sprit
                 stbtt_FreeBitmap(bitmap, NULL);
             }
 
-            penX += (int)(advanceWidth * g_FontScale);
+            penX += (int)(advanceWidth * fontScale);
         }
         shadowRect.x = xPos * 2 + 3;
         shadowRect.y = 2;
@@ -577,6 +629,12 @@ void TextHelper::ReleaseTextBuffer()
     {
         free(g_FontBuffer);
         g_FontBuffer = NULL;
+    }
+
+    if (g_FontPatchBuffer != NULL)
+    {
+        free(g_FontPatchBuffer);
+        g_FontPatchBuffer = NULL;
     }
 
     if (g_TextBufferSurface != NULL)

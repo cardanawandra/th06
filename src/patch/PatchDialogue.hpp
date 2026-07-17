@@ -147,6 +147,38 @@ inline bool LoadPatchDialogue(
     return true;
 }
 
+inline std::string SanitizeDialogueLine(std::string line)
+{
+    // Remove TL notes.
+    size_t tl = line.find("TL note:");
+    if (tl != std::string::npos)
+        line.erase(tl);
+
+    // Remove everything after 0x14.
+    size_t ctrl = line.find('\x14');
+    if (ctrl != std::string::npos)
+        line.erase(ctrl);
+
+    // Convert <c$A$B> -> A\nB
+    size_t p = line.find("<c$");
+    while (p != std::string::npos)
+    {
+        size_t mid = line.find('$', p + 3);
+        size_t end = line.find('>', mid + 1);
+
+        if (mid == std::string::npos || end == std::string::npos)
+            break;
+
+        line.replace(p, end - p + 1,
+            line.substr(p + 3, mid - (p + 3)) + "\n" +
+            line.substr(mid + 1, end - (mid + 1)));
+
+        p = line.find("<c$", p);
+    }
+
+    return line;
+}
+
 inline void BuildPatchDialogueArray(
     const PatchDialogue &patch,
     const char *sectionNames,
@@ -180,10 +212,12 @@ inline void BuildPatchDialogueArray(
 
                 for (size_t j = 0; j < entry.lines.size(); ++j)
                 {
+                    std::string line = SanitizeDialogueLine(entry.lines[j]);
+
                     if (!merged.empty())
                         merged += '\n';
 
-                    merged += entry.lines[j];
+                    merged += line;
                 }
 
                 char *copy = (char *)malloc(merged.size() + 1);

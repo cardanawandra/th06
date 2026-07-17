@@ -4,92 +4,105 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Instrumentation;
 import android.app.UiModeManager;
-import android.content.ClipboardManager;
+
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
+
+import android.database.Cursor;
+
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+
 import android.hardware.Sensor;
+
 import android.net.Uri;
+
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+
+import android.provider.OpenableColumns;
+
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
+
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
+
 import android.view.Display;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import android.app.Instrumentation;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.Button;
-import android.view.LayoutInflater;
-import com.th06.game.JoystickView;
-import com.th06.game.R;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import android.content.res.AssetManager;
-import android.widget.Toast;
-import android.provider.OpenableColumns;
-import android.database.Cursor;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.ImageView;
-import android.view.WindowMetrics;
-import android.widget.SeekBar;
-import android.widget.GridLayout;
+import com.th06.game.JoystickView;
+import com.th06.game.R;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import java.io.FileWriter;
+import java.io.FileReader;
 
 /**
     SDL Activity
@@ -97,6 +110,7 @@ import java.util.Locale;
 public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
     private static final int REQUEST_CODE_OPEN_TREE = 1001;
     private static final int PICK_FILE  = 1002;
+    private static final int PICK_BACKGROUND = 1003;
 
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 2;
@@ -399,9 +413,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             e.printStackTrace();
         }
     }
-    // Setup
-    int normalColor = 0xFFffc77d;  
-    int pressedColor = 0xFFFF4444;  // red
 
     private void openFolderPicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
@@ -479,10 +490,16 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                     );
                 }).start();
             }
-        }
-        if (requestCode == PICK_FILE && resultCode == RESULT_OK && data != null) {
+        } else if (resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
-            importFile(uri);
+            if (requestCode == PICK_FILE) {
+                importFile(uri);
+            } else if (requestCode == PICK_BACKGROUND) {
+                File background = new File(getExternalFilesDir(null), "background.jpg");
+                importFile(uri, background);
+                loadBackground();
+                Toast.makeText(this, "Background updated", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -570,6 +587,29 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             Toast.makeText(this, "Import failed", Toast.LENGTH_SHORT).show();
         }
     }
+    private void importFile(Uri uri, File outFile) {
+        try {
+            File parent = outFile.getParentFile();
+            if (parent != null && !parent.exists())
+                parent.mkdirs();
+
+            InputStream in = getContentResolver().openInputStream(uri);
+            FileOutputStream out = new FileOutputStream(outFile, false);
+
+            byte[] buffer = new byte[4096];
+            int len;
+
+            while ((len = in.read(buffer)) > 0) {
+                out.write(buffer, 0, len);
+            }
+
+            in.close();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private String getFileName(Uri uri) {
         String result = null;
@@ -591,10 +631,361 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         return result;
     }
+
+    // =========================
+    // LANGUAGE PATCH THCRAP
+    // =========================
+    private void loadLanguages() {
+        // runOnUiThread(() ->
+        //     Toast.makeText(
+        //             this,
+        //             "Load Languages",
+        //             Toast.LENGTH_SHORT
+        //     ).show());
+        new Thread(() -> {
+            try {
+                String html = downloadString("https://srv.thpatch.net/");
+
+                ArrayList<String> langs = new ArrayList<>();
+
+                Pattern p = Pattern.compile("href=\"(lang_[^\"]+)/\"");
+                Matcher m = p.matcher(html);
+
+                while (m.find()) {
+                    String lang = m.group(1);
+                    if (!langs.contains(lang))
+                        langs.add(lang);
+                }
+
+                runOnUiThread(() -> showLanguageDialog(langs));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void showLanguageDialog(ArrayList<String> langs) {
+
+        String[] items = langs.toArray(new String[0]);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Language")
+                .setItems(items, (dialog, which) -> {
+
+                    new Thread(() -> {
+
+                        try {
+
+                            downloadLanguage(items[which]);
+
+                            runOnUiThread(() ->
+                                    new AlertDialog.Builder(this)
+                                            .setMessage("Download Complete, restart the game")
+                                            .setPositiveButton("OK", null)
+                                            .show());
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }).start();
+
+                })
+                .show();
+    }
+
+    private void clearPatchFolder() {
+
+        File patch = new File(
+                getExternalFilesDir(null),
+                "patch");
+
+        if (!patch.exists() || !patch.isDirectory())
+            return;
+
+        File[] files = patch.listFiles();
+
+        if (files == null)
+            return;
+
+        for (File file : files) {
+            if (file.isFile()) {
+                file.delete();
+            }
+        }
+    }
+
+    private void downloadLanguage(String lang) throws Exception {
+        clearPatchFolder();
+        File root = new File(
+                getExternalFilesDir(null),
+                "patch");
+        root.mkdirs();
+
+        downloadFile(
+                "https://srv.thpatch.net/" + lang + "/files.js",
+                new File(root, "files.js"));
+
+        downloadFile(
+                "https://srv.thpatch.net/" + lang + "/patch.js",
+                new File(root, "patch.js"));
+
+        downloadFile(
+                "https://srv.thpatch.net/" + lang + "/stringdefs.js",
+                new File(root, "stringdefs.js"));
+
+        downloadFile(
+                "https://srv.thpatch.net/" + lang + "/themes.js",
+                new File(root, "themes.js"));
+
+        downloadFolder(lang);
+    }
+
+    private void downloadFolder(String lang) throws Exception {
+
+        String url = "https://srv.thpatch.net/" + lang + "/th06/";
+
+        String html = downloadString(url);
+
+        File outDir = new File(
+                getExternalFilesDir(null),
+                "patch");
+        outDir.mkdirs();
+
+        Pattern p = Pattern.compile(
+                "<a\\s+href=\"([^\"]+)\"[^>]*>([^<]+)</a>",
+                Pattern.CASE_INSENSITIVE);
+
+        Matcher m = p.matcher(html);
+
+        URL base = new URL(url);
+
+        while (m.find()) {
+
+            String href = m.group(1).trim();
+            String text = m.group(2).trim();
+
+            // Skip parent directory
+            if (href.equals("../"))
+                continue;
+
+            // Only download entries where the link text is the filename
+            if (!href.equals(text))
+                continue;
+
+            URL fileUrl = new URL(base, href);
+
+            downloadFile(
+                    fileUrl.toString(),
+                    new File(outDir, text));
+        }
+    }
+
+    private void downloadFile(String urlString, File outFile) throws Exception {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(SDLActivity.this,
+                        "Downloaded: " + outFile.getName(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+        outFile.getParentFile().mkdirs();
+
+        HttpURLConnection conn =
+                (HttpURLConnection) new URL(urlString).openConnection();
+
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+
+        InputStream in = conn.getInputStream();
+
+        FileOutputStream out = new FileOutputStream(outFile);
+
+        byte[] buffer = new byte[8192];
+        int len;
+
+        while ((len = in.read(buffer)) != -1) {
+            out.write(buffer, 0, len);
+        }
+
+        out.close();
+        in.close();
+        conn.disconnect();
+    }
+
+    private String downloadString(String urlString) throws Exception {
+
+        HttpURLConnection conn =
+                (HttpURLConnection) new URL(urlString).openConnection();
+
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(10000);
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()));
+
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+
+        br.close();
+        conn.disconnect();
+
+        return sb.toString();
+    }
+    // THCRAP END
+
+    // =========================
+    // CUSTOMIZATION CONTROLLER
+    // =========================
+    private void bindButtonControls(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            findViewById(R.id.joystickPanel).setBackground(null);
+        } else {
+            findViewById(R.id.joystickPanel).setBackgroundDrawable(null);
+        }
+        findViewById(R.id.joystick).setVisibility(View.VISIBLE);
+        bindButton(R.id.btnEsc, KeyEvent.KEYCODE_ESCAPE);
+        bindButton(R.id.btnZ, KeyEvent.KEYCODE_Z);
+        bindButton(R.id.btnX, KeyEvent.KEYCODE_X);
+        bindButton(R.id.btnShift, KeyEvent.KEYCODE_SHIFT_LEFT);
+        bindButtonSticky(R.id.zSticky, KeyEvent.KEYCODE_Z);
+    }
+    private void unBindButtonControls(){
+        // makeDraggable(findViewById(R.id.leftPanel));
+        // makeDraggable(findViewById(R.id.rightPanel));
+        findViewById(R.id.joystickPanel).setBackgroundResource(R.drawable.material_panel);
+        findViewById(R.id.joystick).setVisibility(View.GONE);
+        makeDraggable(findViewById(R.id.joystickPanel));
+        makeDraggable(findViewById(R.id.padPanel));
+        makeDraggable(findViewById(R.id.btnZ));
+        makeDraggable(findViewById(R.id.btnX));
+        makeDraggable(findViewById(R.id.btnShift));
+        makeDraggable(findViewById(R.id.zSticky));
+    }
+    private boolean customizationMode = false;
+    private void makeDraggable(final View view) {
+        view.setOnTouchListener(new View.OnTouchListener() {
+            float dragStartX;
+            float dragStartY;
+            float viewStartX;
+            float viewStartY;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (!customizationMode)
+                    return false;
+
+                switch (event.getAction()) {
+
+                    case MotionEvent.ACTION_DOWN:
+                        dragStartX = event.getRawX();
+                        dragStartY = event.getRawY();
+                        viewStartX = v.getX();
+                        viewStartY = v.getY();
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        v.setX(viewStartX + (event.getRawX() - dragStartX));
+                        v.setY(viewStartY + (event.getRawY() - dragStartY));
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        return true;
+                }
+
+                return false;
+            }
+        });
+    }
+    private void setCustomizationMode(boolean enable) {
+        if (enable) {
+            unBindButtonControls();
+        } else {
+            bindButtonControls();
+        }
+
+        if (customizationMode && !enable) {
+            saveAllControlPositions();
+        }
+
+        customizationMode = enable;
+    }
+    private void appendPosition(StringBuilder sb, String key, View view) {
+        sb.append(key)
+        .append("=")
+        .append((int)view.getX())
+        .append(",")
+        .append((int)view.getY())
+        .append("\n");
+    }
+    private void saveAllControlPositions() {
+
+        StringBuilder sb = new StringBuilder();
+
+        appendPosition(sb, "leftPanel", findViewById(R.id.leftPanel));
+        appendPosition(sb, "joystickPanel", findViewById(R.id.joystickPanel));
+        appendPosition(sb, "padPanel", findViewById(R.id.padPanel));
+
+        appendPosition(sb, "btnZ", findViewById(R.id.btnZ));
+        appendPosition(sb, "btnX", findViewById(R.id.btnX));
+        appendPosition(sb, "btnShift", findViewById(R.id.btnShift));
+        appendPosition(sb, "zSticky", findViewById(R.id.zSticky));
+
+        try {
+            File file = new File(
+                    getExternalFilesDir(null),
+                    "touchControl.txt");
+
+            FileWriter writer = new FileWriter(file, false); // overwrite
+            writer.write(sb.toString());
+            writer.close();
+
+            Toast.makeText(this, "Touch layout saved", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    // END CUSTOMIZATION
+
+    // =========================
+    // BACKGROUND IMAGE
+    // =========================
+    private void loadBackground() {
+        File backgroundJPG = new File(getExternalFilesDir(null), "background.jpg");
+        Bitmap bitmap = BitmapFactory.decodeFile(backgroundJPG.getAbsolutePath());
+
+        if (bitmap != null) {
+            ImageView leftBar = findViewById(R.id.leftBar);
+            ImageView rightBar = findViewById(R.id.rightBar);
+            ImageView censor = findViewById(R.id.censor);
+
+            leftBar.setImageBitmap(bitmap);
+            rightBar.setImageBitmap(bitmap);
+            censor.setImageBitmap(bitmap);
+        }
+    }
+    private void openBackgroundPicker() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        startActivityForResult(intent, PICK_BACKGROUND);
+    }
+    // END BACKGROUND
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ensureAssetFile(this, "th06.ttc", "th06.ttc");
+        ensureAssetFile(this, "Aroania.ttf", "Aroania.ttf");
         ensureAssetFile(this, "background.jpg", "background.jpg");
         ensureAssetFile(this, "background.jpg", "censor.jpg");
         ensureAssetFile(this, "CM.DAT", "CM.DAT");
@@ -603,6 +994,13 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         ensureAssetFile(this, "MD.DAT", "MD.DAT");
         ensureAssetFile(this, "ST.DAT", "ST.DAT");
         ensureAssetFile(this, "TL.DAT", "TL.DAT");
+
+        // LOWERING THEM
+        // DisplayMetrics metrics = getResources().getDisplayMetrics();
+        // Configuration config = getResources().getConfiguration();
+        // config.densityDpi = DisplayMetrics.DENSITY_LOW;   // 120 dpi
+        // getResources().updateConfiguration(config, metrics);
+
         boolean hasTargetFile = false;
         File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
 
@@ -755,12 +1153,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         View overlay = inflater.inflate(R.layout.activity_main, null);
 
         mLayout.addView(overlay);
-        bindButton(R.id.btnEsc, KeyEvent.KEYCODE_ESCAPE);
-        bindButton(R.id.btnZ, KeyEvent.KEYCODE_Z);
-        bindButton(R.id.btnX, KeyEvent.KEYCODE_X);
-        bindButton(R.id.btnShift, KeyEvent.KEYCODE_SHIFT_LEFT);
-
-        bindButtonSticky(R.id.zSticky, KeyEvent.KEYCODE_Z);
 
         JoystickView joystick = findViewById(R.id.joystick);
 
@@ -848,22 +1240,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         rightParams.width = sideWidth;
         rightBar.setLayoutParams(rightParams);
 
-        File backgroundJPG = new File(getExternalFilesDir(null), "background.jpg");
-
-        Bitmap bitmap = BitmapFactory.decodeFile(backgroundJPG.getAbsolutePath());
-
-        if (bitmap != null) {
-            leftBar.setImageBitmap(bitmap);
-            rightBar.setImageBitmap(bitmap);
-        }
-
-        File censorJPG = new File(getExternalFilesDir(null), "censor.jpg");
-
-        Bitmap bitmap2 = BitmapFactory.decodeFile(censorJPG.getAbsolutePath());
-
-        if (bitmap2 != null) {
-            censor.setImageBitmap(bitmap2);
-        }
+        loadBackground();
         censor.setVisibility(View.GONE);
 
         // mSurface.setTranslationX(sideWidth);
@@ -879,10 +1256,21 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             Button btnShare = dialog.findViewById(R.id.btnShare);
             Button btnImport = dialog.findViewById(R.id.btnImport);
             Button btnCensor = dialog.findViewById(R.id.btnCensor);
+            Button btnDownload = dialog.findViewById(R.id.btnDownload);
+            Button btnCustomize = dialog.findViewById(R.id.btnCustomize);
+            Button btnImportBackground = dialog.findViewById(R.id.btnImportBackground);
 
             btnShare.setOnClickListener(v -> shareLatestScore());
             btnImport.setOnClickListener(v -> openFilePicker());
             btnCensor.setOnClickListener(v -> censorToggle());
+            btnDownload.setOnClickListener(v -> loadLanguages());
+
+            btnCustomize.setText(customizationMode ? "Save Layout" : "✏ Customize");
+            btnCustomize.setOnClickListener(v -> {
+                setCustomizationMode(!customizationMode);
+                btnCustomize.setText(customizationMode ? "Save Layout" : "✏ Customize");
+            });
+            btnImportBackground.setOnClickListener(v -> openBackgroundPicker());
 
             SeekBar seekSensitivity = dialog.findViewById(R.id.seekSensitivity);
             TextView txtSensitivity = dialog.findViewById(R.id.txtSensitivity);
@@ -904,8 +1292,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         // BUTTON JOYPAD
         Button btnJoyPad = findViewById(R.id.btnJoyPad);
-        View joystickView = findViewById(R.id.joystick);
-        GridLayout padcontrolView = findViewById(R.id.padcontrol);
+        View joystickView = findViewById(R.id.joystickPanel);
+        GridLayout padcontrolView = findViewById(R.id.padPanel);
 
         joystickView.setVisibility(View.VISIBLE);
         padcontrolView.setVisibility(View.GONE);
@@ -947,6 +1335,10 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 KeyEvent.KEYCODE_DPAD_DOWN,
                 KeyEvent.KEYCODE_DPAD_RIGHT);
 
+
+        // Customization
+        // loadControlPositions();
+        setCustomizationMode(false);
     }
 
     boolean useJoystick = true;
@@ -973,24 +1365,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private void buttonStickyToggle(int id, int keyCode){
         zSticky = !zSticky;
         if(zSticky){
-            if(id>0){
-                Button btn = findViewById(id);
-                btn.setBackgroundColor(pressedColor);
-            }
             SDLActivity.onNativeKeyDown(keyCode);
         }else{
-            if(id>0){
-                Button btn = findViewById(id);
-                btn.setBackgroundColor(normalColor);
-            }
             SDLActivity.onNativeKeyUp(keyCode);    
         }
     }
     // Single direction
     private void bindButtonSticky(int id, int keyCode) {
         Button btn = findViewById(id);
-        btn.setBackgroundColor(normalColor);
- 
         btn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 buttonStickyToggle(id,keyCode);
@@ -1030,38 +1412,31 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     // Single direction
     private void bindButton(int id, int keyCode) {
         Button btn = findViewById(id);
-        btn.setBackgroundColor(normalColor);
- 
         btn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                btn.setBackgroundColor(pressedColor);
                 SDLActivity.onNativeKeyDown(keyCode);
             } else if (event.getAction() == MotionEvent.ACTION_UP ||
                        event.getAction() == MotionEvent.ACTION_CANCEL) {
-                btn.setBackgroundColor(normalColor);
                 SDLActivity.onNativeKeyUp(keyCode);
             }
-            return true;
+            return false;
         });
     }
     
     // Diagonal (press 2 keys)
     private void bindDiagonal(int id, int key1, int key2) {
         Button btn = findViewById(id);
-        btn.setBackgroundColor(normalColor);
 
         btn.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                btn.setBackgroundColor(pressedColor);
                 SDLActivity.onNativeKeyDown(key1);
                 SDLActivity.onNativeKeyDown(key2);
             } else if (event.getAction() == MotionEvent.ACTION_UP ||
                        event.getAction() == MotionEvent.ACTION_CANCEL) {
-                btn.setBackgroundColor(normalColor);
                 SDLActivity.onNativeKeyUp(key1);
                 SDLActivity.onNativeKeyUp(key2);
             }
-            return true;
+            return false;
         });
     }
 
