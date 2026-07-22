@@ -108,8 +108,9 @@ add_library(main SHARED ${TH06_GAME_SOURCES})
 target_compile_definitions(main PRIVATE
     TH06_ANDROID=1
     NO_FIXED_FUNCTION=1
+#    NO_WEBGL=1
     COMPAT_PORTABLE=1
-#    NO_EFFECT=1
+    NO_EFFECT=1
     NO_LOG_COMPAT=1
 )
 

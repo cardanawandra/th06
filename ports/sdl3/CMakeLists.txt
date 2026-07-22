@@ -71,8 +71,8 @@ set(TH06_GAME_SOURCES
     ../../src/Gui.cpp
     ../../src/ItemManager.cpp
     ../../src/MainMenu.cpp
-    
-    ../../src/sound/SDLMidiOutput.cpp
+
+    ../../src/sound/EmptyMidiOutput.cpp
 
     ../../src/MusicRoom.cpp
     ../../src/Player.cpp
@@ -91,12 +91,12 @@ set(TH06_GAME_SOURCES
     ../../src/ZunTimer.cpp
     ../../src/thirdparty/sjis_converter.cpp
     ../../src/midi/MidiDefault.cpp
+
     ../../src/graphics/GLFunc.cpp
-    ../../src/graphics/FixedFunctionGLWIN32.cpp
+    ../../src/graphics/Software2D.cpp
     ../../src/graphics/FixedFunctionGL.cpp
     ../../src/graphics/WebGL.cpp
-    ../../src/graphics/Software.cpp
-    ../../src/graphics/Hardware.cpp
+
     ../../src/pbg3/FileAbstraction.cpp
     ../../src/pbg3/IPbg3Parser.cpp
     ../../src/pbg3/Pbg3Archive.cpp
@@ -114,6 +114,8 @@ target_compile_definitions(th06 PRIVATE
     TH06_USE_GLES=1
 )
 target_compile_definitions(th06 PRIVATE SDL_ENABLE_OLD_NAMES)
+target_compile_definitions(th06 PRIVATE GAME_WINDOW_DYNAMIC=1)
+target_compile_definitions(th06 PRIVATE NO_LOG_COMPAT=1)
 
 # =========================================================
 # Includes

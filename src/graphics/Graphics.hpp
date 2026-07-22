@@ -15,8 +15,8 @@
     #include "graphics/FixedFunctionGL.hpp"
     #endif
     #if SDL_MAJOR_VERSION >= 2
+        #ifndef NO_WEBGL
         #include "graphics/WebGL.hpp"
-        #ifndef COMPAT_PORTABLE
         #endif
     #endif
     #if SDL_MAJOR_VERSION >= 3

@@ -291,5 +291,6 @@
 // Use marker byte 0x01 for ♪ (U+266A) — converted to UTF-8 in ConvertToUtf8.
 // Do NOT use raw UTF-8 here: the %s argument is in native encoding (GBK/SJIS)
 // and mixing encodings breaks the decoder.
-#define TH_SONG_NAME "\x01%s"
+// #define TH_SONG_NAME "\x01%s"
+#define TH_SONG_NAME "\x81\xF4%s"
 #define TH_FONT_NAME "ＭＳ ゴシック"

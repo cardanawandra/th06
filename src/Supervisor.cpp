@@ -75,6 +75,7 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
         g_NumOfFramesInputsWereHeld = 0;
     }
 
+    LOG_COMPAT("Supervisor::OnUpdate 4\n");
     if (s->wantedState != s->curState)
     {
         s->wantedState2 = s->wantedState;
@@ -229,6 +230,7 @@ ChainCallbackResult Supervisor::OnUpdate(Supervisor *s)
 
     s->wantedState = s->curState;
     s->calcCount++;
+    LOG_COMPAT("Supervisor::OnUpdate fin\n");
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
