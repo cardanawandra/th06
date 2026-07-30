@@ -21,7 +21,7 @@
 GameWindow g_GameWindow;
 GfxInterface *g_GfxBackend;
 i32 g_TickCountToEffectiveFramerate;
-f64 g_LastFrameTime;
+f32 g_LastFrameTime;
 
 #define FRAME_TIME (1000. / 60.)
 
@@ -30,6 +30,7 @@ static const struct
     const char *name;
     GfxInterface *(*TryInit)();
 } s_RenderBackends[] = {
+    {"Software fallback (VERY SLOW)", Software::Init},
     #ifdef RENDER_WEBGL
     {"GL(ES) 2.0 / WebGL", WebGL::Create},
     #endif
@@ -45,9 +46,9 @@ RenderResult GameWindow::Render()
 {
     LOG_COMPAT("Render 1");
     i32 res;
-    f64 slowdown;
+    f32 slowdown;
     ZunViewport viewport;
-    f64 delta;
+    f32 delta;
     u32 curtime;
 
     LOG_COMPAT("Render 2");
@@ -130,7 +131,7 @@ RUN_CHAINS:
             g_Supervisor.framerateMultiplier = 1.0;
 
             u32 slowdownTicks = GET_TICKS();
-            slowdown = (f64)slowdownTicks;
+            slowdown = (f32)slowdownTicks;
 
             if (slowdown < g_LastFrameTime)
                 g_LastFrameTime = slowdown;

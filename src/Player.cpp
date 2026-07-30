@@ -508,7 +508,7 @@ void Player::UpdatePlayerBullets(Player *player)
                     vector.x = vector.x / vecLength + bullet->velocity.x;
                     vector.y = vector.y / vecLength + bullet->velocity.y;
 
-                    vecLength = vector.VectorLengthF64();
+                    vecLength = vector.VectorLength();
 
                     bullet->unk_134.y = ZUN_MIN(vecLength, 10.0f);
 
@@ -527,7 +527,7 @@ void Player::UpdatePlayerBullets(Player *player)
                         bullet->unk_134.y += 0.33333333f;
                         vector.x = bullet->velocity.x;
                         vector.y = bullet->velocity.y;
-                        vecLength = vector.VectorLengthF64();
+                        vecLength = vector.VectorLength();
                         bullet->velocity.x = vector.x * bullet->unk_134.y / vecLength;
                         bullet->velocity.y = vector.y * bullet->unk_134.y / vecLength;
                     }

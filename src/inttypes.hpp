@@ -147,7 +147,6 @@ typedef int iptr;
 #endif
 
 typedef float f32;
-typedef double f64;
 
 #ifdef __ANDROID__
 inline f32 uf32(const f32* ptr) {

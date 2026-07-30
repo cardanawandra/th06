@@ -111,21 +111,6 @@
     #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d) SDL_PutAudioStreamData(b,c,d)
     #define SDL_OPEN_AUDIO_COMPAT(a,b) SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,a)
     #define SDL_BIND_AUDIO_STREAM_COMPAT SDL_BindAudioStream
-
-    //Replacement
-    typedef struct SDL_AudioCVT
-    {
-        int needed;
-        SDL_AudioFormat src_format;
-        SDL_AudioFormat dst_format;
-        double rate_incr;
-        Uint8 *buf;
-        int len;
-        int len_cvt;
-        int len_mult;
-        double len_ratio;
-        int filter_index;
-    } SDL_AudioCVT;
     #define SDL_RESUME_AUDIO_COMPAT(a,b) SDL_ResumeAudioDevice(a);SDL_ResumeAudioStreamDevice(b) 
     #define SDL_PAUSE_AUDIO_COMPAT(b) SDL_PauseAudioDevice(b)
     #define SDL_DESTROY_AUDIO_STREAM SDL_DestroyAudioStream

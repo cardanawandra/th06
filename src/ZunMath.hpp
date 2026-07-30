@@ -151,12 +151,7 @@ struct ZunVec2
 
     f32 VectorLength() const
     {
-        return sqrt((f64)(this->x * this->x + this->y * this->y));
-    }
-
-    f64 VectorLengthF64() const
-    {
-        return (f64)this->VectorLength();
+        return sqrt((f32)(this->x * this->x + this->y * this->y));
     }
 };
 // static_assert(sizeof(ZunVec2) == 0x08 && sizeof(ZunVec2Raw) == 0x08, "ZunVec2 has additional padding between struct members!");

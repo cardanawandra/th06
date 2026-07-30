@@ -116,5 +116,5 @@ struct GameWindow
 
 extern GameWindow g_GameWindow;
 extern i32 g_TickCountToEffectiveFramerate;
-extern double g_LastFrameTime;
+extern f32 g_LastFrameTime;
 extern GfxInterface *g_GfxBackend;
