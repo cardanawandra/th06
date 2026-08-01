@@ -7,7 +7,7 @@ u16 Rng::GetRandomU16(void)
 {
     u16 a = (this->seed ^ 0x9630) - 0x6553;
 
-    this->seed = RotateLeft16(a, 2) & 0xFFFF;
+    this->seed = RotateLeft16Compat(a, 2) & 0xFFFF;
     this->generationCount++;
     return this->seed;
 }

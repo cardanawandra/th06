@@ -70,21 +70,12 @@ inline u32 CountrZero(u32 n)
     return table[((n & (0u - n)) * 0x077CB531U) >> 27];
 }
 #endif
+#endif
 
-#if __has_builtin(__builtin_rotateleft16)
-inline u16 RotateLeft16(u16 n, u8 s)
-{
-    return __builtin_rotateleft16(n, s);
-}
-#else
-inline u16 RotateLeft16(u16 n, u8 s)
+inline u16 RotateLeft16Compat(u16 n, u8 s)
 {
     return (u16)((n << s) | (n >> (16 - s)));
-    // return (u32)n >> 16 - s | n << s;
 }
-#endif
-
-#endif
 
 // EoSD makes extensive use of the float versions of math functions made standard in C99
 //   These were mostly added to C++ with C++17, but GNU bikeshedded so hard, they didn't add
