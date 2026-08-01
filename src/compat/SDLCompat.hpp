@@ -106,6 +106,21 @@
         SDL_ReadU32LE(src, &value);
         return value;
     }
+
+    typedef struct SDL_AudioCVT
+    {
+        i32 needed;
+        SDL_AudioFormat src_format;
+        SDL_AudioFormat dst_format;
+        f32 rate_incr;
+        Uint8 *buf;
+        i32 len;
+        i32 len_cvt;
+        i32 len_mult;
+        f32 len_ratio;
+        i32 filter_index;
+    } SDL_AudioCVT;
+
     #define SDL_AUDIO_STREAM_COMPAT SDL_AudioStream*
     #define SDL_CREATE_AUDIO_STREAM_COMPAT SDL_CreateAudioStream
     #define SDL_QUEUE_AUDIO_COMPAT(a,b,c,d) SDL_PutAudioStreamData(b,c,d)

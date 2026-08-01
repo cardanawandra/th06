@@ -69,7 +69,7 @@ GfxInterface *Software::Init()
     }
     SDL_Texture* framebufferTexture = SDL_CreateTexture(gfx->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, GAME_WINDOW_WIDTH_REAL, GAME_WINDOW_HEIGHT_REAL);
     gfx->framebufferTexture = framebufferTexture;
-    if (framebufferTexture == NULL)    {
+    if (framebufferTexture == NULL){
         delete gfx;
         return NULL;
     }
