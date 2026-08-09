@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <cstring>
 #include "GamePaths.hpp"
-#include "AnmManager.hpp"
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "thirdparty/stb_truetype.h"
 

@@ -422,51 +422,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         startActivityForResult(intent, REQUEST_CODE_OPEN_TREE);
     }
 
-    private void copyFolderContents(Uri treeUri) {
-        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
-        File destDir = getExternalFilesDir(null);
-
-        if (pickedDir == null || destDir == null) return;
-
-        for (DocumentFile file : pickedDir.listFiles()) {
-            copyDocumentFile(file, destDir);
-        }
-    }
-
-    private void copyDocumentFile(DocumentFile source, File destDir) {
-        if (source == null || source.getName() == null) return;
-
-        if (source.isDirectory()) {
-            File newDir = new File(destDir, source.getName());
-            if (!newDir.exists()) {
-                newDir.mkdirs();
-            }
-
-            for (DocumentFile child : source.listFiles()) {
-                copyDocumentFile(child, newDir);
-            }
-
-        } else if (source.isFile()) {
-            File destFile = new File(destDir, source.getName());
-
-            try (InputStream input =
-                         getContentResolver().openInputStream(source.getUri());
-                 OutputStream output = new FileOutputStream(destFile)) {
-
-                if (input != null) {
-                    byte[] buffer = new byte[8192];
-                    int len;
-                    while ((len = input.read(buffer)) > 0) {
-                        output.write(buffer, 0, len);
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -474,21 +429,26 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         if (requestCode == REQUEST_CODE_OPEN_TREE && resultCode == RESULT_OK) {
             if (data != null && data.getData() != null) {
                 Uri treeUri = data.getData();
-
                 getContentResolver().takePersistableUriPermission(
                         treeUri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 );
+                try {
+                    File file = new File(getFilesDir(), "gamepath.txt");
 
-                // Run copy in background thread
-                new Thread(() -> {
-                    copyFolderContents(treeUri);
+                    try (FileOutputStream fos = new FileOutputStream(file)) {
+                        fos.write(treeUri.toString().getBytes());
+                    }
 
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Copy finished", Toast.LENGTH_LONG).show()
-                    );
-                }).start();
+                    Toast.makeText(this, "Game path saved", Toast.LENGTH_LONG).show();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to save game path", Toast.LENGTH_LONG).show();
+                }
+
+                Toast.makeText(this, "Game path saved", Toast.LENGTH_LONG).show();
             }
         } else if (resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
@@ -1002,41 +962,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         // getResources().updateConfiguration(config, metrics);
 
         boolean hasTargetFile = false;
-        File targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.DAT");
+        File targetFile = new File(getExternalFilesDir(null), "gamepath.txt");
 
-        if (targetFile.exists()) {
-            hasTargetFile = true;
-        }
-        if(!hasTargetFile){
-            targetFile = new File(getExternalFilesDir(null), "紅魔郷CM.dat");
-            if (targetFile.exists()) {
-                hasTargetFile = true;
-            }
-        }
-        if(!hasTargetFile){
-            targetFile = new File(getExternalFilesDir(null), "紅魔郷cmZz.dat");
-            if (targetFile.exists()) {
-                hasTargetFile = true;
-            }
-        }
-        if(!hasTargetFile){
-            targetFile = new File(getExternalFilesDir(null), "CM.DAT");
-            if (targetFile.exists()) {
-                hasTargetFile = true;
-            }
-        }
-        if(!hasTargetFile){
-            targetFile = new File(getExternalFilesDir(null), "CM.dat");
-            if (targetFile.exists()) {
-                hasTargetFile = true;
-            }
-        }
-        if(!hasTargetFile){
-            targetFile = new File(getExternalFilesDir(null), "cm.dat");
-            if (targetFile.exists()) {
-                hasTargetFile = true;
-            }
-        }
         if(!hasTargetFile){
             openFolderPicker();
         }

@@ -21,15 +21,67 @@ void Init()
 {
     // On Android, SDL must be initialized before GamePaths::Init()
     STORAGE_INIT();
-    const char *internalPath = GET_EXTERNAL_STORAGE_PATH();
-    if (internalPath)
+
+    s_userPath[0] = '\0';
+
+    const char *externalPath = GET_EXTERNAL_STORAGE_PATH();
+
+    if (externalPath)
     {
-        SNPRINTF(s_userPath, sizeof(s_userPath), "%s/", internalPath);
-        LOG_COMPAT("GamePaths: user data path = %s/", s_userPath);
-    }
-    else
-    {
-        s_userPath[0] = '\0';
+        char gamePathFile[1024];
+
+        SNPRINTF(
+            gamePathFile,
+            sizeof(gamePathFile),
+            "%s/gamepath.txt",
+            externalPath
+        );
+
+        FILE *file = fopen(gamePathFile, "r");
+
+        if (file)
+        {
+            char gamePath[1024] = {0};
+
+            if (fgets(gamePath, sizeof(gamePath), file))
+            {
+                // Remove trailing newline
+                gamePath[strcspn(gamePath, "\r\n")] = '\0';
+
+                if (gamePath[0] != '\0')
+                {
+                    SNPRINTF(
+                        s_userPath,
+                        sizeof(s_userPath),
+                        "%s/",
+                        gamePath
+                    );
+
+                    LOG_COMPAT(
+                        "GamePaths: user data path from gamepath.txt = %s",
+                        s_userPath
+                    );
+                }
+            }
+
+            fclose(file);
+        }
+
+        // Fallback if gamepath.txt doesn't exist or is empty
+        if (s_userPath[0] == '\0')
+        {
+            SNPRINTF(
+                s_userPath,
+                sizeof(s_userPath),
+                "%s/",
+                externalPath
+            );
+
+            LOG_COMPAT(
+                "GamePaths: fallback user data path = %s",
+                s_userPath
+            );
+        }
     }
 }
 
