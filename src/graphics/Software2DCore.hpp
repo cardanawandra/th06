@@ -541,7 +541,7 @@ void Software::Draw(PrimitiveType type, i32 start, i32 count)
         const u8 *tableG = ColorOpTable[colorOp][textureFactor_g];
         const u8 *tableB = ColorOpTable[colorOp][textureFactor_b];
         const u8 *tableA = ColorOpTable[colorOp][textureFactor_a];
-        const u8 *tableDA = ColorDA[blendMode]; 
+        const u8 *tableDA = ColorDA[blendMode];
 
         const u8* tData = (u8*)texCoordData;
         const u8* vData = (u8*)vertexData;

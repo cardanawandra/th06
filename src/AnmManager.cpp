@@ -484,20 +484,95 @@ STB_Surface *AnmManager::LoadToSurfaceWithFormat(
     return surface;
 }
 
+// u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
+// {
+//     const i32 dstPitch = src->w * pixelDepth;
+//     const i32 srcPitch = src->pitch;
+
+//     u8 *pixelData = new u8[dstPitch * src->h];
+//     u8 *dstPtr = pixelData;
+//     const u8 *srcPtr = (u8 *)src->pixels;
+
+//     for (i32 i = 0; i < src->h; i++)
+//     {
+//         memcpy(dstPtr, srcPtr, dstPitch);
+//         dstPtr += dstPitch;
+//         srcPtr += srcPitch;
+//     }
+
+//     return pixelData;
+// }
+
 u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
 {
-    const i32 dstPitch = src->w * pixelDepth;
-    const i32 srcPitch = src->pitch;
+    const i32 width  = src->w;
+    const i32 height = src->h;
 
-    u8 *pixelData = new u8[dstPitch * src->h];
-    u8 *dstPtr = pixelData;
-    const u8 *srcPtr = (u8 *)src->pixels;
+    // 4 pixels -> 1 byte
+    const i32 dstPitch = (width + 3) >> 2;
 
-    for (i32 i = 0; i < src->h; i++)
+    u8 *pixelData = new u8[dstPitch * height];
+
+    const u8 *srcBase = (const u8 *)src->pixels;
+
+    for (i32 y = 0; y < height; ++y)
     {
-        memcpy(dstPtr, srcPtr, dstPitch);
-        dstPtr += dstPitch;
-        srcPtr += srcPitch;
+        const u8 *srcRow =
+            srcBase + y * src->pitch;
+        u8 *dstRow =
+            pixelData + y * dstPitch;
+        for (i32 x = 0; x < width; x += 4)
+        {
+            u8 packed = 0;
+            for (i32 i = 0; i < 4; ++i)
+            {
+                const i32 px = x + i;
+                if (px >= width)
+                    break;
+                const u8 *p =
+                    srcRow + px * pixelDepth;
+                u8 r, g, b, a;
+
+                if (pixelDepth == 3)
+                {
+                    // RGB888
+                    r = p[0];
+                    g = p[1];
+                    b = p[2];
+                    a = 255;
+                }
+                else
+                {
+                    // RGBA8888
+                    r = p[0];
+                    g = p[1];
+                    b = p[2];
+                    a = p[3];
+                }
+                u8 value;
+
+                if (a <= 4) // <= alphaThreeshold
+                {
+                    // Transparent
+                    value = 0;
+                }
+                else
+                {
+                    const u32 gray =
+                        (u32)r * 77 +
+                        (u32)g * 150 +
+                        (u32)b * 29;
+
+                    value = (gray >= (128u << 8))
+                        ? 2   // white
+                        : 1;  // black
+                }
+
+                packed |= (u8)(value << (i * 2));
+            }
+
+            dstRow[x >> 2] = packed;
+        }
     }
 
     return pixelData;
@@ -826,8 +901,81 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
 
     // Copy over the alpha channel from the source to the destination, taking
     // into account the texture format.
-    switch (textureDesc->format)
+    u8 txtFormat = textureDesc->format;
+    txtFormat = TEX_FMT_BADAPPLE_2BIT;
+    switch (txtFormat)
     {
+    case TEX_FMT_BADAPPLE_2BIT:
+    {
+        if (!textureDesc->textureData)
+        {
+            LOG_COMPAT("textureDesc->textureData failed\n");
+            break;
+        }
+
+        if (!alphaSurface || !alphaSurface->pixels)
+        {
+            LOG_COMPAT("alphaSurface failed\n");
+            break;
+        }
+
+        /*
+        * 4 pixels -> 1 byte
+        */
+        const u32 dstPitch =
+            (textureDesc->width + 3) >> 2;
+
+        for (y = 0; y < textureDesc->height; y++)
+        {
+            const u8 *srcRow =
+                (const u8 *)alphaSurface->pixels +
+                alphaSurface->pitch * y;
+
+            u8 *dstRow =
+                (u8 *)textureDesc->textureData +
+                dstPitch * y;
+
+            for (x = 0; x < textureDesc->width; x += 4)
+            {
+                u8 packed = dstRow[x >> 2];
+
+                u32 i;
+
+                for (i = 0; i < 4; ++i)
+                {
+                    const u32 px = x + i;
+
+                    if (px >= textureDesc->width)
+                        break;
+
+                    /*
+                    * Source alpha.
+                    *
+                    * Same source layout used by the A8R8G8B8
+                    * case above: one alpha value every 4 bytes.
+                    */
+                    const u8 alpha =
+                        srcRow[px * 4];
+
+                    const u32 shift = i * 2;
+                    const u8 mask = (u8)(3 << shift);
+
+                    /*
+                    * Transparent source:
+                    * force destination 2-bit pixel to 00.
+                    */
+                    if (alpha <= 16)
+                    {
+                        packed &= (u8)~mask;
+                    }
+                }
+
+                dstRow[x >> 2] = packed;
+            }
+        }
+
+        break;
+    }
     case TEX_FMT_A8R8G8B8:
         dstData8 = dstData;
         for (y = 0; y < textureDesc->height; y++)

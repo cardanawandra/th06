@@ -1,0 +1,10 @@
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/SDL3/CMakeFiles/SDL3-shared.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/SDL3/CMakeFiles/SDL3_test.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/SDL3/CMakeFiles/SDL_uclibc.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/SDL3/CMakeFiles/edit_cache.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/SDL3/CMakeFiles/rebuild_cache.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/src/CMakeFiles/main.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/src/CMakeFiles/edit_cache.dir
+E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/armeabi-v7a/src/CMakeFiles/rebuild_cache.dir

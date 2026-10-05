@@ -110,8 +110,8 @@ target_compile_definitions(main PRIVATE
     NO_FIXED_FUNCTION=1
 #    NO_WEBGL=1
     COMPAT_PORTABLE=1
-    NO_EFFECT=1
-    NO_LOG_COMPAT=1
+#    NO_EFFECT=1
+#    NO_LOG_COMPAT=1
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

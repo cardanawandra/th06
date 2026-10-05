@@ -20,6 +20,7 @@
 #define TEX_FMT_R5G6B5 3u
 #define TEX_FMT_R8G8B8 4u
 #define TEX_FMT_A4R4G4B4 5u
+#define TEX_FMT_BADAPPLE_2BIT 6u
 
 struct TextureData
 {

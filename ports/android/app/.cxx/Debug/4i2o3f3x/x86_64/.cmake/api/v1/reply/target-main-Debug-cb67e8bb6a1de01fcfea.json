@@ -1,0 +1,625 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "E:/proyek/c++/th06-android/th06/ports/android/app/build/intermediates/cxx/Debug/4i2o3f3x/obj/x86_64/libmain.so"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_link_libraries",
+			"target_compile_options",
+			"target_compile_definitions",
+			"target_include_directories"
+		],
+		"files" : 
+		[
+			"src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 80,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 142,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 155,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 103,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 88,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 125,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-fpermissive"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-extra-qualification"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-unknown-warning-option"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-unknown-pragmas"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-unused-value"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-macro-redefined"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-null-conversion"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-inconsistent-missing-override"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-switch"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-null-arithmetic"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-constant-conversion"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-address-of-temporary"
+				},
+				{
+					"backtrace" : 4,
+					"fragment" : "-Wno-format-security"
+				},
+				{
+					"fragment" : "-std=gnu++17"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 5,
+					"define" : "COMPAT_PORTABLE=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "NO_EFFECT=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "NO_FIXED_FUNCTION=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "NO_LOG_COMPAT=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "NO_WEBGL=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "SDL_ENABLE_OLD_NAMES=1"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "TH06_ANDROID=1"
+				},
+				{
+					"define" : "main_EXPORTS"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 6,
+					"path" : "E:/proyek/c++/th06-android/th06/src"
+				},
+				{
+					"backtrace" : 6,
+					"path" : "E:/proyek/c++/th06-android/th06/ports/android/app/jni/src/../../../SDL3/include/SDL3"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/x86_64/SDL3/include-revision"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/proyek/c++/th06-android/th06/ports/android/SDL3/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "17"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43
+			],
+			"sysroot" : 
+			{
+				"path" : "C:/Users/user/AppData/Local/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+			}
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 2,
+			"id" : "SDL3-shared::@61f02b296a88846ad5eb"
+		}
+	],
+	"id" : "main::@145eef247bfb46b6828c",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\build\\intermediates\\cxx\\Debug\\4i2o3f3x\\obj\\x86_64\\libSDL3.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\21\\liblog.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\21\\libandroid.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\21\\libEGL.so",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\21\\libGLESv2.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-latomic -lm",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX",
+		"sysroot" : 
+		{
+			"path" : "C:/Users/user/AppData/Local/Android/Sdk/ndk/28.2.13676358/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+		}
+	},
+	"name" : "main",
+	"nameOnDisk" : "libmain.so",
+	"paths" : 
+	{
+		"build" : "src",
+		"source" : "src"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/main.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/AnmManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/AsciiManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/BombData.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/BulletData.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/BulletManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Chain.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/controller/SDLController.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/EclManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/EffectManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Ending.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/EnemyEclInstr.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/EnemyManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/FileSystem.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/GameErrorContext.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/GameManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/GamePaths.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/GameWindow.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Gui.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ItemManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/MainMenu.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/sound/SDLMidiOutput.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/MusicRoom.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Player.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ReplayManager.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ResultScreen.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Rng.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ScreenEffect.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/sound/SDLSoundplayer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Stage.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/Supervisor.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/TextHelper.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/utils.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ZunMath.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/ZunTimer.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/pbg3/FileAbstraction.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/pbg3/IPbg3Parser.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/pbg3/Pbg3Archive.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/pbg3/Pbg3Parser.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/thirdparty/sjis_converter.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/midi/MidiDefault.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/graphics/Software2D.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/graphics/GLFunc.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "E:/proyek/c++/th06-android/th06/src/graphics/WebGL.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}

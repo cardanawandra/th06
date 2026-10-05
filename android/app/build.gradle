@@ -19,6 +19,14 @@ android {
             }
         }
     }
+    signingConfigs {
+        release {
+            storeFile file("my-release-key.jks")
+            storePassword "eosd06"
+            keyAlias "my-key-alias"
+            keyPassword "eosd06"
+        }
+    }
     buildTypes {
         debug {
             debuggable true
@@ -27,6 +35,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     applicationVariants.all { variant ->

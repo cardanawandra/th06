@@ -19,6 +19,7 @@
 #if SDL_MAJOR_VERSION >= 3
     // SDL 3.x specific code
     #include <SDL_gamepad.h>
+    #include <SDL_main.h>
     #define SDL_MAP_RGBA_COMPAT(format, r, g, b, a) SDL_MapRGBA(SDL_GetPixelFormatDetails(format), NULL, r, g, b, a)
     #define SDL_JOYSTICK_COMPAT SDL_Gamepad
     #define SDL_JOYSTICK_COMPATButton SDL_GamepadButton
@@ -80,11 +81,6 @@
     // #define SDL_STOP_TEXT_INPUT_COMPAT(a) SDL_StopTextInput(a)
     #define SDL_START_TEXT_INPUT_COMPAT()
     #define SDL_STOP_TEXT_INPUT_COMPAT()
-
-    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
-    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateSurfaceFrom(b,c,f,a,e)
-    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateSurface(a,b,c)
-    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,b)
 
     inline int SDL_NumJoysticks() {
         int count;
@@ -188,10 +184,6 @@
 
     #define SDL_START_TEXT_INPUT_COMPAT() SDL_StartTextInput()
     #define SDL_STOP_TEXT_INPUT_COMPAT() SDL_StopTextInput()
-    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormatEnum
-    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurfaceWithFormat(0,a,b,32,c)
-    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceWithFormatFrom(a,b,c,d,e,f)
-    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT SDL_ConvertSurfaceFormat
 
     inline void GetWindowSizeF(int *w, int *h, int *r){
         SDL_DisplayMode mode;
@@ -257,6 +249,15 @@
 
     #define KEY_Q              SDL_SCANCODE_Q
     #define KEY_S              SDL_SCANCODE_S
+    // wasd jkl +(e exception)
+    #define KEY_E              SDL_SCANCODE_E
+    #define KEY_W              SDL_SCANCODE_W
+    #define KEY_A              SDL_SCANCODE_A
+    #define KEY_D              SDL_SCANCODE_D
+    #define KEY_J              SDL_SCANCODE_J
+    #define KEY_K              SDL_SCANCODE_K
+    #define KEY_L              SDL_SCANCODE_L
+
     #define KEY_RETURN         SDL_SCANCODE_RETURN
     #define WINDOW_FLAGS_COMPAT SDL_WINDOW_OPENGL
 
@@ -268,20 +269,8 @@
     #define SDL_FULLSCREEN_COMPAT SDL_WINDOW_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,b,c)
 
-    #define SDL_PIXEL_FORMAT_COMPAT_LOAD()
-    #define SDL_BITSPERPIXEL_COMPAT(a) SDL_BITSPERPIXEL(a)
-    #define SDL_BYTESPERPIXEL_COMPAT(a) SDL_BYTESPERPIXEL(a)
-
     #define SDL_RW_SIZE_COMPAT SDL_RWsize
 
-    inline SDL_Color SDL_TEXT_COLOR_COMPAT(ZunColor shadowColor){
-        SDL_Color sdlShadowColor;
-        sdlShadowColor.a = 0xFF;
-        sdlShadowColor.b = (shadowColor >> 16) & 0xFF;
-        sdlShadowColor.g = (shadowColor >> 8) & 0xFF;
-        sdlShadowColor.r = shadowColor & 0xFF;
-        return sdlShadowColor;
-    }
     #define SDL_AUDIO_DEVICE_ID_COMPAT SDL_AudioDeviceID
     #define SDL_OPEN_AUDIO_COMPAT_ERROR 0
     #define SDL_CLOSE_AUDIO_COMPAT(c) SDL_CloseAudioDevice(c)
@@ -292,11 +281,7 @@
     // SDL 1.x specific code
     #include <SDL_joystick.h>
     #define SDL_INIT_GAMECONTROLLER_COMPAT SDL_INIT_JOYSTICK
-    #ifdef _WIN32
-        #define TRY_RESOLVE_FUNCTION(name) this->name = ::name;
-    #else
-        #define TRY_RESOLVE_FUNCTION(name) *(void**)&this->name = SDL_GL_GetProcAddress(#name);
-    #endif
+    #define TRY_RESOLVE_FUNCTION(name) *(void**)&this->name = SDL_GL_GetProcAddress(#name);
     #define TRY_RESOLVE_FUNCTION_GLES(bla)
 
     #define SDL_SURFACE_COMPAT SDL_Surface
@@ -357,6 +342,15 @@
 
     #define KEY_Q              SDLK_q
     #define KEY_S              SDLK_s
+    // wasd jkl +(e exception)
+    #define KEY_E              SDLK_e
+    #define KEY_W              SDLK_w
+    #define KEY_A              SDLK_a
+    #define KEY_D              SDLK_d
+    #define KEY_J              SDLK_J
+    #define KEY_K              SDLK_K
+    #define KEY_L              SDLK_L
+
     #define KEY_RETURN         SDLK_RETURN
     #define WINDOW_FLAGS_COMPAT SDL_OPENGL | SDL_DOUBLEBUF
     #define TH_WINDOWPOS_UNDEFINED 0
@@ -367,11 +361,6 @@
     #define SDL_FULLSCREEN_COMPAT SDL_FULLSCREEN
     #define SDL_CREATE_THREAD_COMPAT(a,b,c) SDL_CreateThread(a,c)
     #define SDL_CreateWindowCompat(title, x, y, width, height, flags) SDL_SetVideoMode(width, height, 32, flags); SDL_WM_SetCaption(title, "hello_icon")
-    #define SDL_CONVERT_SURFACE_FORMAT_COMPAT(a,b,c) SDL_ConvertSurface(a,&b,c)
-    #define SDL_CREATE_RGB_SURFACE_COMPAT(a,b,c) SDL_CreateRGBSurface(SDL_HWSURFACE,a,b,c.BitsPerPixel,c.Rmask,c.Gmask,c.Bmask,c.Amask)
-    #define SDL_CREATE_RGB_SURFACE_FROM_COMPAT(a,b,c,d,e,f) SDL_CreateRGBSurfaceFrom(a,b,c,d,e,f.Rmask,f.Gmask,f.Bmask,f.Amask)
-    #define SDL_BITSPERPIXEL_COMPAT(a) a.BitsPerPixel
-    #define SDL_BYTESPERPIXEL_COMPAT(a) a.BytesPerPixel
     #define SDL_SetHintCompat(a,b)
 
     inline void GetWindowSizeF(int *w, int *h, int *r){
@@ -384,137 +373,10 @@
         *r = 60;
     }
 
-    #define SDL_PIXEL_FORMAT_COMPAT SDL_PixelFormat
     #define WIN98
     #if defined(_MSC_VER) && (_MSC_VER >= 1600)
     #undef WIN98
     #endif
-
-    typedef struct {
-        int BPP;
-        Uint32 Rmask, Gmask, Bmask, Amask;
-    } SDL_PIXEL_FORMAT_COMPAT_CACHED;
-
-
-    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_UNKNOWN_CACHED = {0, 0, 0, 0, 0};
-    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA32_CACHED = {
-            32,
-            0xFF000000, // R
-            0x00FF0000, // G
-            0x0000FF00, // B
-            0x000000FF  // A
-        };
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA5551_CACHED = {
-            16,
-            0xF800, // R (bits 15-11)
-            0x07C0, // G (10-6)
-            0x003E, // B (5-1)
-            0x0001  // A (0)
-        };
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB24_CACHED = {
-            24,
-            0xFF0000,
-            0x00FF00,
-            0x0000FF,
-            0
-        };
-    #else
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA32_CACHED = {
-            32,
-            0x000000FF, // R
-            0x0000FF00, // G
-            0x00FF0000, // B
-            0xFF000000  // A
-        };
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA5551_CACHED = {
-            16,
-            0x001F, // R
-            0x03E0, // G
-            0x7C00, // B
-            0x8000  // A
-        };
-        const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB24_CACHED = {
-            24,
-            0x0000FF,
-            0x00FF00,
-            0xFF0000,
-            0
-        };
-    #endif
-
-    //this thing doesn't care about endian at all
-    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGBA4444_CACHED = {
-        16,
-        0xF000, // R (15-12)
-        0x0F00, // G (11-8)
-        0x00F0, // B (7-4)
-        0x000F  // A (3-0)
-    };
-    const SDL_PIXEL_FORMAT_COMPAT_CACHED SDL_PIXELFORMAT_RGB565_CACHED = {
-        16,
-        0xF800, // R (15-11)
-        0x07E0, // G (10-5)
-        0x001F, // B (4-0)
-        0
-    };
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_UNKNOWN;
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA32;
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA5551;
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB24;
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGBA4444;
-    static SDL_PIXEL_FORMAT_COMPAT SDL_PIXELFORMAT_RGB565;
-
-    inline void InitPixelFormat(
-        SDL_PixelFormat* dst,
-        SDL_PIXEL_FORMAT_COMPAT_CACHED fmt)
-    {
-        SDL_Surface *tmp =
-        SDL_CreateRGBSurface(
-            SDL_HWSURFACE,
-            0,0,
-            // src->w,
-            // src->h,
-            fmt.BPP,
-            fmt.Rmask,
-            fmt.Gmask,
-            fmt.Bmask,
-            fmt.Amask
-        );
-        *dst = *tmp->format;
-
-        // SDL_FreeSurface(tmp);
-    }
-
-    inline void SDL_PIXEL_FORMAT_COMPAT_LOAD(){
-        InitPixelFormat(
-            &SDL_PIXELFORMAT_RGBA32,
-            SDL_PIXELFORMAT_RGBA32_CACHED);
-
-        InitPixelFormat(
-            &SDL_PIXELFORMAT_RGBA5551,
-            SDL_PIXELFORMAT_RGBA5551_CACHED);
-
-        InitPixelFormat(
-            &SDL_PIXELFORMAT_RGB24,
-            SDL_PIXELFORMAT_RGB24_CACHED);
-
-        InitPixelFormat(
-            &SDL_PIXELFORMAT_RGBA4444,
-            SDL_PIXELFORMAT_RGBA4444_CACHED);
-
-        InitPixelFormat(
-            &SDL_PIXELFORMAT_RGB565,
-            SDL_PIXELFORMAT_RGB565_CACHED);
-    }
-
-    inline SDL_Color SDL_TEXT_COLOR_COMPAT(ZunColor shadowColor){
-        SDL_Color sdlShadowColor;
-        sdlShadowColor.b = (shadowColor >> 16) & 0xFF;
-        sdlShadowColor.g = (shadowColor >> 8) & 0xFF;
-        sdlShadowColor.r = shadowColor & 0xFF;
-        return sdlShadowColor;
-    }
 
     #define SDL_AUDIO_DEVICE_ID_COMPAT int
     static inline Sint64 SDL_RW_SIZE_COMPAT(SDL_RWOPS_COMPAT* ctx)

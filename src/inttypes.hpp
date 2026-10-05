@@ -140,7 +140,6 @@
 // typedef int32_t i32;
 // typedef uint32_t u32;
 #ifdef COMPAT_PORTABLE
-#include <stdint.h>
 typedef intptr_t iptr;
 #else
 typedef int iptr;
@@ -157,3 +156,6 @@ inline f32 uf32(const f32* ptr) {
 #else
 #define uf32(a) *a
 #endif
+
+#define FIXED_ONE 65536.0f
+typedef i32 fixed32; // signed 16.16

@@ -416,11 +416,81 @@ typedef struct json_parse_result_s {
 #define json_uintmax_t uintmax_t
 #endif
 
-#if defined(_MSC_VER)
-#define json_strtoumax _strtoui64
-#else
-#define json_strtoumax strtoumax
-#endif
+// #if defined(_MSC_VER)
+// #define json_strtoumax _strtoui64
+// #else
+// #define json_strtoumax strtoumax
+// #endif
+#include <stddef.h>
+
+// COMPATSLOP!!!
+#include <ctype.h>
+
+static unsigned __int64 json_strtoumax(const char *str, char **endptr, int radix)
+{
+    const char *p = str;
+    unsigned __int64 value = 0;
+
+    /* Skip whitespace */
+    while (*p && isspace((unsigned char)*p))
+        ++p;
+
+    /* Optional + sign */
+    if (*p == '+')
+        ++p;
+
+    /* Auto-detect radix */
+    if (radix == 0)
+    {
+        if (*p == '0')
+        {
+            if (p[1] == 'x' || p[1] == 'X')
+            {
+                radix = 16;
+                p += 2;
+            }
+            else
+            {
+                radix = 8;
+                ++p;
+            }
+        }
+        else
+        {
+            radix = 10;
+        }
+    }
+    else if (radix == 16)
+    {
+        if (p[0] == '0' && (p[1] == 'x' || p[1] == 'X'))
+            p += 2;
+    }
+
+    while (*p)
+    {
+        unsigned int digit;
+
+        if (*p >= '0' && *p <= '9')
+            digit = *p - '0';
+        else if (*p >= 'a' && *p <= 'z')
+            digit = *p - 'a' + 10;
+        else if (*p >= 'A' && *p <= 'Z')
+            digit = *p - 'A' + 10;
+        else
+            break;
+
+        if (digit >= (unsigned int)radix)
+            break;
+
+        value = value * (unsigned int)radix + digit;
+        ++p;
+    }
+
+    if (endptr)
+        *endptr = (char *)p;
+
+    return value;
+}
 
 #if defined(__cplusplus) && (__cplusplus >= 201103L)
 #define json_null nullptr

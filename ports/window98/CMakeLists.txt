@@ -16,7 +16,8 @@ add_definitions(
 #    -DNO_SDL
 
     -D_CRT_SECURE_NO_DEPRECATE
-    -DNO_EFFECT
+#    -DNO_EFFECT
+    -DNO_LOG_COMPAT
     #dynamic
     -DGAME_WINDOW_DYNAMIC
 )
@@ -78,8 +79,8 @@ set(TH06_GAME_SOURCES
     ../../src/Rng.cpp
     ../../src/ScreenEffect.cpp
 
-#    ../../src/sound/EmptySoundPlayer.cpp
-    ../../src/sound/SDLSoundPlayer.cpp
+    ../../src/sound/EmptySoundPlayer.cpp
+#    ../../src/sound/SDLSoundPlayer.cpp
 
     ../../src/Stage.cpp
     ../../src/Supervisor.cpp
@@ -90,9 +91,11 @@ set(TH06_GAME_SOURCES
     ../../src/thirdparty/sjis_converter.cpp
     ../../src/midi/MidiDefault.cpp
 
-#    ../../src/graphics/GLFunc.cpp
+    ../../src/graphics/BadAppleRenderer.cpp
+    ../../src/graphics/GLFunc.cpp
 #    ../../src/graphics/Software2DWin32.cpp
     ../../src/graphics/Software2D.cpp
+    ../../src/graphics/FixedFunctionGL.cpp
 #    ../../src/graphics/FixedFunctionGLWIN32.cpp
 
     ../../src/pbg3/FileAbstraction.cpp

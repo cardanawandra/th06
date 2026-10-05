@@ -2,6 +2,7 @@
 // #include "graphics/FixedFunctionDX2.hpp"
 #endif
 
+#include "graphics/BadAppleRenderer.hpp"
 #include "graphics/Software.hpp"
 #ifdef NO_SDL
     // #include "graphics/FixedFunctionGLWIN32.hpp"

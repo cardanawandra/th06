@@ -1,0 +1,64 @@
+{
+  "buildFiles": [
+    "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\jni\\CMakeLists.txt",
+    "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\jni\\src\\CMakeLists.txt",
+    "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\SDL3\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\.cxx\\Debug\\4i2o3f3x\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\.cxx\\Debug\\4i2o3f3x\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "SDL3-shared::@61f02b296a88846ad5eb": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL3-shared",
+      "output": "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\build\\intermediates\\cxx\\Debug\\4i2o3f3x\\obj\\x86_64\\libSDL3.so",
+      "runtimeFiles": []
+    },
+    "SDL3_test::@61f02b296a88846ad5eb": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL3_test",
+      "output": "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\.cxx\\Debug\\4i2o3f3x\\x86_64\\SDL3\\libSDL3_test.a"
+    },
+    "SDL_uclibc::@61f02b296a88846ad5eb": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "SDL_uclibc",
+      "output": "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\.cxx\\Debug\\4i2o3f3x\\x86_64\\SDL3\\libSDL_uclibc.a"
+    },
+    "main::@145eef247bfb46b6828c": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "main",
+      "output": "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\build\\intermediates\\cxx\\Debug\\4i2o3f3x\\obj\\x86_64\\libmain.so",
+      "runtimeFiles": [
+        "E:\\proyek\\c++\\th06-android\\th06\\ports\\android\\app\\build\\intermediates\\cxx\\Debug\\4i2o3f3x\\obj\\x86_64\\libSDL3.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang.exe",
+      "cppCompilerExecutable": "C:\\Users\\user\\AppData\\Local\\Android\\Sdk\\ndk\\28.2.13676358\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [
+    "c"
+  ],
+  "cppFileExtensions": [
+    "cxx",
+    "cpp"
+  ]
+}

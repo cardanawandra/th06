@@ -1,0 +1,141 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10.0"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "SDL3",
+					"jsonFile" : "directory-SDL3-Debug-385be8149101a7676a1f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "E:/proyek/c++/th06-android/th06/ports/android/SDL3",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-c94b7c2814d5a21df52c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "GAME"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "SDL3",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "th06",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "SDL3-shared::@61f02b296a88846ad5eb",
+					"jsonFile" : "target-SDL3-shared-Debug-b6fa2c99b8c1886a3ff5.json",
+					"name" : "SDL3-shared",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "SDL3_test::@61f02b296a88846ad5eb",
+					"jsonFile" : "target-SDL3_test-Debug-36e5408d1a621b2c0cd4.json",
+					"name" : "SDL3_test",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "SDL_uclibc::@61f02b296a88846ad5eb",
+					"jsonFile" : "target-SDL_uclibc-Debug-a09e774770ab5bdc11b5.json",
+					"name" : "SDL_uclibc",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "main::@145eef247bfb46b6828c",
+					"jsonFile" : "target-main-Debug-71ee73c0eea8c2b12daf.json",
+					"name" : "main",
+					"projectIndex" : 2
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/4i2o3f3x/arm64-v8a",
+		"source" : "E:/proyek/c++/th06-android/th06/ports/android/app/jni"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

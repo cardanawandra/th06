@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "SDL3",
+		"source" : "E:/proyek/c++/th06-android/th06/ports/android/SDL3"
+	}
+}

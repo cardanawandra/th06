@@ -11,15 +11,8 @@
 #include <memory>
 #include <stddef.h>
 
-#define FIXED_ONE 65536.0f
-typedef i32 fixed32; // signed 16.16
-
 struct Texture {
     std::vector<u32> texels; //ARGB8888
-    std::vector<u8> texR;
-    std::vector<u8> texG;
-    std::vector<u8> texB;
-    std::vector<u8> texA;
     i32 width, height;
     i8 shift;
     PixelFormat format;
