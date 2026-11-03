@@ -1,3 +1,0 @@
-E:\proyek\c++\th06-android\th06\ports\android\app\jni\CMakeLists.txt
-E:\proyek\c++\th06-android\th06\ports\android\app\jni\src\CMakeLists.txt
-E:\proyek\c++\th06-android\th06\ports\android\SDL3\CMakeLists.txt

@@ -443,7 +443,7 @@ struct AnmManager
     u32 STB_MapRGBA(u8 r,u8 g,u8 b,u8 a);
 
     static STB_Surface *LoadToSurfaceWithFormat(const char *filename, i32 desired_channels, u8 **fileData);
-    static u8 *ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth);
+    u8 *ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth);
     static void FlipSurface(STB_Surface *surface);
     void ApplySurfaceToColorBuffer(STB_Surface *surface, const STB_Rect &srcRect, const STB_Rect &dstRect);
     // Creates, binds, and set parameters for a new texture
@@ -506,3 +506,4 @@ struct AnmManager
 };
 
 extern AnmManager *g_AnmManager;
+extern u8 g_QualityReducer;

@@ -1,5 +1,11 @@
+#define BAD_APPLE_FRAMEBUFFER_TYPE u32
+#define BAD_APPLE_COLOR_BLACK 0xff000000
+#define BAD_APPLE_COLOR_WHITE 0xffffffff
+#define BAD_APPLE_COLOR_TRANSPARENT 4 //<- WHAT THE HELL
+
 #include "BadAppleRendererHeader.hpp"
 
+BAD_APPLE_FRAMEBUFFER_TYPE *badAppleFramebuffer;
 GfxInterface *BadAppleRenderer::Init()
 {
     BadAppleRenderer* gfx = new BadAppleRenderer;
@@ -32,8 +38,8 @@ GfxInterface *BadAppleRenderer::Init()
     i32 width  = GAME_WINDOW_WIDTH_REAL;
     i32 height = GAME_WINDOW_HEIGHT_REAL;
 
+    badAppleFramebuffer = new BAD_APPLE_FRAMEBUFFER_TYPE[width * height];
     #if SDL_MAJOR_VERSION >= 2
-    gfx->rgbaFramebuffer = new u32[width * height];
     i32 x = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     i32 y = SDL_WINDOWPOS_UNDEFINED_COMPAT;
     gfx->window = SDL_CreateWindowCompat(TH_WINDOW_TITLE, x, y, width, height, flags);
@@ -79,29 +85,9 @@ GfxInterface *BadAppleRenderer::Init()
     gfx->screen = SDL_SetVideoMode(
         width,
         height,
-        8,
+        32,
         flags
     );
-    SDL_Color colors[256];
-    memset(colors, 0, sizeof(colors));
-
-    colors[0].r = 0;
-    colors[0].g = 0;
-    colors[0].b = 0;
-
-    colors[1].r = 0;
-    colors[1].g = 0;
-    colors[1].b = 0;
-
-    colors[2].r = 255;
-    colors[2].g = 255;
-    colors[2].b = 255;
-
-    if (SDL_SetColors(gfx->screen, colors, 0, 256) == SDL_FALSE)
-    {
-        delete gfx;
-        return NULL;
-    }
 
     if (!gfx->screen)
     {
@@ -124,8 +110,6 @@ GfxInterface *BadAppleRenderer::Init()
 
     gfx->textures.reserve(1024);
     gfx->freeTextures.reserve(1024);
-
-    gfx->framebuffer = new u8[width * height];
 
     gfx->noVertexBuffer =
         (g_Supervisor.cfg.opts & (1 << GCOS_DONT_USE_VERTEX_BUF))!=0;
@@ -169,13 +153,13 @@ void BadAppleRenderer::Exit()
         SDL_DestroyTexture(this->framebufferTexture);
         this->framebufferTexture = NULL;
     }
-    if (this->framebuffer)    {
-        delete[] this->framebuffer;
-        this->framebuffer = NULL;
+    if (badAppleFramebuffer)    {
+        delete[] badAppleFramebuffer;
+        badAppleFramebuffer = NULL;
     }
     #else
-    delete[] framebuffer;
-    framebuffer = NULL;
+    delete[] badAppleFramebuffer;
+    badAppleFramebuffer = NULL;
 
     SDL_Quit();
     #endif
@@ -183,39 +167,20 @@ void BadAppleRenderer::Exit()
 
 void BadAppleRenderer::SwapBuffers()
 {
-    const i32 width = GAME_WINDOW_WIDTH_REAL;
-    const i32 height = GAME_WINDOW_HEIGHT_REAL;
-
     #if SDL_MAJOR_VERSION >= 2
-    const i32 count = width * height;
-    i32 i;
-    for (i = 0; i < count; ++i)
-    {
-        switch (framebuffer[i])
-        {
-        case 2:
-            rgbaFramebuffer[i] = 0xFFFFFFFF; // White
-            break;
-
-        case 0:
-        case 1:
-        default:
-            rgbaFramebuffer[i] = 0xFF000000; // Black
-            break;
-        }
-    }
-
-    SDL_UpdateTexture(framebufferTexture, NULL, rgbaFramebuffer, GAME_WINDOW_WIDTH_REAL * sizeof(u32));
+    SDL_UpdateTexture(framebufferTexture, NULL, badAppleFramebuffer, GAME_WINDOW_WIDTH_REAL * sizeof(u32));
     SDL_RenderCopy(renderer, framebufferTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
     #else
+    const i32 width = GAME_WINDOW_WIDTH_REAL;
+    const i32 height = GAME_WINDOW_HEIGHT_REAL;
     SDL_LockSurface(screen);
     for (i32 y = 0; y < height; y++)
     {
         memcpy(
             (u8*)screen->pixels + y * screen->pitch,
-            framebuffer + y * width,
-            width
+            badAppleFramebuffer + y * width,
+            width * sizeof(u32)
         );
     }
     SDL_UnlockSurface(screen);

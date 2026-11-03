@@ -1,5 +1,0 @@
-E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/2412m6f3/arm64-v8a/CMakeFiles/edit_cache.dir
-E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/2412m6f3/arm64-v8a/CMakeFiles/rebuild_cache.dir
-E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/2412m6f3/arm64-v8a/src/CMakeFiles/main.dir
-E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/2412m6f3/arm64-v8a/src/CMakeFiles/edit_cache.dir
-E:/proyek/c++/th06-android/th06/ports/android/app/.cxx/Debug/2412m6f3/arm64-v8a/src/CMakeFiles/rebuild_cache.dir

@@ -23,6 +23,8 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "thirdparty/stb_image_resize.h"
 
+u8 g_QualityReducer;
+
 static VertexTex1Xyzrhw g_PrimitivesToDrawVertexBuf[4];
 static VertexTex1DiffuseXyzrhw g_PrimitivesToDrawNoVertexBuf[4];
 static VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
@@ -484,27 +486,25 @@ STB_Surface *AnmManager::LoadToSurfaceWithFormat(
     return surface;
 }
 
-// u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
-// {
-//     const i32 dstPitch = src->w * pixelDepth;
-//     const i32 srcPitch = src->pitch;
-
-//     u8 *pixelData = new u8[dstPitch * src->h];
-//     u8 *dstPtr = pixelData;
-//     const u8 *srcPtr = (u8 *)src->pixels;
-
-//     for (i32 i = 0; i < src->h; i++)
-//     {
-//         memcpy(dstPtr, srcPtr, dstPitch);
-//         dstPtr += dstPitch;
-//         srcPtr += srcPitch;
-//     }
-
-//     return pixelData;
-// }
-
 u8 *AnmManager::ExtractSurfacePixels(STB_Surface *src, u8 pixelDepth)
 {
+    if(g_QualityReducer<4){
+        const i32 dstPitch = src->w * pixelDepth;
+        const i32 srcPitch = src->pitch;
+
+        u8 *pixelData = new u8[dstPitch * src->h];
+        u8 *dstPtr = pixelData;
+        const u8 *srcPtr = (u8 *)src->pixels;
+
+        for (i32 i = 0; i < src->h; i++)
+        {
+            memcpy(dstPtr, srcPtr, dstPitch);
+            dstPtr += dstPitch;
+            srcPtr += srcPitch;
+        }
+
+        return pixelData;
+    }
     const i32 width  = src->w;
     const i32 height = src->h;
 
@@ -771,7 +771,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
     LOG_COMPAT("LoadTexture 2");
     ReleaseTexture(textureIdx);
 
-    #ifndef WIN98
+    #ifdef WIN98
     if (((g_Supervisor.cfg.opts >> GCOS_FORCE_16BIT_COLOR_MODE) & 1) != 0)
     {
         //use indexing instead
@@ -902,7 +902,8 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
     // Copy over the alpha channel from the source to the destination, taking
     // into account the texture format.
     u8 txtFormat = textureDesc->format;
-    txtFormat = TEX_FMT_BADAPPLE_2BIT;
+    if(g_QualityReducer>=4)
+        txtFormat = TEX_FMT_BADAPPLE_2BIT;
     switch (txtFormat)
     {
     case TEX_FMT_BADAPPLE_2BIT:

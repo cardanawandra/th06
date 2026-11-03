@@ -1,1 +1,0 @@
-C:\Users\user\AppData\Local\Android\Sdk\platform-tools\adb.exe install app\build\outputs\apk\debug\app-debug.apk

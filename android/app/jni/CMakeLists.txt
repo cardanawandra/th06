@@ -94,10 +94,12 @@ set(TH06_GAME_SOURCES
     ${TH06_ROOT}/src/pbg3/IPbg3Parser.cpp
     ${TH06_ROOT}/src/pbg3/Pbg3Archive.cpp
     ${TH06_ROOT}/src/pbg3/Pbg3Parser.cpp
+
     # graphics
     ${TH06_ROOT}/src/thirdparty/sjis_converter.cpp
     ${TH06_ROOT}/src/midi/MidiDefault.cpp
     ${TH06_ROOT}/src/graphics/Software2D.cpp
+    ${TH06_ROOT}/src/graphics/BadAppleRenderer.cpp
     ${TH06_ROOT}/src/graphics/GLFunc.cpp
     ${TH06_ROOT}/src/graphics/WebGL.cpp
 )

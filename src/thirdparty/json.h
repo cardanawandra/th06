@@ -416,13 +416,8 @@ typedef struct json_parse_result_s {
 #define json_uintmax_t uintmax_t
 #endif
 
-// #if defined(_MSC_VER)
+#if defined(_MSC_VER)
 // #define json_strtoumax _strtoui64
-// #else
-// #define json_strtoumax strtoumax
-// #endif
-#include <stddef.h>
-
 // COMPATSLOP!!!
 #include <ctype.h>
 
@@ -491,6 +486,10 @@ static unsigned __int64 json_strtoumax(const char *str, char **endptr, int radix
 
     return value;
 }
+#else
+#define json_strtoumax strtoumax
+#endif
+#include <stddef.h>
 
 #if defined(__cplusplus) && (__cplusplus >= 201103L)
 #define json_null nullptr

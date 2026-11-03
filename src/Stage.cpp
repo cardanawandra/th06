@@ -556,8 +556,8 @@ ZunResult Stage::UpdateObjects()
 
 ZunResult Stage::RenderObjects(i32 zLevel)
 {
-    // TODO, DYNAMIC
-    return ZUN_SUCCESS;
+    if(g_QualityReducer>2)
+        return ZUN_SUCCESS;
     f32 quadWidth;
     ZunVec3 projectSrc;
     bool didDraw;

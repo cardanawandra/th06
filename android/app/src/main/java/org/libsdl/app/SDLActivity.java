@@ -118,6 +118,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private static final int SDL_MICRO_VERSION = 8;
 
     private View touchScreenController;
+    private boolean alwaysHideTouchScreenController=false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final Runnable hideController = () -> {
@@ -125,6 +126,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     };
 
     private void showControllerTemporarily() {
+        if(alwaysHideTouchScreenController){
+            return;
+        }
         touchScreenController.setVisibility(View.VISIBLE);
 
         // Reset timer
@@ -1038,8 +1042,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
         }
         if(!hasTargetFile){
-            openFolderPicker();
-            return;
+            await openFolderPicker();
         }
         Log.v(TAG, "Device: " + Build.DEVICE);
         Log.v(TAG, "Model: " + Build.MODEL);

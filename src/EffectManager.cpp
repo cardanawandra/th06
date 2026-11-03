@@ -288,8 +288,8 @@ ChainCallbackResult EffectManager::OnUpdate(EffectManager *mgr)
 
 ChainCallbackResult EffectManager::OnDraw(EffectManager *mgr)
 {
-    // TODO DYNAMIC
-    return CHAIN_CALLBACK_RESULT_CONTINUE;
+    if(g_QualityReducer>0)
+        return CHAIN_CALLBACK_RESULT_CONTINUE;
     int effectIdx;
     Effect *effect;
 

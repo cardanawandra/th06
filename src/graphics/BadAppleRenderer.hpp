@@ -84,10 +84,8 @@ struct BadAppleRenderer : GfxInterface
     SDL_Renderer* renderer;
     SDL_Texture *framebufferTexture;
     SDL_Palette *framebufferPalette;
-    u32 *rgbaFramebuffer;
     #endif
     #endif
-    u8 *framebuffer;
 
     i32 viewport[4];   //x, y, w, h
     //precompute viewport

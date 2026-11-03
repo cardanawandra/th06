@@ -202,7 +202,7 @@ void BadAppleRenderer::SetClearDepth(f32 depth) {
 
 void BadAppleRenderer::Clear(u32 clearBits) {
     if (clearBits & CLEAR_COLOR_BUFFER) {
-        std::fill(framebuffer, framebuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, 0);
+        std::fill(badAppleFramebuffer, badAppleFramebuffer + GAME_WINDOW_WIDTH_REAL * GAME_WINDOW_HEIGHT_REAL, 0);
     }
 }
 
@@ -357,7 +357,7 @@ void BadAppleRenderer::ReadPixels(i32 x, i32 y, i32 width, i32 height, const voi
     // broken
     // u8* dst = (u8*)pixels;
     // for (i32 row = 0; row < height; row++) {
-    //     const u8* src = framebuffer + (GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * GAME_WINDOW_WIDTH_REAL + x;
+    //     const u8* src = badAppleFramebuffer + (GAME_WINDOW_HEIGHT_REAL - 1 - (y + row)) * GAME_WINDOW_WIDTH_REAL + x;
     //     memcpy(dst + row * width, src, width);
     // }
 }
@@ -447,7 +447,7 @@ void BadAppleRenderer::Draw(PrimitiveType type, i32 start, i32 count)
     if(useTexCoord&&boundTexture){
         const u8* tData = (u8*)texCoordData;
         const u8* vData = (u8*)vertexData;
-        const u8 *cachedColor = ColorOpTableBadApple[colorOp][textureFactor];
+        const BAD_APPLE_FRAMEBUFFER_TYPE *cachedColor = ColorOpTableBadApple[colorOp][textureFactor];
 
         const u8 *texels = (const u8 *)&boundTexture->texels[0];
         const f32 ftexW = (f32)boundTexture->width;
@@ -591,12 +591,12 @@ void BadAppleRenderer::Draw(PrimitiveType type, i32 start, i32 count)
             const fixed32 v_dy = (fixed32)(fv_dy * FIXED_ONE);
 
             //add fb_row instead of Y multiplication
-            u8 *fb_row = framebuffer + ymin * GAME_WINDOW_WIDTH_REAL;
+            BAD_APPLE_FRAMEBUFFER_TYPE *fb_row = badAppleFramebuffer + ymin * GAME_WINDOW_WIDTH_REAL;
             for (i32 y = ymin; y <= ymax; ++y)
             {
                 fixed32 u = u_row;
                 fixed32 v = v_row;
-                u8 *fb = fb_row + xmin;
+                BAD_APPLE_FRAMEBUFFER_TYPE *fb = fb_row + xmin;
                 f32 w0 = w0_row; f32 w1 = w1_row; f32 w2 = w2_row;
                 for (i32 x = xmin; x <= xmax; ++x)
                 {
@@ -616,8 +616,8 @@ void BadAppleRenderer::Draw(PrimitiveType type, i32 start, i32 count)
                         const u8 pixel =
                             (packed >> ((tu & 3) * 2)) & 3;
 
-                        const u8 px = cachedColor[pixel];
-                        if(px!=0){
+                        const BAD_APPLE_FRAMEBUFFER_TYPE px = cachedColor[pixel];
+                        if(px!=BAD_APPLE_COLOR_TRANSPARENT){
                             *fb = px;
                         }
                     }

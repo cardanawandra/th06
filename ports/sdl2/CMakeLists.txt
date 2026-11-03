@@ -59,7 +59,8 @@ set(TH06_GAME_SOURCES
     ../../src/BulletManager.cpp
     ../../src/Chain.cpp
 
-    ../../src/controller/SDLController.cpp
+#    ../../src/controller/SDLController.cpp
+    ../../src/controller/WIN32Controller.cpp
 
     ../../src/EclManager.cpp
     ../../src/EffectManager.cpp
@@ -104,7 +105,7 @@ set(TH06_GAME_SOURCES
     ../../src/graphics/FixedFunctionGL.cpp
     ../../src/graphics/WebGL.cpp
     ../../src/graphics/Software2D.cpp
-    ../../src/graphics/BadAppleRenderer.cpp
+    ../../src/graphics/BadAppleRendererCMD.cpp
     
     ../../src/pbg3/FileAbstraction.cpp
     ../../src/pbg3/IPbg3Parser.cpp

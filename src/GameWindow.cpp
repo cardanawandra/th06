@@ -29,18 +29,18 @@ static const struct
 {
     const char *name;
     GfxInterface *(*TryInit)();
+    u8 qualityReducer;
 } s_RenderBackends[] = {
-    {"Bad Apple Renderer", BadAppleRenderer::Init},
-    {"Software fallback (VERY SLOW)", Software::Init},
+    {"Bad Apple Renderer", BadAppleRenderer::Init,4},
+    #ifdef RENDER_SOFTWARE
+    {"Software fallback (VERY SLOW)", Software::Init,3},
+    #endif
     #ifdef RENDER_WEBGL
-    {"GL(ES) 2.0 / WebGL", WebGL::Create},
+    {"GL(ES) 2.0 / WebGL", WebGL::Create,0},
     #endif
     #ifdef RENDER_FIXED_FUNCTION_GL
-    {"Fixed function GL(ES)", FixedFunctionGL::Init},
+    {"Fixed function GL(ES)", FixedFunctionGL::Init,0},
     #endif
-    // #ifdef RENDER_SOFTWARE
-    // {"Software fallback (VERY SLOW)", Software::Init},
-    // #endif
 };
 
 RenderResult GameWindow::Render()
@@ -233,6 +233,7 @@ void GameWindow::CreateGameWindow()
         g_GfxBackend = s_RenderBackends[i].TryInit();
         if(g_GfxBackend) {
             printf("Using renderer backend %s\n", s_RenderBackends[i].name);
+            g_QualityReducer = s_RenderBackends[i].qualityReducer;
             break;
         }else{
             printf("Failed renderer backend %s\n", s_RenderBackends[i].name);
