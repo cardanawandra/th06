@@ -182,7 +182,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
         file = fopen(patchPath, "rb");
         if (file != NULL)
         {
-            printf("FileSystem::OpenPath patch fopen %s\n",patchPath);
+            LOG_COMPAT("FileSystem::OpenPath patch fopen %s\n",patchPath);
             fseek(file, 0, SEEK_END);
             fsize = ftell(file);
             g_LastFileSize = fsize;
@@ -194,7 +194,7 @@ u8 *FileSystem::OpenPath(const char *filepath, int isExternalResource)
             return data;
         }
         g_LastFilePatched = false;
-        // printf("FileSystem::OpenPath no patch %s\n",patchPath);
+        // LOG_COMPAT("FileSystem::OpenPath no patch %s\n",patchPath);
 
         if (g_Pbg3Archives != NULL)
         {

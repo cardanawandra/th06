@@ -139,11 +139,12 @@
 // typedef uint16_t u16;
 // typedef int32_t i32;
 // typedef uint32_t u32;
-#ifdef COMPAT_PORTABLE
-typedef intptr_t iptr;
-#else
+
+// #ifdef COMPAT_PORTABLE
+// typedef intptr_t iptr;
+// #else
 typedef int iptr;
-#endif
+// #endif
 
 typedef float f32;
 
